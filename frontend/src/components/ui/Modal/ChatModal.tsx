@@ -264,7 +264,7 @@ export default function ChatModal({ isOpen, onClose, roomNumber = '1204', reques
                 <div className={styles.emptyState}>이 객실의 대화 내역이 없습니다.</div>
               ) : (
                 messages.map((msg) => (
-                  <ChatBubble key={msg.id} variant={msg.variant}>
+                  <ChatBubble key={msg.id} variant={msg.variant} isFallback={msg.senderType === 'STAFF'}>
                     {msg.content}
                   </ChatBubble>
                 ))
@@ -273,7 +273,7 @@ export default function ChatModal({ isOpen, onClose, roomNumber = '1204', reques
 
             {!isReadOnly && (
               <div className={styles.footer}>
-                <ChatInput placeholder="고객에게 답변을 입력하세요..." onSend={handleSend} />
+                <ChatInput isStaff placeholder="고객에게 답변을 입력하세요..." onSend={handleSend} />
               </div>
             )}
           </div>

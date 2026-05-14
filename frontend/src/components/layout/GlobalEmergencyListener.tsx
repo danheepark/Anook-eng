@@ -51,12 +51,22 @@ export default function GlobalEmergencyListener() {
   if (!emergencyAlert) return null;
 
   return (
-    <EmergencyBanner
-      alert={emergencyAlert}
-      onDismiss={() => setEmergencyAlert(null)}
-      onClick={() => {
-        window.location.href = '/admin/emergency';
-      }}
-    />
+    <div style={{
+      position: 'fixed',
+      top: 'var(--space-24)',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 9999,
+      width: 'auto',
+      minWidth: '400px'
+    }}>
+      <EmergencyBanner
+        alert={emergencyAlert}
+        onDismiss={() => setEmergencyAlert(null)}
+        onClick={() => {
+          window.location.href = '/admin/front-desk';
+        }}
+      />
+    </div>
   );
 }

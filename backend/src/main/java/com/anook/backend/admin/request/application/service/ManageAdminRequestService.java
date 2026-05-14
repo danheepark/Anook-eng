@@ -450,7 +450,7 @@ public class ManageAdminRequestService implements ManageAdminRequestUseCase {
                 r.getId(), r.getStatus(), r.getPriority(),
                 r.getDepartmentId(),
                 deptMap.getOrDefault(r.getDepartmentId(), r.getDepartmentId()),
-                r.getSummary(), r.getRoomNo(),
+                r.getSummary(), r.getRawText(), r.getRoomNo(),
                 r.getAssignedStaffId(),
                 r.getAssignedStaffId() != null ? staffMap.get(r.getAssignedStaffId()) : null,
                 r.isCancelRequested(),

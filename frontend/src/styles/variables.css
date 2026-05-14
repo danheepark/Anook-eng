@@ -1,8 +1,8 @@
 /* src/styles/variables.css — 디자인 토큰 (MVP 아키텍처 v3 섹션 10) */
 :root {
   /* Colors */
-  --color-primary: #374151;
-  --color-primary-hover: #6B7280;
+  --color-primary: #585FE2;
+  --color-primary-hover: #4D53C5;
   --color-secondary: #4B5563;
   --color-bg: #ffffff;
   --color-surface: #F3F4F6;

@@ -70,6 +70,18 @@
   margin: 0;
 }
 
+.questionText {
+  font: var(--text-body-medium);
+  color: var(--color-gray-700);
+  line-height: 1.5;
+}
+
+.answerText {
+  font: var(--text-body-medium);
+  color: var(--color-gray-500);
+  line-height: 1.5;
+}
+
 .actionSection {
   display: flex;
   flex-direction: column;

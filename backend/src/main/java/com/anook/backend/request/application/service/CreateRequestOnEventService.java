@@ -174,8 +174,8 @@ public class CreateRequestOnEventService {
         }
 
 
-        // [AN-252] URGENT 판별: priority가 URGENT/EMERGENCY이거나 에스컬레이션된 경우
-        boolean isUrgent = savedRequest.getPriority() == Priority.URGENT || savedRequest.getPriority() == Priority.EMERGENCY;
+        // [AN-252] URGENT 판별: priority가 EMERGENCY인 경우에만 Grace Period 생략
+        boolean isUrgent = savedRequest.getPriority() == Priority.EMERGENCY;
         String deptCode = savedRequest.getDomainCode() != null ? savedRequest.getDomainCode().name() : "UNKNOWN";
         int graceRemaining = isUrgent ? 0 : GracePeriodScheduler.GRACE_SECONDS;
 

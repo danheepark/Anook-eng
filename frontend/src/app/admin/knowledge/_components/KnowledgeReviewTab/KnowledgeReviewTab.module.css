@@ -2,37 +2,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-32); /* 컴포넌트 간 간격 */
-  padding: var(--space-48) var(--space-32); /* 상하 48px, 좌우 32px */
+  padding: 0 0 var(--space-48) 0;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
 
-.headerLeft {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8); /* 제목과 서브타이틀 사이 간격 */
-}
-
-.subtitle {
-  font: var(--text-body-medium);
-  color: var(--color-gray-500);
-}
-
-.title {
-  font: var(--text-h1-bold);
-  color: var(--color-gray-900);
-  margin: 0;
-}
-
-.headerActions {
-  display: flex;
-  gap: var(--space-12);
-  align-items: center;
-}
 
 .cardList {
   display: flex;
@@ -47,57 +20,3 @@
   font: var(--text-body-medium);
 }
 
-.candidateCard {
-  display: flex;
-  align-items: stretch;
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-12);
-  overflow: hidden;
-  transition: box-shadow 0.2s ease;
-}
-
-.candidateCard:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.candidateContent {
-  flex: 1;
-  padding: var(--space-20);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.candidateHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.candidateTime {
-  font: var(--text-caption-medium);
-  color: var(--color-gray-400);
-}
-
-.candidateQuestion {
-  font: var(--text-body-medium);
-  color: var(--color-gray-700);
-  line-height: 1.5;
-}
-
-.candidateAnswer {
-  font: var(--text-body-medium);
-  color: var(--color-gray-500);
-  line-height: 1.5;
-}
-
-.candidateActions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-  padding: var(--space-16);
-  justify-content: center;
-  border-left: 1px solid var(--color-gray-200);
-  min-width: 120px;
-}

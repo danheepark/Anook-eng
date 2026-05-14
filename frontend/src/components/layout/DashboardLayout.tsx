@@ -18,19 +18,17 @@ export default function DashboardLayout({ children, role = 'admin' }: DashboardL
   return (
     <div className={styles.layout}>
       <GlobalEmergencyListener />
-      <Header className={styles.header} />
+      {isSidebarOpen && (
+        <div className={styles.backdrop} onClick={toggleSidebar} />
+      )}
+      <div className={`${styles.sidebarWrapper} ${isSidebarOpen ? styles.open : ''}`}>
+        <Suspense fallback={<div className={styles.sidebar} />}>
+          <Sidebar className={styles.sidebar} role={role} />
+        </Suspense>
+      </div>
       
-      <div className={styles.body}>
-        {isSidebarOpen && (
-          <div className={styles.backdrop} onClick={toggleSidebar} />
-        )}
-        
-        <div className={`${styles.sidebarWrapper} ${isSidebarOpen ? styles.open : ''}`}>
-          <Suspense fallback={<div className={styles.sidebar} />}>
-            <Sidebar className={styles.sidebar} role={role} />
-          </Suspense>
-        </div>
-        
+      <div className={styles.contentWrapper}>
+        <Header className={styles.header} role={role} />
         <main className={styles.main}>
           {children}
         </main>

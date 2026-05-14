@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import InputField from '@/components/ui/Inputfield/InputField';
-import FilterButton from '@/components/ui/FilterButton/FilterButton';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
 import KnowledgeModal from '@/components/ui/Knowledge/KnowledgeModal';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
@@ -14,13 +12,13 @@ import { useTranslation } from '@/app/useTranslation';
 
 interface KnowledgeLibraryTabProps {
   domainCode: string; // 'ALL' 또는 도메인 코드
+  searchValue: string;
+  filterValue: string;
 }
 
-export default function KnowledgeLibraryTab({ domainCode }: KnowledgeLibraryTabProps) {
+export default function KnowledgeLibraryTab({ domainCode, searchValue, filterValue }: KnowledgeLibraryTabProps) {
   const { t } = useTranslation();
   const { data, loading, error, createEntry, updateEntry, deleteEntry } = useKnowledge(domainCode === 'ALL' ? undefined : domainCode);
-  
-  const [searchValue, setSearchValue] = useState('');
   const [selectedKnowledge, setSelectedKnowledge] = useState<KnowledgeEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
@@ -42,38 +40,20 @@ export default function KnowledgeLibraryTab({ domainCode }: KnowledgeLibraryTabP
     : ALL_OPTIONS;
 
   // 검색 필터 적용
-  const filteredData = data.filter(item => 
+  let filteredData = data.filter(item => 
     item.question.toLowerCase().includes(searchValue.toLowerCase()) ||
     item.answer.toLowerCase().includes(searchValue.toLowerCase())
   );
 
+  // 정렬 적용 (최신순 등)
+  if (filterValue === 'latest') {
+    filteredData.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  } else {
+    // 기본적으로 id 등 다른 기준으로 정렬할 수 있으나 생략
+  }
+
   return (
     <div className={styles.container}>
-      {/* Header Section */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>{t.adminPage.taskBoard.titles.rag} 데이터 관리</h1>
-        </div>
-        <div className={styles.headerActions}>
-          <InputField 
-            variant="search" 
-            placeholder={t.adminPage.rag.searchPlaceholder} 
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className={styles.searchInput}
-          />
-          <FilterButton 
-            filterOptions={[
-              { label: t.adminPage.rag.filterAll, value: 'all' }, 
-              { label: t.adminPage.rag.filterLatest, value: 'latest' }
-            ]}
-            selectedFilter="all"
-            onFilterSelect={() => {}}
-            className={styles.filterBtn}
-          />
-        </div>
-      </div>
-
       {/* Content Section */}
       <div className={styles.contentSection}>
         <div className={styles.buttonWrapper}>

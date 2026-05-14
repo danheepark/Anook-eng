@@ -101,8 +101,8 @@ STATIC_REPLIES = {
         "en": "It looks like we're having a tiny system hiccup. Could you try asking again in just a moment?"
     },
     "COMPLAINT": {
-        "ko": "불편을 드려 대단히 죄송합니다. 담당 직원에게 즉시 전달하여 빠르게 해결해 드리겠습니다.",
-        "en": "We sincerely apologize for the inconvenience. We will escalate this to our staff immediately for a prompt resolution."
+        "ko": "불편을 드려 대단히 죄송합니다. 지금 바로 프런트와 직접 연결해 드리겠습니다.",
+        "en": "We sincerely apologize for the inconvenience. We will connect you directly to the front desk right now."
     },
     "FALLBACK_FAILURE": {
         "ko": "말씀하신 내용을 파악하기 어렵습니다. 프론트 연결이 필요하시면 '프론트 연결'이라고 말씀해 주세요.",
@@ -111,6 +111,10 @@ STATIC_REPLIES = {
     "NEED_MORE_INFO": {
         "ko": "자세한 정보가 필요하시면 프런트로 연결해 드릴까요?",
         "en": "Would you like me to connect you to the front desk for more detailed information?"
+    },
+    "EMERGENCY_REPLY": {
+        "ko": "응급 상황을 인지하였습니다. 즉시 119 및 호텔 보안팀을 호출하고 가장 가까운 직원을 파견하겠습니다. 안전한 곳에 머물러 주십시오.",
+        "en": "We have recognized an emergency. We are immediately dispatching hotel security and calling 911. Please stay safe."
     }
 }
 
@@ -320,6 +324,38 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     # ── [비동기 로깅 메타데이터 처리 보류] ──
     # agent_result 안에서 __ai_log_meta를 반환하도록 처리
 
+    # ── [실무 최적화: 역질문 단답형(네/아니요) 강제 라우팅 인터셉트] ──
+    if request.chat_history:
+        last_ai = None
+        for msg in reversed(request.chat_history):
+            if msg.get("role") == "ai":
+                last_ai = msg.get("content", "")
+                break
+        
+        if last_ai and "프런트 데스크의 직접적인 조치나 확인이 필요하신 상황일까요" in last_ai:
+            text_lower = request.text.lower().replace(" ", "")
+            if any(w in text_lower for w in ["네", "응", "조치해", "필요해", "부탁해", "해주", "yes", "요청"]):
+                print(f"[Analyze] ⚡ 역질문 단답형 '네' 감지 → FRONT_ESCALATION 강제 라우팅")
+                return [{
+                    "guest_reply": "제가 바로 답변드리기 어려운 부분이라, 프런트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
+                    "summary": "프론트 연결 요청 (고객 확인)",
+                    "domain_code": "FRONT",
+                    "priority": "URGENT",
+                    "entities": {"intent": "ESCALATION"},
+                    "confidence": 1.0
+                }]
+            elif any(w in text_lower for w in ["아니", "괜찮", "됐어", "피드백", "no", "의견", "아닙"]):
+                print(f"[Analyze] ⚡ 역질문 단답형 '아니요' 감지 → VOC 강제 라우팅")
+                return [{
+                    "guest_reply": "소중한 의견 감사드립니다. 서비스 개선에 꼭 참고하겠습니다.",
+                    "summary": "고객 피드백 (VOC)",
+                    "domain_code": None,
+                    "priority": "NORMAL",
+                    "entities": {"intent": "VOC", "sentiment": "NEGATIVE"},
+                    "confidence": 1.0,
+                    "action": "VOC_FEEDBACK"
+                }]
+
     # ──────────────────────────────────────────────
     # STEP 0: 지식 베이스 정확 일치 검색 (Exact Match)
     # ──────────────────────────────────────────────
@@ -399,6 +435,51 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     final_responses = []
     processed_domains = set()
     agent_tasks = []  # (domain, primary, coroutine)
+
+    # ──────────────────────────────────────────────
+    # STEP 2-1: [FALSE ALARM 감지] LLM 기반 다국어 및 의미 검증
+    # ──────────────────────────────────────────────
+    # 단순 키워드("아니") 매칭의 치명적 오류("아니 진짜 불이 났다고!!")를 방지하고,
+    # 영어(No, false alarm), 중국어, 일본어 등 모든 언어의 취소 의도를 정확히 파악합니다.
+    _EMERGENCY_CONTEXT_KEYWORDS = ["119", "응급", "보안팀", "긴급", "EMERGENCY", "emergency", "security", "911"]
+    
+    has_emergency_context = False
+    if request.chat_history:
+        recent_ai_msgs = [m for m in request.chat_history[-4:] if m.get("role") == "ai"]
+        if recent_ai_msgs:
+            last_ai_content = recent_ai_msgs[-1].get("content", "").lower()
+            has_emergency_context = any(kw in last_ai_content for kw in _EMERGENCY_CONTEXT_KEYWORDS)
+    
+    if has_emergency_context:
+        is_false_alarm = False
+        try:
+            validation_prompt = (
+                f"호텔 직원이 고객에게 긴급 상황(화재, 응급 환자 등)을 인지하고 즉시 조치/출동하겠다고 안내한 직후입니다.\n"
+                f"고객이 보낸 다음 메시지를 읽고, 고객의 의도를 정확히 분류하세요.\n"
+                f"- CANCEL: 오인 신고, 단순 실수, 장난, 상황 종료 등 출동을 취소하려는 의도 (예: '아니야 잘못 눌렀어', '불 안났어', '취소', 'No, false alarm', '不是')\n"
+                f"- CONFIRM: 상황이 실제임을 확인하거나, 강조하거나, 더 빨리 와달라고 재촉하는 의도 (예: '아니 진짜 불났다고!', '빨리 와요', 'Yes, hurry')\n\n"
+                f"[고객 메시지]: {request.text}"
+            )
+            val_raw = await call_gemini_async(
+                prompt=validation_prompt,
+                system_instruction='반드시 {"intent": "CANCEL"} 또는 {"intent": "CONFIRM"} 형태의 JSON으로만 응답하세요.'
+            )
+            is_false_alarm = (val_raw.get("intent") == "CANCEL") if isinstance(val_raw, dict) else False
+            print(f"[Analyze] 🧠 긴급 상황 의미 검증 결과: {val_raw} (원문: '{request.text}')")
+        except Exception as e:
+            print(f"[Analyze] ⚠️ 긴급 상황 의미 검증 실패, 폴백 사용: {e}")
+            is_false_alarm = any(pat in request.text.lower() for pat in ["취소", "장난", "잘못", "아니", "괜찮", "no", "false", "cancel", "mistake"])
+
+        if is_false_alarm:
+            # 라우터가 EMERGENCY를 반환했더라도 강제 CANCEL로 오버라이드
+            any_emergency = any(r.route_type == "FRONT_ESCALATION" and r.domain == "EMERGENCY" for r in router_results)
+            if any_emergency:
+                print(f"[Analyze] 🛡️ FALSE ALARM (LLM 판별 완료) — EMERGENCY → CANCEL 오버라이드")
+                for r in router_results:
+                    if r.route_type == "FRONT_ESCALATION":
+                        r.route_type = "CANCEL"
+                        r.domain = "EMERGENCY"
+                        r.confidence = 1.0
 
     # ──────────────────────────────────────────────
     # STEP 2-5: [Progress Indicator] 라우터 결과 기반 진행 상태 전송
@@ -526,8 +607,8 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         images=request.images
                     )
                     response = {
-                        "guest_reply": agent_result.get("guest_reply", _get_static_reply("CLARIFICATION", request.language)),
-                        "summary": agent_result.get("summary", "추가 확인 필요"),
+                        "guest_reply": agent_result.get("guest_reply", primary.clarification_question or _get_static_reply("CLARIFICATION", request.language)),
+                        "summary": agent_result.get("summary", primary.summary or "추가 확인 필요"),
                         "domain_code": None if agent_result.get("missing_fields") else agent_result.get("domain_code", None),
                         "priority": agent_result.get("priority", "NORMAL"),
                         "entities": agent_result.get("entities", {}),
@@ -541,7 +622,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     final_responses.append(response)
                     continue
                 except Exception as e:
-                    print(f"[Analyze] ⚠️ CLARIFICATION 에이전트 재위임 실패, 프론트 에이전트로 폴백: {e}")
+                    print(f"[Analyze] ⚠️ CLARIFICATION 에이전트 재위임 실패: {e}")
 
             # last_agent_domain이 없거나 실패한 경우, FRONT 에이전트(기본 라우팅 질문)로 처리
             try:
@@ -577,6 +658,8 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "priority": "NORMAL",
                     "entities": {},
                     "confidence": primary.confidence,
+                    "clarification_options": primary.clarification_options or [],
+                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
                 }
                 print(f"[Analyze] ❓ CLARIFICATION — reasoning: {primary.reasoning}")
                 print(f"[Analyze] 응답: {response}\n")
@@ -624,14 +707,24 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     f"[고객의 질문]\n{request.text}\n\n"
                     f"위 맥락을 참고하여, 고객이 궁극적으로 알고 싶은 '호텔 정책/정보'가 무엇인지 파악하고 지식 베이스 검색에 최적화된 구체적인 문장으로 재작성하세요."
                 )
-                search_query_raw = await call_gemini_async(
-                    prompt=rewrite_prompt,
-                    system_instruction=(
+                if domain == "CONCIERGE":
+                    sys_instruction = (
+                        "당신은 호텔 검색 엔진 최적화 전문가입니다. "
+                        "사용자가 대명사('이거', '다른데')나 생략된 표현을 사용했더라도, 반드시 [과거 대화 맥락]을 파악하여 사용자가 찾고자 하는 '명확한 대상(예: 식당, 관광지, 카페 등)'을 명시적으로 포함한 '단일 검색 쿼리 문장' 하나만 작성하세요. "
+                        "절대로 고객에게 대답하거나 말을 걸지 마세요. 질문형으로 끝내지 말고, 검색어 형태로 명사형이나 평서문으로 작성하세요. "
+                        "반드시 {\"reply\": \"재작성된 문장\"} 형식의 JSON으로만 출력하세요."
+                    )
+                else:
+                    sys_instruction = (
                         "당신은 호텔 검색 엔진 최적화 전문가입니다. "
                         "사용자가 특정 사물이나 서비스를 지칭하지 않고 '왜', '얼마야' 등 생략된 표현을 사용했더라도, 반드시 [과거 대화 맥락]을 파악하여 질문 대상을 찾아 명시적으로 포함시키세요. (예: '생수 추가 요금이 발생하는 이유가 무엇인가요?') "
                         "**주의**: 사용자가 직접 언급하지 않은 구체적인 음식 이름이나 카테고리를 무단으로 추가하지 마세요. "
                         "반드시 {\"reply\": \"재작성된 문장\"} 형식의 JSON으로만 출력하세요."
                     )
+                    
+                search_query_raw = await call_gemini_async(
+                    prompt=rewrite_prompt,
+                    system_instruction=sys_instruction
                 )
                 search_query = search_query_raw.get("reply", request.text) if isinstance(search_query_raw, dict) else request.text
                 print(f"[Analyze] 🔍 검색어 확장: '{request.text}' → '{search_query}'")
@@ -650,41 +743,32 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     
                     mentioned_places = []
                     if request.chat_history:
-                        for msg in request.chat_history[-4:]:
+                        for msg in request.chat_history[-6:]:
                             if msg.get('role') == 'ai':
                                 content = msg.get('content', '')
                                 all_answers = rag_service.get_all_answers_by_domain("CONCIERGE")
-                                all_places = set()
+                                
+                                # 1) Find all places that appear in this message
+                                found_in_msg = []
                                 for ans in all_answers:
                                     found = re.findall(r"'([^']+)'", ans)
                                     for f in found:
-                                        all_places.add(f)
+                                        if f in content and f not in found_in_msg:
+                                            found_in_msg.append(f)
                                 
-                                for place in all_places:
-                                    if place in content:
+                                # 2) Sort them by the order they appear in the message
+                                found_in_msg.sort(key=lambda x: content.find(x))
+                                
+                                # 3) Append to mentioned_places if not already there
+                                for place in found_in_msg:
+                                    if place not in mentioned_places:
                                         mentioned_places.append(place)
                     
                     fresh_results = [r for r in rag_results if not any(p in r['answer'] for p in mentioned_places)]
-                    already_said = [r for r in rag_results if any(p in r['answer'] for p in mentioned_places)]
                     
                     fact_results = [r for r in fresh_results if "[fact]" in r['question'] and r.get('similarity', 0) >= 0.7]
                     rec_results = [r for r in fresh_results if "[recommendation]" in r['question']]
                     other_results = [r for r in fresh_results if "[fact]" not in r['question'] and "[recommendation]" not in r['question']]
-                    
-                    is_reconfirm = "RE-CONFIRM" in (primary.reasoning or "").upper()
-                    if not is_reconfirm and rec_results:
-                        # 가장 유사도가 높은 항목과 점수 차이가 0.05 미만인 항목들만 후보로 선정하여 셔플
-                        top_score = rec_results[0].get('similarity', 0)
-                        candidates = [r for r in rec_results if top_score - r.get('similarity', 0) < 0.05]
-                        others = [r for r in rec_results if top_score - r.get('similarity', 0) >= 0.05]
-                        
-                        random.shuffle(candidates)
-                        rec_results = candidates + others
-                        
-                        # AI가 헷갈리지 않고 항상 새롭고 정확한 1개만 추천하도록 슬라이싱
-                        rec_results = rec_results[:1]
-                    
-                    rag_results = fact_results + rec_results + other_results + already_said
                     
                     last_place = mentioned_places[-1] if mentioned_places else None
                     is_another_request = any(word in request.text for word in ["다른", "또", "더", "다음에", "더보기"])
@@ -698,18 +782,48 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                                 break
                     
                     if is_another_request and last_category:
-                        rag_results.sort(key=lambda x: 0 if x.get('category') == last_category else 1)
+                        # 동일 카테고리만 후보로 남김
+                        rec_results = [r for r in rec_results if r.get('category') == last_category]
+
+                    is_reconfirm = "RE-CONFIRM" in (primary.reasoning or "").upper()
+                    if not is_reconfirm and rec_results:
+                        # 셔플 풀 확대 (0.05 -> 0.15)
+                        top_score = rec_results[0].get('similarity', 0)
+                        candidates = [r for r in rec_results if top_score - r.get('similarity', 0) < 0.15]
+                        others = [r for r in rec_results if top_score - r.get('similarity', 0) >= 0.15]
+                        
+                        random.shuffle(candidates)
+                        rec_results = candidates + others
+                        
+                        # AI가 헷갈리지 않고 항상 새롭고 정확한 1개만 추천하도록 슬라이싱
+                        rec_results = rec_results[:1]
+                    
+                    # 새 추천 결과가 있다면 이미 말한 것은 아예 빼버려서 AI의 착각을 방지
+                    if rec_results:
+                        rag_results = fact_results + rec_results + other_results
+                    else:
+                        already_said = [r for r in rag_results if any(p in r['answer'] for p in mentioned_places)]
+                        if is_another_request and last_category:
+                            already_said = [r for r in already_said if r.get('category') == last_category]
+                        rag_results = fact_results + already_said
 
                     is_fact_included = any("[fact]" in r['question'] for r in rag_results)
                     fact_instruction = "\n- **중요**: [fact] 태그 정보는 질문에 대한 확정적 답변이므로 즉시 활용하세요." if is_fact_included else ""
 
-                    last_mention_instruction = f"방금 '{last_place}'를 추천했음을 인지하고, " if last_place else ""
+                    mentioned_str = ", ".join([f"'{p}'" for p in mentioned_places])
+                    if rec_results:
+                        last_mention_instruction = f"이전 대화에서 이미 {mentioned_str} 등을 추천했음을 인지하세요. 고객이 '다른' 것을 원할 경우 이전에 추천한 곳을 절대 다시 추천하지 말고 제공된 새로운 [KNOWLEDGE BASE] 항목을 우선적으로 제시하세요. " if mentioned_places else ""
+                        avoid_repeat_instruction = "\n- 이전 대화와 중복되는 장소 추천은 절대 피하세요."
+                    else:
+                        last_mention_instruction = "고객이 다른 장소를 원하지만 현재 지식 베이스에 더 이상 새로운 추천 장소가 없습니다. '현재 더 이상 새로운 장소를 안내해 드리기 어려워, 이전에 안내해 드렸던 장소 중 하나를 다시 추천해 드립니다'와 같이 양해를 구하고 [KNOWLEDGE BASE]에 있는 장소 하나를 자연스럽게 다시 추천하세요. " if mentioned_places else ""
+                        avoid_repeat_instruction = ""
+
                     additional_instructions = (
                         f"\n- 답변 시 마크다운 강조(**)를 사용하지 말고 평문으로 작성하세요. {fact_instruction}"
                         f"\n- {last_mention_instruction}사용자의 요청 흐름에 맞춰 자연스럽게 대화를 이어가세요. "
                         f"\n- 안내한 내용이 택시 호출, 꽃배달, 짐 보관 등 '요청이나 예약'이 가능한 서비스라면, 답변 마지막에 반드시 '지금 바로 예약을 도와드릴까요?' 또는 '필요하시면 바로 접수해 드릴까요?'와 같이 서비스로 이어지는 질문을 포함하세요."
                         f"\n- 예: '파스타 외에 다른 맛집을 찾으신다면 ~는 어떠세요?', '택시는 정문에서 이용 가능합니다. 지금 바로 호출해 드릴까요?' 등"
-                        "\n- 이전 대화와 중복되는 장소 추천은 절대 피하세요."
+                        f"{avoid_repeat_instruction}"
                     )
 
                 if rag_results:
@@ -787,7 +901,24 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             text_lower = request.text.lower()
             is_all = any(word in text_lower for word in ["전부", "모두", "모든", "다 취소", "전체", "all", "everything"])
             
-            if is_all:
+            # FALSE ALARM: EMERGENCY 도메인 취소 (오인 신고 정정)
+            if primary.domain == "EMERGENCY":
+                false_alarm_reply_ko = "확인되었습니다. 긴급 호출을 취소 처리하겠습니다. 혹시 다른 도움이 필요하시면 말씀해 주세요."
+                false_alarm_reply_en = "Understood. The emergency call has been cancelled. Please let us know if you need anything else."
+                response = {
+                    "guest_reply": false_alarm_reply_ko if request.language == "ko" else false_alarm_reply_en,
+                    "summary": "긴급 호출 취소 (오인 신고)",
+                    "domain_code": "EMERGENCY",
+                    "priority": "NORMAL",
+                    "entities": {"intent": "CANCEL"},
+                    "confidence": primary.confidence,
+                    "action": "CANCEL_REQUEST",
+                }
+                print(f"[Analyze] 🛡️ FALSE ALARM CANCEL 응답")
+                print(f"[Analyze] 응답: {response}\n")
+                final_responses.append(response)
+                continue
+            elif is_all:
                 response = {
                     "guest_reply": "대기 중인 요청은 즉시 취소 처리됩니다. 단, 이미 직원이 처리를 시작한 요청의 경우 담당 부서에 취소 가능 여부를 확인해 달라고 전달해 두겠습니다.",
                     "summary": "전체 요청 취소",
@@ -823,13 +954,35 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             
         # STEP 3-f: FRONT_ESCALATION → 명시적인 프론트 데스크 연결 요청
         if primary.route_type == "FRONT_ESCALATION":
+            is_emergency = (primary.domain == "EMERGENCY")
+            
+            # 불만(Complaint) 여부 파악 (키워드 기반 휴리스틱)
+            is_complaint = False
+            if not is_emergency:
+                text_lower = request.text.lower()
+                summary_lower = (primary.summary or "").lower()
+                reasoning_lower = (primary.reasoning or "").lower()
+                complaint_keywords = ["불만", "컴플레인", "불편", "짜증", "최악", "환불", "태도", "실화", "이따구", "장난하", "엉망", "화가", "기분"]
+                is_complaint = any(kw in text_lower or kw in summary_lower or kw in reasoning_lower for kw in complaint_keywords)
+                
             escalation_key = "ESCALATION_INFO" if "INFO_ESCALATION" in (primary.reasoning or "") else "ESCALATION"
+            
+            if is_emergency:
+                reply_key = "EMERGENCY_REPLY"
+                summary_val = "긴급 구조 요청 (119/보안팀)"
+            elif is_complaint:
+                reply_key = "COMPLAINT"
+                summary_val = "프론트 연결 (고객 불만)"
+            else:
+                reply_key = escalation_key
+                summary_val = "프론트 연결 요청 (고객 확인)"
+            
             response = {
-                "guest_reply": _get_static_reply(escalation_key, request.language),
-                "summary": "프론트 연결 요청 (고객 확인)",
-                "domain_code": "FRONT",
-                "priority": "NORMAL",
-                "entities": {"intent": "ESCALATION"},
+                "guest_reply": _get_static_reply(reply_key, request.language),
+                "summary": summary_val,
+                "domain_code": "EMERGENCY" if is_emergency else "FRONT",
+                "priority": "EMERGENCY" if is_emergency else "URGENT",
+                "entities": {"intent": "EMERGENCY" if is_emergency else "ESCALATION"},
                 "confidence": 0.0,
                 "reasoning": getattr(primary, 'reasoning', '알 수 없음')
             }
@@ -837,6 +990,27 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             print(f"[Analyze] 응답: {response}\n")
             final_responses.append(response)
             continue
+
+        # STEP 3-f-2: VOC → 단순 피드백 (티켓 생성 X)
+        if primary.route_type == "VOC":
+            sentiment = primary.sentiment if hasattr(primary, 'sentiment') else "POSITIVE"
+            reply_ko = "따뜻한 말씀 감사드립니다! 담당 부서에 꼭 전달하겠습니다." if sentiment == "POSITIVE" else "소중한 의견 감사드립니다. 서비스 개선에 꼭 참고하겠습니다."
+            reply_en = "Thank you for your kind words! We will definitely pass it on to the department." if sentiment == "POSITIVE" else "Thank you for your valuable feedback. We will use it to improve our service."
+            response = {
+                "guest_reply": reply_ko if request.language == "ko" else reply_en,
+                "summary": "고객 피드백 (VOC)",
+                "domain_code": None, # 티켓 생성 안 함
+                "priority": "NORMAL",
+                "entities": {"intent": "VOC", "sentiment": sentiment},
+                "confidence": primary.confidence,
+                "action": "VOC_FEEDBACK",
+                "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+            }
+            print(f"[Analyze] 📝 VOC 피드백 응답")
+            print(f"[Analyze] 응답: {response}\n")
+            final_responses.append(response)
+            continue
+
 
         # STEP 3-g: STATUS_CHECK → 진행 상태 확인
         if primary.mode == "STATUS_CHECK":
@@ -934,7 +1108,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     # "아래 접수 내역을 확인해 주세요" 공통 문구 1회 추가 (취소 요청은 제외)
     task_responses = [
         r for r in final_responses 
-        if r.get("domain_code") and r.get("domain_code") != "FRONT" 
+        if r.get("domain_code") 
         and not (r.get("action") and str(r.get("action")).startswith("CANCEL"))
     ]
     if task_responses:

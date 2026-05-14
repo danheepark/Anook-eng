@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
 import Button from '@/components/ui/Button/Button';
+import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import styles from './ApproveEscalationModal.module.css';
 
 import useApproveEscalation from './useApproveEscalation';
@@ -28,16 +29,17 @@ export default function ApproveEscalationModal({
 }: ApproveEscalationModalProps) {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDept, setSelectedDept] = useState('');
-  const [selectedPriority, setSelectedPriority] = useState('URGENT');
+  const [selectedPriority, setSelectedPriority] = useState('NORMAL');
   const { approveEscalation, loading } = useApproveEscalation();
 
   useEffect(() => {
     if (isOpen) {
       fetch('/api/admin/departments')
         .then(res => res.json())
-        .then(data => {
-          setDepartments(data);
-          if (data.length > 0) setSelectedDept(data[0].id);
+        .then((data: Department[]) => {
+          const filteredDepartments = data.filter(d => d.id !== 'EMERGENCY');
+          setDepartments(filteredDepartments);
+          if (filteredDepartments.length > 0) setSelectedDept(filteredDepartments[0].id);
         })
         .catch(err => console.error(err));
     }
@@ -54,24 +56,20 @@ export default function ApproveEscalationModal({
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="sm">
+      <ModalCard size="sm" overflowVisible={true}>
         <div className={styles.textWrapper}>
           <h2 className={styles.title}>에스컬레이션 승인</h2>
           <p className={styles.subtitle}>재배정할 부서를 선택해 주세요. 승인 시 우선순위가 긴급으로 변경되며 부서로 요청이 넘어갑니다.</p>
         </div>
 
         <div className={styles.inputGroup}>
-          <label className={styles.label}>배정 부서</label>
-          <select
-            className={styles.select}
+          <Dropdown
+            label="배정 부서"
+            placeholder="부서를 선택하세요"
+            options={departments.map(dept => ({ value: dept.id, label: dept.name }))}
             value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            disabled={loading}
-          >
-            {departments.map(dept => (
-              <option key={dept.id} value={dept.id}>{dept.name}</option>
-            ))}
-          </select>
+            onChange={(val) => setSelectedDept(val)}
+          />
         </div>
 
         <div className={styles.inputGroup}>
@@ -85,7 +83,7 @@ export default function ApproveEscalationModal({
               style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-error)' }}
             />
             <span style={{ fontSize: '14px', fontWeight: selectedPriority === 'URGENT' ? 600 : 400, color: 'var(--color-gray-700)' }}>
-              긴급 작업으로 재배정
+              긴급 작업으로 설정
             </span>
           </label>
         </div>

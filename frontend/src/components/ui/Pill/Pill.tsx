@@ -6,9 +6,10 @@ export interface PillProps {
   selectedOption?: string;
   onSelect: (option: string) => void;
   align?: 'center' | 'flex-start';
+  disabled?: boolean;
 }
 
-export default function Pill({ options, selectedOption, onSelect, align = 'center' }: PillProps) {
+export default function Pill({ options, selectedOption, onSelect, align = 'center', disabled = false }: PillProps) {
   if (!options || options.length === 0) return null;
 
   return (
@@ -20,6 +21,7 @@ export default function Pill({ options, selectedOption, onSelect, align = 'cente
           onClick={() => onSelect(option)}
           role="tab"
           aria-selected={selectedOption === option}
+          disabled={disabled}
         >
           {option}
         </button>

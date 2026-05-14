@@ -8,6 +8,7 @@ interface AdminRequest {
   departmentId: string;
   departmentName: string;
   summary: string;
+  rawText?: string;
   roomNo: string;
   assignedStaffId: number | null;
   assignedStaffName: string | null;

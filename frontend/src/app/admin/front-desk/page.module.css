@@ -1,11 +1,9 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-32); /* 컴포넌트 간 간격 */
-  padding: var(--space-48) var(--space-32); /* 상하 48px, 좌우 32px */
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
+  height: 100%;
+  gap: var(--space-24);
+  padding: 0;
 }
 
 .header {
@@ -31,20 +29,53 @@
   margin-bottom: var(--space-24);
 }
 
-.contentSection {
+.splitLayout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+
+.leftPane {
+  width: 400px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-24); /* 섹션 내 요소 그룹 간격 */
+  border-right: 1px solid var(--color-gray-200);
+  overflow-y: auto;
+  padding: var(--space-24);
+  background-color: var(--color-white);
+}
+
+.rightPane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+
+.detailPane {
+  width: 400px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  overflow: hidden;
 }
 
 .sectionTitle {
-  font: var(--text-h2-bold);
+  font: var(--text-h3-bold);
   color: var(--color-gray-900);
-  margin: 0;
+  margin: 0 0 var(--space-16) 0;
 }
 
 .cardGrid {
   display: flex;
   flex-direction: column;
-  gap: var(--space-16); /* 리스트 아이템 간격 세로 배치 */
+  gap: 0;
+  margin: 0 calc(var(--space-24) * -1);
 }

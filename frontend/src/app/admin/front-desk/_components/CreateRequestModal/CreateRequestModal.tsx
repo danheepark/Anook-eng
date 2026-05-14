@@ -5,6 +5,7 @@ import styles from './CreateRequestModal.module.css';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
 import Button from '@/components/ui/Button/Button';
+import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import { CancelIcon } from '@/components/icons';
 import useCreateRequest from './useCreateRequest';
 
@@ -19,11 +20,7 @@ interface CreateRequestModalProps {
   onSuccess?: () => void;
 }
 
-const PRIORITIES = [
-  { value: 'NORMAL', label: '보통' },
-  { value: 'URGENT', label: '긴급(Urgent)' },
-  { value: 'EMERGENCY', label: '비상(Emergency)' },
-];
+
 
 export default function CreateRequestModal({
   isOpen,
@@ -44,7 +41,7 @@ export default function CreateRequestModal({
     // 부서 목록 조회
     fetch('/api/admin/departments')
       .then(res => res.json())
-      .then(data => setDepartments(data))
+      .then((data: Department[]) => setDepartments(data.filter(d => d.id !== 'EMERGENCY')))
       .catch(() => {});
   }, [isOpen]);
 
@@ -78,7 +75,7 @@ export default function CreateRequestModal({
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={handleClose}>
-      <ModalCard size="md">
+      <ModalCard size="md" overflowVisible={true}>
         <div className={styles.header}>
           <h2 className={styles.title}>요청 생성</h2>
           <button className={styles.closeButton} onClick={handleClose} aria-label="닫기">
@@ -129,31 +126,27 @@ export default function CreateRequestModal({
           {/* 하단 2열: 우선순위 + 배정 부서 */}
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="cr-priority">우선순위</label>
-              <select
-                id="cr-priority"
-                className={styles.select}
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              >
-                {PRIORITIES.map(p => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+              <label className={styles.label}>우선순위</label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', height: '40px', paddingLeft: '4px' }}>
+                <input
+                  type="checkbox"
+                  checked={priority === 'URGENT'}
+                  onChange={(e) => setPriority(e.target.checked ? 'URGENT' : 'NORMAL')}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-error)' }}
+                />
+                <span style={{ fontSize: '14px', fontWeight: priority === 'URGENT' ? 600 : 400, color: 'var(--color-gray-700)' }}>
+                  긴급 작업으로 설정
+                </span>
+              </label>
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="cr-dept">배정 부서 <span className={styles.required}>*</span></label>
-              <select
-                id="cr-dept"
-                className={styles.select}
+              <Dropdown
+                label="배정 부서 *"
+                placeholder="부서를 선택하세요"
+                options={departments.map(d => ({ value: d.id, label: d.name }))}
                 value={departmentId}
-                onChange={(e) => setDepartmentId(e.target.value)}
-              >
-                <option value="" disabled>부서를 선택하세요</option>
-                {departments.map(d => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </select>
+                onChange={(val) => setDepartmentId(val)}
+              />
             </div>
           </div>
         </div>

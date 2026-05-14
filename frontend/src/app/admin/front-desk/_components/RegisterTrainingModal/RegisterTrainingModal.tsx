@@ -20,7 +20,8 @@ export default function RegisterTrainingModal({
   departmentId = '',
   summary = '',
   roomNo = '',
-}: RegisterTrainingModalProps) {
+  requestId,
+}: RegisterTrainingModalProps & { requestId?: number }) {
   const { registerTraining } = useRegisterTraining();
   
   const [step, setStep] = useState<'select' | 'edit'>('select');
@@ -76,6 +77,13 @@ export default function RegisterTrainingModal({
     });
 
     if (success) {
+      if (requestId) {
+        const saved = localStorage.getItem('registeredRagIds');
+        const set = saved ? new Set(JSON.parse(saved)) : new Set();
+        set.add(requestId);
+        localStorage.setItem('registeredRagIds', JSON.stringify(Array.from(set)));
+        window.dispatchEvent(new CustomEvent('ragRegistered', { detail: requestId }));
+      }
       onClose();
     }
   };

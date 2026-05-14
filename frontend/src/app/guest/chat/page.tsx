@@ -5,7 +5,7 @@ import ChatScreen from './_components/ChatScreen';
 import { useChat } from './useChat';
 
 export default function GuestChatPage() {
-  const { messages, isTyping, sendMessage, activeRequests, cancelRequest, confirmRequest, stopMessage } = useChat();
+  const { messages, isTyping, sendMessage, activeRequests, cancelRequest, confirmRequest, stopMessage, handlePillSelect } = useChat();
 
   return (
     <main style={{ 
@@ -23,6 +23,7 @@ export default function GuestChatPage() {
         onCancelRequest={cancelRequest}
         onConfirmRequest={confirmRequest}
         onStopMessage={stopMessage}
+        onPillSelect={handlePillSelect}
       />
     </main>
   );

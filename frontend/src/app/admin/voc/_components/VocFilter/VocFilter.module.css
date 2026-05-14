@@ -1,0 +1,31 @@
+.filterContainer {
+  display: flex;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
+}
+
+.filterButton {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--color-gray-200);
+  background-color: white;
+  color: var(--color-gray-600);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+  background-color: var(--color-gray-50);
+}
+
+.active {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.active:hover {
+  background-color: var(--color-primary-dark);
+}

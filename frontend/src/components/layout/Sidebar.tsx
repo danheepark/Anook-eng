@@ -9,7 +9,7 @@ import { useTranslation } from '@/app/useTranslation';
 import {
   LayoutDashboard,
   Inbox,
-  AlertTriangle,
+
   Wrench,
   Home,
   Utensils,
@@ -25,7 +25,8 @@ import {
   Layers,
   FileSearch,
   FileText,
-  LogOut
+  LogOut,
+  MessageCircle
 } from 'lucide-react';
 
 export interface SidebarProps {
@@ -94,7 +95,6 @@ export default function Sidebar({ role = 'admin', className = '', fakePathname, 
         { label: t.adminPage.sidebar.menus.fb, href: '/admin/fb', icon: Utensils },
         { label: t.adminPage.sidebar.menus.facility, href: '/admin/facility', icon: Wrench },
         { label: t.adminPage.sidebar.menus.concierge, href: '/admin/concierge', icon: MessageSquare },
-        { label: t.adminPage.sidebar.menus.emergency, href: '/admin/emergency', icon: AlertTriangle },
       ]
     },
     {
@@ -102,6 +102,7 @@ export default function Sidebar({ role = 'admin', className = '', fakePathname, 
       items: [
         { label: t.adminPage.sidebar.menus.allRequests, href: '/admin/all-requests', icon: Layers },
         { label: t.adminPage.sidebar.menus.chatHistory, href: '/admin/chat-history', icon: History },
+        { label: '고객 피드백', href: '/admin/voc', icon: MessageCircle },
       ]
     },
     {
@@ -136,14 +137,26 @@ export default function Sidebar({ role = 'admin', className = '', fakePathname, 
   return (
     <aside
       className={`${styles.sidebar} ${className}`.trim()}
-      style={{ height: 'calc(100vh - 65px)', overflowY: 'auto' }}
+      style={{ height: '100vh', overflowY: 'auto' }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-16) 0', width: '100%', flex: 1 }}>
+      <div style={{ padding: 'var(--space-24) var(--space-24) var(--space-8)' }}>
+        <Link href="/" style={{
+          fontSize: '1.75rem',
+          fontWeight: 900,
+          letterSpacing: '-0.05em',
+          color: 'var(--color-primary, #0f172a)',
+          textDecoration: 'none'
+        }}>
+          Anook
+        </Link>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, paddingTop: 'var(--space-8)' }}>
         {menus.map((group, groupIdx) => (
           <div key={groupIdx} style={{ marginBottom: group.category ? 'var(--space-8)' : '0' }}>
             {group.category && (
               <h4 style={{ 
-                padding: 'var(--space-8) var(--space-16)', 
+                padding: 'var(--space-8) var(--space-24)', 
                 fontSize: '0.75rem', 
                 fontWeight: 600, 
                 color: 'var(--color-gray-500)',
@@ -153,7 +166,7 @@ export default function Sidebar({ role = 'admin', className = '', fakePathname, 
                 {group.category}
               </h4>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               {group.items.map((menu) => {
                 const isActive = activeMenu?.href === menu.href;
                 return (
@@ -172,13 +185,13 @@ export default function Sidebar({ role = 'admin', className = '', fakePathname, 
         ))}
       </div>
 
-      <div style={{ width: '100%', padding: 'var(--space-16) 0', borderTop: '1px solid var(--color-gray-200)', marginTop: 'auto' }}>
+      <div style={{ width: '100%', paddingBottom: 'var(--space-24)', marginTop: 'auto' }}>
         <button
           onClick={async () => {
             await fetch('/api/auth/session', { method: 'DELETE' });
             window.location.href = '/login';
           }}
-          className={`${styles.item} ${styles.default}`}
+          className={`${styles.item} ${styles.danger}`}
           style={{ width: '100%', border: 'none', cursor: 'pointer', justifyContent: 'flex-start' }}
         >
           <LogOut className={styles.icon} />

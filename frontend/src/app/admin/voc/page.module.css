@@ -1,0 +1,31 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-48) var(--space-32);
+  flex: 1;
+}
+
+.pageHeader {
+  margin-bottom: var(--space-24);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--space-8);
+}
+
+.subtitle {
+  color: var(--color-gray-500);
+  font-size: 0.875rem;
+}
+
+.errorBox {
+  background-color: var(--color-red-50);
+  color: var(--color-red-700);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-red-200);
+  margin-bottom: 24px;
+}

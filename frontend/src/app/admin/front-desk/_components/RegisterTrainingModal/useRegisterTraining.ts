@@ -21,7 +21,7 @@ export function useRegisterTraining() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...payload,
-          status: 'PENDING', // 관리자 승인을 위해 PENDING 상태로 등록
+          status: 'APPROVED', // 즉시 RAG 등록 (PENDING은 '나중에 하기'에서만 사용)
         }),
       });
 

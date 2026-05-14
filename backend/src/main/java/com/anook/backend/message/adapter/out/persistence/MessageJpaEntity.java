@@ -42,6 +42,9 @@ public class MessageJpaEntity {
     @Column(name = "guest_id")
     private Long guestId;
 
+    @Column(name = "sentiment", length = 10)
+    private String sentiment;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -56,6 +59,7 @@ public class MessageJpaEntity {
         entity.roomNo = domain.getRoomNo();
         entity.guestId = domain.getGuestId();
         entity.requestId = domain.getRequestId();
+        entity.sentiment = domain.getSentiment();
         entity.createdAt = domain.getCreatedAt();
         return entity;
     }
@@ -72,6 +76,7 @@ public class MessageJpaEntity {
                         this.roomNo,
                         this.guestId,
                         this.requestId,
+                        this.sentiment,
                         this.createdAt
                 );
         return msg;

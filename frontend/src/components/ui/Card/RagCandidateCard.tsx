@@ -7,9 +7,11 @@ export type RagReason = 'RAG_MISSING' | 'INTENT_UNCLEAR';
 
 export interface RagCandidateCardProps {
   department: string;
-  aiReason: RagReason;
+  aiReason?: RagReason;
   roomNumber?: string;
-  consultationContent: string;
+  consultationContent?: string;
+  question?: string;
+  answer?: string;
   timestamp: string;
   onAddRag: (extractedContent: string) => void;
   onReject: () => void;
@@ -20,6 +22,8 @@ export default function RagCandidateCard({
   aiReason,
   roomNumber,
   consultationContent,
+  question,
+  answer,
   timestamp,
   onAddRag,
   onReject
@@ -46,9 +50,9 @@ export default function RagCandidateCard({
     return `"${text.trim()}"`;
   };
 
-  const displayContent = getLongestStaffReply(consultationContent);
-  const reasonText = aiReason === 'RAG_MISSING' ? '지식 없음' : '의도 불명';
-  const displayCategory = `${reasonText} (${department})`;
+  const displayContent = consultationContent ? getLongestStaffReply(consultationContent) : '';
+  const reasonText = aiReason === 'RAG_MISSING' ? '지식 없음' : aiReason === 'INTENT_UNCLEAR' ? '의도 불명' : '검토 대기';
+  const displayCategory = aiReason ? `${reasonText} (${department})` : `검토 대기 (${department})`;
   const badgeVariant = aiReason === 'INTENT_UNCLEAR' ? 'red' : 'purple';
 
   return (
@@ -67,13 +71,31 @@ export default function RagCandidateCard({
             {timestamp}
           </span>
         </div>
-        <h3 className={styles.title}>
-          {displayContent}
-        </h3>
+        
+        {consultationContent ? (
+          <h3 className={styles.title}>
+            {displayContent}
+          </h3>
+        ) : (
+          <>
+            <div className={styles.questionText}>
+              <strong>Q:</strong> {question || '(질문 없음)'}
+            </div>
+            <div className={styles.answerText}>
+              <strong>A:</strong> {answer || '(답변 없음)'}
+            </div>
+          </>
+        )}
       </div>
 
       <div className={styles.actionSection}>
-        <Button variant="primary" onClick={() => onAddRag(displayContent.replace(/(^"|"$)/g, ''))} style={{ width: '100%', padding: 'var(--space-8)' }}>RAG 추가</Button>
+        <Button 
+          variant="primary" 
+          onClick={() => onAddRag(consultationContent ? displayContent.replace(/(^"|"$)/g, '') : answer || '')} 
+          style={{ width: '100%', padding: 'var(--space-8)' }}
+        >
+          RAG 추가
+        </Button>
         <Button variant="secondary" onClick={onReject} style={{ width: '100%', padding: 'var(--space-8)' }}>제외</Button>
       </div>
     </div>

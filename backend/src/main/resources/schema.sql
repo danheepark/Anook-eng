@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS message (
     room_no             VARCHAR(10)  NOT NULL REFERENCES room(number),
     guest_id            BIGINT,      -- PMS 투숙객 ID (데이터 격리 및 RAG용)
     request_id          BIGINT       REFERENCES request(id),
+    sentiment           VARCHAR(10), -- 'POSITIVE' | 'NEGATIVE' (VOC 필터링용)
     created_at          TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 

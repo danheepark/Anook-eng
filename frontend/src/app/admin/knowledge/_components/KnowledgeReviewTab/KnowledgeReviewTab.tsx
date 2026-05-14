@@ -5,6 +5,7 @@ import InputField from '@/components/ui/Inputfield/InputField';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import Button from '@/components/ui/Button/Button';
+import RagCandidateCard from '@/components/ui/Card/RagCandidateCard';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import { useKnowledge, KnowledgeEntry } from '../../useKnowledge';
 import styles from './KnowledgeReviewTab.module.css';
@@ -13,11 +14,11 @@ import { handleResponse } from '@/lib/api';
 
 interface KnowledgeReviewTabProps {
   domainCode: string; // 'ALL' 또는 도메인 코드
+  searchValue: string;
 }
 
-export default function KnowledgeReviewTab({ domainCode }: KnowledgeReviewTabProps) {
+export default function KnowledgeReviewTab({ domainCode, searchValue }: KnowledgeReviewTabProps) {
   const { t } = useTranslation();
-  const [searchValue, setSearchValue] = useState('');
   const { data, loading, error, deleteEntry, refresh } = useKnowledge(domainCode === 'ALL' ? undefined : domainCode);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<KnowledgeEntry | null>(null);
@@ -84,21 +85,6 @@ export default function KnowledgeReviewTab({ domainCode }: KnowledgeReviewTabPro
 
   return (
     <div className={styles.container}>
-      {/* Header Section */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>{t.adminPage.taskBoard.titles.aiTraining} 관리</h1>
-        </div>
-        <div className={styles.headerActions}>
-          <InputField 
-            variant="search" 
-            placeholder={t.adminPage.taskBoard.searchPlaceholder} 
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </div>
-      </div>
-
       {/* Content Section */}
       <div className={styles.cardList}>
         {loading ? (
@@ -109,43 +95,18 @@ export default function KnowledgeReviewTab({ domainCode }: KnowledgeReviewTabPro
           <div className={styles.emptyState}>검토 대기 중인 항목이 없습니다.</div>
         ) : (
           filteredItems.map(item => (
-            <div key={item.id} className={styles.candidateCard}>
-              <div className={styles.candidateContent}>
-                <div className={styles.candidateHeader}>
-                  <StatusBadge variant="purple">
-                    검토 대기 ({getDomainLabel(item.domainCode)})
-                  </StatusBadge>
-                  <span className={styles.candidateTime}>
-                    {new Date(item.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className={styles.candidateQuestion}>
-                  <strong>Q:</strong> {item.question || '(질문 없음)'}
-                </div>
-                <div className={styles.candidateAnswer}>
-                  <strong>A:</strong> {item.answer || '(답변 없음)'}
-                </div>
-              </div>
-              <div className={styles.candidateActions}>
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    setSelectedItem(item);
-                    setIsEditModalOpen(true);
-                  }}
-                  style={{ width: '100%', padding: 'var(--space-8)' }}
-                >
-                  RAG 등록
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => setDeleteTargetId(item.id)}
-                  style={{ width: '100%', padding: 'var(--space-8)' }}
-                >
-                  제외
-                </Button>
-              </div>
-            </div>
+            <RagCandidateCard
+              key={item.id}
+              department={getDomainLabel(item.domainCode)}
+              question={item.question}
+              answer={item.answer}
+              timestamp={new Date(item.updatedAt).toLocaleDateString()}
+              onAddRag={() => {
+                setSelectedItem(item);
+                setIsEditModalOpen(true);
+              }}
+              onReject={() => setDeleteTargetId(item.id)}
+            />
           ))
         )}
       </div>

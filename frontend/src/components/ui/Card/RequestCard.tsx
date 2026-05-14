@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './RequestCard.module.css';
 import Button from '@/components/ui/Button/Button';
-import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
-import ChatModal from '@/components/ui/Modal/ChatModal';
+import Tag from '@/components/ui/StatusBadge/StatusBadge';
 
 export interface RequestCardProps {
   roomType?: string;
@@ -22,6 +21,9 @@ export interface RequestCardProps {
   status?: string;
   onStatusChange?: (id: number, newStatus: string) => Promise<void>;
   reverseActions?: boolean;
+  isSelected?: boolean;
+  hasNewMessage?: boolean;
+  isEmergency?: boolean;
 }
 
 export default function RequestCard({
@@ -32,8 +34,8 @@ export default function RequestCard({
   createdAt,
   title,
   description,
-  primaryActionText = '상담 시작',
-  secondaryActionText = '무시하기',
+  primaryActionText,
+  secondaryActionText,
   onPrimaryAction,
   onSecondaryAction,
   onCardClick,
@@ -41,15 +43,13 @@ export default function RequestCard({
   requestId,
   status,
   onStatusChange,
-  reverseActions
+  reverseActions,
+  isSelected = false,
+  hasNewMessage = false,
+  isEmergency = false
 }: RequestCardProps) {
   const isWarning = variant === 'warning';
-  const [isChatOpen, setIsChatOpen] = useState(false);
-
   const handlePrimaryClick = () => {
-    if (primaryActionText === '상담 시작' || primaryActionText === '상담 기록 보기') {
-      setIsChatOpen(true);
-    }
     if (onPrimaryAction) {
       onPrimaryAction();
     }
@@ -57,53 +57,55 @@ export default function RequestCard({
 
   return (
     <>
-      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
-        <div className={`${styles.roomBox} ${isWarning ? styles.roomBoxWarning : ''}`}>
-          <span className={`${styles.roomType} ${isWarning ? styles.textWhite : ''}`}>{roomType}</span>
-          <span className={`${styles.roomNumber} ${isWarning ? styles.textWhite : ''}`}>{roomNumber}</span>
+      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
+        <div className={styles.roomBox}>
+          <span className={styles.roomNumber}>{roomNumber}</span>
         </div>
 
         <div className={styles.contentSection}>
           <div className={styles.contentHeader}>
-            <StatusBadge variant={statusVariant}>{statusText}</StatusBadge>
-            <span className={styles.timeText}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              {getRelativeTime(createdAt)}
-            </span>
+            <h3 className={styles.title}>{title}</h3>
           </div>
-          <h3 className={styles.title}>{title}</h3>
-          {description && <p className={styles.description}>{description}</p>}
+          
+          <div className={styles.contentBody}>
+            {description && <p className={styles.description}>{description}</p>}
+          </div>
+
+          {(primaryActionText || secondaryActionText) && (
+            <div
+              className={styles.actionSection}
+              style={reverseActions ? { flexDirection: 'row-reverse' } : undefined}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {secondaryActionText && (
+                <Button variant="secondary" className={styles.actionButton} onClick={onSecondaryAction}>
+                  {secondaryActionText}
+                </Button>
+              )}
+              {primaryActionText && (
+                <Button variant="primary" className={styles.actionButton} onClick={handlePrimaryClick}>
+                  {primaryActionText}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
-        <div
-          className={`${styles.actionSection} ${isWarning ? styles.actionSectionWarning : ''} ${(!primaryActionText || !secondaryActionText) ? styles.actionSectionSingle : ''}`}
-          style={reverseActions ? { flexDirection: 'column-reverse' } : undefined}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {primaryActionText && (
-            <Button variant="primary" className={styles.actionButton} onClick={handlePrimaryClick}>
-              {primaryActionText}
-            </Button>
+        <div className={styles.rightSection}>
+          <span className={styles.timeText}>
+            {getRelativeTime(createdAt)}
+          </span>
+          {isEmergency && (
+            <Tag variant="red">EMERGENCY</Tag>
           )}
-          {secondaryActionText && (
-            <Button variant="secondary" className={styles.actionButton} onClick={onSecondaryAction}>
-              {secondaryActionText}
-            </Button>
+          {status === 'PENDING' && !isEmergency && (
+            <Tag variant="red">NEW</Tag>
+          )}
+          {status === 'IN_PROGRESS' && hasNewMessage && (
+            <div className={styles.redDot}></div>
           )}
         </div>
       </div>
-
-      <ChatModal
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        roomNumber={roomNumber.toString()}
-        requestId={requestId}
-        status={status}
-        onStatusChange={onStatusChange}
-      />
     </>
   );
 }

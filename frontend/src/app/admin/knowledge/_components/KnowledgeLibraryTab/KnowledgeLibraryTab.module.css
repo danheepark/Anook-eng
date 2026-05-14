@@ -1,52 +1,10 @@
 .container {
   display: flex;
   flex-direction: column;
-  padding: var(--space-48) var(--space-32);
+  padding: 0 0 var(--space-48) 0;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-32);
-}
 
-.headerLeft {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.subtitle {
-  font: var(--text-body-medium);
-  color: var(--color-gray-500);
-}
-
-.title {
-  font: var(--text-h1-bold);
-  color: var(--color-gray-900);
-  margin: 0;
-}
-
-.headerActions {
-  display: flex;
-  gap: var(--space-12);
-  align-items: center;
-}
-
-.searchInput {
-  height: 36px !important;
-}
-
-/* filterBtn overrides the container, we need to target the internal button too */
-.filterBtn {
-  height: 36px !important;
-  width: 36px !important;
-}
-.filterBtn > button {
-  height: 36px !important;
-  width: 36px !important;
-}
 
 .tabSection {
   margin-bottom: var(--space-24);

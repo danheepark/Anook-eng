@@ -38,6 +38,7 @@
 
 .bubble {
   max-width: 100%;
+  width: fit-content;
   padding: var(--space-12) var(--space-24);
   font: var(--text-body-md-medium);
   word-break: keep-all;
@@ -81,6 +82,18 @@
     inset -2px -2px 8px rgba(250, 200, 150, 0.3),
     0 4px 16px rgba(31, 38, 135, 0.05);
   color: var(--color-gray-900);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.received.fallback {
+  padding: var(--space-12) var(--space-24);
+  border-radius: 4px 24px 24px 24px;
+  max-width: 80%;
+}
+
+.sent.fallback {
+  border-radius: 24px 4px 24px 24px;
 }
 
 @keyframes waitingBubble {
@@ -213,7 +226,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-4);
-  max-width: 80%;
+  max-width: 85%;
 }
 
 /* ── 첨부 이미지 썸네일 ── */

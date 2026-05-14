@@ -29,9 +29,10 @@ export interface ChatScreenProps {
   onCancelRequest?: (requestId: number) => void;
   onConfirmRequest?: (requestId: number) => void;
   onStopMessage?: () => void;
+  onPillSelect?: (msgId: string, option: string) => void;
 }
 
-export default function ChatScreen({ messages, isTyping, activeRequests, onSendMessage, onCancelRequest, onConfirmRequest, onStopMessage }: ChatScreenProps) {
+export default function ChatScreen({ messages, isTyping, activeRequests, onSendMessage, onCancelRequest, onConfirmRequest, onStopMessage, onPillSelect }: ChatScreenProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isUserTyping, setIsUserTyping] = useState(false);
 
@@ -173,7 +174,15 @@ export default function ChatScreen({ messages, isTyping, activeRequests, onSendM
                 }}>
                   <Pill 
                     options={msg.meta?.options as string[]} 
-                    onSelect={onSendMessage} 
+                    selectedOption={msg.meta?.selectedOption as string | undefined}
+                    disabled={msg.meta?.pillDisabled as boolean | undefined}
+                    onSelect={(option) => {
+                      if (onPillSelect) {
+                        onPillSelect(msg.id, option);
+                      } else {
+                        onSendMessage(option);
+                      }
+                    }} 
                     align={isWelcome ? 'center' : 'flex-start'}
                   />
                 </div>

@@ -19,6 +19,7 @@ public class Message {
     private String roomNo;
     private Long guestId;
     private Long requestId;
+    private String sentiment;
     private LocalDateTime createdAt;
 
     // ── 팩토리 메서드 ──
@@ -79,6 +80,13 @@ public class Message {
     }
 
     /**
+     * 감정 분석 결과(VOC) 설정
+     */
+    public void setSentiment(String sentiment) {
+        this.sentiment = sentiment;
+    }
+
+    /**
      * 고객이 보낸 메시지인지 확인
      */
     public boolean isFromGuest() {
@@ -101,6 +109,7 @@ public class Message {
     public String getRoomNo() { return roomNo; }
     public Long getGuestId() { return guestId; }
     public Long getRequestId() { return requestId; }
+    public String getSentiment() { return sentiment; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     // ── 영속성 어댑터 전용: DB에서 읽어온 데이터를 도메인 모델로 복원 ──
@@ -111,7 +120,7 @@ public class Message {
      */
     public static Message reconstruct(Long id, SenderType senderType, String content,
                                        String translatedContent, String roomNo, Long guestId,
-                                       Long requestId, LocalDateTime createdAt) {
+                                       Long requestId, String sentiment, LocalDateTime createdAt) {
         Message msg = new Message();
         msg.id = id;
         msg.senderType = senderType;
@@ -120,6 +129,7 @@ public class Message {
         msg.roomNo = roomNo;
         msg.guestId = guestId;
         msg.requestId = requestId;
+        msg.sentiment = sentiment;
         msg.createdAt = createdAt;
         return msg;
     }

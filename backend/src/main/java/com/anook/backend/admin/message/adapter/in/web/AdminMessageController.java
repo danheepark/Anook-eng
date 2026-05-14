@@ -15,8 +15,10 @@ import java.util.Map;
  * message 모듈의 UseCase/Port를 import하지 않고 독립적으로 동작합니다.
  */
 import com.anook.backend.admin.message.application.port.in.DeleteAdminMessageUseCase;
+import com.anook.backend.message.application.port.in.GetVocListUseCase;
 import com.anook.backend.message.application.port.in.SendMessageUseCase;
 import com.anook.backend.message.application.dto.request.SendStaffMessageCommand;
+import com.anook.backend.message.application.dto.response.GetVocListResult;
 
 @RestController
 @RequestMapping("/admin/messages")
@@ -26,6 +28,7 @@ public class AdminMessageController {
     private final AdminMessageQueryPort adminMessageQueryPort;
     private final SendMessageUseCase sendMessageUseCase;
     private final DeleteAdminMessageUseCase deleteAdminMessageUseCase;
+    private final GetVocListUseCase getVocListUseCase;
 
     /**
      * 메시지가 있는 객실 목록 조회
@@ -84,5 +87,15 @@ public class AdminMessageController {
     public ResponseEntity<Void> deleteRoomMessages(@PathVariable String roomNo) {
         deleteAdminMessageUseCase.deleteRoomMessages(roomNo);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 관리자 VOC 목록 조회
+     *
+     * GET /admin/messages/vocs
+     */
+    @GetMapping("/vocs")
+    public ResponseEntity<List<GetVocListResult>> getVocList() {
+        return ResponseEntity.ok(getVocListUseCase.getVocList());
     }
 }

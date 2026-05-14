@@ -21,4 +21,15 @@ public interface MessageJpaRepository extends JpaRepository<MessageJpaEntity, Lo
      * 특정 객실과 투숙객의 최근 메시지 조회 (Pageable 이용)
      */
     List<MessageJpaEntity> findByRoomNoAndGuestIdOrderByCreatedAtDesc(String roomNo, Long guestId, org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * VOC 태그가 있는 메시지 조회
+     */
+    List<MessageJpaEntity> findBySentimentIsNotNullOrderByCreatedAtDesc();
+
+    /**
+     * 특정 시점 이전의 메시지 조회 (VOC 원문 불만 역추적용)
+     */
+    List<MessageJpaEntity> findByRoomNoAndGuestIdAndCreatedAtBeforeOrderByCreatedAtDesc(
+            String roomNo, Long guestId, java.time.LocalDateTime before, org.springframework.data.domain.Pageable pageable);
 }

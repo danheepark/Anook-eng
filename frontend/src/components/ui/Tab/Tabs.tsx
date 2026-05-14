@@ -14,18 +14,20 @@ export interface TabsProps {
   options: TabOption[];
   /** 현재 선택된 탭의 value */
   activeValue: string;
-  /** 탭 변경 시 호출될 콜백 함수 */
   onChange: (value: string) => void;
   className?: string;
+  variant?: 'line' | 'pill';
 }
 
 export default function Tabs({
   options,
   activeValue,
   onChange,
-  className = ''
+  className = '',
+  variant = 'line'
 }: TabsProps) {
-  const containerClass = styles.variantLine;
+  const isPill = variant === 'pill';
+  const containerClass = isPill ? styles.variantPill : styles.variantLine;
 
   return (
     <div className={`${styles.container} ${containerClass} ${className}`.trim()} role="tablist">
@@ -33,7 +35,11 @@ export default function Tabs({
         const isActive = option.value === activeValue;
         
         let tabClass = styles.tabButton;
-        tabClass += ` ${styles.lineTab} ${isActive ? styles.lineTabActive : ''}`;
+        if (isPill) {
+          tabClass += ` ${styles.pillTab} ${isActive ? styles.pillTabActive : ''}`;
+        } else {
+          tabClass += ` ${styles.lineTab} ${isActive ? styles.lineTabActive : ''}`;
+        }
 
         return (
           <button

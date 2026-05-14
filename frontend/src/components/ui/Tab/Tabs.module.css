@@ -54,13 +54,35 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
+  color: inherit;
+  margin-left: 4px;
+}
+
+/* --------- Pill Variant --------- */
+.variantPill {
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.pillTab {
+  padding: 6px 16px;
   border-radius: var(--radius-full);
-  background-color: var(--color-primary);
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-600);
+  font: var(--text-body-medium);
+}
+
+.pillTab:hover {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-800);
+}
+
+.pillTabActive {
+  background-color: var(--color-gray-500);
   color: var(--color-white);
-  font: var(--text-caption-medium);
-  font-size: 0.65rem;
-  margin-left: 6px;
-  padding: 0 5px;
+}
+
+.pillTabActive:hover {
+  background-color: var(--color-gray-600);
+  color: var(--color-white);
 }
