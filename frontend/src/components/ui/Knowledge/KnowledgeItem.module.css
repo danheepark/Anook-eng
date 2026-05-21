@@ -19,39 +19,46 @@
 .topRow {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  margin-bottom: var(--space-16);
 }
 
 .badgeWrapper {
-  margin-bottom: var(--space-16);
+  margin-bottom: 0;
+}
+
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
 }
 
 .actions {
   display: flex;
   gap: var(--space-8);
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-
-.container:hover .actions {
-  opacity: 1;
 }
 
 .actionIcon {
-  color: var(--color-gray-400);
+  background: none;
+  border: none;
   cursor: pointer;
+  color: var(--color-gray-500);
+  padding: var(--space-4);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
   transition: all var(--transition);
-  font-size: 14px;
 }
 
 .actionIcon:hover {
   color: var(--color-gray-800);
-  background-color: var(--color-gray-100);
+}
+
+.bottomRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: var(--space-12);
 }
 
 .title {
@@ -63,21 +70,24 @@
 .description {
   font: var(--text-body-regular);
   color: var(--color-gray-600);
-  margin: 0 0 var(--space-16) 0;
+  margin: 0;
   line-height: 1.5;
-}
-
-.footer {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.clockIcon {
-  color: var(--color-gray-500);
 }
 
 .dateText {
   font: var(--text-caption-medium);
   color: var(--color-gray-500);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-16);
+  }
+}
+
+.activeCardGlow {
+  border-color: #ffd54f !important;
+  box-shadow: 0 0 12px rgba(255, 213, 79, 0.4) !important;
+  background-color: rgba(255, 213, 79, 0.05) !important;
+  transition: all var(--transition);
 }

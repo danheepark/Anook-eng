@@ -1,204 +1,190 @@
 .statusBarContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-24) var(--space-24) var(--space-16);
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.title {
+  font: var(--text-body-bold);
+  color: var(--color-gray-900);
+}
+
+.translatingText {
+  color: var(--color-gray-500) !important;
+  font-weight: normal !important;
+}
+
+.statusLabel {
+  font: var(--text-body-medium);
+  color: var(--color-gray-500);
+}
+
+.stepperContainer {
   position: relative;
   width: 100%;
-  z-index: 20;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: var(--radius-md);
-  transition: all 0.3s ease;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  padding: 0;
 }
 
-.statusBarContainer.hidden {
-  height: 0;
-  border-bottom: none;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.compactView {
-  padding: var(--space-12) var(--space-16);
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  cursor: pointer;
-}
-
-.iconWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  background-color: #EFF6FF; /* 연한 파란색 배경 */
-  color: var(--color-info);
-}
-
-.icon {
-  font-size: 1rem;
-}
-
-.progressSection {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.inlineProgressBarContainer {
-  position: relative;
-  width: 100%;
-  height: 12px; /* 동그라미가 위치할 높이 확보 */
-  display: flex;
-  align-items: center;
-}
-
-.inlineProgressBarBg {
+.stepperTrack {
   position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  width: 100%;
-  height: 4px; /* 기존 6px에서 얇게 변경 */
-  background-color: var(--color-gray-100);
-  border-radius: var(--radius-full);
-  overflow: hidden;
+  top: 9px; /* 20px/2 - 1px line thickness */
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background-color: var(--color-gray-200);
   z-index: 1;
 }
 
-.inlineProgressBarFill {
+.stepperFill {
   height: 100%;
-  background-color: var(--color-info);
-  border-radius: var(--radius-full);
-  transition: width 0.5s ease-in-out;
+  background-color: var(--color-primary);
+  transition: width 0.5s ease;
 }
 
-.progressDotsOverlay {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  width: 100%;
+.stepperNodes {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  position: relative;
   z-index: 2;
 }
 
-.progressDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--color-white);
-  border: 2px solid var(--color-gray-300);
-  transition: all 0.3s ease;
-  z-index: 3;
-  box-sizing: border-box;
+.stepWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 60px; /* To center the label with the node */
 }
 
-.dotActive {
-  background-color: var(--color-info);
-  border-color: var(--color-info);
-}
-
-.statusSection {
+.node {
   display: flex;
   align-items: center;
-  gap: var(--space-8);
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.nodeCompleted, .nodeActive {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.nodeInactive {
+  width: 20px;
+  height: 20px;
+}
+
+.nodeInactive::after {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-gray-300);
+}
+
+.innerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 1;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+.stepLabel {
+  font: var(--text-caption-regular);
+  color: var(--color-gray-400);
+  text-align: center;
   white-space: nowrap;
 }
 
-.summary {
-  font: var(--text-caption-bold);
-  color: var(--color-info);
-}
-
-
-
-.arrow {
-  color: var(--color-gray-500);
-  transition: transform 0.3s ease;
-}
-
-.arrow.open {
-  transform: rotate(180deg);
-}
-
-.expandedView {
-  padding: 0 var(--space-16) var(--space-16);
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.progressContainer {
-  margin-top: var(--space-16);
-}
-
-.progressBarBg {
-  width: 100%;
-  height: 6px;
-  background-color: var(--color-gray-100);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  margin-bottom: var(--space-8);
-}
-
-.progressBarFill {
-  height: 100%;
-  background-color: var(--color-primary);
-  border-radius: var(--radius-full);
-  transition: width 0.5s ease-in-out;
-}
-
-.steps {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--space-8);
-}
-
-.stepInactive {
-  font: var(--text-caption-medium);
-  color: var(--color-gray-400);
-}
-
-.stepActive {
-  font: var(--text-caption-medium);
+.labelActive {
   color: var(--color-primary);
+  font-weight: 600;
 }
 
-.detailsContainer {
-  padding-top: var(--space-12);
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2px;
 }
 
-.detailsTitle {
-  font: var(--text-caption-medium);
-  color: var(--color-gray-700);
-  margin-bottom: var(--space-8);
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
+  width: 100%;
+}
+
+.menuItem {
+  font: var(--text-caption-regular);
+  color: var(--color-gray-500);
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-6);
+  line-height: 1.4;
 }
 
-.detailItem {
+.bullet {
+  color: var(--color-primary);
   font: var(--text-caption-regular);
-  color: var(--color-gray-600);
-  margin-bottom: var(--space-4);
-  display: flex;
+  font-weight: bold;
 }
 
-.detailLabel {
-  width: 60px;
+.statusMessage {
+  font: var(--text-caption-regular);
   color: var(--color-gray-500);
+  margin-top: var(--space-4);
 }
 
-.detailValue {
+.cursor {
+  display: inline-block;
+  width: 2px;
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.highlight {
   color: var(--color-gray-900);
-  font-weight: 500;
+  font: var(--text-caption-medium);
 }

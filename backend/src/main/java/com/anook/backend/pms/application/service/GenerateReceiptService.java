@@ -1,18 +1,20 @@
 package com.anook.backend.pms.application.service;
-
+ 
 import com.anook.backend.pms.application.port.in.GenerateReceiptUseCase;
 import com.anook.backend.pms.application.port.out.PmsMenuRepositoryPort;
 import com.anook.backend.pms.application.port.out.PmsReceiptRepositoryPort;
 import com.anook.backend.pms.domain.model.PmsMenu;
+import com.anook.backend.room.application.service.RoomInventoryService;
+import com.anook.backend.room.application.service.InventoryPolicyProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
+ 
 import java.util.List;
 import java.util.Map;
-
+ 
 /**
  * 통합 영수증 생성 서비스 — 모든 부서의 유료 서비스를 통합 처리
  *
@@ -23,22 +25,28 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class GenerateReceiptService implements GenerateReceiptUseCase {
-
+ 
     private final PmsMenuRepositoryPort menuRepository;
     private final PmsReceiptRepositoryPort receiptRepository;
-
+    private final RoomInventoryService roomInventoryService;
+    private final InventoryPolicyProperties policyProperties;
+ 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void generate(String roomNo, String departmentId, Map<String, Object> entities) {
         if (entities == null) {
             return;
         }
-
+ 
         // FB 룸서비스: entities.menu_items 기반 영수증 생성
         if ("FB".equals(departmentId)) {
             handleFbReceipt(roomNo, entities);
         }
-        // HK 및 기타 부서: entities.REQ_ITEM 기반 영수증 생성
+        // HK 부서: entities.items 파싱하여 초과분 영수증 생성
+        else if ("HK".equals(departmentId)) {
+            handleHkReceipt(roomNo, entities);
+        }
+        // 기타 부서: entities.REQ_ITEM 기반 영수증 생성
         else {
             handleGenericReceipt(roomNo, departmentId, entities);
         }
@@ -123,6 +131,73 @@ public class GenerateReceiptService implements GenerateReceiptUseCase {
                                 departmentId, roomNo,
                                 menu.name(), finalQuantity, totalPrice);
                     });
+        }
+    }
+
+    /**
+     * HK 부서의 유료 서비스 영수증 처리 — Redis와 인벤토리 정책 활용
+     */
+    @SuppressWarnings("unchecked")
+    private void handleHkReceipt(String roomNo, Map<String, Object> entities) {
+        List<Map<String, Object>> items = (List<Map<String, Object>>) entities.get("items");
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        // 전체 PMS 메뉴 조회
+        List<PmsMenu> allMenus = menuRepository.findAll();
+
+        for (Map<String, Object> item : items) {
+            String name = (String) item.get("item");
+            int quantity = (item.get("count") instanceof Number)
+                    ? ((Number) item.get("count")).intValue() : 1;
+
+            if (name == null || quantity <= 0) continue;
+
+            for (InventoryPolicyProperties.PolicyItem policy : policyProperties.getPolicies()) {
+                boolean matched = false;
+                for (String alias : policy.getAliases()) {
+                    if (name.equalsIgnoreCase(policy.getCode()) || name.toLowerCase().contains(alias.toLowerCase())) {
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (matched) {
+                    // Redis에서 현재 사용량 조회
+                    Map<String, Integer> inventory = roomInventoryService.getInventory(roomNo);
+                    String usedKey = "free_" + policy.getCode().toLowerCase() + "_used";
+                    int currentUsed = inventory.getOrDefault(usedKey, 0);
+                    int allowance = policy.getAllowance();
+
+                    // 초과분 계산: 이번 주문에서 추가된 물량(quantity) 중에서 무료 제공량을 초과하는 부분
+                    int prevUsed = Math.max(0, currentUsed - quantity);
+                    int chargeableQty = 0;
+
+                    if (prevUsed >= allowance) {
+                        chargeableQty = quantity;
+                    } else if (currentUsed > allowance) {
+                        chargeableQty = currentUsed - allowance;
+                    }
+
+                    if (chargeableQty > 0) {
+                        int finalChargeableQty = chargeableQty;
+                        // pms_menu에서 이름 매칭 (예: "생수 추가", "추가 수건")
+                        allMenus.stream()
+                                .filter(m -> m.name().contains(policy.getAliases().get(0)) || policy.getAliases().get(0).contains(m.name()))
+                                .findFirst()
+                                .ifPresentOrElse(menu -> {
+                                    int totalPrice = menu.price() * finalChargeableQty;
+                                    receiptRepository.save(roomNo, menu.id(), finalChargeableQty, totalPrice);
+                                    log.info("[Billing] HK 초과 영수증 생성: {}호 / {} x{} = {}원",
+                                            roomNo, menu.name(), finalChargeableQty, totalPrice);
+                                }, () -> {
+                                    log.warn("[Billing] HK 메뉴 '{}'에 해당하는 PMS 메뉴를 찾을 수 없음", policy.getCode());
+                                });
+                    }
+                    break;
+                }
+            }
         }
     }
 }

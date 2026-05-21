@@ -42,6 +42,9 @@ public record MessageAiResult(
         /** [Keyword Targeting] 취소/변경 대상 아이템 키워드 (예: "콜라", "수건"). 미지정 시 null */
         String targetKeyword,
 
+        /** [ID Targeting] 취소 대상 주문 ID (활성 목록 주입 기반). 미지정 시 null */
+        Long targetRequestId,
+
         /** UI에 표시할 선택지 (Pill Tab) 목록 */
         java.util.List<String> clarificationOptions,
 

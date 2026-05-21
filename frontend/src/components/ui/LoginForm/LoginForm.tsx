@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Button from '../Button/Button';
 import InputField from '../Inputfield/InputField';
+import Logo from '../Logo';
 import styles from './LoginForm.module.css';
 
 export interface LoginFormProps {
@@ -57,7 +58,11 @@ export default function LoginForm({
     <div className={styles.container}>
       <div className={styles.header}>
         {icon && <div className={styles.iconWrapper}>{icon}</div>}
-        <h1 className={styles.title}>{title}</h1>
+        {title.toUpperCase() === 'ANOOK' ? (
+          <div style={{ marginBottom: '4px' }}><Logo /></div>
+        ) : (
+          <h1 className={styles.title}>{title}</h1>
+        )}
         <p className={styles.subtitle}>{subtitle}</p>
       </div>
 
@@ -77,6 +82,7 @@ export default function LoginForm({
         <Button 
           type="submit" 
           variant="primary" 
+          size="large"
           fullWidth 
           disabled={isLoading || !pin}
           className={styles.submitBtn}

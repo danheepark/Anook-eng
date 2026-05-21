@@ -10,6 +10,7 @@ import java.util.List;
 public interface KnowledgeJpaRepository extends JpaRepository<KnowledgeJpaEntity, Long> {
     List<KnowledgeJpaEntity> findByDomainCodeOrderByCreatedAtDesc(DomainCode domainCode);
     List<KnowledgeJpaEntity> findAllByOrderByCreatedAtDesc();
+    boolean existsByDomainCodeAndQuestion(DomainCode domainCode, String question);
 
     @Modifying
     @Query(value = "UPDATE knowledge_entry SET embedding = cast(?2 as vector) WHERE id = ?1", nativeQuery = true)

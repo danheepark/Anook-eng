@@ -30,15 +30,24 @@ export default function RequestStatusCard({
   
   const formatTime = (isoStr: string) => {
     const date = new Date(isoStr);
-    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${hh}:${min}`;
   };
+
+  let displayTitle = summary;
+  
+  // '요청'과 '주문' 단어가 타이틀 끝에 있는 경우 제거 (예약은 유지)
+  displayTitle = displayTitle
+    .replace(/(?:\s*요청|\s*주문|\s*[Rr]equest|\s*[Oo]rder|\s*リクエスト|\s*依頼|\s*注文|\s*请求|\s*订单)$/, '')
+    .trim();
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.titleGroup}>
           <span className={styles.department}>{deptName}</span>
-          <h3 className={styles.title}>{summary}</h3>
+          <h3 className={styles.title}>{displayTitle}</h3>
         </div>
         <div className={styles.timeInfo}>
           <span>접수: {formatTime(createdAt)}</span>

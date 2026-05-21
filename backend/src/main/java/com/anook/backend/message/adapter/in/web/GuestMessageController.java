@@ -46,7 +46,8 @@ public class GuestMessageController {
         }
 
         Long guestId = Long.parseLong(principal.getName());
-        SendMessageCommand command = new SendMessageCommand(roomNo, guestId, request.content(), request.images());
+        String lang = request.language() != null ? request.language() : "ko";
+        SendMessageCommand command = new SendMessageCommand(roomNo, guestId, request.content(), request.images(), lang);
         SendMessageResult result = sendMessageUseCase.send(command);
 
         return ResponseEntity.ok(result);

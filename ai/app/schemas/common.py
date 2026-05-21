@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 class HotelRequestSchema(BaseModel):
+    target_request_id: Optional[int] = Field(default=None, description="중복 또는 변경 대상이 되는 기존 요청의 ID")
     """
     아늑(Aneuk) 호텔 AI 시스템의 공통 JSON 응답 스키마
     모든 도메인 에이전트(HK, FB, FACILITY 등)는 이 규격에 맞추어 JSON을 반환해야 합니다.
@@ -12,11 +13,12 @@ class HotelRequestSchema(BaseModel):
     
     domain: str = Field(description="담당 부서 코드 (HK, FB, FACILITY, CONCIERGE, FRONT, COMMON)")
     
-    summary: str = Field(description="어떤 요청/문의인지 프론트데스크 직원이 바로 이해할 수 있도록 3줄 요약 (반드시 한국어)")
+    summary: str = Field(description="어떤 요청/문의인지 프론트데스크 직원이 바로 이해할 수 있도록 3줄 요약 (반드시 전달받은 system_language 언어로 작성)")
     priority: str = Field(description="긴급도 (직원 UI 화면에 빨간색 긴급 뱃지로 표시: NORMAL, URGENT)")
     status: str = Field(default="PENDING", description="티켓 상태 (PENDING, ASSIGNED, IN_PROGRESS, COMPLETED 등)")
     confidence: float = Field(description="AI 확신도 (0.0 ~ 1.0)")
     reasoning: str = Field(default="", description="AI가 이 판단을 내린 논리적 근거 (디버깅/업무 상세용)")
+    action_type: Optional[str] = Field(default=None, description="ADD, REPLACE, ADD_DUPLICATE 등")
     
     # --- [2. 챗봇 UX & 부서별 가변 데이터 (동적 데이터)] ---
     # [부서별 entities 작성 가이드]

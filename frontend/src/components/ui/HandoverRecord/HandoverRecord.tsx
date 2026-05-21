@@ -29,7 +29,6 @@ export interface HandoverRecordProps {
 export default function HandoverRecord({ managerName, briefing, items }: HandoverRecordProps) {
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>인수인계 기록</h2>
 
       {briefing && (
         <table className={styles.infoTable}>

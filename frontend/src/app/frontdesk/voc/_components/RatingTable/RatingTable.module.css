@@ -1,0 +1,91 @@
+.summaryCard {
+  background: linear-gradient(135deg, var(--color-blue-50), var(--color-purple-50, #f5f3ff));
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-24);
+  margin-bottom: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.summaryLabel {
+  font: var(--text-body-medium);
+  color: var(--color-gray-500);
+}
+
+.summaryScore {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.scoreText {
+  font: var(--text-h2-bold);
+  color: var(--color-gray-900);
+}
+
+.scoreCount {
+  font: var(--text-body-medium);
+  color: var(--color-gray-400);
+}
+
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  font-size: 18px;
+}
+
+.starFilled {
+  color: #FBBF24;
+}
+
+.starEmpty {
+  color: var(--color-gray-200);
+}
+
+.emptyState {
+  padding: 40px;
+  text-align: center;
+  color: var(--color-gray-500);
+}
+
+/* ── Table Cell Styles ── */
+
+.roomBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-100);
+  color: var(--color-gray-700);
+  font: var(--text-body-bold);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  min-width: 48px;
+}
+
+.summaryText {
+  font: var(--text-body-medium);
+  color: var(--color-gray-700);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.staffName {
+  font: var(--text-body-medium);
+  color: var(--color-gray-800);
+}
+
+.ratingText {
+  font: var(--text-body-bold);
+  color: var(--color-gray-800);
+}
+
+.dateText {
+  font: var(--text-caption-medium);
+  color: var(--color-gray-500);
+  font-size: 12px;
+}

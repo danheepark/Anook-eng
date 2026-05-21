@@ -20,23 +20,6 @@
   margin: 0;
 }
 
-.closeBtn {
-  background: none;
-  border: none;
-  color: var(--color-gray-400);
-  cursor: pointer;
-  padding: var(--space-4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition);
-}
-
-.closeBtn:hover {
-  background-color: var(--color-gray-100);
-}
-
 .body {
   display: flex;
   flex-direction: column;

@@ -1,57 +1,79 @@
 /* src/app/guest/chat/_components/FeedbackCard.module.css */
 
 .card {
+  width: 100%;
+  background: linear-gradient(to right, color-mix(in srgb, #A8E6CF 12%, rgba(255, 255, 255, 0)) 0%, rgba(255, 255, 255, 0) 70%), rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ── Horizontal Layout (matches RequestCard) ── */
+
+.cardLayout {
   display: flex;
-  flex-direction: column;
+  gap: var(--space-16);
+  align-items: flex-start;
+}
+
+.leftColumn {
+  flex-shrink: 0;
+}
+
+.iconContainer {
+  width: 48px;
+  height: 48px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-24) 0;
-  width: 100%;
-  margin-top: var(--space-8);
-  margin-bottom: var(--space-12);
-  gap: var(--space-16);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
 }
 
-/* 상단 텍스트 + 닫기 버튼 */
-.textWrapper {
+.rightColumn {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
   width: 100%;
 }
 
-.titleBox {
+.summaryRow {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
   width: 100%;
 }
 
 .title {
-  font: var(--text-body-bold);
+  font: var(--text-h3-bold);
   color: var(--color-gray-900);
   margin: 0;
-  width: 100%;
-  text-align: center;
+}
+
+.timeLabel {
+  font: var(--text-caption-regular);
+  color: var(--color-gray-500);
+  text-align: right;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .subtitle {
   font: var(--text-body-medium);
-  color: var(--color-text-gray-500);
-  margin: 0;
-  width: 100%;
+  color: var(--color-gray-500);
 }
 
-/* 별점 영역 */
-.ratingWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-8);
-  width: 100%;
-}
+/* ── Star Rating (inline) ── */
 
 .stars {
   display: flex;
   gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
 .starButton {
@@ -63,44 +85,24 @@
   align-items: center;
 }
 
+.starButton:disabled {
+  cursor: default;
+}
+
 .starIcon {
   width: 32px;
   height: 32px;
   transition: transform 0.15s ease, color 0.15s ease;
 }
 
-.starButton:hover .starIcon {
+.starButton:not(:disabled):hover .starIcon {
   transform: scale(1.15);
 }
 
 .starFilled {
-  color: var(--color-warning);
+  color: #FFBF00;
 }
 
 .starEmpty {
   color: var(--color-gray-500);
-}
-
-.ratingLabel {
-  font: var(--text-caption-medium);
-  color: var(--color-gray-500);
-  min-height: 1.2em;
-}
-
-/* 에러 메시지 */
-.errorMessage {
-  font: var(--text-caption-medium);
-  color: var(--color-error);
-  margin: 0;
-  width: 100%;
-}
-
-/* 하단 버튼 */
-.buttonGroup {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-12);
-  width: 100%;
 }

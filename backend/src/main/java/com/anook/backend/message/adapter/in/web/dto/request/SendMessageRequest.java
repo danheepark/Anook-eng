@@ -7,6 +7,7 @@ package com.anook.backend.message.adapter.in.web.dto.request;
  */
 public record SendMessageRequest(
         String content,
-        java.util.List<String> images
+        java.util.List<String> images,
+        String language
 ) {
 }

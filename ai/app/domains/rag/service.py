@@ -3,17 +3,33 @@ import os
 from neo4j import GraphDatabase
 from app.infrastructure.embedding.client import generate_embedding
 from app.infrastructure.database.connection import get_db_connection
+from app.core.config import settings
 
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://anook-neo4j-local:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "anook2026")
+NEO4J_URI = settings.NEO4J_URI
+NEO4J_USER = settings.NEO4J_USER
+NEO4J_PASSWORD = settings.NEO4J_PASSWORD
+
+# Neo4j Driver (Connection Pool) - Singleton
+_neo4j_driver = None
+
+def get_neo4j_driver():
+    global _neo4j_driver
+    if _neo4j_driver is None:
+        auth = (NEO4J_USER, NEO4J_PASSWORD) if NEO4J_PASSWORD else None
+        _neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=auth)
+    return _neo4j_driver
+
+def init_neo4j_driver():
+    """서버 구동 시점에 미리 호출하여 연결을 맺고 검증(Fail-Fast)합니다."""
+    driver = get_neo4j_driver()
+    driver.verify_connectivity()
+    return driver
 
 def search_graph(query: str) -> List[Dict[str, Any]]:
     """
     사용자 질문에서 키워드를 바탕으로 Neo4j 그래프 데이터베이스를 탐색합니다.
     """
-    auth = (NEO4J_USER, NEO4J_PASSWORD) if NEO4J_PASSWORD else None
-    driver = GraphDatabase.driver(NEO4J_URI, auth=auth)
+    driver = get_neo4j_driver()
     results = []
     try:
         with driver.session() as session:
@@ -34,8 +50,6 @@ def search_graph(query: str) -> List[Dict[str, Any]]:
                 })
     except Exception as e:
         print(f"Graph Search Error: {e}")
-    finally:
-        driver.close()
     
     return results
 
@@ -65,6 +79,43 @@ def embed_text(text: str) -> List[float]:
     텍스트를 임베딩 벡터로 변환합니다.
     """
     return generate_embedding(text)
+
+
+def upsert_knowledge_entry(cur, domain_code: str, question: str, answer: str, force: bool = False) -> str:
+    """
+    질문 단위로 knowledge_entry를 INSERT/UPDATE/SKIP 분기 처리합니다.
+
+    - 신규 질문: 임베딩 생성 후 INSERT
+    - 기존 질문 & answer 변경됨: 임베딩 재생성 후 UPDATE
+    - 기존 질문 & answer 동일: 재임베딩 없이 SKIP
+    - force=True: answer 동일해도 강제 재임베딩 후 UPDATE (모델 교체 시 사용)
+
+    반환값: "inserted" | "updated" | "skipped"
+    """
+    cur.execute(
+        "SELECT answer FROM knowledge_entry WHERE domain_code = %s AND question = %s",
+        (domain_code, question),
+    )
+    row = cur.fetchone()
+
+    if row is not None and row[0] == answer and not force:
+        return "skipped"
+
+    embedding_vector = embed_text(f"질문: {question}\n답변: {answer}")
+
+    # ON CONFLICT DO UPDATE로 race condition 원천 차단 (AN-351 UNIQUE 제약과 연동)
+    cur.execute(
+        """
+        INSERT INTO knowledge_entry (question, answer, domain_code, status, embedding)
+        VALUES (%s, %s, %s, 'APPROVED', %s::vector)
+        ON CONFLICT (domain_code, question) DO UPDATE SET
+            answer = EXCLUDED.answer,
+            embedding = EXCLUDED.embedding,
+            updated_at = NOW()
+        """,
+        (question, answer, domain_code, embedding_vector),
+    )
+    return "inserted" if row is None else "updated"
 
 def search_similar(query: str, domain_code: str, top_k: int = 3, threshold: float = 0.7) -> List[Dict[str, Any]]:
     """

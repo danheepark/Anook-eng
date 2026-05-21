@@ -1,11 +1,11 @@
 /* src/styles/variables.css — 디자인 토큰 (MVP 아키텍처 v3 섹션 10) */
 :root {
   /* Colors */
-  --color-primary: #585FE2;
-  --color-primary-hover: #4D53C5;
-  --color-secondary: #4B5563;
+  --color-primary: #4B5563; /* gray-600 */
+  --color-primary-hover: #374151; /* gray-700 */
+  --color-secondary: #6B7280; /* gray-500 */
   --color-bg: #ffffff;
-  --color-surface: #F3F4F6;
+  --color-surface: #F3F4F6; /* gray-100 */
   --color-surface-hover: #334155;
 
 
@@ -26,6 +26,7 @@
   --color-border: #334155;
   --color-success: #10B981;
   --color-error: #EF4444;
+  --color-red-500: #EF4444;
   --color-warning: #F59E0B;
   --color-info: #3B82F6;
 
@@ -38,10 +39,11 @@
   --color-tag-text-gray: #374151;
   --color-tag-text-violet: #5B21B6;
 
-  /* 1. 파스텔 그린 (이미지의 Bottom Middle) -> 하우스키핑 */
-  --color-dept-hk-border: #91EFAD;
-  --color-dept-hk-bg: #C8F7D6;
-  --color-dept-hk-text: #166534;
+  /* 부서별 색상 팔레트 */
+  /* 1. HK - 프론트 색상 적용 */
+  --color-dept-hk-border: #A9C9F9;
+  --color-dept-hk-bg: #D4E4FC;
+  --color-dept-hk-text: #1E40AF;
 
   /* 2. 파스텔 오렌지/옐로우 (이미지의 Top Right) -> 시설관리 */
   --color-dept-facility-border: #FAD1A1;
@@ -58,15 +60,15 @@
   --color-dept-concierge-bg: #E1D5FA;
   --color-dept-concierge-text: #5B21B6;
 
-  /* 5. 파스텔 블루 (이미지의 Top Left) -> 프런트 */
-  --color-dept-front-border: #A9C9F9;
-  --color-dept-front-bg: #D4E4FC;
-  --color-dept-front-text: #1E40AF;
+  /* 5. FRONT - 살구색(Peach/Apricot) 적용 */
+  --color-dept-front-border: #FFBCA6;
+  --color-dept-front-bg: #FFE0D4;
+  --color-dept-front-text: #B44A28;
 
-  /* 긴급 상황 (기존 유지) */
-  --color-dept-emergency-border: #ff7272;
+  /* 긴급 상황 — 단일 색상(--color-error) 통일 */
+  --color-dept-emergency-border: var(--color-error);
   --color-dept-emergency-bg: #FEF2F2;
-  --color-dept-emergency-text: #991B1B;
+  --color-dept-emergency-text: var(--color-error);
 
   /* Typography Tokens (font: weight size/line-height font-family) */
   --font-sans: 'Pretendard', 'Inter', -apple-system, sans-serif;

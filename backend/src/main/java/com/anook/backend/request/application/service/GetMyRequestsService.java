@@ -24,6 +24,8 @@ public class GetMyRequestsService implements GetMyRequestsUseCase {
                         request.getStatus().name(),
                         request.getDomainCode() != null ? request.getDomainCode().name() : "UNKNOWN",
                         request.getSummary(),
+                        request.getEntities(),
+                        request.getPriority() != null ? request.getPriority().name() : "NORMAL",
                         request.getCreatedAt(),
                         request.getUpdatedAt()
                 ))

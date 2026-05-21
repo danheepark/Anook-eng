@@ -41,8 +41,7 @@
 }
 
 .menuItem:hover {
-  background: var(--color-surface);
-  /* var(--color-surface) */
+  background: var(--color-gray-100);
 }
 
 .menuItemText {

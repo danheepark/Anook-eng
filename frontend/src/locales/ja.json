@@ -1,0 +1,499 @@
+{
+  "guest": "ゲスト",
+  "staff": "スタッフ",
+  "frontdesk": "フロントデスク",
+  "status": {
+    "pending": "保留中",
+    "assigned": "割り当て済み",
+    "inProgress": "進行中",
+    "completed": "完了",
+    "escalated": "エスカレーション済み",
+    "transferred": "転送済み"
+  },
+  "priority": {
+    "low": "低",
+    "normal": "通常",
+    "high": "高",
+    "urgent": "緊急"
+  },
+  "common": {
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "close": "閉じる",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "retry": "再試行",
+    "logout": "ログアウト"
+  },
+  "frontdeskPage": {
+    "sidebar": {
+      "categories": {
+        "requestManagement": "リクエスト管理",
+        "aiSystem": "AIシステム",
+        "operations": "運用"
+      },
+      "menus": {
+        "dashboard": "運営統計",
+        "frontDesk": "ライブチャット",
+        "housekeeping": "ハウスキーピング",
+        "fb": "料飲",
+        "facility": "施設",
+        "concierge": "コンシェルジュ",
+        "emergency": "緊急",
+        "allRequests": "全てのリクエスト",
+        "chatHistory": "チャット履歴",
+        "voc": "お客様の声",
+        "aiTraining": "新規知識の追加",
+        "rag": "AIナレッジ管理",
+        "aiRouting": "AIルーティングログ",
+        "handover": "引き継ぎ文書",
+        "staffManagement": "スタッフ管理"
+      }
+    },
+    "dashboard": {
+      "title": "運営統計",
+      "searchPlaceholder": "検索キーワードを入力...",
+      "filters": {
+        "today": "今日",
+        "last7Days": "過去7日間",
+        "last30Days": "過去30日間"
+      },
+      "charts": {
+        "avgResTime": "平均解決時間",
+        "frequentReqs": "最も頻繁なリクエスト"
+      },
+      "summaries": {
+        "totalToday": "本日の総リクエスト数",
+        "avgResponseTime": "平均応答時間",
+        "resolutionRate": "解決率",
+        "csat": "顧客満足度"
+      },
+      "departments": {
+        "HK": "ハウスキーピング",
+        "FB": "料飲",
+        "FACILITY": "施設",
+        "CONCIERGE": "コンシェルジュ",
+        "FRONT": "緊急"
+      }
+    },
+    "taskBoard": {
+      "searchPlaceholder": "検索キーワードを入力...",
+      "filterAll": "全て",
+      "filterLatest": "最新",
+      "filterOldest": "最古",
+      "columns": {
+        "pending": "保留中",
+        "inProgress": "進行中",
+        "completed": "完了"
+      },
+      "titles": {
+        "housekeeping": "ハウスキーピング",
+        "fb": "料飲",
+        "facility": "施設管理",
+        "concierge": "コンシェルジュ",
+        "emergency": "緊急対応",
+        "allRequests": "全てのリクエスト",
+        "aiTraining": "新規知識の追加",
+        "rag": "AIナレッジ管理",
+        "aiRouting": "AIルーティングログ",
+        "handover": "引き継ぎ文書"
+      }
+    },
+    "voc": {
+      "title": "お客様の声 (VOC)",
+      "subtitle": "お客様からのご意見（お褒めの言葉や苦情など）を収集・管理するページです。",
+      "filterAll": "全て表示",
+      "filterPositive": "👍 お褒めの言葉",
+      "filterNegative": "👎 苦情・ご意見",
+      "filterRating": "⭐ 評価",
+      "empty": "フィードバックは見つかりませんでした。",
+      "columns": {
+        "date": "受信日",
+        "room": "部屋番号",
+        "sentiment": "カテゴリ",
+        "content": "お客様からのフィードバック内容",
+        "reply": "AI自動返信"
+      },
+      "sentiments": {
+        "positive": "お褒めの言葉",
+        "negative": "苦情・ご意見"
+      }
+    },
+    "rag": {
+      "title": "ナレッジベース",
+      "addKnowledge": "+ 知識を追加",
+      "searchPlaceholder": "検索キーワードを入力...",
+      "filterAll": "全て",
+      "filterLatest": "最新",
+      "empty": "登録された知識はありません。",
+      "deleteTitle": "削除の確認",
+      "deleteConfirm": "この知識を削除してもよろしいですか？",
+      "deleteButton": "削除",
+      "tabs": {
+        "ALL": "全て",
+        "HK": "ハウスキーピング",
+        "FB": "料飲",
+        "FACILITY": "施設",
+        "CONCIERGE": "コンシェルジュ",
+        "FRONT": "フロントデスク",
+        "EMERGENCY": "緊急",
+        "COMMON": "共通"
+      }
+    },
+    "aiTraining": {
+      "filterAll": "全て",
+      "filterMissing": "不足",
+      "filterUnclear": "意図不明",
+      "empty": "レビュー待ちの項目はありません。",
+      "rejectTitle": "除外の確認",
+      "rejectSubtitle": "この項目をレビューリストから除外してもよろしいですか？",
+      "rejectConfirm": "除外"
+    },
+    "frontDesk": {
+      "title": "ライブチャット",
+      "createRequest": "+ リクエスト作成",
+      "tabs": {
+        "unhandled": "保留中",
+        "inProgress": "進行中",
+        "escalation": "転送リクエスト"
+      },
+      "sections": {
+        "unhandled": "未処理 / 例外リクエスト",
+        "inProgress": "進行中のリクエスト",
+        "escalation": "転送リクエスト"
+      },
+      "empty": "リクエストは見つかりませんでした。",
+      "actions": {
+        "approve": "承認",
+        "reject": "却下",
+        "startChat": "チャットを開始",
+        "manualAssign": "割り当て"
+      },
+      "status": {
+        "pending": "保留中",
+        "assigned": "割り当て済み",
+        "inProgress": "進行中",
+        "completed": "完了",
+        "escalated": "転送リクエスト"
+      }
+    },
+    "chatHistory": {
+      "title": "チャット履歴",
+      "emptyMessage": "メッセージはありません",
+      "systemCompleted": "以前の相談および処理がすべて完了しました。",
+      "systemMessageNote": "(※ ゲストには表示されないフロント業務用のシステムメッセージです)",
+      "roomConversation": "{{room}}号室の会話",
+      "roomChatRecord": "{{room}}号室のチャット記録",
+      "selectRoomPrompt": "会話を表示する部屋を選択してください",
+      "deleteTitle": "チャット履歴の削除",
+      "deleteSubtitle": "{{room}}号室のチャット履歴を削除してもよろしいですか？この操作は元に戻せません。",
+      "deleteButton": "削除",
+      "searchPlaceholder": "検索キーワードを入力...",
+      "filterAll": "全て",
+      "filterLatest": "最新",
+      "activeChat": "アクティブなチャット",
+      "archived": "アーカイブ済み",
+      "selectRoom": "部屋を選択",
+      "roomLog": "チャットログ",
+      "fullLog": "完全なチャットログ",
+      "delete": "削除",
+      "loadingMessages": "メッセージを読み込み中...",
+      "noHistory": "チャット履歴はありません。",
+      "sendPlaceholder": "ゲストへのメッセージを入力（自動翻訳されます）...",
+      "sending": "送信中...",
+      "send": "送信",
+      "sendFail": "メッセージの送信に失敗しました。"
+    },
+    "requestDetailModal": {
+      "title": "リクエスト詳細",
+      "basicInfo": "基本情報",
+      "roomNo": "部屋番号",
+      "currentDept": "現在の部署",
+      "createdAt": "作成日時",
+      "updatedAt": "最終更新日時",
+      "requestContent": "リクエスト内容",
+      "summary": "概要",
+      "originalText": "原文",
+      "orderDetail": "注文/リクエスト詳細",
+      "transferReason": "転送理由",
+      "photo": "添付写真",
+      "aiAnalysis": "AI分析結果",
+      "confidence": "信頼度",
+      "reasoning": "推論",
+      "assignment": "割り当て管理",
+      "priority": "優先度",
+      "setUrgent": "緊急タスクとして設定",
+      "assignDept": "割り当て部署",
+      "selectDept": "部署を選択",
+      "buttons": {
+        "forceCancel": "リクエストを強制キャンセル",
+        "approveEscalation": "エスカレーションを承認",
+        "rejectEscalation": "エスカレーションを却下",
+        "save": "変更を保存",
+        "saving": "保存中...",
+        "close": "閉じる",
+        "approveCancel": "キャンセルを承認",
+        "rejectCancel": "キャンセルを却下"
+      },
+      "status": {
+        "cancelRequested": "ゲストによるキャンセルリクエスト"
+      },
+      "entityLabels": {
+        "is_contactless": "非接触配達",
+        "target_time": "希望時間",
+        "equipment": "備品",
+        "symptom": "症状",
+        "location": "場所",
+        "destination": "目的地",
+        "passenger_count": "乗客数",
+        "restaurant_name": "レストラン",
+        "cuisine_type": "料理の種類",
+        "category": "カテゴリ",
+        "action": "アクションタイプ",
+        "item": "品目",
+        "time": "時間",
+        "special_requests": "特別なリクエスト",
+        "count": "数量",
+        "type": "種類",
+        "target": "対象",
+        "issue": "問題/症状",
+        "priority": "推定優先度",
+        "topic": "トピック",
+        "question": "質問",
+        "language": "言語",
+        "items": "品目リクエスト",
+        "tasks": "タスクリクエスト",
+        "menu_items": "注文メニュー",
+        "countSuffix": "点",
+        "option": "オプション",
+        "none": "なし"
+      }
+    }
+  },
+  "guestChat": {
+    "welcomeMessage": "こんにちは！ホテルAIアシスタントです。\n快適なご滞在をサポートいたします。\n何かご要望がございましたら、お気軽にお申し付けください！",
+    "quickReplyPrompt": "何かお手伝いできることはありますか？以下のオプションを選択するか、ご要望を入力してください！",
+    "quickReplyOptions": [
+      "タオルを2枚追加でお願いします",
+      "朝食は何時ですか？",
+      "部屋を掃除してください",
+      "チェックアウトを延長できますか？"
+    ],
+    "activeRequestsCount": "{count}件の進行中のリクエスト",
+    "progress": {
+      "checking": "リクエストを確認中...",
+      "forwardingPrefix": "",
+      "forwardingSuffix": "チームに転送中...",
+      "domains": {
+        "HK": "ハウスキーピング",
+        "FB": "料飲",
+        "FACILITY": "施設",
+        "CONCIERGE": "コンシェルジュ",
+        "FRONT": "フロントデスク",
+        "EMERGENCY": "緊急"
+      }
+    }
+  },
+  "intents": {
+    "TOWEL": "タオルリクエスト",
+    "WATER": "水のリクエスト",
+    "ROOM_CLEAN": "部屋の清掃",
+    "CLEAN_ROOM": "部屋の清掃",
+    "CLEANING": "清掃リクエスト",
+    "MULTIPLE_HK": "ハウスキーピングリクエスト",
+    "AMENITY_DELIVERY": "アメニティリクエスト",
+    "LATE_CHECKOUT": "レイトチェックアウト",
+    "AMENITY": "アメニティリクエスト",
+    "BEDDING": "寝具リクエスト",
+    "ROOM_SERVICE": "ルームサービス料理注文",
+    "DINING": "ルームサービス料理注文",
+    "MENU_INQUIRY": "メニュー問い合わせ",
+    "ALLERGY_CHECK": "アレルギー確認",
+    "ORDER_MODIFY": "注文変更",
+    "ORDER_CANCEL": "注文キャンセル",
+    "OPERATING_HOURS": "営業時間",
+    "RECOMMENDATION": "おすすめ",
+    "SPENDING_INQUIRY": "利用料金問い合わせ",
+    "AC_REPAIR": "エアコン修理",
+    "HEATER_REPAIR": "ヒーター修理",
+    "PLUMBING": "配管リクエスト",
+    "WATER_LEAK": "水漏れ",
+    "DRAIN_CLOG": "排水溝の詰まり",
+    "ELECTRICAL": "電気系統の問題",
+    "LIGHTING": "照明修理",
+    "TV_ISSUE": "テレビの問題",
+    "WIFI_ISSUE": "WiFiの問題",
+    "APPLIANCE": "家電の問題",
+    "DOOR_LOCK": "ドアロックの問題",
+    "WINDOW": "窓/騒音の問題",
+    "FURNITURE": "家具修理",
+    "FIRE_ALARM": "火災報知器の問題",
+    "ODOR": "異臭",
+    "NOISE": "騒音苦情",
+    "OTHER": "その他のリクエスト",
+    "TAXI": "タクシー配車予約",
+    "TOUR_INFO": "観光情報",
+    "LUGGAGE_STORAGE": "手荷物一時預かり/引き取り",
+    "RESTAURANT": "レストラン予約",
+    "RESERVATION": "予約",
+    "DELIVERY": "配達リクエスト",
+    "WAKE_UP_CALL": "モーニングコール予約",
+    "MEDICAL_INFO": "医療情報",
+    "POSTAL_SERVICE": "郵便物発送代行",
+    "COMPLAINT": "苦情",
+    "INQUIRY": "一般的な問い合わせ",
+    "AMBIGUOUS": "曖昧なリクエスト",
+    "ESCALATION": "スタッフ支援",
+    "LOST_FOUND": "忘れ物・落とし物",
+    "MEDICAL_EMERGENCY": "医療緊急事態",
+    "FIRE_EMERGENCY": "火災緊急事態",
+    "VIOLENCE_EMERGENCY": "騒乱/暴力",
+    "FIRE": "火災緊急事態",
+    "MEDICAL_ASSIST": "医療緊急事態",
+    "SECURITY": "セキュリティ / 暴力",
+    "URGENT_CLEANUP": "緊急清掃"
+  },
+  "cardUI": {
+    "status": {
+      "pending": "保留中",
+      "received": "受付済み",
+      "inProgress": "進行中",
+      "completed": "完了",
+      "completedMark": "完了",
+      "cancelled": "キャンセル済み",
+      "cancelPending": "キャンセル保留中",
+      "escalated": "スタッフ対応待ち"
+    },
+    "statusBar": {
+      "checking": "確認中",
+      "processing": "対応中",
+      "completed": "処理完了",
+      "templateWithDetailsPending": "{team} チームが {details} を確認しています。",
+      "templateWithDetailsInProgress": "{team} チームが {details} を対応中です。",
+      "templateWithDetailsCompleted": "{team} チームが {details} を完了しました。",
+      "templateNoDetailsPending": "{team} チームが確認しています。",
+      "templateNoDetailsInProgress": "{team} チームが対応中です。",
+      "templateNoDetailsCompleted": "{team} チームが完了しました。",
+      "emergencyPending": "フロントデスクで緊急リクエストを確認しています。",
+      "emergencyInProgress": "フロントデスクで緊急リクエストを処理しています。",
+      "emergencyCompleted": "緊急リクエストが解決されました。"
+    },
+    "message": {
+      "cancelPending": "🔄 キャンセルリクエストを受付、スタッフが確認中です",
+      "escalated": "スタッフが間もなく対応いたします",
+      "forwarded": "{team} チームに転送されました",
+      "cancelledCard": "リクエストはキャンセルされました",
+      "autoAcceptGuide": "リクエスト内容を確認してください。まもなく自動的に転送されます。",
+      "confirmGuide": "確認後、進行ボタンを押してください。",
+      "cancelPendingShort": "キャンセル要請確認中",
+      "translating": "翻訳中...",
+      "escalationRequest": "フロントデスクスタッフ接続リクエスト",
+      "cancelRequest": "リクエストをキャンセル",
+      "proceed": "進行",
+      "urgentPrefix": "[緊急] ",
+      "cancelSuffix": " キャンセル済み",
+      "reserveSuffix": " 予約"
+    },
+    "button": {
+      "accept": "今すぐ送信",
+      "cancel": "キャンセル"
+    },
+    "time": {
+      "received": "受信",
+      "seconds": "秒"
+    },
+    "title": "リクエストステータス",
+    "items": "点",
+    "and": "と",
+    "others": "その他"
+  },
+  "ticketUI": {
+    "department": {
+      "HK": "ハウスキーピング",
+      "FACILITY": "施設",
+      "FB": "料飲",
+      "CONCIERGE": "コンシェルジュ",
+      "FRONT": "フロントデスク",
+      "EMERGENCY": "緊急 🚨"
+    },
+    "badge": {
+      "cancelled": "キャンセル済み",
+      "cancelPending": "キャンセル保留中",
+      "urgent": "緊急",
+      "contactless": "非接触",
+      "targetTime": "希望時間"
+    },
+    "button": {
+      "accept": "承認",
+      "complete": "完了"
+    },
+    "time": {
+      "justStarted": "開始したばかり",
+      "elapsed": "経過",
+      "hoursAgo": "時間前",
+      "minsAgo": "分前",
+      "justNow": "たった今"
+    },
+    "entityLabels": {
+      "time": "時間",
+      "dest": "目的地",
+      "pax": "人数",
+      "paxUnit": "名",
+      "count": "数量",
+      "countUnit": "個",
+      "rest": "レストラン",
+      "target": "対象",
+      "req": "リクエスト",
+      "store": "保管",
+      "pickup": "受け取り",
+      "item": "品物",
+      "vendor": "業者",
+      "type": "分類",
+      "symptom": "症状",
+      "area": "地域",
+      "content": "内容"
+    }
+  },
+  "menu": {
+    "아메리카노": "アメリカーノ",
+    "한우 불고기 덮밥": "韓牛プルコギ丼",
+    "제로콜라": "ゼロコーラ",
+    "콜라": "コーラ",
+    "클래식 치즈버거": "クラシックチーズバーガー"
+  },
+  "chatInput": {
+    "placeholder": "ご用件をお伺いします...",
+    "listening": "聞いています...",
+    "camera": "写真を撮る",
+    "gallery": "アルバム",
+    "imageTooLarge": "画像が最大サイズを超えています。より小さな画像を選択してください。",
+    "speechUnsupported": "お使いのブラウザは音声認識をサポートしていません。"
+  },
+  "aiReplies": {
+    "forwardFb": "かしこまりました！F&B（ルームサービス）チームにご注文内容を迅速にお伝えいたします。🍽️",
+    "forwardHk": "かしこまりました！ハウスキーピングチームにご要望内容を迅速にお伝えいたします。🧹",
+    "forwardFacility": "ご不便をおかけして大変申し訳ございません。🥲 施設管理チームにお伝えし、できる限り迅速に対応させていただきます！🛠️",
+    "forwardConcierge": "かしこまりました！コンシェルジュチームにご要望をお伝えいたします。🛎️",
+    "forwardFront": "ただいまフロントデスクに直接お繋ぎし、サポートさせていただきます。",
+    "infoNotFound": "申し訳ありません、そちらについてはお答えいたしかねます。🥲 フロントデスクのスタッフに質問を転送いたしましたので、確認後すぐにこちらでご返答させていただきます。🙏",
+    "cancelSuccess": "リクエストは正常にキャンセルされました。😌 他にご要望がございましたら、いつでもお申し付けください。",
+    "cancelPending": "すでに処理が進行中のため、担当部署にキャンセルをリクエストしました。🏃‍♂️ 確認次第お知らせいたします！",
+    "piiGuard": "お客様の大切な個人情報を保護するため、チャットでの機密情報の入力はお断りしております。🔒 詳細な確認が必要な場合は、客室内の電話からフロントデスク（内線0番）までご連絡いただければ、安全に対応させていただきます。😊"
+  },
+  "feedbackCard": {
+    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
+    "requestCompleted": "요청 완료",
+    "consultationCompleted": "상담이 완료되었습니다",
+    "satisfactionQuestion": "서비스가 만족스러우셨나요?",
+    "thankYou": "감사합니다!",
+    "ratings": {
+      "1": "별로예요",
+      "2": "그저 그래요",
+      "3": "보통이에요",
+      "4": "좋았어요",
+      "5": "최고예요!"
+    }
+  }
+}

@@ -1,0 +1,93 @@
+# ============================================================
+# Anook CI/CD Pipeline (AWS Self-hosted Runner)
+# ============================================================
+# 트리거: main 브랜치 push (dev 브랜치 머지 시 동작)
+# 흐름: checkout → .env 생성 → rsync 동기화 → docker compose build → health check
+# ============================================================
+
+name: Anook AWS Deploy
+
+on:
+  push:
+    branches: [ dev ] # 아늑 프로젝트는 dev 브랜치 머지 기준
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, aws] # AWS EC2에 설치된 Github Runner를 사용!
+
+    # ⭐ 프로젝트에 필요한 환경변수들
+    env:
+      POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      DB_PORT: ${{ vars.DB_PORT }}
+      FRONTEND_PORT: ${{ vars.FRONTEND_PORT }}
+      SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+      NEO4J_USER: ${{ vars.NEO4J_USER }}
+      NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+      KOREAEXIM_AUTH_KEY: ${{ secrets.KOREAEXIM_AUTH_KEY }}
+
+    steps:
+      # 1. 소스코드 체크아웃
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 2. 최신 소스를 서버의 실제 서비스 디렉토리로 동기화
+      - name: Sync to workspace
+        run: |
+          mkdir -p ~/workspace/team3-Anook
+          rsync -a --delete --exclude='.git' --exclude='__pycache__' ./ ~/workspace/team3-Anook/
+
+      # 3. .env 파일 생성 (docker-compose가 환경변수를 읽을 수 있게 함)
+      - name: Generate .env file
+        run: |
+          cd ~/workspace/team3-Anook
+          cat > .env << 'ENVEOF'
+          POSTGRES_USER=${{ vars.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ vars.POSTGRES_DB }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          DB_PORT=${{ vars.DB_PORT }}
+          FRONTEND_PORT=${{ vars.FRONTEND_PORT }}
+          NEO4J_USER=${{ vars.NEO4J_USER }}
+          NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}
+          KOREAEXIM_AUTH_KEY=${{ secrets.KOREAEXIM_AUTH_KEY }}
+          SPRING_PROFILE=prod
+          ENVEOF
+          sed -i 's/^[[:space:]]*//' .env
+
+      # 4. Docker Compose 로 빌드 & 배포
+      - name: Build and Deploy
+        run: |
+          cd ~/workspace/team3-Anook
+          docker compose down
+          docker compose up -d --build
+
+      # 5. Health Check (배포 정상 확인 - AWS 포트 80은 Nginx로 열려 있으므로 80포트로 확인)
+      - name: Health Check
+        run: |
+          cd ~/workspace/team3-Anook
+          echo "⏳ Waiting for services to start..."
+          sleep 30
+
+          echo "🔍 Checking Nginx Gateway (Port 80)..."
+          curl -f http://localhost:80 || exit 1
+          echo "✅ Gateway OK"
+
+          echo "🔍 Checking Backend (via docker network)..."
+          docker compose exec -T backend curl -sf http://localhost:8080/actuator/health || echo "⚠️ Backend health endpoint not yet configured (skipping)"
+          echo "✅ Health Check Done"
+
+      # 6. RAG 지식 자동 시딩 (Vector 임베딩 DB 저장)
+      - name: Seed RAG Knowledge
+        run: |
+          cd ~/workspace/team3-Anook
+          echo "⏳ Seeding RAG Knowledge Data to pgvector..."
+          docker compose exec -T ai python seed_all.py || echo "⚠️ Seeding failed but continuing"
+
+      # 7. 불필요한 쓰레기 이미지 정리
+      - name: Cleanup
+        run: docker image prune -f

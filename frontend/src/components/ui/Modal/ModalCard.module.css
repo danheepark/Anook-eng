@@ -5,10 +5,12 @@
   padding: var(--space-24);
   gap: var(--space-24);
   background: var(--color-bg);
-  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-xl);
   box-sizing: border-box;
   max-height: calc(100vh - 64px);
   overflow-y: auto;
+  position: relative;
 }
 
 .overflowVisible {
@@ -28,4 +30,125 @@
 .sizeLg {
   width: 800px;
   max-width: calc(100vw - 32px);
+}
+
+/* ──────────────────────────────────────────────────────────
+   Universal Modal Close Button (X Button) Normalization
+   ────────────────────────────────────────────────────────── */
+.modalCard button[class*="closeIcon"],
+.modalCard button[class*="closeBtn"] {
+  position: absolute !important;
+  top: 24px !important;
+  right: 24px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 0 !important;
+  width: 20px !important;
+  height: 20px !important;
+  z-index: 10 !important;
+}
+
+/* Remove hover background gray box */
+.modalCard button[class*="closeIcon"]:hover,
+.modalCard button[class*="closeBtn"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Enforce exact same X icon size and default soft gray color */
+.modalCard button[class*="closeIcon"] svg,
+.modalCard button[class*="closeBtn"] svg {
+  width: 20px !important;
+  height: 20px !important;
+  color: var(--color-gray-400) !important;
+  transition: color 0.15s ease !important;
+}
+
+/* Hover: slightly darken the X icon color */
+.modalCard button[class*="closeIcon"]:hover svg,
+.modalCard button[class*="closeBtn"]:hover svg {
+  color: var(--color-gray-700) !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Direct Modal closeButton component style
+   ────────────────────────────────────────────────────────── */
+.closeButton {
+  position: absolute;
+  top: var(--space-24);
+  right: var(--space-24);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  z-index: 10;
+  color: var(--color-gray-400);
+  transition: color 0.15s ease;
+}
+
+.closeButton:hover {
+  color: var(--color-gray-700);
+}
+
+.closeButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Standardized Modal Header, Title and Subtitle Styling
+   ────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-8) !important; /* EXACTLY 8px gap between title and subtitle */
+  width: 100%;
+}
+
+.title {
+  font: var(--text-h2-bold) !important; /* EXACTLY var(--text-h2-bold) */
+  color: var(--color-gray-900) !important;
+  margin: 0 !important;
+  line-height: 1.5 !important;
+}
+
+.subtitle {
+  font: var(--text-body-medium) !important; /* EXACTLY var(--text-body-medium) */
+  color: var(--color-gray-500) !important;
+  margin: 0 !important;
+  line-height: 1.5 !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Standardized Modal Spacing & Footer Normalization (EXACTLY 32px Gap)
+   ────────────────────────────────────────────────────────── */
+/* Neutralize custom margins/paddings on direct children of modalCard to guarantee pixel-perfect spacing */
+.modalCard > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Enforce EXACTLY 32px visual gap (24px gap + 8px margin-top) for all modal footers & button groups */
+.modalCard div[class*="footer"],
+.modalCard div[class*="buttonGroup"],
+.modalCard div[class*="actionGroup"] {
+  margin-top: var(--space-8) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }

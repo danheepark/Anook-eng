@@ -1,7 +1,7 @@
 {
   "guest": "Guest",
   "staff": "Staff",
-  "admin": "Admin",
+  "frontdesk": "Frontdesk",
   "status": {
     "pending": "Pending",
     "assigned": "Assigned",
@@ -22,9 +22,11 @@
     "confirm": "Confirm",
     "close": "Close",
     "loading": "Loading...",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "retry": "Retry",
+    "logout": "Log out"
   },
-  "adminPage": {
+  "frontdeskPage": {
     "sidebar": {
       "categories": {
         "requestManagement": "Request Management",
@@ -32,8 +34,8 @@
         "operations": "Operations"
       },
       "menus": {
-        "dashboard": "Dashboard",
-        "frontDesk": "Front Desk",
+        "dashboard": "Operations Analytics",
+        "frontDesk": "Live Chat",
         "housekeeping": "Housekeeping",
         "fb": "F&B",
         "facility": "Facility",
@@ -41,15 +43,16 @@
         "emergency": "Emergency",
         "allRequests": "All Requests",
         "chatHistory": "Chat History",
-        "aiTraining": "AI Training",
-        "rag": "Knowledge Base",
+        "voc": "Customer Feedback",
+        "aiTraining": "Add New Knowledge",
+        "rag": "AI Knowledge Management",
         "aiRouting": "AI Routing Logs",
-        "handover": "Handover",
+        "handover": "Handover Document",
         "staffManagement": "Staff Management"
       }
     },
     "dashboard": {
-      "title": "Dashboard",
+      "title": "Operations Analytics",
       "searchPlaceholder": "Enter search term...",
       "filters": {
         "today": "Today",
@@ -91,10 +94,30 @@
         "concierge": "Concierge",
         "emergency": "Emergency Response",
         "allRequests": "All Requests",
-        "aiTraining": "AI Training",
-        "rag": "Knowledge Base",
+        "aiTraining": "Add New Knowledge",
+        "rag": "AI Knowledge Management",
         "aiRouting": "AI Routing Logs",
-        "handover": "Handover"
+        "handover": "Handover Document"
+      }
+    },
+    "voc": {
+      "title": "Customer Feedback (VOC)",
+      "subtitle": "Page to collect and manage customer feedback such as compliments and complaints.",
+      "filterAll": "View All",
+      "filterPositive": "👍 Compliment",
+      "filterNegative": "👎 Complaint/Feedback",
+      "filterRating": "⭐ Ratings",
+      "empty": "No feedback found.",
+      "columns": {
+        "date": "Received Date",
+        "room": "Room",
+        "sentiment": "Category",
+        "content": "Customer Feedback Content",
+        "reply": "AI Auto Reply"
+      },
+      "sentiments": {
+        "positive": "Compliment",
+        "negative": "Complaint/Feedback"
       }
     },
     "rag": {
@@ -104,7 +127,9 @@
       "filterAll": "All",
       "filterLatest": "Latest",
       "empty": "No knowledge registered.",
+      "deleteTitle": "Confirm Deletion",
       "deleteConfirm": "Are you sure you want to delete this knowledge?",
+      "deleteButton": "Delete",
       "tabs": {
         "ALL": "All",
         "HK": "Housekeeping",
@@ -119,10 +144,14 @@
     "aiTraining": {
       "filterAll": "All",
       "filterMissing": "Missing",
-      "filterUnclear": "Unclear Intent"
+      "filterUnclear": "Unclear Intent",
+      "empty": "No items pending for review.",
+      "rejectTitle": "Confirm Exclusion",
+      "rejectSubtitle": "Are you sure you want to exclude this item from the review list?",
+      "rejectConfirm": "Exclude"
     },
     "frontDesk": {
-      "title": "Front Desk",
+      "title": "Live Chat",
       "createRequest": "+ Create Request",
       "tabs": {
         "unhandled": "Pending",
@@ -151,6 +180,15 @@
     },
     "chatHistory": {
       "title": "Chat History",
+      "emptyMessage": "No messages",
+      "systemCompleted": "The previous consultation and processing have been completed.",
+      "systemMessageNote": "(※ This is a system-only message for front desk operations, not visible to guests)",
+      "roomConversation": "Room {{room}} Conversation",
+      "roomChatRecord": "Room {{room}} Chat Record",
+      "selectRoomPrompt": "Please select a room to view the conversation",
+      "deleteTitle": "Delete Chat History",
+      "deleteSubtitle": "Are you sure you want to delete the chat history for Room {{room}}? This action cannot be undone.",
+      "deleteButton": "Delete",
       "searchPlaceholder": "Enter search term...",
       "filterAll": "All",
       "filterLatest": "Latest",
@@ -166,29 +204,292 @@
       "sending": "Sending...",
       "send": "Send",
       "sendFail": "Failed to send message."
+    },
+    "requestDetailModal": {
+      "title": "Request Details",
+      "basicInfo": "Basic Info",
+      "roomNo": "Room No",
+      "currentDept": "Current Dept",
+      "createdAt": "Created At",
+      "updatedAt": "Last Updated",
+      "requestContent": "Request Content",
+      "summary": "Summary",
+      "originalText": "Original Text",
+      "orderDetail": "Order/Request Details",
+      "transferReason": "Transfer Reason",
+      "photo": "Attached Photo",
+      "aiAnalysis": "AI Analysis Result",
+      "confidence": "Confidence",
+      "reasoning": "Reasoning",
+      "assignment": "Assignment Management",
+      "priority": "Priority",
+      "setUrgent": "Set as Urgent Task",
+      "assignDept": "Assigned Dept",
+      "selectDept": "Select Department",
+      "buttons": {
+        "forceCancel": "Force Cancel Request",
+        "approveEscalation": "Approve Escalation",
+        "rejectEscalation": "Reject Escalation",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "close": "Close",
+        "approveCancel": "Approve Cancellation",
+        "rejectCancel": "Reject Cancellation"
+      },
+      "status": {
+        "cancelRequested": "Cancellation Requested by Guest"
+      },
+      "entityLabels": {
+        "is_contactless": "Contactless Delivery",
+        "target_time": "Target Time",
+        "equipment": "Equipment",
+        "symptom": "Symptom",
+        "location": "Location",
+        "destination": "Destination",
+        "passenger_count": "Passengers",
+        "restaurant_name": "Restaurant",
+        "cuisine_type": "Cuisine",
+        "category": "Category",
+        "action": "Action Type",
+        "item": "Item",
+        "time": "Time",
+        "special_requests": "Special Requests",
+        "count": "Quantity",
+        "type": "Type",
+        "target": "Target",
+        "issue": "Issue/Symptom",
+        "priority": "Est. Priority",
+        "topic": "Topic",
+        "question": "Question",
+        "language": "Language",
+        "items": "Item Requests",
+        "tasks": "Task Requests",
+        "menu_items": "Order Menu",
+        "countSuffix": " item(s)",
+        "option": "Option",
+        "none": "None"
+      }
     }
   },
   "guestChat": {
     "welcomeMessage": "Hello! I am the Hotel AI Assistant.\nI will help you have a comfortable stay.\nPlease let me know whatever you need!",
     "quickReplyPrompt": "How can I help you? Choose an option below or type your request!",
     "quickReplyOptions": [
-      "🛏️ Extra towels",
-      "🍳 Breakfast time",
-      "🧹 Room cleaning",
-      "🔑 Late checkout"
+      "Need 2 extra towels",
+      "When is breakfast?",
+      "Please clean my room",
+      "Can I extend checkout?"
     ],
+    "activeRequestsCount": "{count} active requests",
     "progress": {
       "checking": "Checking your request...",
       "forwardingPrefix": "Forwarding to the ",
       "forwardingSuffix": " team...",
       "domains": {
         "HK": "Housekeeping",
-        "FB": "Room Service",
+        "FB": "F&B",
         "FACILITY": "Facility",
         "CONCIERGE": "Concierge",
         "FRONT": "Front Desk",
         "EMERGENCY": "Emergency"
       }
+    }
+  },
+  "intents": {
+    "TOWEL": "Towel Request",
+    "WATER": "Water Request",
+    "ROOM_CLEAN": "Room Cleaning",
+    "CLEAN_ROOM": "Room Cleaning",
+    "CLEANING": "Cleaning Request",
+    "MULTIPLE_HK": "Housekeeping Request",
+    "AMENITY_DELIVERY": "Amenity Request",
+    "LATE_CHECKOUT": "Late Checkout",
+    "AMENITY": "Amenity Request",
+    "BEDDING": "Bedding Request",
+    "ROOM_SERVICE": "Room Service Food Order",
+    "DINING": "Room Service Food Order",
+    "MENU_INQUIRY": "Menu Inquiry",
+    "ALLERGY_CHECK": "Allergy Check",
+    "ORDER_MODIFY": "Order Modification",
+    "ORDER_CANCEL": "Order Cancellation",
+    "OPERATING_HOURS": "Operating Hours",
+    "RECOMMENDATION": "Recommendation",
+    "SPENDING_INQUIRY": "Spending Inquiry",
+    "AC_REPAIR": "AC Repair",
+    "HEATER_REPAIR": "Heater Repair",
+    "PLUMBING": "Plumbing Request",
+    "WATER_LEAK": "Water Leak",
+    "DRAIN_CLOG": "Drain Clogged",
+    "ELECTRICAL": "Electrical Issue",
+    "LIGHTING": "Lighting Repair",
+    "TV_ISSUE": "TV Issue",
+    "WIFI_ISSUE": "WiFi Issue",
+    "APPLIANCE": "Appliance Issue",
+    "DOOR_LOCK": "Door Lock Issue",
+    "WINDOW": "Window/Noise Issue",
+    "FURNITURE": "Furniture Repair",
+    "FIRE_ALARM": "Fire Alarm Issue",
+    "ODOR": "Bad Odor",
+    "NOISE": "Noise Complaint",
+    "OTHER": "Other Request",
+    "TAXI": "Taxi Request",
+    "TOUR_INFO": "Tour Information",
+    "LUGGAGE_STORAGE": "Luggage Storage",
+    "RESTAURANT": "Restaurant Reservation",
+    "RESERVATION": "Reservation",
+    "DELIVERY": "Delivery Request",
+    "WAKE_UP_CALL": "Wake-up Call",
+    "MEDICAL_INFO": "Medical Info",
+    "POSTAL_SERVICE": "Postal Service",
+    "COMPLAINT": "Complaint",
+    "INQUIRY": "General Inquiry",
+    "AMBIGUOUS": "Ambiguous Request",
+    "ESCALATION": "Staff Assistance",
+    "LOST_FOUND": "Lost & Found",
+    "MEDICAL_EMERGENCY": "Medical Emergency",
+    "FIRE_EMERGENCY": "Fire Emergency",
+    "VIOLENCE_EMERGENCY": "Disturbance/Violence"
+  },
+  "cardUI": {
+    "status": {
+      "pending": "Pending",
+      "received": "Received",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "completedMark": "Completed",
+      "cancelled": "Cancelled",
+      "cancelPending": "Cancel Pending",
+      "escalated": "Awaiting Staff"
+    },
+    "statusBar": {
+      "checking": "Checking",
+      "processing": "Processing",
+      "completed": "Completed",
+      "templateWithDetailsPending": "The {team} team is checking {details}.",
+      "templateWithDetailsInProgress": "The {team} team is processing {details}.",
+      "templateWithDetailsCompleted": "The {team} team has completed {details}.",
+      "templateNoDetailsPending": "The {team} team is checking your request.",
+      "templateNoDetailsInProgress": "The {team} team is processing your request.",
+      "templateNoDetailsCompleted": "The {team} team has completed your request.",
+      "emergencyPending": "The front desk is checking your emergency request.",
+      "emergencyInProgress": "The front desk is handling your emergency request.",
+      "emergencyCompleted": "Your emergency request has been resolved."
+    },
+    "message": {
+      "cancelPending": "🔄 Cancel request received, staff is checking",
+      "escalated": "Staff will respond shortly",
+      "forwarded": "Forwarded to the {team} team",
+      "cancelledCard": "Request Cancelled",
+      "autoAcceptGuide": "Please check your request. Auto-forwarding shortly.",
+      "confirmGuide": "Please press the proceed button to confirm.",
+      "cancelPendingShort": "Checking cancel request",
+      "translating": "Translating...",
+      "escalationRequest": "Front desk staff connection request",
+      "cancelRequest": "Cancel Request",
+      "proceed": "Proceed",
+      "urgentPrefix": "[Urgent] ",
+      "cancelSuffix": " Cancelled",
+      "reserveSuffix": " Reservation"
+    },
+    "button": {
+      "accept": "Submit Now",
+      "cancel": "Cancel"
+    },
+    "time": {
+      "received": "Received",
+      "seconds": "sec"
+    },
+    "title": "Request Status",
+    "items": " items",
+    "and": "and",
+    "others": "other item(s)"
+  },
+  "ticketUI": {
+    "department": {
+      "HK": "Housekeeping",
+      "FACILITY": "Facility",
+      "FB": "F&B",
+      "CONCIERGE": "Concierge",
+      "FRONT": "Front Desk",
+      "EMERGENCY": "Emergency"
+    },
+    "badge": {
+      "cancelled": "Cancelled",
+      "cancelPending": "Cancel Pending",
+      "urgent": "Urgent",
+      "contactless": "Contactless",
+      "targetTime": "Target Time"
+    },
+    "button": {
+      "accept": "Accept",
+      "complete": "Complete"
+    },
+    "time": {
+      "justStarted": "Just started",
+      "elapsed": " elapsed",
+      "hoursAgo": "hrs ago",
+      "minsAgo": "mins ago",
+      "justNow": "Just now"
+    },
+    "entityLabels": {
+      "time": "Time",
+      "dest": "Dest.",
+      "pax": "Pax",
+      "paxUnit": "",
+      "count": "Qty",
+      "countUnit": "",
+      "rest": "Restaurant",
+      "target": "Target",
+      "req": "Request",
+      "store": "Store",
+      "pickup": "Pickup",
+      "item": "Item",
+      "vendor": "Vendor",
+      "type": "Type",
+      "symptom": "Symptom",
+      "area": "Area",
+      "content": "Details"
+    }
+  },
+  "menu": {
+    "아메리카노": "Americano",
+    "한우 불고기 덮밥": "Hanwoo Bulgogi Bowl",
+    "제로콜라": "Zero Coke",
+    "콜라": "Coke",
+    "클래식 치즈버거": "Classic Cheeseburger"
+  },
+  "chatInput": {
+    "placeholder": "Ask me anything...",
+    "listening": "Listening...",
+    "camera": "Take Photo",
+    "gallery": "Gallery",
+    "imageTooLarge": "Image exceeds the maximum size limit. Please select a smaller image.",
+    "speechUnsupported": "Speech recognition is not supported in this browser."
+  },
+  "aiReplies": {
+    "forwardFb": "Sure! I will forward your order to the F&B team right away! 🍽️",
+    "forwardHk": "Got it! I will forward your request to the Housekeeping team right away. 🧹",
+    "forwardFacility": "We sincerely apologize for the inconvenience. 🥲 We will forward this to the Facility team to handle it as quickly as possible! 🛠️",
+    "forwardConcierge": "Got it! I will forward your request to the Concierge team right away. 🛎️",
+    "forwardFront": "We will connect you directly to the front desk right now to assist you further.",
+    "infoNotFound": "I'm not quite sure about that one! 🥲 I have forwarded your question to the front desk staff. They will check and reply to you here shortly. 🙏",
+    "cancelSuccess": "Your request has been successfully cancelled. 😌 Please let me know if you need anything else!",
+    "cancelPending": "Your request is already being processed, so we have sent a cancellation request to the department. 🏃‍♂️ We will notify you once confirmed!",
+    "piiGuard": "To protect your valuable personal information, we do not accept sensitive details via chat. 🔒 For detailed inquiries, please contact the front desk (extension 0) using your in-room phone for safe assistance. 😊"
+  },
+  "feedbackCard": {
+    "systemCompletedTitle": "Previous consultation and processing have been fully completed.",
+    "systemCompletedSubtitle": "(※ This is an internal front desk message not visible to guests)",
+    "requestCompleted": "Request Completed",
+    "consultationCompleted": "Consultation completed",
+    "satisfactionQuestion": "Were you satisfied with our service?",
+    "thankYou": "Thank you!",
+    "ratings": {
+      "1": "Terrible",
+      "2": "Poor",
+      "3": "Average",
+      "4": "Good",
+      "5": "Excellent!"
     }
   }
 }

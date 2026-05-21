@@ -1,17 +1,7 @@
 .container {
-  border: 1px solid var(--color-gray-300);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-white);
-  padding: var(--space-24) var(--space-32);
   display: flex;
   flex-direction: column;
-}
-
-.title {
-  font: var(--text-h2-bold);
-  color: var(--color-gray-900);
-  margin: 0;
-  padding-bottom: var(--space-8);
+  width: 100%;
 }
 
 .tableWrapper {
@@ -43,4 +33,42 @@
 .infoTd {
   width: 35%;
   color: var(--color-gray-700);
+  background-color: var(--color-white);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0;
+  }
+
+  .infoTable {
+    margin-bottom: var(--space-32);
+    margin-top: var(--space-16);
+  }
+
+  .infoTable tbody {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    border-top: 1px solid var(--color-gray-300);
+    border-left: 1px solid var(--color-gray-300);
+  }
+
+  .infoTable tr {
+    display: contents;
+  }
+
+  .infoTh,
+  .infoTd {
+    width: auto !important;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 1px solid var(--color-gray-300);
+    border-right: 1px solid var(--color-gray-300);
+    padding: var(--space-12) var(--space-16);
+  }
+
+  .infoTh {
+    text-align: left;
+    background-color: var(--color-gray-50);
+  }
 }

@@ -1,0 +1,6 @@
+.logo {
+  font: var(--text-h1-bold);
+  font-family: 'Inter', sans-serif;
+  color: var(--color-gray-700);
+  display: inline-block;
+}

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useWebSocket } from '@/app/useWebSocket';
+import { useSSE } from '@/app/useSSE';
 import EmergencyBanner from '@/components/ui/EmergencyBanner/EmergencyBanner';
 
 export default function GlobalEmergencyListener() {
-  const { subscribe } = useWebSocket();
+  const { subscribe } = useSSE();
   const [emergencyAlert, setEmergencyAlert] = useState<{
     requestId: number;
     roomNo: string;
@@ -41,10 +41,10 @@ export default function GlobalEmergencyListener() {
       }
     };
 
-    const unsubscribeAdmin = subscribe('/topic/admin', handleEvent);
+    const unsubscribeFrontdesk = subscribe('/topic/frontdesk', handleEvent);
     
     return () => {
-      unsubscribeAdmin();
+      unsubscribeFrontdesk();
     };
   }, [subscribe]);
 
@@ -64,7 +64,7 @@ export default function GlobalEmergencyListener() {
         alert={emergencyAlert}
         onDismiss={() => setEmergencyAlert(null)}
         onClick={() => {
-          window.location.href = '/admin/front-desk';
+          window.location.href = '/frontdesk/requests';
         }}
       />
     </div>

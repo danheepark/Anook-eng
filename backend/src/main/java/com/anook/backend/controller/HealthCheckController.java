@@ -34,8 +34,8 @@ public class HealthCheckController {
         return "✅ 이곳은 누구나 들어올 수 있는 로비입니다! (인증/토큰 불필요)";
     }
 
-    @GetMapping("/api/admin/test")
-    public String adminTest() {
+    @GetMapping("/api/frontdesk/test")
+    public String frontdeskTest() {
         return "🚨 이곳은 관리자 전용 비밀의 방입니다! (ADMIN 권한 토큰이 있어야만 이 글씨가 보입니다)";
     }
 }

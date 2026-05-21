@@ -16,6 +16,10 @@
   border-color: var(--color-gray-300);
 }
 
+.clickable {
+  cursor: pointer;
+}
+
 .md {
   padding: var(--space-16);
   min-width: 140px;
@@ -37,7 +41,7 @@
 .md .value {
   font: var(--text-h1-bold);
   color: var(--color-gray-900);
-  line-height: 1;
+  line-height: 1.35;
 }
 
 .sm {
@@ -59,12 +63,14 @@
 .sm .value {
   font: var(--text-h3-regular);
   color: var(--color-gray-900);
-  line-height: 1;
+  line-height: 1.35;
 }
 
 .change {
   font: var(--text-body-bold);
   margin-bottom: 2px;
+  white-space: pre-wrap;
+  text-align: right;
 }
 
 .change.positive {

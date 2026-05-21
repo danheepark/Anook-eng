@@ -78,7 +78,7 @@
 }
 
 .pillTabActive {
-  background-color: var(--color-gray-500);
+  background-color: var(--color-gray-600);
   color: var(--color-white);
 }
 

@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useCallback, useState } from 'react';
-import { useWebSocket } from '@/app/useWebSocket';
+import { useSSE } from '@/app/useSSE';
 import { handleResponse } from '@/lib/api';
 
 export interface StaffTask {
   id: number;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'ESCALATED';
   priority: 'NORMAL' | 'URGENT';
   departmentId: string;
   summary: string;
@@ -28,6 +28,7 @@ export interface StaffTask {
     target_time?: string;
     [key: string]: any;
   };
+  reasoning?: string | null;
 }
 
 export interface EmergencyAlert {
@@ -54,7 +55,7 @@ export function useTasks(view?: 'my' | 'dept'): UseTasksReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { subscribe } = useWebSocket();
+  const { subscribe } = useSSE();
 
   const fetchTasks = useCallback(async (silent = false) => {
     if (!silent) {
@@ -191,14 +192,14 @@ export function useTasks(view?: 'my' | 'dept'): UseTasksReturn {
       }
     };
 
-    const unsubscribeAdmin = subscribe('/topic/admin', handleEvent);
+    const unsubscribeFrontdesk = subscribe('/topic/frontdesk', handleEvent);
     const deptChannel = `/topic/dept/${currentDeptId}`;
     const unsubscribeDept = subscribe(deptChannel, handleEvent);
 
     console.info(`[useTasks] WebSocket Subscribed: ${deptChannel}`);
 
     return () => {
-      unsubscribeAdmin();
+      unsubscribeFrontdesk();
       unsubscribeDept();
     };
   }, [subscribe, fetchTasks, currentDeptId]);

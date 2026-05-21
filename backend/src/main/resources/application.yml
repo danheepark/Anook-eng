@@ -37,3 +37,27 @@ ai:
     enabled: true  # AI 서버 완성 후 true로 변경 → PythonAiHttpAdapter 활성화
     url: ${AI_SERVER_URL:http://localhost:8000}
 
+# 객실 일일 제한 물품 정책 설정 (단일 호텔 전용)
+inventory:
+  policies:
+    - code: WATER
+      aliases:
+        - "생수"
+        - "물"
+        - "워터"
+        - "water"
+      allowance: 2
+      extra-charge: 2000
+    - code: TOWEL
+      aliases:
+        - "수건"
+        - "타월"
+        - "towel"
+      allowance: 4
+      extra-charge: 1000
+
+# 한국수출입은행 환율 API (PMS 빌링 KRW → USD 변환)
+koreaexim:
+  base-url: https://oapi.koreaexim.go.kr
+  auth-key: ${KOREAEXIM_AUTH_KEY:}
+

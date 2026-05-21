@@ -2,6 +2,8 @@ package com.anook.backend.knowledge.application.service;
 
 import com.anook.backend.knowledge.application.dto.request.RegisterKnowledgeFromAnswerCommand;
 import com.anook.backend.knowledge.application.dto.response.CreateKnowledgeResult;
+import com.anook.backend.global.exception.BusinessException;
+import com.anook.backend.global.exception.ErrorCode;
 import com.anook.backend.knowledge.application.port.in.RegisterKnowledgeFromAnswerUseCase;
 import com.anook.backend.knowledge.application.port.out.EmbeddingPort;
 import com.anook.backend.knowledge.application.port.out.KnowledgeRepositoryPort;
@@ -36,24 +38,31 @@ public class RegisterKnowledgeFromAnswerService implements RegisterKnowledgeFrom
     @Override
     @Transactional
     public CreateKnowledgeResult register(RegisterKnowledgeFromAnswerCommand command) {
-        // 1. domainCode 기본값 처리 — null 또는 빈 문자열이면 COMMON
+        // 1. 중복 질문 확인
+        if (knowledgeRepositoryPort.existsByDomainCodeAndQuestion(
+                command.domainCode() != null ? command.domainCode() : "COMMON",
+                command.question())) {
+            throw new BusinessException(ErrorCode.DUPLICATE_KNOWLEDGE);
+        }
+
+        // 2. domainCode 기본값 처리 — null 또는 빈 문자열이면 COMMON
         String domainCodeStr = (command.domainCode() != null && !command.domainCode().isBlank())
                 ? command.domainCode().trim().toUpperCase()
                 : "COMMON";
         DomainCode domainCode = DomainCode.from(domainCodeStr);
 
-        // 2. status 결정 — "PENDING"이면 나중에 검토, 그 외 즉시 APPROVED
+        // 3. status 결정 — "PENDING"이면 나중에 검토, 그 외 즉시 APPROVED
         boolean isPending = "PENDING".equalsIgnoreCase(command.status());
         KnowledgeStatus status = isPending ? KnowledgeStatus.PENDING : KnowledgeStatus.APPROVED;
 
-        // 3. 임베딩 생성 (PENDING이면 스킵 — 승인 시 생성)
+        // 4. 임베딩 생성 (PENDING이면 스킵 — 승인 시 생성)
         float[] embedding = null;
         if (!isPending) {
             String contentToEmbed = "Q: " + command.question() + "\nA: " + command.answer();
             embedding = embeddingPort.generateEmbedding(contentToEmbed);
         }
 
-        // 4. 도메인 모델 생성
+        // 5. 도메인 모델 생성
         KnowledgeEntry entry = KnowledgeEntry.builder()
                 .question(command.question())
                 .answer(command.answer())
@@ -61,7 +70,7 @@ public class RegisterKnowledgeFromAnswerService implements RegisterKnowledgeFrom
                 .status(status)
                 .build();
 
-        // 5. 저장 (PENDING은 임베딩 없이 저장)
+        // 6. 저장 (PENDING은 임베딩 없이 저장)
         KnowledgeEntry saved = isPending
                 ? knowledgeRepositoryPort.save(entry, new float[0])
                 : knowledgeRepositoryPort.save(entry, embedding);

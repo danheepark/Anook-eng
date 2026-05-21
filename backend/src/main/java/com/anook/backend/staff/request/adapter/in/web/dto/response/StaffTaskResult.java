@@ -17,5 +17,6 @@ public record StaffTaskResult(
         boolean cancelRequested,
         LocalDateTime cancelRequestedAt,
         java.util.Map<String, Object> entities,
-        String imageUrl
+        String imageUrl,
+        String reasoning
 ) {}

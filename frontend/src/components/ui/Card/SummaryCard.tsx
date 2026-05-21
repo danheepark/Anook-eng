@@ -7,6 +7,7 @@ export interface SummaryCardProps {
   changeValue?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
   size?: 'sm' | 'md';
+  onClick?: () => void;
 }
 
 export default function SummaryCard({
@@ -14,11 +15,13 @@ export default function SummaryCard({
   value,
   changeValue,
   changeType = 'neutral',
-  size = 'md'
+  size = 'md',
+  onClick
 }: SummaryCardProps) {
   const sizeClass = size === 'sm' ? styles.sm : styles.md;
+  const clickableClass = onClick ? styles.clickable : '';
   return (
-    <div className={`${styles.summaryCard} ${sizeClass}`}>
+    <div className={`${styles.summaryCard} ${sizeClass} ${clickableClass}`} onClick={onClick} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined}>
       <span className={styles.title}>{title}</span>
       <div className={styles.bottomRow}>
         <span className={styles.value}>{value}</span>

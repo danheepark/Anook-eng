@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
-import { X, Clock, Edit2 } from 'lucide-react';
+import { Clock, Edit2 } from 'lucide-react';
 import Button from '@/components/ui/Button/Button';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import styles from './KnowledgeModal.module.css';
@@ -30,16 +30,13 @@ export default function KnowledgeModal({
 }: KnowledgeModalProps) {
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="lg">
+      <ModalCard size="lg" onClose={onClose}>
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <StatusBadge variant="gray">{domainCode}</StatusBadge>
             <h2 className={styles.title}>{question}</h2>
           </div>
-          <button className={styles.closeBtn} onClick={onClose}>
-            <X size={24} />
-          </button>
         </div>
         
         {/* Body */}

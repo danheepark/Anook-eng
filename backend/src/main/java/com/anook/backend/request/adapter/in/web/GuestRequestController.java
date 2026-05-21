@@ -6,6 +6,7 @@ import com.anook.backend.request.application.dto.response.GetMyRequestsResult;
 import com.anook.backend.request.application.port.in.CancelRequestUseCase;
 import com.anook.backend.request.application.port.in.ConfirmRequestUseCase;
 import com.anook.backend.request.application.port.in.GetMyRequestsUseCase;
+import com.anook.backend.request.application.port.in.RateRequestUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ public class GuestRequestController {
     private final GetMyRequestsUseCase getMyRequestsUseCase;
     private final CancelRequestUseCase cancelRequestUseCase;
     private final ConfirmRequestUseCase confirmRequestUseCase;
+    private final RateRequestUseCase rateRequestUseCase;
 
     /**
      * 내 요청 목록 조회
@@ -87,6 +89,26 @@ public class GuestRequestController {
         confirmRequestUseCase.confirmRequest(requestId, roomNo);
 
         return ResponseEntity.ok(Map.of("message", "요청이 즉시 접수되었습니다."));
+    }
+
+    /**
+     * [AN-332] 고객 피드백 별점 등록
+     */
+    @PatchMapping("/{roomNo}/requests/{requestId}/rating")
+    public ResponseEntity<Map<String, String>> rateRequest(
+            @PathVariable String roomNo,
+            @PathVariable Long requestId,
+            @RequestBody Map<String, Integer> body,
+            Principal principal
+    ) {
+        validateRoomNo(principal, roomNo);
+        int rating = body.getOrDefault("rating", 0);
+
+        log.info("[GuestRequestController] 피드백 등록 — roomNo: {}, requestId: {}, rating: {}", roomNo, requestId, rating);
+
+        rateRequestUseCase.rateRequest(requestId, roomNo, rating);
+
+        return ResponseEntity.ok(Map.of("message", "피드백이 등록되었습니다."));
     }
 
     /**

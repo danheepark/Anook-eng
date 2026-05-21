@@ -25,6 +25,14 @@ EMERGENCY_KEYWORDS: Dict[str, Dict[str, Any]] = {
             r"강도", r"도둑", r"침입", r"경찰\s*불러", r"경찰\s*신고", r"살인"
         ],
         "severity": 10,
+    },
+    "WATER_LEAK": {
+        "patterns": [r"물\s*바다", r"물\s*새", r"누수", r"홍수"],
+        "severity": 10,
+    },
+    "URGENT_CLEANUP": {
+        "patterns": [r"토했", r"구토", r"피\s*흘", r"오물", r"토\s*사물"],
+        "severity": 9,
     }
 }
 # 긴급 상황별 다국어 응답 (한국어/영어만 지원)

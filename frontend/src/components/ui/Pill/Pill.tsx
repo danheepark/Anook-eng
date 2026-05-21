@@ -5,7 +5,7 @@ export interface PillProps {
   options: string[];
   selectedOption?: string;
   onSelect: (option: string) => void;
-  align?: 'center' | 'flex-start';
+  align?: 'center' | 'flex-start' | 'flex-end';
   disabled?: boolean;
 }
 

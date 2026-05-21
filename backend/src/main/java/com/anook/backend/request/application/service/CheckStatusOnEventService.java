@@ -64,9 +64,21 @@ public class CheckStatusOnEventService {
             }
         }
 
-        // 3. 매칭된 요청이 없으면, 가장 최근 요청을 선택
+        // 3. 매칭된 요청이 없으면:
+        //    (a) 먼저 활성 상태(PENDING, IN_PROGRESS, ESCALATED)인 요청 중 가장 최근 것 선택
+        //    (b) 활성 요청이 없으면 전체 요청 중 가장 최근 것 선택
         if (matchedRequest == null && !allRequests.isEmpty()) {
-            matchedRequest = allRequests.get(0);
+            for (Request req : allRequests) {
+                if (req.getStatus() == RequestStatus.PENDING || 
+                    req.getStatus() == RequestStatus.IN_PROGRESS || 
+                    req.getStatus() == RequestStatus.ESCALATED) {
+                    matchedRequest = req;
+                    break;
+                }
+            }
+            if (matchedRequest == null) {
+                matchedRequest = allRequests.get(0);
+            }
         }
 
         String replyMessage;
@@ -77,7 +89,9 @@ public class CheckStatusOnEventService {
                 replyMessage = prefix + "요청이 접수되어 담당 부서 배정을 기다리고 있습니다. 곧 처리가 시작될 예정이니 조금만 더 기다려 주시면 감사하겠습니다.";
             } else if (matchedRequest.getStatus() == RequestStatus.IN_PROGRESS) {
                 replyMessage = prefix + "현재 담당 직원이 요청을 처리하고 있습니다. 보통 15~30분 정도 소요되니 조금만 더 기다려 주시면 감사하겠습니다.";
-            } else if (matchedRequest.getStatus() == RequestStatus.COMPLETED) {
+            } else if (matchedRequest.getStatus() == RequestStatus.ESCALATED) {
+                replyMessage = prefix + "더 빠르고 정확한 처리를 위해 프론트 데스크 담당 직원이 직접 확인 중입니다. 확인 후 신속하게 도와드리겠습니다.";
+            } else if (matchedRequest.getStatus() == RequestStatus.COMPLETED || matchedRequest.getStatus() == RequestStatus.SETTLED) {
                 replyMessage = "가장 최근 접수된 " + (matchedRequest.getSummary() != null ? "[" + matchedRequest.getSummary() + "] " : "") + "요청은 이미 처리가 완료되었습니다. 혹시 추가로 필요한 사항이 있으시다면 언제든지 말씀해 주세요.";
             } else if (matchedRequest.getStatus() == RequestStatus.CANCELLED) {
                 replyMessage = "해당 요청은 취소 처리되었습니다. 새로운 요청이 필요하시면 언제든지 말씀해 주세요.";

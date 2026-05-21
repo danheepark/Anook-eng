@@ -31,7 +31,11 @@
   flex-shrink: 0;
   background-color: var(--color-bg);
   z-index: 40;
-  transition: transform var(--transition);
+  transition: width 0.2s ease-in-out;
+}
+
+.sidebarWrapper.collapsed {
+  width: 64px;
 }
 
 .sidebar {
@@ -55,16 +59,19 @@
 }
 
 @media (max-width: 768px) {
-  .sidebarWrapper {
+  .sidebarWrapper,
+  .sidebarWrapper.collapsed {
+    width: 220px !important;
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     transform: translateX(-100%);
+    transition: transform 0.2s ease-in-out;
   }
 
   .sidebarWrapper.open {
-    transform: translateX(0);
+    transform: translateX(0) !important;
     box-shadow: var(--shadow-lg);
   }
 

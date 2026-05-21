@@ -1,0 +1,105 @@
+.card {
+  width: 100%;
+  background: linear-gradient(to right, color-mix(in srgb, #A8E6CF 12%, rgba(255, 255, 255, 0)) 0%, rgba(255, 255, 255, 0) 70%), rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ── Horizontal Layout (matches RequestCard exactly) ── */
+
+.cardLayout {
+  display: flex;
+  gap: var(--space-16);
+  align-items: flex-start;
+}
+
+.leftColumn {
+  flex-shrink: 0;
+}
+
+.iconContainer {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.summary {
+  font: var(--text-h3-bold);
+  color: var(--color-gray-900);
+}
+
+.timeLabel {
+  font: var(--text-caption-regular);
+  color: var(--color-gray-500);
+  text-align: right;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.subtitle {
+  font: var(--text-body-medium);
+  color: var(--color-gray-500);
+}
+
+/* ── Star Rating (inline) ── */
+
+.stars {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.starButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.starButton:disabled {
+  cursor: default;
+}
+
+.starIcon {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.starButton:not(:disabled):hover .starIcon {
+  transform: scale(1.15);
+}
+
+.starFilled {
+  color: #FFBF00;
+}
+
+.starEmpty {
+  color: var(--color-gray-500);
+}

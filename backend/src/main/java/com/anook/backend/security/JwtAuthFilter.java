@@ -56,7 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     log.error("Guest 검증 중 오류 발생: {}", e.getMessage());
                     isAuthorized = false;
                 }
-            } else if ("STAFF".equals(role) || "ADMIN".equals(role)) {
+            } else if ("STAFF".equals(role) || "FRONTDESK".equals(role)) {
                 try {
                     Long staffId = Long.parseLong(identifier);
                     var staffOpt = staffRepositoryPort.findById(staffId);

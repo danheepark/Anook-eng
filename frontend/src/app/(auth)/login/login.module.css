@@ -1,8 +1,14 @@
 .container {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-surface); /* 기본 배경색과 맞춤 */
   padding: var(--space-24);
+  background:
+    radial-gradient(at 10% 10%, rgba(255, 228, 196, 0.2) 0px, transparent 50%),
+    radial-gradient(at 90% 10%, rgba(122, 214, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 90% 90%, rgba(196, 155, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 10% 90%, rgba(255, 125, 180, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(233, 109, 255, 0.05) 0px, transparent 60%),
+    linear-gradient(180deg, #F5F5F8 0%, #EFEBF2 30%, #E8E0EC 100%);
 }

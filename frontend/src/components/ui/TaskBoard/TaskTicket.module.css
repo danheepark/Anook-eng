@@ -164,9 +164,10 @@
 }
 
 .description {
-  font: var(--text-body-regular);
-  color: var(--color-gray-700);
-  margin: 0;
+  font: var(--text-caption-regular);
+  color: var(--color-gray-500);
+  margin-top: var(--space-4);
+  word-break: break-word;
   white-space: pre-wrap;
 }
 

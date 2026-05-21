@@ -1,0 +1,499 @@
+{
+  "guest": "住客",
+  "staff": "员工",
+  "frontdesk": "前台",
+  "status": {
+    "pending": "待处理",
+    "assigned": "已分配",
+    "inProgress": "进行中",
+    "completed": "已完成",
+    "escalated": "已上报",
+    "transferred": "已转交"
+  },
+  "priority": {
+    "low": "低",
+    "normal": "普通",
+    "high": "高",
+    "urgent": "紧急"
+  },
+  "common": {
+    "submit": "提交",
+    "cancel": "取消",
+    "confirm": "确认",
+    "close": "关闭",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "retry": "重试",
+    "logout": "退出登录"
+  },
+  "frontdeskPage": {
+    "sidebar": {
+      "categories": {
+        "requestManagement": "请求管理",
+        "aiSystem": "AI系统",
+        "operations": "运营"
+      },
+      "menus": {
+        "dashboard": "运营统计",
+        "frontDesk": "实时咨询",
+        "housekeeping": "客房服务",
+        "fb": "餐饮",
+        "facility": "设施",
+        "concierge": "礼宾",
+        "emergency": "紧急情况",
+        "allRequests": "所有请求",
+        "chatHistory": "聊天记录",
+        "voc": "客户反馈",
+        "aiTraining": "添加新知识",
+        "rag": "AI知识管理",
+        "aiRouting": "AI路由日志",
+        "handover": "交接班文档",
+        "staffManagement": "员工管理"
+      }
+    },
+    "dashboard": {
+      "title": "运营统计",
+      "searchPlaceholder": "输入搜索词...",
+      "filters": {
+        "today": "今天",
+        "last7Days": "过去7天",
+        "last30Days": "过去30天"
+      },
+      "charts": {
+        "avgResTime": "平均解决时间",
+        "frequentReqs": "最常见请求"
+      },
+      "summaries": {
+        "totalToday": "今日总请求",
+        "avgResponseTime": "平均响应时间",
+        "resolutionRate": "解决率",
+        "csat": "客户满意度"
+      },
+      "departments": {
+        "HK": "客房服务",
+        "FB": "餐饮",
+        "FACILITY": "设施",
+        "CONCIERGE": "礼宾",
+        "FRONT": "紧急情况"
+      }
+    },
+    "taskBoard": {
+      "searchPlaceholder": "输入搜索词...",
+      "filterAll": "全部",
+      "filterLatest": "最新",
+      "filterOldest": "最旧",
+      "columns": {
+        "pending": "待处理",
+        "inProgress": "进行中",
+        "completed": "已完成"
+      },
+      "titles": {
+        "housekeeping": "客房服务",
+        "fb": "餐饮",
+        "facility": "设施管理",
+        "concierge": "礼宾",
+        "emergency": "紧急响应",
+        "allRequests": "所有请求",
+        "aiTraining": "添加新知识",
+        "rag": "AI知识管理",
+        "aiRouting": "AI路由日志",
+        "handover": "交接班文档"
+      }
+    },
+    "voc": {
+      "title": "客户反馈 (VOC)",
+      "subtitle": "用于收集和管理客户反馈（如表扬和投诉）的页面。",
+      "filterAll": "查看全部",
+      "filterPositive": "👍 表扬",
+      "filterNegative": "👎 投诉/反馈",
+      "filterRating": "⭐ 评分",
+      "empty": "未找到反馈。",
+      "columns": {
+        "date": "接收日期",
+        "room": "房间",
+        "sentiment": "类别",
+        "content": "客户反馈内容",
+        "reply": "AI自动回复"
+      },
+      "sentiments": {
+        "positive": "表扬",
+        "negative": "投诉/反馈"
+      }
+    },
+    "rag": {
+      "title": "知识库",
+      "addKnowledge": "+ 添加知识",
+      "searchPlaceholder": "输入搜索词...",
+      "filterAll": "全部",
+      "filterLatest": "最新",
+      "empty": "未注册任何知识。",
+      "deleteTitle": "确认删除",
+      "deleteConfirm": "您确定要删除此知识吗？",
+      "deleteButton": "删除",
+      "tabs": {
+        "ALL": "全部",
+        "HK": "客房服务",
+        "FB": "餐饮",
+        "FACILITY": "设施",
+        "CONCIERGE": "礼宾",
+        "FRONT": "前台",
+        "EMERGENCY": "紧急情况",
+        "COMMON": "通用"
+      }
+    },
+    "aiTraining": {
+      "filterAll": "全部",
+      "filterMissing": "缺失",
+      "filterUnclear": "意图不明确",
+      "empty": "没有待审核项目。",
+      "rejectTitle": "确认排除",
+      "rejectSubtitle": "您确定要将此项目从审核列表中排除吗？",
+      "rejectConfirm": "排除"
+    },
+    "frontDesk": {
+      "title": "实时咨询",
+      "createRequest": "+ 创建请求",
+      "tabs": {
+        "unhandled": "待处理",
+        "inProgress": "进行中",
+        "escalation": "转交请求"
+      },
+      "sections": {
+        "unhandled": "未处理/异常请求",
+        "inProgress": "进行中的请求",
+        "escalation": "转交请求"
+      },
+      "empty": "未找到请求。",
+      "actions": {
+        "approve": "批准",
+        "reject": "拒绝",
+        "startChat": "开始聊天",
+        "manualAssign": "分配"
+      },
+      "status": {
+        "pending": "待处理",
+        "assigned": "已分配",
+        "inProgress": "进行中",
+        "completed": "已完成",
+        "escalated": "转交请求"
+      }
+    },
+    "chatHistory": {
+      "title": "聊天记录",
+      "emptyMessage": "无消息",
+      "systemCompleted": "先前的咨询和处理已全部完成。",
+      "systemMessageNote": "(※ 此消息为前台运营专用系统消息，住客不可见)",
+      "roomConversation": "{{room}}房间对话",
+      "roomChatRecord": "{{room}}房间聊天记录",
+      "selectRoomPrompt": "请选择一个房间查看对话",
+      "deleteTitle": "删除聊天记录",
+      "deleteSubtitle": "您确定要删除{{room}}房间的聊天记录吗？此操作无法撤销。",
+      "deleteButton": "删除",
+      "searchPlaceholder": "输入搜索词...",
+      "filterAll": "全部",
+      "filterLatest": "最新",
+      "activeChat": "活跃聊天",
+      "archived": "已归档",
+      "selectRoom": "选择房间",
+      "roomLog": " 聊天日志",
+      "fullLog": "完整聊天日志",
+      "delete": "删除",
+      "loadingMessages": "正在加载消息...",
+      "noHistory": "无聊天记录。",
+      "sendPlaceholder": "输入给住客的消息（自动翻译）...",
+      "sending": "发送中...",
+      "send": "发送",
+      "sendFail": "消息发送失败。"
+    },
+    "requestDetailModal": {
+      "title": "请求详情",
+      "basicInfo": "基本信息",
+      "roomNo": "房间号",
+      "currentDept": "当前部门",
+      "createdAt": "创建时间",
+      "updatedAt": "最后更新",
+      "requestContent": "请求内容",
+      "summary": "摘要",
+      "originalText": "原始文本",
+      "orderDetail": "订单/请求详情",
+      "transferReason": "转交原因",
+      "photo": "附件照片",
+      "aiAnalysis": "AI分析结果",
+      "confidence": "置信度",
+      "reasoning": "推理",
+      "assignment": "分配管理",
+      "priority": "优先级",
+      "setUrgent": "设为紧急任务",
+      "assignDept": "分配部门",
+      "selectDept": "选择部门",
+      "buttons": {
+        "forceCancel": "强制取消请求",
+        "approveEscalation": "批准上报",
+        "rejectEscalation": "拒绝上报",
+        "save": "保存更改",
+        "saving": "保存中...",
+        "close": "关闭",
+        "approveCancel": "批准取消",
+        "rejectCancel": "拒绝取消"
+      },
+      "status": {
+        "cancelRequested": "住客请求取消"
+      },
+      "entityLabels": {
+        "is_contactless": "无接触配送",
+        "target_time": "目标时间",
+        "equipment": "设备",
+        "symptom": "症状",
+        "location": "位置",
+        "destination": "目的地",
+        "passenger_count": "乘客人数",
+        "restaurant_name": "餐厅",
+        "cuisine_type": "菜系",
+        "category": "类别",
+        "action": "操作类型",
+        "item": "物品",
+        "time": "时间",
+        "special_requests": "特殊要求",
+        "count": "数量",
+        "type": "类型",
+        "target": "目标",
+        "issue": "问题/症状",
+        "priority": "预估优先级",
+        "topic": "主题",
+        "question": "问题",
+        "language": "语言",
+        "items": "物品请求",
+        "tasks": "任务请求",
+        "menu_items": "点餐菜单",
+        "countSuffix": " 件",
+        "option": "选项",
+        "none": "无"
+      }
+    }
+  },
+  "guestChat": {
+    "welcomeMessage": "您好！我是酒店AI助手。\n我将帮助您拥有舒适的住宿体验。\n请告诉我您需要什么！",
+    "quickReplyPrompt": "我能如何帮助您？请选择以下选项或输入您的请求！",
+    "quickReplyOptions": [
+      "需要2条额外毛巾",
+      "早餐时间是几点？",
+      "请打扫我的房间",
+      "我可以延迟退房吗？"
+    ],
+    "activeRequestsCount": "{count} 个进行中的请求",
+    "progress": {
+      "checking": "正在检查您的请求...",
+      "forwardingPrefix": "正在转交给",
+      "forwardingSuffix": "团队...",
+      "domains": {
+        "HK": "客房服务",
+        "FB": "餐饮",
+        "FACILITY": "设施",
+        "CONCIERGE": "礼宾",
+        "FRONT": "前台",
+        "EMERGENCY": "紧急情况"
+      }
+    }
+  },
+  "intents": {
+    "TOWEL": "毛巾请求",
+    "WATER": "饮用水请求",
+    "ROOM_CLEAN": "房间清洁",
+    "CLEAN_ROOM": "房间清洁",
+    "CLEANING": "清洁请求",
+    "MULTIPLE_HK": "客房服务请求",
+    "AMENITY_DELIVERY": "便利设施请求",
+    "LATE_CHECKOUT": "延迟退房",
+    "AMENITY": "客房用品申请",
+    "BEDDING": "床上用品请求",
+    "ROOM_SERVICE": "客房送餐食品订单",
+    "DINING": "客房送餐食品订单",
+    "MENU_INQUIRY": "菜单查询",
+    "ALLERGY_CHECK": "过敏检查",
+    "ORDER_MODIFY": "订单修改",
+    "ORDER_CANCEL": "订单取消",
+    "OPERATING_HOURS": "营业时间",
+    "RECOMMENDATION": "推荐",
+    "SPENDING_INQUIRY": "消费查询",
+    "AC_REPAIR": "空调维修",
+    "HEATER_REPAIR": "暖气维修",
+    "PLUMBING": "管道维修",
+    "WATER_LEAK": "漏水",
+    "DRAIN_CLOG": "下水道堵塞",
+    "ELECTRICAL": "电路/插座维修",
+    "LIGHTING": "照明维修",
+    "TV_ISSUE": "电视问题",
+    "WIFI_ISSUE": "WiFi网络问题",
+    "APPLIANCE": "电器维修",
+    "DOOR_LOCK": "门锁故障",
+    "WINDOW": "窗户/隔音问题",
+    "FURNITURE": "家具维修",
+    "FIRE_ALARM": "火警问题",
+    "ODOR": "异味",
+    "NOISE": "噪音投诉",
+    "OTHER": "其他请求",
+    "TAXI": "出租车呼叫预约",
+    "TOUR_INFO": "旅游信息",
+    "LUGGAGE_STORAGE": "行李寄存/提取",
+    "RESTAURANT": "餐厅预订",
+    "RESERVATION": "预订",
+    "DELIVERY": "送货请求",
+    "WAKE_UP_CALL": "叫醒服务预约",
+    "MEDICAL_INFO": "医疗信息",
+    "POSTAL_SERVICE": "邮寄服务代办",
+    "COMPLAINT": "投诉",
+    "INQUIRY": "一般查询",
+    "AMBIGUOUS": "意图不明确",
+    "ESCALATION": "人工服务",
+    "LOST_FOUND": "失物招领",
+    "MEDICAL_EMERGENCY": "医疗紧急情况",
+    "FIRE_EMERGENCY": "火灾紧急情况",
+    "VIOLENCE_EMERGENCY": "骚乱/暴力事件",
+    "FIRE": "火灾紧急情况",
+    "MEDICAL_ASSIST": "医疗紧急情况",
+    "SECURITY": "安全/骚乱问题",
+    "URGENT_CLEANUP": "紧急清洁"
+  },
+  "cardUI": {
+    "status": {
+      "pending": "待处理",
+      "received": "已接收",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "completedMark": "已完成",
+      "cancelled": "已取消",
+      "cancelPending": "取消待处理",
+      "escalated": "等待员工"
+    },
+    "statusBar": {
+      "checking": "确认中",
+      "processing": "处理中",
+      "completed": "已完成",
+      "templateWithDetailsPending": "{team} 团队正在确认 {details}。",
+      "templateWithDetailsInProgress": "{team} 团队正在处理 {details}。",
+      "templateWithDetailsCompleted": "{team} 团队已完成 {details}。",
+      "templateNoDetailsPending": "{team} 团队正在确认您的请求。",
+      "templateNoDetailsInProgress": "{team} 团队正在处理您的请求。",
+      "templateNoDetailsCompleted": "{team} 团队已完成您的请求。",
+      "emergencyPending": "前台正在确认紧急请求。",
+      "emergencyInProgress": "前台正在处理紧急请求。",
+      "emergencyCompleted": "紧急请求已处理完毕。"
+    },
+    "message": {
+      "cancelPending": "🔄 已收到取消请求，工作人员正在确认中",
+      "escalated": "工作人员将很快与您联系",
+      "forwarded": "已转交给 {team} 团队",
+      "cancelledCard": "请求已取消",
+      "autoAcceptGuide": "请确认请求内容。稍后将自动传送。",
+      "confirmGuide": "请确认后点击进行按钮。",
+      "cancelPendingShort": "取消请求确认中",
+      "translating": "正在翻译...",
+      "escalationRequest": "前台员工连接请求",
+      "cancelRequest": "取消请求",
+      "proceed": "进行",
+      "urgentPrefix": "[紧急] ",
+      "cancelSuffix": " 已取消",
+      "reserveSuffix": " 预约"
+    },
+    "button": {
+      "accept": "立即提交",
+      "cancel": "取消"
+    },
+    "time": {
+      "received": "已接收",
+      "seconds": "秒"
+    },
+    "title": "请求状态",
+    "items": " 件",
+    "and": "和",
+    "others": "其他件"
+  },
+  "ticketUI": {
+    "department": {
+      "HK": "客房服务",
+      "FACILITY": "设施",
+      "FB": "餐饮",
+      "CONCIERGE": "礼宾",
+      "FRONT": "前台",
+      "EMERGENCY": "紧急情况 🚨"
+    },
+    "badge": {
+      "cancelled": "已取消",
+      "cancelPending": "取消待处理",
+      "urgent": "紧急",
+      "contactless": "无接触",
+      "targetTime": "目标时间"
+    },
+    "button": {
+      "accept": "接受",
+      "complete": "完成"
+    },
+    "time": {
+      "justStarted": "刚开始",
+      "elapsed": " 已过去",
+      "hoursAgo": "小时前",
+      "minsAgo": "分钟前",
+      "justNow": "刚刚"
+    },
+    "entityLabels": {
+      "time": "时间",
+      "dest": "目的地",
+      "pax": "人数",
+      "paxUnit": "名",
+      "count": "数量",
+      "countUnit": "个",
+      "rest": "餐厅",
+      "target": "对象",
+      "req": "请求",
+      "store": "寄存",
+      "pickup": "领取",
+      "item": "物品",
+      "vendor": "商家",
+      "type": "分类",
+      "symptom": "症状",
+      "area": "区域",
+      "content": "内容"
+    }
+  },
+  "menu": {
+    "아메리카노": "美式咖啡",
+    "한우 불고기 덮밥": "韩牛烤肉盖饭",
+    "제로콜라": "零度可乐",
+    "콜라": "可乐",
+    "클래식 치즈버거": "经典芝士汉堡"
+  },
+  "chatInput": {
+    "placeholder": "请问有什么可以帮您...",
+    "listening": "正在聆听...",
+    "camera": "拍照",
+    "gallery": "相册",
+    "imageTooLarge": "图片超出最大尺寸限制，请选择较小的图片。",
+    "speechUnsupported": "当前浏览器不支持语音识别。"
+  },
+  "aiReplies": {
+    "forwardFb": "好的！我们会立即将您的订单转交给餐饮（房餐）团队。🍽️",
+    "forwardHk": "好的，没问题！我们会立即将您的请求转交给客房服务团队。🧹",
+    "forwardFacility": "给您带来不便，我们深表歉意。🥲 我们会立即将维修请求转交给设施团队，以最快速度为您处理！🛠️",
+    "forwardConcierge": "好的，没问题！我们会立即将您的请求转交给礼宾团队。🛎️",
+    "forwardFront": "现在立刻为您直接连接到前台，为您提供进一步的协助。",
+    "infoNotFound": "抱歉，关于这个问题我不太确定！🥲 我已经将您的问题转交给了前台员工。他们会核实后尽快在这里回复您。🙏",
+    "cancelSuccess": "您的请求已成功取消。😌 如果您还有其他需要，请随时告诉我！",
+    "cancelPending": "您的请求正在处理中，因此我们已向相关部门发送了取消请求。🏃‍♂️ 确认后我们将立刻通知您！",
+    "piiGuard": "为了保护您宝贵的个人信息，我们不接受通过聊天提供敏感信息。🔒 如需详细查询，请使用客房内的电话联系前台（分机0），我们将为您提供安全的帮助。😊"
+  },
+  "feedbackCard": {
+    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
+    "requestCompleted": "요청 완료",
+    "consultationCompleted": "상담이 완료되었습니다",
+    "satisfactionQuestion": "서비스가 만족스러우셨나요?",
+    "thankYou": "감사합니다!",
+    "ratings": {
+      "1": "별로예요",
+      "2": "그저 그래요",
+      "3": "보통이에요",
+      "4": "좋았어요",
+      "5": "최고예요!"
+    }
+  }
+}

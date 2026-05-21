@@ -1,8 +1,8 @@
 .banner {
   display: flex;
   align-items: center;
-  gap: var(--space-12);
-  padding: var(--space-12) var(--space-24);
+  gap: var(--space-16);
+  padding: var(--space-16);
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   border-radius: var(--radius-md);
   color: #ffffff;
@@ -21,35 +21,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--color-error);
   animation: iconBlink 1s ease-in-out infinite;
   flex-shrink: 0;
 }
 
 .iconPulse svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .textArea {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-4);
   flex: 1;
   min-width: 0;
 }
 
 .title {
-  font: var(--text-body-bold);
+  font: var(--text-h3-bold);
   color: #ffffff;
   margin: 0;
 }
 
 .detail {
-  font: var(--text-caption-regular);
+  font: var(--text-body-medium);
   color: rgba(255, 255, 255, 0.85);
   margin: 0;
   white-space: nowrap;

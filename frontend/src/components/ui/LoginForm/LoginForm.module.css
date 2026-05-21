@@ -1,51 +1,88 @@
 .container {
   width: 100%;
   max-width: 420px;
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-100);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.4px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-lg);
   border-radius: var(--radius-xl);
   padding: var(--space-48);
-  box-shadow: var(--shadow-lg);
   animation: fadeIn 0.6s ease-out;
   color: var(--color-gray-900);
   font-family: var(--font-sans);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: -260px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 660px;
+  height: 660px;
+  background: radial-gradient(50% 50% at 50% 50%, var(--color-surface) 0%, rgba(216, 223, 245, 0.8) 35%, rgba(216, 223, 245, 0.4) 65%, rgba(216, 223, 245, 0) 100%);
+  border-radius: 50%;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: -1;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header {
   text-align: center;
   margin-bottom: var(--space-48);
+  position: relative;
+  z-index: 1;
 }
 
 .iconWrapper {
   display: flex;
   justify-content: center;
-  margin-bottom: var(--space-16);
+  align-items: center;
+  margin: 0 auto var(--space-32);
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
   color: var(--color-primary);
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.05em;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: 0;
   color: var(--color-gray-900);
-  margin-bottom: var(--space-8);
+  margin: 0;
 }
 
 .subtitle {
   color: var(--color-gray-500);
   font-size: 0.875rem;
   font-weight: 500;
+  margin: 0;
+  margin-top: 2px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--space-24);
+  position: relative;
+  z-index: 1;
 }
 
 /* InputField는 이미 기본 색상을 따르므로 별도 커스터마이징 최소화 */

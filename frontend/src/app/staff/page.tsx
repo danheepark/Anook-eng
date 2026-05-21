@@ -2,12 +2,13 @@
 
 import React, { useMemo, useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Tabs from '@/components/ui/Tab/Tabs';
 import TaskColumn from '@/components/ui/TaskBoard/TaskColumn';
 import TaskTicket from '@/components/ui/TaskBoard/TaskTicket';
 import InputField from '@/components/ui/Inputfield/InputField';
-import FilterButton from '@/components/ui/FilterButton/FilterButton';
 import TaskDetailModal from './_components/TaskDetailModal/TaskDetailModal';
 import { useTasks, StaffTask } from './useTasks';
+import BoardSkeleton from './_components/BoardSkeleton/BoardSkeleton';
 import styles from './page.module.css';
 
 const COLUMN_CONFIG = [
@@ -92,6 +93,7 @@ function DashboardContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [selectedTask, setSelectedTask] = useState<StaffTask | null>(null);
+  const [activeTab, setActiveTab] = useState<'TODO' | 'IN_PROGRESS' | 'DONE'>('TODO');
 
   const [departmentName, setDepartmentName] = useState('부서');
   const [departmentRole, setDepartmentRole] = useState<any>('housekeeping');
@@ -147,7 +149,7 @@ function DashboardContent() {
     };
 
     return {
-      TODO: sortByCancelRequested(filteredTasks.filter(t => t.status === 'PENDING')),
+      TODO: sortByCancelRequested(filteredTasks.filter(t => t.status === 'PENDING' || t.status === 'ESCALATED')),
       IN_PROGRESS: sortByCancelRequested(filteredTasks.filter(t => t.status === 'IN_PROGRESS')),
       DONE: filteredTasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED'),
     };
@@ -170,67 +172,80 @@ function DashboardContent() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <FilterButton
-            filterOptions={PRIORITY_OPTIONS}
-            selectedFilter={priorityFilter}
-            onFilterSelect={setPriorityFilter}
-          />
         </div>
       </div>
 
       {loading ? (
-        <div className={styles.loading}>데이터를 불러오는 중...</div>
+        <BoardSkeleton />
       ) : error ? (
         <div className={styles.error}>데이터를 불러오는 데 실패했습니다. ({error})</div>
       ) : (
-        <section className={styles.board}>
-          {COLUMN_CONFIG.map(col => {
-            const columnTasks = boardData[col.status as keyof typeof boardData];
-            return (
-              <TaskColumn
-                key={col.id}
-                title={col.title}
-                count={columnTasks.length}
-                status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
-              >
-                <div className={styles.columnContent}>
-                  {columnTasks.map(task => (
-                    <div
-                      key={`${task.roomNumber}-${task.createdAt}`}
-                      className={styles.ticketWrapper}
-                      onClick={() => setSelectedTask(task)}
-                    >
-                      <TaskTicket
-                        ticketId={task.id}
-                        roomNo={task.roomNumber}
-                        department={task.departmentId}
-                        priority={mapPriority(task.priority)}
-                        title={task.summary}
-                        description=""
-                        status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
-                        createdAt={task.createdAt}
-                        cancelRequested={task.cancelRequested}
-                        isCancelled={task.status === 'CANCELLED'}
-                        onAccept={col.status === 'TODO' ? (e) => {
-                          e.stopPropagation();
-                          acceptTask(task.id, task.version);
-                        } : undefined}
-                        onComplete={col.status === 'IN_PROGRESS' && !task.cancelRequested ? (e) => {
-                          e.stopPropagation();
-                          completeTask(task.id, task.version);
-                        } : undefined}
-                        entities={task.entities}
-                      />
+        <>
+          <div className={styles.mobileTabs}>
+            <Tabs
+              options={[
+                { label: '대기 중', value: 'TODO', count: boardData.TODO.length },
+                { label: '진행 중', value: 'IN_PROGRESS', count: boardData.IN_PROGRESS.length },
+                { label: '완료됨', value: 'DONE', count: boardData.DONE.length }
+              ]}
+              activeValue={activeTab}
+              onChange={(val) => val && setActiveTab(val as 'TODO' | 'IN_PROGRESS' | 'DONE')}
+            />
+          </div>
+
+          <section className={styles.board}>
+            {COLUMN_CONFIG.map(col => {
+              const columnTasks = boardData[col.status as keyof typeof boardData];
+              return (
+                <div
+                  key={col.id}
+                  className={`${styles.columnWrapper} ${activeTab !== col.status ? styles.mobileHidden : ''}`}
+                >
+                  <TaskColumn
+                    title={col.title}
+                    count={columnTasks.length}
+                    status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
+                  >
+                    <div className={styles.columnContent}>
+                      {columnTasks.map(task => (
+                        <div
+                          key={`${task.roomNumber}-${task.createdAt}`}
+                          className={styles.ticketWrapper}
+                          onClick={() => setSelectedTask(task)}
+                        >
+                          <TaskTicket
+                            ticketId={task.id}
+                            roomNo={task.roomNumber}
+                            department={task.departmentId}
+                            priority={mapPriority(task.priority)}
+                            title={task.summary}
+                            description=""
+                            status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
+                            createdAt={task.createdAt}
+                            cancelRequested={task.cancelRequested}
+                            isCancelled={task.status === 'CANCELLED'}
+                            onAccept={col.status === 'TODO' ? (e) => {
+                              e.stopPropagation();
+                              acceptTask(task.id, task.version);
+                            } : undefined}
+                            onComplete={col.status === 'IN_PROGRESS' && !task.cancelRequested ? (e) => {
+                              e.stopPropagation();
+                              completeTask(task.id, task.version);
+                            } : undefined}
+                            entities={task.entities}
+                          />
+                        </div>
+                      ))}
+                      {columnTasks.length === 0 && (
+                        <div className={styles.empty}>해당하는 작업이 없습니다.</div>
+                      )}
                     </div>
-                  ))}
-                  {columnTasks.length === 0 && (
-                    <div className={styles.empty}>해당하는 작업이 없습니다.</div>
-                  )}
+                  </TaskColumn>
                 </div>
-              </TaskColumn>
-            );
-          })}
-        </section>
+              );
+            })}
+          </section>
+        </>
       )}
 
       <TaskDetailModal

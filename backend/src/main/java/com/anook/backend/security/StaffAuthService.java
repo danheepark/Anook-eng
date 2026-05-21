@@ -36,8 +36,8 @@ public class StaffAuthService {
                 .orElseThrow(() -> new com.anook.backend.global.exception.BusinessException(
                         com.anook.backend.global.exception.ErrorCode.GUEST_NOT_FOUND)); // 임시로 NOT_FOUND 계열 사용
 
-        // 2. 부서의 isAdmin 여부에 따라 권한(Role) 결정
-        String role = staff.getDepartment().isAdmin() ? "ADMIN" : "STAFF";
+        // 2. 부서의 isFrontdesk 여부에 따라 권한(Role) 결정
+        String role = staff.getDepartment().isFrontdesk() ? "FRONTDESK" : "STAFF";
 
         // 3. 중복 로그인 방지를 위한 새로운 JTI 생성
         String jti = UUID.randomUUID().toString();

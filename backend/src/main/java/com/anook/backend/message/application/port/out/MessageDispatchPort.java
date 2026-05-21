@@ -31,9 +31,9 @@ public interface MessageDispatchPort {
 
     /**
      * 관리자 채널로 메시지 전송
-     * → /topic/admin
+     * → /topic/frontdesk
      *
      * @param payload 전송할 이벤트 데이터
      */
-    void sendToAdmin(Object payload);
+    void sendToFrontdesk(Object payload);
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useWebSocket } from '@/app/useWebSocket';
+import { useSSE } from '@/app/useSSE';
 
 export interface RequestStatusItem {
   id: number;
@@ -15,7 +15,7 @@ export function useRequestStatus(roomNo: string = '707') {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const { subscribe } = useWebSocket();
+  const { subscribe } = useSSE();
 
   // 초기 데이터 조회
   useEffect(() => {

@@ -12,6 +12,7 @@ public record PmsReceipt(
         String menuName,
         int quantity,
         int totalPrice,
+        Double totalPriceUsd,
         String status,
         LocalDateTime createdAt
 ) {}

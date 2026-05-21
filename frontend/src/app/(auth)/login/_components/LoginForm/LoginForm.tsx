@@ -34,9 +34,9 @@ export default function LoginForm() {
   return (
     <div className={styles.container}>
       <CommonLoginForm
-        title="Anook"
-        subtitle="스태프 통합 관리 시스템"
-        icon={<SecurityIcon width={48} height={48} />}
+        title="ANOOK"
+        subtitle="AI 기반 호텔 통합 관리 시스템"
+        icon={<SecurityIcon width={32} height={32} />}
         placeholder="PIN 번호 또는 접속 코드 입력"
         onLogin={handleLogin}
         isLoading={isLoading}
@@ -44,7 +44,7 @@ export default function LoginForm() {
         maxLength={20} // ★ 길이를 20자리로 확장
         footerContent={
           <>
-            <p>© 2024 Team Anook. All rights reserved.</p>
+            <p>© 2026 Team Anook. All rights reserved.</p>
             <p>관리자 문의: 02-1234-5678</p>
           </>
         }

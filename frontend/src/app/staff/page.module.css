@@ -3,23 +3,16 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: var(--space-32);
+  gap: var(--space-16); /* housekeeping과 동일하게 gap 축소 */
   padding: var(--space-24);
-}
-
-.mainContent {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-48) var(--space-32);
-  gap: var(--space-32);
-  min-height: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .headerContainer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start; /* 기존 flex-end에서 housekeeping과 일치시킴 */
 }
 
 .header {
@@ -29,7 +22,7 @@
 }
 
 .title {
-  font: var(--text-h1-bold);
+  font: var(--text-h2-bold);
   color: var(--color-gray-900);
   margin: 0;
 }
@@ -52,13 +45,17 @@
 
 .board {
   display: flex;
-  gap: var(--space-32);
+  gap: var(--space-24); /* 기존 32에서 housekeeping처럼 24로 통일 */
   align-items: stretch;
   flex: 1;
-  overflow-x: auto;
   min-height: 0;
-  padding-bottom: var(--space-16);
-  /* 스크롤바와 카드 사이 간격 */
+}
+
+.columnWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .columnContent {
@@ -66,6 +63,14 @@
   flex-direction: column;
   gap: var(--space-24);
   width: 100%;
+}
+
+.mobileTabs {
+  display: none;
+}
+
+.mobileHidden {
+  display: flex;
 }
 
 .empty {
@@ -86,4 +91,58 @@
   height: 200px;
   font: var(--text-body-regular);
   color: var(--color-gray-500);
-}.ticketWrapper { cursor: pointer; border-radius: 8px; }
+}
+
+.ticketWrapper {
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+/* 반응형 스타일 - housekeeping과 완벽하게 대칭 통일 */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-16) !important;
+    gap: var(--space-16) !important;
+  }
+
+  .headerContainer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--space-16) !important;
+  }
+
+  .toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: var(--space-12) !important;
+  }
+
+  .searchBox {
+    width: 100% !important;
+  }
+
+  /* 필터 버튼 모바일 최적화 */
+  .toolbar > :global(div) {
+    width: 100% !important;
+  }
+
+  .mobileTabs {
+    display: block !important;
+  }
+
+  .mobileHidden {
+    display: none !important;
+  }
+
+  .board {
+    flex-direction: column !important;
+    gap: 0 !important;
+    overflow-x: visible !important;
+  }
+
+  .columnWrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

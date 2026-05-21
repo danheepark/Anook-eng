@@ -1,19 +1,19 @@
 version: '3.8'
 
 services:
-  # 1. Nginx 리버스 프록시 (미니PC 환경에서는 호스트 Nginx 사용하므로 주석 처리. AWS 배포 시 주석 해제)
-  # nginx:
-  #   image: nginx:alpine
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 방금 생성한 설정 파일 매핑
-  #   depends_on:
-  #     - backend
-  #     - frontend
-  #   networks:
-  #     - Anook-network
+  # 1. Nginx 리버스 프록시
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 설정 파일 매핑
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - Anook-network
   # 2. PostgreSQL + pgvector (RAG 용)
   db:
     image: pgvector/pgvector:pg16
@@ -23,6 +23,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - db-data:/var/lib/postgresql/data # 데이터 영구 저장
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -39,6 +41,8 @@ services:
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redis-data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     restart: on-failure
     networks:
       - Anook-network
@@ -55,8 +59,12 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE:-prod}
       - JWT_SECRET=${JWT_SECRET}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - KOREAEXIM_AUTH_KEY=${KOREAEXIM_AUTH_KEY}
       - AI_SERVER_URL=http://ai:8000
       - SPRING_DATA_REDIS_HOST=redis
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "127.0.0.1:8080:8080"  # 호스트 Nginx만 접근 가능 (외부 차단)
     depends_on:
@@ -85,10 +93,15 @@ services:
       - NEO4J_USER=${NEO4J_USER}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD}
     volumes:
-      - ./ai:/app # 소스 코드 실시간 동기화 (Hot Reload)
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     depends_on:
-      - db
+      db:
+        condition: service_started
+      neo4j:
+        condition: service_healthy
+    restart: on-failure
     networks:
       - Anook-network
 
@@ -102,6 +115,9 @@ services:
     environment:
       - BACKEND_URL=http://backend:8080
       - AI_SERVER_URL=http://ai:8000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - Anook-network
 
@@ -114,6 +130,14 @@ services:
     # 배포용이므로 7474, 7687 포트를 외부에 열지 않아 보안을 유지합니다.
     volumes:
       - neo4j-data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     networks:
       - Anook-network
 

@@ -37,8 +37,11 @@ class AnalyzeRequest(BaseModel):
     text: str
     room_no: str
     language: Optional[str] = "ko"
+    system_language: Optional[str] = "ko"
     chat_history: List[dict] = []
     images: Optional[List[str]] = []
+    active_requests: Optional[List[dict]] = []
+    room_inventory: Optional[Dict[str, int]] = {}
 
 
 # ── 부서별 에이전트 레지스트리 ──
@@ -60,67 +63,164 @@ DOMAIN_AGENTS: Dict[str, Callable[..., Awaitable[Dict[str, Any]]]] = {
 }
 
 
+import inspect
+
+def invoke_domain_agent(domain: str, **kwargs) -> Awaitable[Dict[str, Any]]:
+    """
+    Dynamically calls the domain agent function with only the arguments it accepts in its signature.
+    """
+    agent_func = DOMAIN_AGENTS.get(domain)
+    if not agent_func:
+        raise ValueError(f"Agent function for domain '{domain}' not found.")
+        
+    sig = inspect.signature(agent_func)
+    has_var_keyword = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+    
+    filtered_kwargs = {}
+    for k, v in kwargs.items():
+        param_name = k
+        # Map generic names to specific names if needed
+        if k == "system_language" and "system_language" not in sig.parameters and "language" in sig.parameters:
+            param_name = "language"
+            
+        if has_var_keyword or param_name in sig.parameters:
+            filtered_kwargs[param_name] = v
+            
+    return agent_func(**filtered_kwargs)
+
+
+
 # ── 다국어 정적 멘트 딕셔너리 ──
 _background_tasks = set()
 
 STATIC_REPLIES = {
     "ESCALATION": {
-        "ko": "제가 바로 답변드리기 어려운 부분이라, 프런트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
-        "en": "I'll connect you to the front desk right away to assist you further. Please hold on a moment!"
+        "ko": "제가 바로 답변드리기 어려운 부분이라, 프론트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
+        "en": "I'll connect you to the front desk right away to assist you further. Please hold on a moment! 😊",
+        "ja": "すぐに対応できるよう、フロントデスクにお繋ぎいたします。少々お待ちくださいませ。😊",
+        "zh": "我会立刻为您连接到前台以便进一步协助您。请稍等片刻！😊"
     },
     "ESCALATION_INFO": {
-        "ko": "더 자세한 정보를 위해 프런트 데스크 직원에게 연결해 드릴게요! 잠시만 기다려 주세요.",
-        "en": "I'll connect you to the front desk for more detailed information! Please hold on a moment."
+        "ko": "더 자세한 정보를 위해 프론트 데스크 직원에게 연결해 드릴게요! 잠시만 기다려 주세요.",
+        "en": "I'll connect you to the front desk for more detailed information! Please hold on a moment. 😊",
+        "ja": "より詳細な情報については、フロントデスクにお繋ぎいたします！少々お待ちください。😊",
+        "zh": "为了提供更详细的信息，我会为您连接到前台！请稍等片刻。😊"
     },
     "CLARIFICATION": {
         "ko": "어떤 말씀이신지 조금만 더 자세히 알려주시겠어요? 말씀해주시면 바로 도와드릴게요!",
-        "en": "Could you tell me a bit more about what you need? I'd be happy to help you right away!"
+        "en": "Could you tell me a bit more about what you need? I'd be happy to help you right away! 😊",
+        "ja": "どのようなご用件か、もう少し詳しく教えていただけますか？すぐにお手伝いさせていただきます！😊",
+        "zh": "您能详细告诉我您的需求吗？我很乐意立刻帮助您！😊"
+    },
+    "CANCEL_REJECTED": {
+        "ko": "안타깝게도 해당 요청은 취소가 어렵습니다. 🥲 이미 처리가 시작되었거나 부서 확인이 필요한 상태이니 양해 부탁드립니다. 🙏",
+        "en": "Unfortunately, this request cannot be cancelled. It is already in progress or requires department confirmation. 🥲🙏",
+        "ja": "申し訳ありませんが、キャンセルリクエストは却下されました。すでに処理が開始されているか、部門の確認が必要です。🥲🙏",
+        "zh": "抱歉，取消请求被拒绝。该请求已在处理中或需要部门批准。🥲🙏"
+    },
+    "CANCEL_SUCCESS": {
+        "ko": "네, 요청하신 건이 정상적으로 즉시 취소 처리되었습니다. 😌 다른 필요하신 사항이 있다면 언제든 말씀해 주세요!",
+        "en": "Your request has been successfully cancelled. 😌 Please let me know if you need anything else!",
+        "ja": "リクエストは正常にキャンセルされました。😌 他にご要望がございましたら、いつでもお申し付けください。",
+        "zh": "您的请求已成功取消。😌 如果您还有其他需要，请随时告诉我！"
+    },
+    "CANCEL_PENDING": {
+        "ko": "해당 건은 이미 처리가 진행 중이어서 담당 부서로 취소 가능 여부를 확인 중입니다. 🏃‍♂️ 확인 후 바로 안내해 드릴게요!",
+        "en": "Your request is already being processed, so we have sent a cancellation request to the department. 🏃‍♂️ We will notify you once confirmed!",
+        "ja": "すでに処理が進行中のため、担当部署にキャンセルをリクエストしました. 🏃‍♂️ 確認次第お知らせいたします。",
+        "zh": "您的请求正在处理中，因此我们已向相关部门发送了取消请求. 🏃‍♂️ 确认后我们将通知您。"
+    },
+    "CANCEL_IN_PROGRESS": {
+        "ko": "네, 요청하신 건에 대해 취소를 접수해 드릴게요! 😌 아직 대기 중이라면 바로 취소되며, 이미 처리 중이라면 부서 확인 후 안내해 드리겠습니다.",
+        "en": "We will process the cancellation for the specific request. Pending ones are canceled immediately, while in-progress ones require department confirmation. 😌",
+        "ja": "ご指定のリクエストのキャンセル手続きを行います. 待機中のものは即座にキャンセルされ, 対応中のものは部門の確認が必要となります. 😌",
+        "zh": "我们将为您处理指定请求的取消操作。待处理的将立即取消，处理中的需要相关部门确认。😌"
     },
     "CANCEL": {
         "ko": "대기 중인 요청은 즉시 취소 처리됩니다. 단, 이미 직원이 처리를 시작한 경우 담당 부서 확인 후 취소됩니다.",
-        "en": "Pending requests will be canceled immediately. If staff have already begun processing, it will be canceled after department confirmation."
+        "en": "Pending requests will be canceled immediately. If staff have already begun processing, it will be canceled after department confirmation. 😌",
+        "ja": "待機中のリクエストは即座にキャンセルされます。すでにスタッフが対応を開始している場合は、担当部門の確認後にキャンセルされます。😌",
+        "zh": "待处理的请求将立即取消。如果工作人员已经开始处理，将在相关部门确认后取消。😌"
     },
     "STATUS_CHECK": {
         "ko": "현재 고객님의 최근 요청 진행 상태를 확인해 드리겠습니다.",
-        "en": "I will check the status of your most recent request right now."
+        "en": "I will check the status of your most recent request right now. 🔍",
+        "ja": "お客様の最新のリクエストの状況をただいま確認いたします。🔍",
+        "zh": "我将立刻为您查询最近请求的处理状态。🔍"
     },
     "TARGETED_CANCEL": {
         "ko": "지목하신 요청의 취소를 진행합니다. 대기 중인 건은 즉시 취소되며, 처리 중인 건은 부서 확인 후 취소됩니다.",
-        "en": "We will process the cancellation for the specific request. Pending ones are canceled immediately, while in-progress ones require department confirmation."
+        "en": "We will process the cancellation for the specific request. Pending ones are canceled immediately, while in-progress ones require department confirmation. 😌",
+        "ja": "ご指定のリクエストのキャンセル手続きを行います. 待機中のものは即座にキャンセルされ, 対応中のものは部門の確認が必要となります. 😌",
+        "zh": "我们将为您处理指定请求的取消操作。待处理的将立即取消，处理中的需要相关部门确认。😌"
     },
     "TASK_WAIT": {
-        "ko": "네, 알겠습니다! 담당 부서로 빠르게 전달해 드릴게요. 조금만 기다려 주세요.",
-        "en": "Got it! I'll pass this on to the right department right away. Please give us just a moment."
+        "ko": "네, 알겠습니다! 담당 부서로 빠르게 전달해 두었습니다. 🚀 조금만 기다려 주시면 금방 조치해 드릴게요. 😊",
+        "en": "Got it! I'll pass this on to the right department right away. Please give us just a moment. 🚀😊",
+        "ja": "かしこまりました！すぐに担当部門にお伝えいたします。少々お待ちくださいませ。🚀😊",
+        "zh": "明白！我会立刻将此转交给相关部门。请稍等片刻。🚀😊"
     },
     "INFO_NOT_FOUND": {
-        "ko": "앗, 그 부분은 제가 바로 답변드리기 어려워 프런트 데스크 직원에게 즉시 전달해 두었습니다! 직원이 확인 후 바로 채팅으로 답변 드릴 예정이니 잠시만 기다려 주세요.",
-        "en": "Oh, I'm not quite sure about that one! I have forwarded your question to the front desk staff. They will check and reply to you here shortly."
+        "ko": "그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏",
+        "en": "I'm not quite sure about that one! I have forwarded your question to the front desk staff. They will check and reply to you here shortly. 🥲🙏",
+        "ja": "申し訳ありません、そちらについてはお答えいたしかねます。フロントデスクのスタッフに質問を転送いたしましたので、確認後すぐにこちらでご返答させていただきます. 🥲🙏",
+        "zh": "抱歉，关于这个问题我不太确定！我已经将您的问题转交给了前台员工。他们会核实后尽快在这里回复您。🥲🙏"
     },
     "ERROR": {
-        "ko": "잠시 시스템에 통신 지연이 생겼나 봐요. 조금만 이따가 다시 말씀해 주시겠어요?",
-        "en": "It looks like we're having a tiny system hiccup. Could you try asking again in just a moment?"
+        "ko": "잠시 통신이 원활하지 않았나 봐요. 🥲 번거로우시겠지만 조금만 이따가 다시 한 번 말씀해 주시겠어요? 🙏",
+        "en": "It looks like we're having a tiny system hiccup. Could you try asking again in just a moment? 🥲🙏",
+        "ja": "システムに一時的な問題が発生しているようです. 少し経ってからもう一度お試しいただけますか？ 🥲🙏",
+        "zh": "系统似乎出现了暂时的故障。您能稍后再试一次吗？ 🥲🙏"
     },
     "COMPLAINT": {
-        "ko": "불편을 드려 대단히 죄송합니다. 지금 바로 프런트와 직접 연결해 드리겠습니다.",
-        "en": "We sincerely apologize for the inconvenience. We will connect you directly to the front desk right now."
+        "ko": "불편을 드려 대단히 죄송합니다. 🥲 지금 바로 프론트 직원과 직접 연결하여 도움을 드리겠습니다.",
+        "en": "We sincerely apologize for the inconvenience. We will connect you directly to the front desk right now. 🥲",
+        "ja": "ご不便をおかけして大変申し訳ございません。ただいまフロントデスクに直接お繋ぎいたします。🥲",
+        "zh": "给您带来不便，我们深表歉意。现在立刻为您直接连接到前台。🥲"
     },
     "FALLBACK_FAILURE": {
-        "ko": "말씀하신 내용을 파악하기 어렵습니다. 프론트 연결이 필요하시면 '프론트 연결'이라고 말씀해 주세요.",
-        "en": "I'm having trouble understanding your request. If you need assistance from the front desk, please type 'connect to front desk'."
+        "ko": "제가 정확한 의미를 파악하기 조금 어렵네요. 🥲 직원분의 도움이 필요하시다면 제가 연결해드릴까요?",
+        "en": "I'm having trouble understanding your request. If you need assistance, shall I connect you to the front desk? 🥲",
+        "ja": "リクエストを理解できませんでした. フロントデスクのサポートが必要な場合は, フロントデスクにお繋ぎいたしましょうか？ 🥲",
+        "zh": "我无法理解您的请求. 如果您需要前台的帮助, 需要我为您连接前台吗？ 🥲"
     },
     "NEED_MORE_INFO": {
-        "ko": "자세한 정보가 필요하시면 프런트로 연결해 드릴까요?",
-        "en": "Would you like me to connect you to the front desk for more detailed information?"
+        "ko": "조금 더 상세한 안내가 필요하시다면 프론트 데스크로 바로 연결해 드릴까요?",
+        "en": "Would you like me to connect you to the front desk for more detailed information? 😊",
+        "ja": "より詳細な情報をご希望の場合は、フロントデスクにお繋ぎいたしましょうか？ 😊",
+        "zh": "您需要我将您连接到前台以获取更详细的信息吗？ 😊"
     },
     "EMERGENCY_REPLY": {
-        "ko": "응급 상황을 인지하였습니다. 즉시 119 및 호텔 보안팀을 호출하고 가장 가까운 직원을 파견하겠습니다. 안전한 곳에 머물러 주십시오.",
-        "en": "We have recognized an emergency. We are immediately dispatching hotel security and calling 911. Please stay safe."
+        "ko": "🚨 응급 상황을 인지하였습니다. 즉시 호텔 보안팀을 호출하고 직원을 파견하겠습니다. 부디 안전한 곳에 머물러 주십시오.",
+        "en": "🚨 We have recognized an emergency. We are immediately dispatching hotel security. Please stay safe.",
+        "ja": "🚨 緊急事態を認識しました. 直ちにホテルのセキュリティチームを呼び, スタッフを派遣します. 安全な場所にとどまってください.",
+        "zh": "🚨 我们已经确认了紧急情况. 将立即呼叫酒店安保团队, 并派遣员工. 请待在安全的地方."
+    },
+    "OPTION_YES": {
+        "ko": "네",
+        "en": "Yes",
+        "ja": "はい",
+        "zh": "是的"
+    },
+    "OPTION_NO": {
+        "ko": "아니요",
+        "en": "No",
+        "ja": "いいえ",
+        "zh": "不是"
     }
 }
 
 def _get_static_reply(key: str, lang: str) -> str:
+    # ── [프론트엔드 다국어 언어팩 연동 코드 맵핑] ──
+    # 프론트엔드가 [FORWARD_FRONT] 또는 [INFO_NOT_FOUND] 코드를 감지하고
+    # 각 언어팩(locale)에서 동적으로 번역된 멘트를 표시하도록 수정되었습니다.
+    if key in ["COMPLAINT", "ESCALATION"]:
+        return "[FORWARD_FRONT]"
+    if key in ["INFO_NOT_FOUND", "ESCALATION_INFO"]:
+        return "[INFO_NOT_FOUND]"
+
     lang = lang.lower()
-    if lang not in ["ko", "en"]:
+    if lang not in ["ko", "en", "ja", "zh"]:
         lang = "en"
     return STATIC_REPLIES.get(key, {}).get(lang, STATIC_REPLIES.get(key, {}).get("en", "We are processing your request."))
 
@@ -173,6 +273,21 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
         return default
         
     request.language = _detect_language(request.text, request.language)
+
+    # ── [개인정보 보호 필터링 및 자동 거절 (PII Masking & Privacy Guard)] ──
+    if has_pii(request.text):
+        masked_text = mask_pii(request.text)
+        print(f"[PII Guard] 민감 정보 차단: {masked_text}")
+        
+        return [{
+            "guest_reply": "[PII_GUARD]",
+            "summary": "개인정보 보호 차단",
+            "domain_code": None,
+            "priority": "NORMAL",
+            "entities": {},
+            "confidence": 1.0,
+            "action": "PII_GUARD"
+        }]
 
     # [수정] AI 모델은 이미지를 직접 판독하지 않도록 이미지 데이터를 비웁니다.
     # 사진은 단순 첨부파일(백엔드가 Redis에 저장) 용도로만 사용하며, AI는 오직 '텍스트'에 집중해 라우팅합니다.
@@ -284,7 +399,7 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                     recent_chat = "\n".join([f"{m.get('role', 'user')}: {m.get('content', '')}" for m in request.chat_history[-4:]])
                     escalation_prompt = (
                         f"고객과의 대화에서 AI가 여러 번 질문을 던졌지만, 고객이 명확한 답을 주지 않고 계속 겉도는 상황입니다.\n"
-                        f"정중하게 '요청하신 내용을 정확히 파악하기 어렵습니다. 원하시는 서비스를 다시 말씀해 주시거나, 프론트 연결을 원하시면 말씀해 주세요.' 라는 뉘앙스로 자연스럽게 안내하고 대화를 종료하세요.\n"
+                        f"정중하게 '제가 정확한 의미를 파악하기 조금 어렵네요. 🥲 직원분의 도움이 필요하시다면 제가 연결해드릴까요?' 라는 뉘앙스로 자연스럽게 안내하세요.\n"
                         f"반드시 고객의 언어(주 언어: {request.language})로 작성하세요.\n\n"
                         f"[최근 대화]\n{recent_chat}"
                     )
@@ -304,7 +419,10 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                 response["entities"] = {}
                 response["confidence"] = 0.0
                 response["missing_fields"] = []
-                response["clarification_options"] = []
+                response["clarification_options"] = [
+                    _get_static_reply("OPTION_YES", request.language),
+                    _get_static_reply("OPTION_NO", request.language)
+                ]
         
         # ── [비동기 로깅 메타데이터 주입] ──
         # STEP 4에서 이미 에이전트별 메타가 세팅되었으면 스킵 (이중 주입 방지)
@@ -324,6 +442,23 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     # ── [비동기 로깅 메타데이터 처리 보류] ──
     # agent_result 안에서 __ai_log_meta를 반환하도록 처리
 
+    from app.core.emergency_filter import emergency_pre_filter, get_emergency_reply
+    
+    # ── [긴급 상황 사전 필터 (1-Tier)] ──
+    em_match = emergency_pre_filter(request.text)
+    if em_match:
+        category = em_match["category"]
+        print(f"[Analyze] 🚨 긴급 상황 키워드 감지: {category}")
+        return [{
+            "guest_reply": get_emergency_reply(category, request.language),
+            "summary": f"긴급 상황 자동 접수 ({category})",
+            "domain_code": "EMERGENCY",
+            "priority": "EMERGENCY",
+            "entities": {"intent": "EMERGENCY", "category": category},
+            "confidence": 1.0,
+            "reasoning": f"• 긴급 키워드 '{em_match['matched_keyword']}' 감지\n• 1-Tier 즉시 라우팅"
+        }]
+
     # ── [실무 최적화: 역질문 단답형(네/아니요) 강제 라우팅 인터셉트] ──
     if request.chat_history:
         last_ai = None
@@ -332,12 +467,12 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 last_ai = msg.get("content", "")
                 break
         
-        if last_ai and "프런트 데스크의 직접적인 조치나 확인이 필요하신 상황일까요" in last_ai:
+        if last_ai and "프론트 데스크의 직접적인 조치나 확인이 필요하신 상황일까요" in last_ai:
             text_lower = request.text.lower().replace(" ", "")
             if any(w in text_lower for w in ["네", "응", "조치해", "필요해", "부탁해", "해주", "yes", "요청"]):
                 print(f"[Analyze] ⚡ 역질문 단답형 '네' 감지 → FRONT_ESCALATION 강제 라우팅")
                 return [{
-                    "guest_reply": "제가 바로 답변드리기 어려운 부분이라, 프런트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
+                    "guest_reply": "제가 바로 답변드리기 어려운 부분이라, 프론트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
                     "summary": "프론트 연결 요청 (고객 확인)",
                     "domain_code": "FRONT",
                     "priority": "URGENT",
@@ -426,7 +561,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     # STEP 2: 라우터 엔진으로 도메인 분류
     # ──────────────────────────────────────────────
     try:
-        router_results = route(request.text, request.chat_history, request.images)
+        router_results = route(request.text, chat_history=request.chat_history, images=request.images, system_language=request.system_language, active_requests=getattr(request, 'active_requests', []))
         print(f"\n[Analyze] 🔀 라우터 결과: {[{'route_type': r.route_type, 'domain': r.domain, 'confidence': r.confidence} for r in router_results]}")
     except Exception as e:
         print(f"[Analyze] ❌ 라우터 실패: {e}")
@@ -482,7 +617,21 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         r.confidence = 1.0
 
     # ──────────────────────────────────────────────
-    # STEP 2-5: [Progress Indicator] 라우터 결과 기반 진행 상태 전송
+    # STEP 2-2: [전체 취소 + EMERGENCY 오분류 보정]
+    # "모든 요청 취소" 시 대부분의 route가 CANCEL인데 EMERGENCY만 FRONT_ESCALATION으로
+    # 분류되는 경우, EMERGENCY도 CANCEL로 강제 오버라이드 (새 긴급 티켓 생성 방지)
+    # ──────────────────────────────────────────────
+    text_lower_check = request.text.lower()
+    is_cancel_intent = any(word in text_lower_check for word in ["전부", "모두", "모든", "다 취소", "전체", "all", "everything", "취소"])
+    cancel_routes = [r for r in router_results if r.route_type == "CANCEL"]
+    emergency_escalation_routes = [r for r in router_results if r.route_type == "FRONT_ESCALATION" and r.domain == "EMERGENCY"]
+
+    if is_cancel_intent and emergency_escalation_routes:
+        print(f"[Analyze] 🛡️ 전체 취소 + EMERGENCY 오분류 보정 — FRONT_ESCALATION → CANCEL 오버라이드")
+        for r in emergency_escalation_routes:
+            r.route_type = "CANCEL"
+            r.confidence = 1.0
+
     # ──────────────────────────────────────────────
     # ⚠️ 에이전트 실행 전에 반드시 전송 완료되어야 하므로 await로 직접 호출합니다.
     #    (create_task 사용 시, 응답이 먼저 도착하여 Progress UI가 표시되지 않는 레이스 컨디션 발생)
@@ -519,11 +668,36 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
 
             # 부서별 에이전트가 등록되어 있으면 호출
             if domain in DOMAIN_AGENTS:
-                coro = DOMAIN_AGENTS[domain](
-                    user_message=request.text,
+                # [공통 주문 보존 규칙] 활성 요청 목록을 chat_history 앞에 주입하여
+                # 모든 부서 에이전트가 REPLACE 시 기존 아이템을 보존하도록 컨텍스트 제공
+                enriched_history = list(request.chat_history)
+                if request.active_requests:
+                    import json
+                    filtered = [{"id": r.get("id"), "summary": r.get("summary")} for r in request.active_requests]
+                    active_ctx = (
+                        f"[고객의 현재 활성 요청(주문) 목록]\n"
+                        f"{json.dumps(filtered, ensure_ascii=False)}\n\n"
+                        f"[주문 수정 및 부분 취소 규칙 (CRITICAL)]\n"
+                        f"기존 주문을 수정하거나 일부 항목만 취소할 때(REPLACE):\n"
+                        f"1. 대상 파악 주의: 직전 대화 주제에 무조건 의존하지 마세요. 사용자의 요청(예: '물 1병으로 바꿔줘')에 포함된 키워드('물')가 위 [현재 활성 요청 목록] 중 어느 티켓(예: '물 2병 및 수건 2개 요청')과 일치하는지 먼저 찾아야 합니다.\n"
+                        f"2. 위 목록에서 귀하의 부서와 관련된 기존 아이템들을 정확히 파악하세요.\n"
+                        f"3. 사용자의 취소/변경 요청을 반영하여 최종적으로 남게 되는 아이템들의 상태를 계산하세요.\n"
+                        f"4. 취소된 아이템은 entities에서 완전히 제외(삭제)하고, 절대 음수(-) 수량을 사용하지 마세요.\n"
+                        f"5. 변경되지 않고 남은 아이템들은 반드시 entities 출력에 그대로 포함해야 합니다. 누락 시 영구 삭제됩니다.\n"
+                    )
+                    user_message_with_ctx = request.text + "\n\n" + active_ctx
+                else:
+                    user_message_with_ctx = request.text
+
+                coro = invoke_domain_agent(
+                    domain,
+                    user_message=user_message_with_ctx,
                     room_no=request.room_no,
                     chat_history=request.chat_history,
-                    images=request.images
+                    images=request.images,
+                    system_language=request.language,
+                    active_requests=getattr(request, 'active_requests', []),
+                    room_inventory=getattr(request, 'room_inventory', {})
                 )
                 agent_tasks.append((domain, primary, coro))
                 continue
@@ -550,6 +724,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
         # STEP 3-b: SOFT_FALLBACK / NON_ACTIONABLE → 티켓 생성 없이 답변만
         if primary.route_type in ("SOFT_FALLBACK", "NON_ACTIONABLE"):
             guest_reply = primary.reply or _get_static_reply("FALLBACK_FAILURE", request.language)
+            fallback_msg = _get_static_reply("FALLBACK_FAILURE", request.language)
             response = {
                 "guest_reply": guest_reply,
                 "summary": "안내 및 거절",
@@ -559,6 +734,11 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "confidence": primary.confidence,
                 "reasoning": getattr(primary, 'reasoning', '알 수 없음')
             }
+            if guest_reply == fallback_msg:
+                response["clarification_options"] = [
+                    _get_static_reply("OPTION_YES", request.language),
+                    _get_static_reply("OPTION_NO", request.language)
+                ]
             print(f"[Analyze] 💬 {primary.route_type} 응답")
             print(f"[Analyze] 응답: {response}\n")
             final_responses.append(response)
@@ -566,6 +746,26 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
 
         # STEP 3-c: CLARIFICATION → 되묻기
         if primary.route_type == "CLARIFICATION":
+            # ── [라우터 직접 생성 검증] ──
+            # 라우터가 직접 구체적인 질문/선택지를 생성했다면 (예: Ambiguous Cancellation), 에이전트 위임 없이 즉시 반환
+            if hasattr(primary, 'clarification_options') and primary.clarification_options and len(primary.clarification_options) > 0:
+                guest_reply = getattr(primary, 'clarification_question', None) or _get_static_reply("CLARIFICATION", request.language)
+                response = {
+                    "guest_reply": guest_reply,
+                    "summary": "취소 요청 대상 불분명" if "취소" in guest_reply else "추가 확인 필요",
+                    "domain_code": None,
+                    "priority": "NORMAL",
+                    "entities": {},
+                    "confidence": primary.confidence,
+                    "missing_fields": [],
+                    "clarification_options": primary.clarification_options,
+                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                }
+                print(f"[Analyze] ❓ CLARIFICATION → 라우터 직접 생성 옵션 사용")
+                print(f"[Analyze] 응답: {response}\n")
+                final_responses.append(response)
+                continue
+
             # ── [에이전트 재위임 로직] ──
             # 직전 AI 메시지가 에이전트의 구체적 질문("?")이었다면,
             # 라우터가 CLARIFICATION으로 분류해도 해당 에이전트를 다시 호출하여
@@ -600,11 +800,14 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
 
             if last_agent_domain:
                 try:
-                    agent_result = await DOMAIN_AGENTS[last_agent_domain](
+                    agent_result = await invoke_domain_agent(
+                        last_agent_domain,
                         user_message=request.text,
                         room_no=request.room_no,
                         chat_history=request.chat_history,
-                        images=request.images
+                        images=request.images,
+                        system_language=request.language,
+                        active_requests=getattr(request, 'active_requests', [])
                     )
                     response = {
                         "guest_reply": agent_result.get("guest_reply", primary.clarification_question or _get_static_reply("CLARIFICATION", request.language)),
@@ -626,11 +829,14 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
 
             # last_agent_domain이 없거나 실패한 경우, FRONT 에이전트(기본 라우팅 질문)로 처리
             try:
-                agent_result = await DOMAIN_AGENTS["FRONT"](
+                agent_result = await invoke_domain_agent(
+                    "FRONT",
                     user_message=request.text,
                     room_no=request.room_no,
                     chat_history=request.chat_history,
-                    images=request.images
+                    images=request.images,
+                    system_language=request.language,
+                    active_requests=getattr(request, 'active_requests', [])
                 )
                 # FRONT 에이전트가 ESCALATION(직원 연결)을 결정한 경우 domain_code를 살려서 티켓 생성
                 is_escalation = agent_result.get("entities", {}).get("intent") == "ESCALATION"
@@ -673,11 +879,14 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             # ── FB 도메인 INFO는 에이전트에게 위임 (메뉴 기반 알러지 추천 등) ──
             if domain == "FB" and "FB" in DOMAIN_AGENTS:
                 try:
-                    agent_result = await DOMAIN_AGENTS["FB"](
+                    agent_result = await invoke_domain_agent(
+                        "FB",
                         user_message=request.text,
                         room_no=request.room_no,
                         chat_history=request.chat_history,
-                        images=request.images
+                        images=request.images,
+                        system_language=request.language,
+                        active_requests=getattr(request, 'active_requests', [])
                     )
                     response = {
                         "guest_reply": agent_result.get("guest_reply", "메뉴 정보를 확인 중입니다."),
@@ -739,8 +948,32 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 additional_instructions = ""
                 import random
                 if domain == "CONCIERGE" and rag_results:
-                    rag_results = [r for r in rag_results if r.get('similarity', 1.0) >= 0.3]
+                    rag_results = [r for r in rag_results if r.get('similarity', 1.0) >= 0.5]
                     
+                    # --- [추가] 카테고리 주입 및 목표 카테고리 감지 ---
+                    from app.domains.concierge.knowledge_data import CONCIERGE_KNOWLEDGE
+                    answer_to_cat = {k['answer']: k.get('category') for k in CONCIERGE_KNOWLEDGE}
+                    for r in rag_results:
+                        r['category'] = answer_to_cat.get(r['answer'])
+                        
+                    target_category = None
+                    query_text = (search_query + " " + request.text).lower()
+                    
+                    restaurant_keywords = [
+                        "식당", "맛집", "먹을", "식사", "밥", "음식점", "레스토랑", "펍", "술집", 
+                        "restaurant", "food", "eat", "dining", "meal", "bar", "pub", "hungry", "cafe"
+                    ]
+                    tour_keywords = [
+                        "관광", "명소", "투어", "구경", "볼거리", "여행지", "가볼만한", "가볼 만한",
+                        "tour", "attraction", "sightseeing", "place to visit", "visit", "explore", "landmark"
+                    ]
+                    
+                    if any(kw in query_text for kw in restaurant_keywords):
+                        target_category = "restaurant"
+                    elif any(kw in query_text for kw in tour_keywords):
+                        target_category = "tour"
+                    # -----------------------------------------------
+
                     mentioned_places = []
                     if request.chat_history:
                         for msg in request.chat_history[-6:]:
@@ -775,7 +1008,6 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     
                     last_category = None
                     if last_place:
-                        from app.domains.concierge.knowledge_data import CONCIERGE_KNOWLEDGE
                         for k in CONCIERGE_KNOWLEDGE:
                             if last_place in k['answer']:
                                 last_category = k.get('category')
@@ -783,7 +1015,14 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     
                     if is_another_request and last_category:
                         # 동일 카테고리만 후보로 남김
-                        rec_results = [r for r in rec_results if r.get('category') == last_category]
+                        filtered_rec = [r for r in rec_results if r.get('category') == last_category]
+                        if filtered_rec:
+                            rec_results = filtered_rec
+                    elif target_category:
+                        # 첫 요청이라도 타겟 카테고리가 있으면 필터링
+                        filtered_rec = [r for r in rec_results if r.get('category') == target_category]
+                        if filtered_rec:
+                            rec_results = filtered_rec
 
                     is_reconfirm = "RE-CONFIRM" in (primary.reasoning or "").upper()
                     if not is_reconfirm and rec_results:
@@ -828,30 +1067,66 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
 
                 if rag_results:
                     knowledge = "\n".join([f"Q: {r['question']}\nA: {r['answer']}" for r in rag_results])
-                    info_prompt = (
-                        f"고객 질문: {request.text}\n\n"
-                        f"아래 제공된 [호텔 지식]은 고객 질문에 대해 검색된 공식 답변입니다. 반드시 이 지식을 활용하여 고객의 질문에 사용된 언어(또는 {request.language} 언어)로 친절하게 답변하세요. {additional_instructions}\n"
-                        f"고객이 한 번 더 묻거나 구체적으로 묻더라도, 제공된 [호텔 지식]을 명확한 답으로 간주하고 답변을 작성하세요. "
-                        f"그리고 답변 마지막에 반드시 '{_get_static_reply('NEED_MORE_INFO', request.language)}' 라는 문장을 덧붙이세요.\n"
-                        f"만약 [호텔 지식]이 고객의 질문과 아예 무관하다면, 절대 유추하거나 지어내지 말고 "
-                        f"'{_get_static_reply('INFO_NOT_FOUND', request.language)}' 라는 문장을 그대로 답변으로 사용하세요.\n\n"
-                        f"[호텔 지식]\n{knowledge}"
-                    )
+                    
+                    # [수정] 컨시어지 도메인인 경우, 지식 베이스를 더 적극적으로 활용하고 서비스 유도를 지시함
+                    if domain == "CONCIERGE":
+                        info_prompt = (
+                            f"고객 질문: {request.text}\n\n"
+                            f"아래 제공된 [호텔 지식]을 바탕으로 고객의 질문에 친절하게 답변하세요. {additional_instructions}\n"
+                            f"**중요**: 제공된 [호텔 지식]이 고객의 명시적인 질문(예: 특정 목적지)과 무관하다면, 억지로 답변을 지어내지 말고 '죄송합니다. 현재 해당 정보는 안내가 어렵습니다. 프론트 데스크로 연결해 드릴까요?' 라고 정중하게 답변하세요.\n"
+                            f"만약 답변 내용이 택시, 꽃배달, 예약 등 서비스 관련 내용이거나, 프론트 데스크 연결을 제안하는 내용이라면, 답변 마지막에 반드시 '지금 바로 예약을 도와드릴까요?' 또는 '필요하시면 바로 접수해 드릴까요?'와 같이 서비스 이용을 유도하는 질문을 포함하세요.\n"
+                            f"**주의**: 질문형으로 대화를 끝맺었다면, 고객이 누를 수 있는 답변 버튼(예: ['네', '아니오'])을 clarification_options에 반드시 제공하세요.\n"
+                            f"서비스 유도 질문이 없는 일반적인 정보 안내인 경우에만 마지막에 '{_get_static_reply('NEED_MORE_INFO', request.language)}'를 덧붙이세요.\n\n"
+                            f"[호텔 지식]\n{knowledge}"
+                        )
+                    else:
+                        info_prompt = (
+                            f"고객 질문: {request.text}\n\n"
+                            f"아래 제공된 [호텔 지식]은 고객 질문에 대해 검색된 공식 답변입니다. 반드시 이 지식을 활용하여 고객의 질문에 사용된 언어(또는 {request.language} 언어)로 친절하게 답변하세요. {additional_instructions}\n"
+                            f"고객이 한 번 더 묻거나 구체적으로 묻더라도, 제공된 [호텔 지식]을 명확한 답으로 간주하고 답변을 작성하세요. "
+                            f"그리고 답변 마지막에 반드시 '{_get_static_reply('NEED_MORE_INFO', request.language)}' 라는 문장을 덧붙이세요.\n"
+                            f"만약 [호텔 지식]이 고객의 질문과 아예 무관하다면, 절대 유추하거나 지어내지 말고 "
+                            f"'{_get_static_reply('INFO_NOT_FOUND', request.language)}' 라는 문장을 그대로 답변으로 사용하세요.\n\n"
+                            f"[호텔 지식]\n{knowledge}"
+                        )
                     raw = await call_gemini_async(
                         prompt=info_prompt, 
-                        system_instruction='당신은 친절한 아눅(Anook) 호텔 컨시어지입니다. 반드시 {"reply": "답변내용"} 형식의 JSON으로만 출력하세요.'
+                        system_instruction='당신은 친절한 아눅(Anook) 호텔 컨시어지입니다. 반드시 {"reply": "답변내용", "clarification_options": ["옵션1", "옵션2"]} 형식의 JSON으로만 출력하세요. 선택지가 필요 없으면 빈 배열을 넣으세요.'
                     )
                     guest_reply = raw.get("reply", _get_static_reply("INFO_NOT_FOUND", request.language)) if isinstance(raw, dict) else _get_static_reply("INFO_NOT_FOUND", request.language)
+                    info_clarification_options = raw.get("clarification_options", []) if isinstance(raw, dict) else []
                 else:
+                    # [수정] RAG 결과가 없을 때 에이전트 폴백 실행 시, 에이전트의 전체 결과를 response로 활용함
                     if domain == "CONCIERGE" and "CONCIERGE" in DOMAIN_AGENTS:
                         print(f"[Analyze] 💡 INFO → RAG 결과 없음. CONCIERGE 에이전트 폴백 실행")
-                        agent_result = await DOMAIN_AGENTS["CONCIERGE"](
+                        agent_result = await invoke_domain_agent(
+                            "CONCIERGE",
                             user_message=request.text,
                             room_no=request.room_no,
                             chat_history=request.chat_history,
-                            images=request.images
+                            images=request.images,
+                            system_language=request.language
                         )
-                        guest_reply = agent_result.get("guest_reply", _get_static_reply("INFO_NOT_FOUND", request.language)) if isinstance(agent_result, dict) else _get_static_reply("INFO_NOT_FOUND", request.language)
+                        # 에이전트 결과를 통째로 response 객체로 만듦
+                        response = {
+                            "guest_reply": agent_result.get("guest_reply", _get_static_reply("INFO_NOT_FOUND", request.language)),
+                            "summary": agent_result.get("summary", "정보 문의"),
+                            "domain_code": agent_result.get("domain_code"),
+                            "priority": agent_result.get("priority", "NORMAL"),
+                            "entities": agent_result.get("entities", {}),
+                            "confidence": agent_result.get("confidence", primary.confidence),
+                            "missing_fields": agent_result.get("missing_fields", []),
+                            "clarification_options": agent_result.get("clarification_options", [])
+                        }
+                        
+                        # 컨시어지는 웬만한 경우 에스컬레이션 없이 직접 답변하도록 신뢰도 보정
+                        if response["confidence"] < 0.5 and response["domain_code"] != "FRONT":
+                            response["confidence"] = 0.5 
+
+                        print(f"[Analyze] ℹ️ INFO → CONCIERGE 에이전트 결과 채택")
+                        print(f"[Analyze] 응답: {response}\n")
+                        final_responses.append(response)
+                        continue
                     else:
                         guest_reply = _get_static_reply("INFO_NOT_FOUND", request.language)
             except Exception as e:
@@ -860,14 +1135,25 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
 
             info_not_found_msg = _get_static_reply("INFO_NOT_FOUND", request.language)
             need_more_info_msg = _get_static_reply("NEED_MORE_INFO", request.language)
+            
             if guest_reply == info_not_found_msg:
+                # [수정] 컨시어지인 경우 INFO_NOT_FOUND 상태에서도 에이전트에게 한 번 더 기회를 줌 (이미 위에서 처리되지 않은 경우)
+                if domain == "CONCIERGE" and "CONCIERGE" in DOMAIN_AGENTS:
+                     pass
+                
+                # [수정] 정보가 없을 때 강제 이관(ESCALATION) 대신 Soft Fallback을 통해 고객에게 연결 의사 묻기
                 response = {
-                    "guest_reply": _get_static_reply("ESCALATION", request.language),
-                    "summary": "AI 미학습 정보 (직원 연결)",
-                    "domain_code": "FRONT",
+                    "guest_reply": "제가 바로 확인해 드리기 어려운 내용이네요. 프론트 데스크 직원을 바로 연결해 드릴까요?" if request.language == "ko" else "Oh, that's a bit tricky for me to answer right away. Shall I connect you to the front desk?",
+                    "summary": "추가 정보 필요 (프론트 연결 제안)",
+                    "domain_code": None,
                     "priority": "NORMAL",
-                    "entities": {"intent": "ESCALATION"},
+                    "entities": {},
                     "confidence": 0.0,
+                    "missing_fields": [],
+                    "clarification_options": [
+                        _get_static_reply("OPTION_YES", request.language),
+                        _get_static_reply("OPTION_NO", request.language)
+                    ],
                     "reasoning": getattr(primary, 'reasoning', '알 수 없음')
                 }
             elif need_more_info_msg in guest_reply:
@@ -878,10 +1164,15 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "priority": "NORMAL",
                     "entities": {},
                     "confidence": primary.confidence,
-                    "clarification_options": ["네", "아니요"],
+                    "clarification_options": [
+                        _get_static_reply("OPTION_YES", request.language),
+                        _get_static_reply("OPTION_NO", request.language)
+                    ],
                     "reasoning": getattr(primary, 'reasoning', '알 수 없음')
                 }
             else:
+                # LLM이 생성한 clarification_options가 있으면 사용
+                options = info_clarification_options if 'info_clarification_options' in locals() else []
                 response = {
                     "guest_reply": guest_reply,
                     "summary": "정보 문의",
@@ -889,6 +1180,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "priority": "NORMAL",
                     "entities": {},
                     "confidence": primary.confidence,
+                    "clarification_options": options
                 }
                 
             print(f"[Analyze] ℹ️ INFO 응답")
@@ -900,6 +1192,10 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
         if primary.route_type == "CANCEL":
             text_lower = request.text.lower()
             is_all = any(word in text_lower for word in ["전부", "모두", "모든", "다 취소", "전체", "all", "everything"])
+            
+            # AI가 명시적으로 특정 요청 ID를 지정하여 취소하려고 한 경우, 전체 취소로 오버라이드하지 않고 핀포인트 취소로 처리함
+            if hasattr(primary, 'target_request_id') and primary.target_request_id is not None:
+                is_all = False
             
             # FALSE ALARM: EMERGENCY 도메인 취소 (오인 신고 정정)
             if primary.domain == "EMERGENCY":
@@ -918,34 +1214,94 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 print(f"[Analyze] 응답: {response}\n")
                 final_responses.append(response)
                 continue
-            elif is_all:
-                response = {
-                    "guest_reply": "대기 중인 요청은 즉시 취소 처리됩니다. 단, 이미 직원이 처리를 시작한 요청의 경우 담당 부서에 취소 가능 여부를 확인해 달라고 전달해 두겠습니다.",
-                    "summary": "전체 요청 취소",
-                    "domain_code": None,
-                    "priority": "NORMAL",
-                    "entities": {},
-                    "confidence": primary.confidence,
-                    "action": "CANCEL_ALL_REQUESTS",
-                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
-                }
             else:
-                reply_key = "TARGETED_CANCEL" if primary.domain else "CANCEL"
-                response = {
-                    "guest_reply": _get_static_reply(reply_key, request.language),
-                    "summary": "요청 취소",
-                    "domain_code": primary.domain if primary.domain else None,
-                    "priority": "NORMAL",
-                    "entities": {"intent": "CANCEL"},
-                    "confidence": primary.confidence,
-                    "action": "CANCEL_REQUEST",
-                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
-                }
-                if hasattr(primary, 'action_type'):
-                    response["action_type"] = primary.action_type
-                # [Keyword Targeting] 취소 대상 키워드 전달
-                if hasattr(primary, 'target_keyword') and primary.target_keyword:
-                    response["target_keyword"] = primary.target_keyword
+                # active_requests에서 실제 취소할 대상 찾기
+                targets = []
+                active_reqs = getattr(request, 'active_requests', []) or []
+                
+                if is_all:
+                    targets = active_reqs
+                else:
+                    # 핀포인트 매칭 (ID, 키워드, 도메인 순)
+                    target_id = getattr(primary, 'target_request_id', None)
+                    target_kw = getattr(primary, 'target_keyword', None)
+                    target_dm = primary.domain
+                    
+                    if target_id is not None:
+                        targets = [r for r in active_reqs if r.get("id") == target_id]
+                    elif target_kw:
+                        kw_lower = target_kw.lower()
+                        targets = [r for r in active_reqs if r.get("summary") and kw_lower in r.get("summary", "").lower()]
+                    elif target_dm:
+                        dept_map = {"HK": "HK", "FACILITY": "FACILITY", "COFFEE": "FB", "FB": "FB", "CONCIERGE": "CONCIERGE"}
+                        target_dept_id = dept_map.get(target_dm)
+                        if target_dept_id:
+                            targets = [r for r in active_reqs if r.get("department_id") == target_dept_id]
+                    
+                    # 매칭된 대상이 전혀 없다면, 기본 폴백으로 가장 최신(첫 번째) active_request를 취소 대상으로 간주
+                    if not targets and active_reqs:
+                        targets = [active_reqs[0]]
+
+                # 타겟들의 상태 분석
+                has_pending = False
+                has_in_progress = False
+                for r in targets:
+                    status = r.get("status")
+                    if status in ("PENDING", "ESCALATED"):
+                        has_pending = True
+                    elif status in ("IN_PROGRESS", "ASSIGNED", "ACCEPTED"):
+                        has_in_progress = True
+
+                # 멘트 결정
+                if is_all:
+                    if has_pending and not has_in_progress:
+                        reply_text = _get_static_reply("CANCEL_SUCCESS", request.language)
+                    elif has_in_progress and not has_pending:
+                        reply_text = _get_static_reply("CANCEL_PENDING", request.language)
+                    else:
+                        # 믹스 혹은 기본값
+                        reply_text = "대기 중인 요청은 즉시 취소 처리됩니다. 단, 이미 직원이 처리를 시작한 요청의 경우 담당 부서에 취소 가능 여부를 확인해 달라고 전달해 두겠습니다."
+                        if request.language != "ko":
+                            reply_text = _get_static_reply("CANCEL_IN_PROGRESS", request.language)
+                    
+                    response = {
+                        "guest_reply": reply_text,
+                        "summary": "전체 요청 취소",
+                        "domain_code": None,
+                        "priority": "NORMAL",
+                        "entities": {},
+                        "confidence": primary.confidence,
+                        "action": "CANCEL_ALL_REQUESTS",
+                        "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                    }
+                else:
+                    if has_pending and not has_in_progress:
+                        reply_text = _get_static_reply("CANCEL_SUCCESS", request.language)
+                    elif has_in_progress and not has_pending:
+                        reply_text = _get_static_reply("CANCEL_PENDING", request.language)
+                    else:
+                        # 대기/처리중 믹스이거나 대상이 없는 경우
+                        reply_key = "TARGETED_CANCEL" if primary.domain else "CANCEL"
+                        reply_text = _get_static_reply(reply_key, request.language)
+                        
+                    response = {
+                        "guest_reply": reply_text,
+                        "summary": "요청 취소",
+                        "domain_code": primary.domain if primary.domain else None,
+                        "priority": "NORMAL",
+                        "entities": {"intent": "CANCEL"},
+                        "confidence": primary.confidence,
+                        "action": "CANCEL_REQUEST",
+                        "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                    }
+                    if hasattr(primary, 'action_type'):
+                        response["action_type"] = primary.action_type
+                    # [Keyword Targeting] 취소 대상 키워드 전달
+                    if hasattr(primary, 'target_keyword') and primary.target_keyword:
+                        response["target_keyword"] = primary.target_keyword
+                    # [ID Targeting] 취소 대상 ID 전달
+                    if hasattr(primary, 'target_request_id') and primary.target_request_id is not None:
+                        response["target_request_id"] = primary.target_request_id
             
             print(f"[Analyze] 🛑 CANCEL 응답")
             print(f"[Analyze] 응답: {response}\n")
@@ -969,19 +1325,19 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             
             if is_emergency:
                 reply_key = "EMERGENCY_REPLY"
-                summary_val = "긴급 구조 요청 (119/보안팀)"
+                summary_val = "[프론트 연결] 긴급 구조 요청"
             elif is_complaint:
                 reply_key = "COMPLAINT"
-                summary_val = "프론트 연결 (고객 불만)"
+                summary_val = "[프론트 연결] 고객 불만"
             else:
                 reply_key = escalation_key
-                summary_val = "프론트 연결 요청 (고객 확인)"
+                summary_val = "[프론트 연결] 고객 직접 요청"
             
             response = {
                 "guest_reply": _get_static_reply(reply_key, request.language),
                 "summary": summary_val,
                 "domain_code": "EMERGENCY" if is_emergency else "FRONT",
-                "priority": "EMERGENCY" if is_emergency else "URGENT",
+                "priority": "EMERGENCY" if is_emergency else getattr(primary, 'priority', 'NORMAL'),
                 "entities": {"intent": "EMERGENCY" if is_emergency else "ESCALATION"},
                 "confidence": 0.0,
                 "reasoning": getattr(primary, 'reasoning', '알 수 없음')
@@ -1012,8 +1368,67 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             continue
 
 
+        # STEP 3-f2: BILLING_INQUIRY → 가상 PMS 비용 조회
+        if primary.route_type == "BILLING_INQUIRY":
+            from app.domains.billing.service import fetch_billing_summary
+            from app.prompts.billing_prompt import build_billing_prompt, BILLING_SYSTEM_PROMPT
+
+            entities = getattr(primary, 'entities', {}) or {}
+            target_category = entities.get("category") if isinstance(entities, dict) else None
+
+            try:
+                billing_data = await fetch_billing_summary(request.room_no, target_category, request.language)
+                items = billing_data.get("items", [])
+
+                if not items:
+                    cat_label = target_category or "전체"
+                    guest_reply_ko = f"현재까지 {cat_label} 이용 내역이 없습니다."
+                    guest_reply_en = f"There are no {cat_label} charges recorded for your room at this time."
+                    guest_reply = guest_reply_ko if request.language == "ko" else guest_reply_en
+                else:
+                    prompt_text = build_billing_prompt(billing_data, request.language)
+                    sys_inst = BILLING_SYSTEM_PROMPT + '\n반드시 {"reply": "응답 내용"} 형식의 JSON으로만 출력하세요.'
+                    raw = await call_gemini_async(
+                        prompt=prompt_text,
+                        system_instruction=sys_inst
+                    )
+                    if isinstance(raw, dict):
+                        guest_reply = raw.get("reply") or raw.get("text") or prompt_text
+                    else:
+                        guest_reply = prompt_text
+
+                response = {
+                    "guest_reply": guest_reply,
+                    "summary": "비용 조회",
+                    "domain_code": None,
+                    "priority": "NORMAL",
+                    "entities": {"intent": "BILLING_INQUIRY", "category": target_category or "ALL"},
+                    "confidence": primary.confidence,
+                    "action": "BILLING_INQUIRY",
+                    "reasoning": getattr(primary, 'reasoning', '비용 문의')
+                }
+            except Exception as e:
+                print(f"[Analyze] ⚠️ BILLING_INQUIRY 처리 실패: {e}")
+                err_ko = "비용 조회에 일시적 오류가 발생했습니다. 프론트 데스크에 문의해 주세요."
+                err_en = "We encountered a temporary error retrieving your billing information. Please contact the front desk."
+                response = {
+                    "guest_reply": err_ko if request.language == "ko" else err_en,
+                    "summary": "비용 조회 오류",
+                    "domain_code": None,
+                    "priority": "NORMAL",
+                    "entities": {"intent": "BILLING_INQUIRY"},
+                    "confidence": primary.confidence,
+                    "action": "BILLING_INQUIRY",
+                    "reasoning": getattr(primary, 'reasoning', '비용 문의')
+                }
+
+            print(f"[Analyze] 💰 BILLING_INQUIRY 응답")
+            print(f"[Analyze] 응답: {response}\n")
+            final_responses.append(response)
+            continue
+
         # STEP 3-g: STATUS_CHECK → 진행 상태 확인
-        if primary.mode == "STATUS_CHECK":
+        if primary.route_type == "STATUS_CHECK":
             response = {
                 "guest_reply": _get_static_reply("STATUS_CHECK", request.language),
                 "summary": "요청 진행 상태 확인",
@@ -1028,6 +1443,10 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             print(f"[Analyze] 응답: {response}\n")
             final_responses.append(response)
             continue
+
+
+
+
 
     # ──────────────────────────────────────────────
     # STEP 3-g: 병렬 실행 대기 및 결과 합치기
@@ -1050,9 +1469,24 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
 
             # (이전의 글로벌 이관 로직은 삭제됨: 잘못된 배정은 직원이 수동 이관함)
 
-            # 🚨 [카드 생성 방지 로직] 필수값(missing_fields)이 아직 다 채워지지 않았다면 절대 카드를 생성하지 않음 (대화로만 처리)
-            if agent_result.get("missing_fields"):
+            # 🚨 [카드 생성 방지 로직] 필수값(missing_fields)이 아직 다 채워지지 않았거나, 에이전트가 아직 최종 접수(ADD/REPLACE)를 확정하지 않았다면 절대 카드를 생성하지 않음 (대화로만 처리)
+            # 단, 에스컬레이션/컴플레인 상황에서는 예외적으로 티켓을 무조건 생성하도록 방어 우회
+            is_escalation = final_entities.get("intent") in ["ESCALATION", "COMPLAINT", "EMERGENCY"]
+            
+            action_type = agent_result.get("action_type")
+            if action_type is None:
+                action_type = final_entities.get("action_type")
+            if action_type is None:
+                action_type = getattr(primary, 'action_type', None)
+            
+            if (agent_result.get("missing_fields") or action_type not in ["ADD", "REPLACE", "ADD_DUPLICATE"]) and not is_escalation:
                 final_domain_code = None
+            
+            # 🛡️ [컨시어지 확인 질문 방어] 로직 삭제됨 (AN-344: 확인 질문과 동시에 정적 카드를 띄우기 위해 차단 해제)
+            
+            # 이중 방어: FRONT 에이전트이고 에스컬레이션인데 여전히 domain_code가 없다면 강제 복구
+            if domain == "FRONT" and is_escalation and not final_domain_code:
+                final_domain_code = "FRONT"
 
             response = {
                 "guest_reply": final_guest_reply,
@@ -1084,6 +1518,14 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 response["target_keyword"] = agent_result["target_keyword"]
             elif hasattr(primary, 'target_keyword') and primary.target_keyword:
                 response["target_keyword"] = primary.target_keyword
+
+            # [Target Request ID Targeting] 중복 대상 요청 ID 전달
+            if "target_request_id" in agent_result.get("entities", {}):
+                response["target_request_id"] = agent_result["entities"]["target_request_id"]
+            elif "target_request_id" in agent_result:
+                response["target_request_id"] = agent_result["target_request_id"]
+            elif hasattr(primary, 'target_request_id') and getattr(primary, 'target_request_id', None):
+                response["target_request_id"] = getattr(primary, 'target_request_id', None)
                 
             print(f"[Analyze] ✅ {domain} 에이전트 병렬 처리 완료")
             print(f"[Analyze] 응답: {response}\n")
@@ -1105,21 +1547,27 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             meta_copy["is_fallback"] = (response.get("domain_code") == "FRONT" or response.get("confidence", 1.0) < 0.4)
             response["ai_log_meta"] = meta_copy
 
-    # "아래 접수 내역을 확인해 주세요" 공통 문구 1회 추가 (취소 요청은 제외)
-    task_responses = [
-        r for r in final_responses 
-        if r.get("domain_code") 
-        and not (r.get("action") and str(r.get("action")).startswith("CANCEL"))
-    ]
-    if task_responses:
-        last_task = task_responses[-1]
-        if request.language == "ko":
-            append_msg = "아래 접수 내역을 확인해 주세요."
-        else:
-            append_msg = "Please check the request details below."
-        if last_task.get("guest_reply"):
-            last_task["guest_reply"] = f"{last_task['guest_reply']}\n{append_msg}"
-        else:
-            last_task["guest_reply"] = append_msg
-
     return final_responses
+
+
+class TranslateRequest(BaseModel):
+    text: str
+    target_language: str
+
+@router.post("/translate-summary")
+async def translate_text(request: TranslateRequest) -> dict:
+    prompt = f"Translate the following hotel dashboard summary into {request.target_language}. Keep it extremely concise, like a short title or noun phrase (e.g., 'Request for 2 towels' instead of 'I would like to request 2 towels'). Respond ONLY with the translated text.\n\nText: {request.text}"
+    translated_text = await call_gemini_async(
+        prompt=prompt,
+        system_instruction="You are a professional translator for a hotel dashboard UI. Provide exact, concise translations without formatting or conversational filler."
+    )
+    return {"translated_text": translated_text}
+
+async def translate_text(request: TranslateRequest) -> dict:
+    prompt = f"Translate the following hotel dashboard summary into {request.target_language}. Keep it extremely concise, like a short title or noun phrase (e.g., 'Request for 2 towels' instead of 'I would like to request 2 towels'). Respond ONLY with the translated text.\n\nText: {request.text}"
+    translated_text = await call_gemini_async(
+        prompt=prompt,
+        system_instruction="You are a professional translator for a hotel dashboard UI. Provide exact, concise translations without formatting or conversational filler."
+    )
+    return {"translated_text": translated_text}
+

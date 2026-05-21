@@ -1,0 +1,170 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--space-24);
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.subtitle {
+  font: var(--text-body-medium);
+  color: var(--color-gray-500);
+}
+
+.title {
+  font: var(--text-h2-bold);
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.splitLayout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+
+.leftPane {
+  width: 25%;
+  min-width: 300px;
+  max-width: 400px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-gray-200);
+  overflow: hidden;
+  background-color: var(--color-white);
+}
+
+.leftPaneContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: column;
+}
+
+.leftPaneHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 var(--space-24);
+  border-bottom: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.leftPaneHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex: 1;
+  min-width: 0;
+}
+
+.leftPaneTitle {
+  font: var(--text-h2-bold) !important;
+  color: var(--color-gray-900);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rightPane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+
+.cardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 calc(var(--space-24) * -1);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.popoverMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-8);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  z-index: 10;
+  min-width: 120px;
+}
+
+.popoverItem {
+  display: flex;
+  align-items: center;
+  padding: var(--space-8) var(--space-16);
+  color: var(--color-error);
+  font: var(--text-body-medium);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition);
+}
+
+.popoverItem:hover {
+  background-color: var(--color-tag-bg-red);
+}
+
+.mobileHidden {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .mobileHidden {
+    display: none !important;
+  }
+
+  .container {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .splitLayout {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .leftPane,
+  .rightPane {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    padding: var(--space-16) !important;
+  }
+
+  .cardGrid {
+    margin: 0 calc(var(--space-16) * -1);
+  }
+}
+

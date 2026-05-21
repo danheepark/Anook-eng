@@ -31,3 +31,4 @@ export { default as StopIcon } from './StopIcon';
 export * from './ImageIcon';
 export * from './PlusIcon';
 export * from './CameraIcon';
+export { default as CalendarIcon } from './CalendarIcon';

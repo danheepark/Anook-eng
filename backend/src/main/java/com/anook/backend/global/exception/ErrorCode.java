@@ -12,11 +12,11 @@ public enum ErrorCode {
         // ── 404 NOT_FOUND ──
         GUEST_NOT_FOUND(HttpStatus.NOT_FOUND,
                         "투숙객을 찾을 수 없습니다.",
-                        "해당 ID의 투숙객이 존재하지 않습니다. 이미 체크아웃(Hard Delete)되었거나, 잘못된 guestId입니다. GET /admin/guests로 현재 투숙객 목록을 확인하세요."),
+                        "해당 ID의 투숙객이 존재하지 않습니다. 이미 체크아웃(Hard Delete)되었거나, 잘못된 guestId입니다. GET /frontdesk/guests로 현재 투숙객 목록을 확인하세요."),
 
         ROOM_NOT_FOUND(HttpStatus.NOT_FOUND,
                         "객실을 찾을 수 없습니다.",
-                        "해당 ID의 객실이 존재하지 않습니다. GET /admin/rooms로 유효한 객실 목록을 확인하세요."),
+                        "해당 ID의 객실이 존재하지 않습니다. GET /frontdesk/rooms로 유효한 객실 목록을 확인하세요."),
 
         REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND,
                         "요청을 찾을 수 없습니다.",
@@ -29,18 +29,18 @@ public enum ErrorCode {
 
         ALREADY_CHECKED_IN(HttpStatus.CONFLICT,
                         "해당 객실에 이미 투숙객이 있습니다.",
-                        "해당 객실에 이미 투숙 중인 게스트가 있습니다. 기존 투숙객을 체크아웃(DELETE /admin/guests/{id})한 후 다시 시도하세요."),
+                        "해당 객실에 이미 투숙 중인 게스트가 있습니다. 기존 투숙객을 체크아웃(DELETE /frontdesk/guests/{id})한 후 다시 시도하세요."),
 
         UNSETTLED_BILLING(HttpStatus.CONFLICT,
                         "미정산 F&B 내역이 있습니다. 결제를 먼저 완료해주세요.",
-                        "해당 객실에 정산되지 않은 F&B 요청이 있습니다. PATCH /admin/tasks/{taskId}/settle로 모든 F&B 요청을 정산한 후 체크아웃하세요."),
+                        "해당 객실에 정산되지 않은 F&B 요청이 있습니다. PATCH /frontdesk/tasks/{taskId}/settle로 모든 F&B 요청을 정산한 후 체크아웃하세요."),
 
         // ── 400 BAD_REQUEST ──
         INVALID_SETTLEMENT(HttpStatus.BAD_REQUEST,
                         "정산할 수 없는 요청입니다.",
                         "정산은 department_id가 'FB'이고 status가 'COMPLETED'인 요청에만 가능합니다. 현재 요청의 상태와 부서를 확인하세요."),
 
-        // ── Admin Settings ──
+        // ── Frontdesk Settings ──
 
         DEPARTMENT_NOT_FOUND(HttpStatus.NOT_FOUND,
                         "부서를 찾을 수 없습니다.",
@@ -48,11 +48,11 @@ public enum ErrorCode {
 
         STAFF_NOT_FOUND(HttpStatus.NOT_FOUND,
                         "직원을 찾을 수 없습니다.",
-                        "해당 ID의 직원이 존재하지 않습니다. GET /admin/staff로 유효한 직원 목록을 확인하세요."),
+                        "해당 ID의 직원이 존재하지 않습니다. GET /frontdesk/staff로 유효한 직원 목록을 확인하세요."),
 
         ROLE_NOT_FOUND(HttpStatus.NOT_FOUND,
                         "역할을 찾을 수 없습니다.",
-                        "해당 ID의 역할이 존재하지 않습니다. GET /admin/roles로 유효한 역할 목록을 확인하세요."),
+                        "해당 ID의 역할이 존재하지 않습니다. GET /frontdesk/roles로 유효한 역할 목록을 확인하세요."),
 
         ROLE_ALREADY_EXISTS(HttpStatus.CONFLICT,
                         "이미 존재하는 역할 코드입니다.",
@@ -86,7 +86,12 @@ public enum ErrorCode {
 
         DEBOUNCE_ERROR(HttpStatus.BAD_REQUEST,
                         "메시지를 너무 빨리 보냈습니다.",
-                        "연속된 메시지 발송은 1초 이상의 간격이 필요합니다.");
+                        "연속된 메시지 발송은 1초 이상의 간격이 필요합니다."),
+
+        // ── Knowledge ──
+        DUPLICATE_KNOWLEDGE(HttpStatus.CONFLICT,
+                        "이미 등록된 질문입니다.",
+                        "동일한 도메인에 같은 질문이 이미 존재합니다. 기존 항목을 수정하거나 다른 질문을 사용하세요.");
 
         private final HttpStatus status;
         private final String message;

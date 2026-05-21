@@ -13,7 +13,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted # 미니PC에 설치된 Github Runner를 직접 사용! (SSH 접속 불필요)
+    runs-on: [self-hosted, minipc] # 미니PC에 설치된 Github Runner를 직접 사용! (SSH 접속 불필요)
 
     # ⭐ 프로젝트에 필요한 환경변수들 (나중에 Github Secrets/Variables 에 추가해야 함)
     env:
@@ -25,7 +25,9 @@ jobs:
       DB_PORT: ${{ vars.DB_PORT }}
       FRONTEND_PORT: ${{ vars.FRONTEND_PORT }}
       SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-      
+      NEO4J_USER: ${{ vars.NEO4J_USER }}
+      NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+      KOREAEXIM_AUTH_KEY: ${{ secrets.KOREAEXIM_AUTH_KEY }}
       # 추가로 필요한 환경변수가 생기면 여기에 계속 추가하세요.
 
     steps:
@@ -52,16 +54,19 @@ jobs:
           SESSION_SECRET=${{ secrets.SESSION_SECRET }}
           DB_PORT=${{ vars.DB_PORT }}
           FRONTEND_PORT=${{ vars.FRONTEND_PORT }}
+          NEO4J_USER=${{ vars.NEO4J_USER }}
+          NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}
+          KOREAEXIM_AUTH_KEY=${{ secrets.KOREAEXIM_AUTH_KEY }}
           SPRING_PROFILE=prod
           ENVEOF
           sed -i 's/^[[:space:]]*//' .env
 
-      # 4. Docker Compose 로 빌드 & 배포
+      # 4. Docker Compose 로 빌드 & 배포 (nginx 컨테이너 배제)
       - name: Build and Deploy
         run: |
           cd ~/workspace/team3-Anook
           docker compose down
-          docker compose up -d --build
+          docker compose up -d --build --scale nginx=0
 
       # 5. Health Check (배포 정상 확인)
       - name: Health Check
@@ -78,7 +83,15 @@ jobs:
           docker compose exec -T backend curl -sf http://localhost:8080/actuator/health || echo "⚠️ Backend health endpoint not yet configured (skipping)"
           echo "✅ Health Check Done"
 
-      # 6. 불필요한 쓰레기 이미지 정리
+      # 6. RAG 지식 자동 시딩 (Vector 임베딩 DB 저장)
+      - name: Seed RAG Knowledge
+        run: |
+          cd ~/workspace/team3-Anook
+          echo "⏳ Seeding RAG Knowledge Data to pgvector..."
+          # docker compose 환경에서 ai 컨테이너를 지정하여 스크립트 실행
+          docker compose exec -T ai python seed_all.py || echo "⚠️ Seeding failed but continuing"
+
+      # 7. 불필요한 쓰레기 이미지 정리
       - name: Cleanup
         run: docker image prune -f
 

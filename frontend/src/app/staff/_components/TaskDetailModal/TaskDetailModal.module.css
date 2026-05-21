@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: var(--space-24);
   width: 100%;
+  position: relative;
+  box-sizing: border-box;
 }
 
 .header {
@@ -19,7 +21,7 @@
 
 .roomBadge {
   font: var(--text-h3-bold);
-  color: var(--color-primary);
+  color: var(--color-gray-900);
 }
 
 .title {
@@ -66,21 +68,21 @@
   margin: 0;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+
 .descriptionBox {
-  background-color: var(--color-gray-50);
-  padding: var(--space-16);
-  border-radius: var(--radius-8, 8px);
   font: var(--text-body-regular);
   color: var(--color-gray-800);
   line-height: 1.5;
   white-space: pre-wrap;
-  border: 1px solid var(--color-gray-200);
 }
 
 .orderDetailBox {
-  background-color: var(--color-primary-light, #f0f4ff);
-  padding: var(--space-16);
-  border-radius: var(--radius-8, 8px);
   font: var(--text-body-regular);
   color: var(--color-gray-800);
   line-height: 1.5;
@@ -88,9 +90,6 @@
 }
 
 .transferReasonBox {
-  background-color: #fef3c7;
-  padding: var(--space-16);
-  border-radius: var(--radius-8, 8px);
   font: var(--text-body-regular);
   color: var(--color-gray-800);
   line-height: 1.5;
@@ -182,4 +181,81 @@
 .cancelAlertBox p {
   font: var(--text-caption-medium);
   margin: 0;
+}
+
+.chatHistoryBtn {
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: 1px dashed var(--color-gray-200);
+  border-radius: 8px;
+  color: var(--color-gray-500);
+  font: var(--text-caption-medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.chatHistoryBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.04);
+}
+
+/* ── Inline Chat History View ── */
+.chatHistoryContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.chatHistoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-24);
+  border-bottom: 1px solid var(--color-gray-100);
+  flex-shrink: 0;
+}
+
+.chatHistoryTitle {
+  font: var(--text-body-bold);
+  color: var(--color-gray-900);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--color-gray-300);
+  transition: color 0.15s ease;
+}
+
+.backBtn:hover {
+  color: var(--color-gray-500);
+}
+
+.chatHistoryMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-16) var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(
+    180deg,
+    rgba(245, 243, 255, 0.6) 0%,
+    rgba(240, 244, 255, 0.4) 50%,
+    rgba(255, 248, 245, 0.3) 100%
+  );
+}
+
+.chatEmptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-gray-400);
+  font: var(--text-caption-medium);
 }

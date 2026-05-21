@@ -1,0 +1,109 @@
+.glassBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-24);
+  border-radius: 9999px;
+  font: var(--text-body-medium);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  outline: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-gray-700);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.glassBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--color-gray-900);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.25),
+    0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.glassBtn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.glassBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background: rgba(100, 116, 139, 0.10) !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(4px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(4px) saturate(150%) !important;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: rgba(100, 116, 139, 0.13) !important;
+}
+
+.cancelBtn:active:not(:disabled) {
+  background: rgba(100, 116, 139, 0.06) !important;
+}
+
+.primaryBtn {
+  background: var(--btn-bg, rgba(255, 255, 255, 0.8)) !important;
+  border: none !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(4px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(4px) saturate(150%) !important;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: var(--btn-bg-hover, rgba(255, 255, 255, 0.93)) !important;
+  opacity: 1 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.primaryBtn:active:not(:disabled) {
+  background: var(--btn-bg-active, rgba(225, 225, 230, 0.9)) !important;
+  opacity: 1 !important;
+  border: none !important;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.btnText {
+  color: var(--color-gray-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  transition: color 0.2s ease;
+}
+
+.glassBtn:hover:not(:disabled) .btnText {
+  color: var(--color-gray-900);
+}
+
+.cancelBtn .btnText {
+  color: var(--color-gray-600) !important;
+}
+
+.cancelBtn:hover:not(:disabled) .btnText {
+  color: var(--color-gray-700) !important;
+}
+
+.primaryBtn .btnText {
+  color: var(--btn-text, var(--color-gray-700)) !important;
+}
+
+.primaryBtn:hover:not(:disabled) .btnText {
+  color: var(--btn-text, var(--color-gray-800)) !important;
+}

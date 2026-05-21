@@ -1,10 +1,10 @@
 .wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   width: 100%;
   background-color: transparent;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  border-radius: var(--radius-full);
+  border-radius: 32px;
   padding: var(--space-8);
   box-sizing: border-box;
   position: relative;
@@ -17,7 +17,7 @@
   content: "";
   position: absolute;
   inset: -1px;
-  border-radius: var(--radius-full);
+  border-radius: 32px;
   background: linear-gradient(90deg,
       #ff9a9e,
       #fecfef,
@@ -42,7 +42,7 @@
   position: absolute;
   inset: 0;
   background-color: var(--color-white);
-  border-radius: var(--radius-full);
+  border-radius: 32px;
   z-index: -1;
 }
 
@@ -67,11 +67,17 @@
   flex: 1;
   background: transparent;
   border: none;
-  padding: var(--space-8) var(--space-16);
+  padding: 12px var(--space-16);
   font: var(--text-body-md-medium);
   color: var(--color-gray-900);
   outline: none;
   min-height: 48px;
+  max-height: 240px;
+  resize: none;
+  overflow-y: auto;
+  line-height: 24px;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .input::placeholder {
@@ -224,6 +230,7 @@
   padding: 0;
   margin-left: var(--space-12);
   margin-right: var(--space-4);
+  height: 48px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -305,13 +312,20 @@
   background-color: var(--color-white);
   box-shadow: none;
   transition: border-color 0.2s;
-  height: 48px;
+  min-height: 48px;
+  height: auto;
   padding: 0 4px 0 0;
+  align-items: flex-end;
 }
 
-.staffWrapper input {
-  min-height: unset;
-  height: 100%;
+.staffWrapper textarea {
+  min-height: 48px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.staffWrapper .actionGroup {
+  margin-bottom: 4px;
 }
 
 .staffWrapper:focus-within {

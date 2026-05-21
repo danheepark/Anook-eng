@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
-import { X } from 'lucide-react';
 import Button from '@/components/ui/Button/Button';
 import InputField from '@/components/ui/Inputfield/InputField';
 import Dropdown from '@/components/ui/Dropdown/Dropdown';
@@ -30,13 +29,11 @@ export default function KnowledgeEditModal({
   initialQuestion = '',
   initialAnswer = '',
   domainOptions = [
+    { value: 'FRONT', label: '프론트 데스크 (FRONT)' },
     { value: 'HK', label: '하우스키핑 (HK)' },
-    { value: 'FB', label: 'F&B (FB)' },
-    { value: 'FACILITY', label: '시설 (FACILITY)' },
-    { value: 'CONCIERGE', label: '컨시어지 (CONCIERGE)' },
-    { value: 'FRONT', label: '프론트 (FRONT)' },
-    { value: 'EMERGENCY', label: '긴급 (EMERGENCY)' },
-    { value: 'COMMON', label: '공통 (COMMON)' }
+    { value: 'FACILITY', label: '시설관리 (FACILITY)' },
+    { value: 'FB', label: '식음료 (FB)' },
+    { value: 'CONCIERGE', label: '컨시어지 (CONCIERGE)' }
   ],
   onSave
 }: KnowledgeEditModalProps) {
@@ -50,16 +47,13 @@ export default function KnowledgeEditModal({
   return (
     <>
       <ModalOverlay isOpen={isOpen} onClose={() => setIsConfirmOpen(true)}>
-        <ModalCard size="lg">
+        <ModalCard size="lg" onClose={() => setIsConfirmOpen(true)}>
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <StatusBadge variant={isRegister ? 'green' : 'gray'}>{isRegister ? '신규 등록' : '정보 수정'}</StatusBadge>
             <h2 className={styles.title}>{isRegister ? '지식 데이터 등록' : '지식 정보 수정'}</h2>
           </div>
-          <button className={styles.closeBtn} onClick={() => setIsConfirmOpen(true)}>
-            <X size={24} />
-          </button>
         </div>
 
         {/* Body */}
@@ -75,8 +69,8 @@ export default function KnowledgeEditModal({
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>제목</label>
             <InputField
+              label="제목"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="예상 질문이나 제목을 입력하세요"
@@ -84,12 +78,13 @@ export default function KnowledgeEditModal({
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>내용</label>
-            <textarea
-              className={styles.textarea}
+            <InputField
+              as="textarea"
+              label="내용"
               value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
+              onChange={(e: any) => setAnswer(e.target.value)}
               placeholder="답변이나 매뉴얼 상세 내용을 입력하세요"
+              rows={4}
             />
           </div>
         </div>

@@ -161,6 +161,12 @@ export default function PmsPage() {
   // ── 타입별 카운트 ──
   const typeList = Array.from(new Set(rooms.map(r => r.type)));
 
+  // ── 요금 계산 (미결제 영수증) ──
+  const receiptSubtotal = receipts.reduce((sum, r) => sum + r.totalPrice, 0);
+  const receiptVat = Math.round(receiptSubtotal * 0.1);
+  const receiptServiceCharge = Math.round(receiptSubtotal * 0.1);
+  const receiptTotal = receiptSubtotal + receiptVat + receiptServiceCharge;
+
   /* ═══════ RENDER ═══════ */
   return (
     <div className={styles.pmsRoot}>
@@ -525,9 +531,23 @@ export default function PmsPage() {
                     <div style={{ textAlign: 'right' }}>{r.totalPrice.toLocaleString()}원</div>
                   </div>
                 ))}
-                <div style={{ borderTop: '1px solid #334155', marginTop: 8, paddingTop: 12, paddingBottom: 20, display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 16 }}>
-                  <span>합계</span>
-                  <span>{receipts.reduce((sum, r) => sum + r.totalPrice, 0).toLocaleString()}원</span>
+                <div style={{ borderTop: '1px solid #334155', marginTop: 8, paddingTop: 16, paddingBottom: 20, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#94a3b8' }}>
+                    <span>소계</span>
+                    <span>{receiptSubtotal.toLocaleString()}원</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#94a3b8' }}>
+                    <span>부가세 (10%)</span>
+                    <span>{receiptVat.toLocaleString()}원</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#94a3b8' }}>
+                    <span>봉사료 (10%)</span>
+                    <span>{receiptServiceCharge.toLocaleString()}원</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 18, color: '#fff', marginTop: 8, paddingTop: 12, borderTop: '1px dashed #475569' }}>
+                    <span>최종 합계</span>
+                    <span>{receiptTotal.toLocaleString()}원</span>
+                  </div>
                 </div>
               </>
             )}

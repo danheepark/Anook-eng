@@ -3,7 +3,30 @@ from app.prompts.concierge_prompt import CONCIERGE_SYSTEM_PROMPT
 from app.schemas.common import HotelRequestSchema
 from app.domains.rag import service as rag_service
 
-async def run_concierge_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None) -> dict:
+# Step 1 전용: 대화에서 확인된 엔티티를 추출하는 경량 프롬프트
+ENTITY_EXTRACT_PROMPT = """You are an entity extraction assistant for a hotel concierge conversation.
+
+TASK: Read the conversation and extract ALL entities that the guest has confirmed or provided.
+
+RULES:
+1. Only include entities the guest explicitly stated (e.g., "개화꽃" → item: "개화꽃").
+2. If the AI mentioned an entity in its message (e.g., "개화꽃을 몇 송이?") and the guest did NOT deny it in their reply, treat it as confirmed.
+3. If the guest said "아무데서나" or "상관없어" for any field, set it to "호텔 지정".
+4. Convert time references to absolute format if possible.
+5. Output ONLY a flat JSON object. No explanation, no markdown.
+
+EXAMPLE:
+[대화]
+AI: 어떤 꽃을 배달해 드릴까요?
+고객: 개화꽃
+AI: 개화꽃을 몇 송이 배달해 드릴까요?
+고객: 10송이
+
+OUTPUT:
+{"intent": "DELIVERY", "item": "개화꽃", "quantity": 10}
+"""
+
+async def run_concierge_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, active_requests: list = None, system_language: str = "ko", **kwargs) -> dict:
     """
     컨시어지 에이전트 엔진 (Step 0-2)
     ───────────────────────────
@@ -31,21 +54,56 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
     if chat_history:
         context = "\n".join([
             f"{'고객' if m.get('role')=='user' else 'AI'}: {m.get('content')}"
-            for m in chat_history[-5:]
+            for m in chat_history[-15:]
         ])
         prompt = f"[현재 날짜 및 시각]\n{now_str}\n\n[대화 맥락]\n{context}\n\n"
+        
+        # ── Step 1: 경량 Gemini 호출로 기존 엔티티 추출 ──
+        # 2턴(메시지 4개) 이상일 때만 실행 (첫 턴에는 추출할 엔티티 없음)
+        accumulated_entities = {}
+        if len(chat_history) >= 4:
+            try:
+                extract_result = await call_gemini_async(
+                    prompt=f"[대화]\n{context}",
+                    system_instruction=ENTITY_EXTRACT_PROMPT
+                )
+                if isinstance(extract_result, dict):
+                    # __ai_log_meta 등 내부 메타데이터 필터링
+                    accumulated_entities = {k: v for k, v in extract_result.items() if not k.startswith('__')}
+                    print(f"[CONCIERGE] 📋 Step 1 추출 엔티티: {accumulated_entities}")
+            except Exception as e:
+                print(f"[CONCIERGE] ⚠️ 엔티티 추출 실패 (무시, 기존 방식 진행): {e}")
+        
+        # Step 1 결과를 [확인된 정보] 블록으로 주입
+        if accumulated_entities:
+            entities_str = "\n".join([
+                f"- {k}: {v} ✅" for k, v in accumulated_entities.items() if v
+            ])
+            prompt += f"[확인된 정보 - 아래 값들은 이미 고객이 확인한 것이므로 반드시 유지하세요]\n{entities_str}\n\n"
     else:
         prompt = f"[현재 날짜 및 시각]\n{now_str}\n\n고객 객실: {room_no}\n"
         
     if rag_context:
         prompt += f"[관련 지식 (RAG)]\n{rag_context}\n\n"
         
+    if active_requests:
+        prompt += "[현재 활성화된 예약 내역]\n"
+        for req in active_requests:
+            prompt += f"- {req}\n"
+        prompt += "\n"
+        
     prompt += f"[현재 요청]\n고객 메시지: {user_message}"
     
     try:
         # Gemini 호출
-        raw = await call_gemini_async(prompt=prompt, system_instruction=CONCIERGE_SYSTEM_PROMPT, images=images)
+        system_instruction_with_lang = CONCIERGE_SYSTEM_PROMPT.replace("{system_language}", system_language)
+        raw = await call_gemini_async(prompt=prompt, system_instruction=system_instruction_with_lang, images=images)
         
+        if isinstance(raw, list):
+            if not raw:
+                raise ValueError("AI returned an empty list")
+            raw = raw[0]
+            
         # AI가 null을 반환할 경우를 대비해 데이터 세척 (Pydantic 검증 오류 방지)
         # 문자열 필드에 null이 들어오면 빈 문자열("")로 대체
         clean_fields = ["clarification_question", "summary", "request_id", "room_no"]
@@ -116,10 +174,34 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
     else:
         default_reply = f"요청하신 컨시어지 서비스({intent or '문의사항'})를 확인하였습니다. 담당 직원이 곧 안내해 드릴까요?"
     
-    # INFO 의도일 경우 티켓 생성 방지
-    domain_code = None if (result.needs_clarification or intent == 'INFO') else "CONCIERGE"
+    # [AN-344] 더블체크 UX 및 정보 제공 인텐트 처리 고도화:
+    # 1. 정보 안내 목적의 인텐트 (INFO, TOUR_INFO, MEDICAL_INFO)는 티켓을 생성하지 않도록 domain_code = None 처리합니다.
+    # 2. 예약/요청 의도(is_request_intent)일 때만 티켓 생성을 진행합니다.
+    #    - 필요한 필수 정보가 누락되어 되묻는 질문 단계(needs_clarification)일 때는 일단 카드를 띄우지 않도록 domain_code = None 처리합니다.
+    #    - 단, 모든 정보가 수집되어 확인 질문을 하거나 최종 접수 승인을 할 때는 domain_code = "CONCIERGE"로 설정하여 카드를 노출합니다.
+    missing = getattr(result, "missing_fields", [])
+    is_request_intent = intent not in ['INFO', 'TOUR_INFO', 'MEDICAL_INFO']
+    
+    if not is_request_intent:
+        domain_code = None
+    else:
+        if result.needs_clarification:
+            domain_code = None
+        else:
+            domain_code = "CONCIERGE"
     
     # /analyze 응답 규격에 맞게 변환 (HotelRequestSchema 준수)
+    
+    final_response = getattr(result, "final_reply", "")
+    if not final_response:
+        final_response = default_reply
+        
+    action_type = cleaned_raw.get("action_type")
+    if action_type is None:
+        action_type = result.entities.get("action_type")
+    if action_type is None:
+        action_type = "ADD"
+
     return {
         "request_id": result.request_id if result.request_id else "REQ_TEMP",
         "room_no": room_no,
@@ -128,10 +210,14 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
         "priority": result.priority,
         "entities": result.entities,
         "confidence": result.confidence,
-        "guest_reply": result.clarification_question if result.needs_clarification else default_reply,
+        "guest_reply": result.clarification_question if result.needs_clarification else final_response,
         "needs_clarification": result.needs_clarification,
         "clarification_question": result.clarification_question,
-        "clarification_options": result.clarification_options,
-        "missing_fields": result.missing_fields,
+        "clarification_options": getattr(result, "clarification_options", []),
+        "missing_fields": getattr(result, "missing_fields", []),
         "reasoning": result.reasoning,
+        "action_type": action_type,
+        "target_keyword": result.entities.get("target_keyword") if result.entities.get("target_keyword") else raw.get("target_keyword"),
+        "target_request_id": result.target_request_id if result.target_request_id else (result.entities.get("target_request_id") if result.entities else raw.get("target_request_id")),
     }
+

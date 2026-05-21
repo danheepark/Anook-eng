@@ -27,15 +27,15 @@ export const useLoginForm = () => {
 
         if (staffResponse.ok) {
           const data = await staffResponse.json();
-          if (data.role === "ADMIN") {
-            router.push("/admin/dashboard");
+          if (data.role === "FRONTDESK") {
+            router.push("/frontdesk/requests");
           } else {
             router.push("/staff");
           }
           setIsLoading(false);
           return; // 직원 로그인 성공 시 종료
         }
-      } catch (err) {
+      } catch {
         console.log("Staff auth failed, trying guest auth...");
       }
     }
@@ -56,8 +56,8 @@ export const useLoginForm = () => {
       if (data.role === "GUEST") {
         router.push("/guest/chat");
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }

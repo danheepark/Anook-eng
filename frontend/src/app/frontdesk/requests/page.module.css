@@ -1,0 +1,203 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--space-24);
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.subtitle {
+  font: var(--text-body-medium);
+  color: var(--color-gray-500);
+}
+
+.title {
+  font: var(--text-h2-bold);
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.tabSection {
+  margin-bottom: var(--space-24);
+}
+
+.splitLayout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+.leftPane {
+  width: 25%;
+  min-width: 280px;
+  max-width: 400px;
+  flex-shrink: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-gray-200);
+  overflow: hidden;
+  background-color: var(--color-white);
+  transition: all 0.2s ease;
+}
+
+.leftPaneContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.leftPaneHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 var(--space-24);
+  border-bottom: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.leftPaneHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex: 1;
+  min-width: 0;
+}
+
+.leftPaneTitle {
+  font: var(--text-h2-bold) !important;
+  color: var(--color-gray-900);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rightPane {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.detailPane {
+  width: 25%;
+  min-width: 280px;
+  max-width: 400px;
+  flex-shrink: 1;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.sectionTitle {
+  font: var(--text-h3-bold);
+  color: var(--color-gray-900);
+  margin: 0 0 var(--space-16) 0;
+}
+
+.cardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 calc(var(--space-24) * -1);
+  transition: all 0.2s ease;
+}
+
+/* Gradual spacing & width compression when space is constrained on tablet/small desktops */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .leftPane {
+    width: 22%;
+    min-width: 250px;
+  }
+  
+  .rightPane {
+    min-width: 300px;
+  }
+  
+  .detailPane {
+    width: 22%;
+    min-width: 250px;
+  }
+  
+  .leftPaneContent {
+    padding: var(--space-16);
+  }
+  
+  .leftPaneHeader {
+    height: 60px;
+    padding: 0 var(--space-16);
+  }
+  
+  .cardGrid {
+    margin: 0 calc(var(--space-16) * -1);
+  }
+}
+
+
+/* ── Mobile Layout & Responsive Overrides ── */
+.mobileHidden {
+  display: flex; /* default block/flex on desktop */
+}
+
+@media (max-width: 768px) {
+  .mobileHidden {
+    display: none !important;
+  }
+
+  .container {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .splitLayout {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .leftPane,
+  .rightPane,
+  .detailPane {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .leftPaneContent {
+    padding: var(--space-16) !important;
+  }
+
+  .cardGrid {
+    margin: 0 calc(var(--space-16) * -1);
+  }
+}

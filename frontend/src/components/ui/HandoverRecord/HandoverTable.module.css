@@ -19,3 +19,15 @@
   color: var(--color-gray-900);
   text-align: center;
 }
+
+.td {
+  background-color: var(--color-white);
+}
+
+/* 데스크탑 및 모바일 반응형 처리 */
+@media (max-width: 768px) {
+  .th,
+  .td {
+    padding: var(--space-12) var(--space-12);
+  }
+}

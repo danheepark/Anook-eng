@@ -3,6 +3,9 @@
   flex-direction: column;
   align-self: stretch;
   gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 
 .tableHeader {
@@ -14,6 +17,7 @@
   gap: var(--space-24);
   border-bottom: 1px solid var(--color-gray-300);
   background: var(--color-bg);
+  transition: all 0.2s ease;
 }
 
 .tableRow {
@@ -25,11 +29,17 @@
   align-items: center;
   gap: var(--space-24);
   background: var(--color-bg);
+  transition: all 0.2s ease;
 }
 
 .headerItem {
   color: var(--color-gray-700);
   font: var(--text-body-regular);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  width: 100%;
 }
 
 .rowItem {
@@ -38,4 +48,123 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+  width: 100%;
 }
+
+/* Ensure nested plain text and custom elements in row items clip properly with ellipsis */
+.rowItem > *, .headerItem > * {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Gradual Responsive Spacing & Scaling above the 768px card breakpoint */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .tableHeader, .tableRow {
+    padding: var(--space-12) var(--space-16);
+    gap: var(--space-16);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tableHeader, .tableRow {
+    padding: var(--space-8) var(--space-12);
+    gap: var(--space-10);
+    height: var(--space-72); /* Squeeze height a bit */
+  }
+  
+  .headerItem, .rowItem {
+    font-size: 0.8125rem !important; /* Scale text down slightly */
+  }
+}
+
+/* Mini mobile breakpoint - convert to Card Layout */
+@media (max-width: 768px) {
+  .tableContainer {
+    overflow-x: visible !important;
+  }
+
+  .tableHeader {
+    display: none !important;
+  }
+  
+  .tableRow {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    height: auto !important;
+    min-width: 0 !important;
+    padding: var(--space-16) !important;
+    gap: var(--space-12) !important;
+    border: 1px solid var(--color-gray-200) !important;
+    border-radius: var(--radius-md) !important;
+    background-color: var(--color-white) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    margin-bottom: var(--space-12) !important;
+  }
+
+  /* --- INLINE VARIANT (Default) --- */
+  .tableContainer.inline .rowItem {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: var(--space-16) !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    width: 100% !important;
+    text-align: right !important;
+  }
+
+  .tableContainer.inline .rowItem::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: var(--color-gray-500);
+    flex-shrink: 0;
+    min-width: 80px;
+    font-size: 0.8125rem;
+    text-align: left !important;
+  }
+
+  .tableContainer.inline .rowItem > * {
+    margin-left: auto !important;
+    text-align: right !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  /* --- STACKED VARIANT --- */
+  .tableContainer.stacked .rowItem {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: var(--space-4) !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .tableContainer.stacked .rowItem::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: var(--color-gray-500);
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    text-align: left !important;
+  }
+
+  .tableContainer.stacked .rowItem > * {
+    margin-left: 0 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+}
+

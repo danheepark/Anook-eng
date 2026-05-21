@@ -63,6 +63,16 @@
   border: 1px solid var(--color-gray-300);
 }
 
+/* 마우스 오버 시 */
+.inputContainer:hover:not(.inputContainerDisabled):not(.inputContainerError) {
+  border-color: var(--color-gray-400);
+}
+
+/* 포커스 시 */
+.inputContainer:focus-within:not(.inputContainerDisabled):not(.inputContainerError) {
+  border-color: var(--color-gray-900);
+}
+
 /* 실제 input 태그 (초기화) */
 .inputElement {
   flex-grow: 1;
@@ -107,21 +117,64 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: var(--space-12) var(--space-16);
+  padding: var(--space-8) var(--space-12);
   width: 100%;
-  height: 48px;
+  height: 40px;
   background: var(--color-gray-50); /* Gray/50 */
   border: 1px solid var(--color-gray-300);
   border-radius: var(--radius-md);
   gap: var(--space-8);
+  transition: all 0.2s ease-in-out;
+}
+
+.searchContainer:hover {
+  border-color: var(--color-gray-400);
+}
+
+.searchContainer:focus-within {
+  border-color: var(--color-gray-900);
+  background: var(--color-white, #ffffff);
 }
 
 .searchIconWrapper {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   display: flex;
   justify-content: center;
   align-items: center;
   color: var(--color-gray-500);
   flex-shrink: 0;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-gray-400);
+  transition: color 0.15s;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+
+.clearButton:hover {
+  color: var(--color-gray-600);
+}
+
+/* --------- Textarea 형태 지원 (as: textarea) --------- */
+.textareaContainer {
+  height: auto !important;
+  min-height: 96px;
+  align-items: flex-start;
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-12);
+}
+
+.textareaElement {
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
 }

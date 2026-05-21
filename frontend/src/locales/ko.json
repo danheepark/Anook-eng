@@ -1,7 +1,7 @@
 {
   "guest": "투숙객",
   "staff": "직원",
-  "admin": "관리자",
+  "frontdesk": "프론트 데스크",
   "status": {
     "pending": "접수됨",
     "assigned": "배정됨",
@@ -22,9 +22,11 @@
     "confirm": "확인",
     "close": "닫기",
     "loading": "로딩 중...",
-    "error": "오류가 발생했습니다"
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "logout": "로그아웃"
   },
-  "adminPage": {
+  "frontdeskPage": {
     "sidebar": {
       "categories": {
         "requestManagement": "요청 관리",
@@ -32,8 +34,8 @@
         "operations": "운영 관리"
       },
       "menus": {
-        "dashboard": "대시보드",
-        "frontDesk": "프론트 데스크",
+        "dashboard": "운영 통계",
+        "frontDesk": "실시간 상담",
         "housekeeping": "하우스키핑",
         "fb": "식음료",
         "facility": "시설",
@@ -41,15 +43,16 @@
         "emergency": "긴급 대응",
         "allRequests": "전체 요청",
         "chatHistory": "채팅 히스토리",
-        "aiTraining": "학습 관리",
-        "rag": "지식 라이브러리",
+        "voc": "고객 피드백",
+        "aiTraining": "새로운 지식 추가",
+        "rag": "AI 지식 관리",
         "aiRouting": "AI 라우팅 로그",
-        "handover": "인수인계",
+        "handover": "인수인계 문서",
         "staffManagement": "직원 관리"
       }
     },
     "dashboard": {
-      "title": "대시보드",
+      "title": "운영 통계",
       "searchPlaceholder": "검색어를 입력하세요...",
       "filters": {
         "today": "오늘",
@@ -91,10 +94,31 @@
         "concierge": "컨시어지",
         "emergency": "긴급 대응",
         "allRequests": "전체 요청",
-        "aiTraining": "학습 관리",
-        "rag": "지식 라이브러리",
+        "voc": "고객 피드백",
+        "aiTraining": "새로운 지식 추가",
+        "rag": "AI가 배운 지식",
         "aiRouting": "AI 라우팅 로그",
-        "handover": "인수인계"
+        "handover": "인수인계 문서"
+      }
+    },
+    "voc": {
+      "title": "고객 피드백 (VOC)",
+      "subtitle": "고객의 칭찬과 불만 등 서비스 피드백을 수집하고 관리하는 페이지입니다.",
+      "filterAll": "전체보기",
+      "filterPositive": "👍 칭찬",
+      "filterNegative": "👎 불만/의견",
+      "filterRating": "⭐ 별점",
+      "empty": "조건에 맞는 피드백이 없습니다.",
+      "columns": {
+        "date": "수신 일시",
+        "room": "객실",
+        "sentiment": "구분",
+        "content": "고객 피드백 내용",
+        "reply": "AI 자동 답변"
+      },
+      "sentiments": {
+        "positive": "칭찬",
+        "negative": "불만/의견"
       }
     },
     "rag": {
@@ -102,9 +126,11 @@
       "addKnowledge": "+ 지식 정보 추가",
       "searchPlaceholder": "검색어를 입력하세요...",
       "filterAll": "전체",
-      "filterLatest": "최신순",
-      "empty": "등록된 지식이 없습니다.",
-      "deleteConfirm": "정말로 이 지식을 삭제하시겠습니까?",
+      "filterLatest": "최신 등록순",
+      "empty": "등록된 지식 정보가 없습니다.",
+      "deleteTitle": "삭제 확인",
+      "deleteConfirm": "이 지식 정보를 정말 삭제하시겠습니까?",
+      "deleteButton": "삭제",
       "tabs": {
         "ALL": "전체",
         "HK": "하우스키핑",
@@ -117,12 +143,16 @@
       }
     },
     "aiTraining": {
-      "filterAll": "전체",
-      "filterMissing": "지식 없음",
-      "filterUnclear": "의도 불명"
+      "filterAll": "전체보기",
+      "filterMissing": "미등록",
+      "filterUnclear": "의도 불명확",
+      "empty": "검토 대기 중인 항목이 없습니다.",
+      "rejectTitle": "제외 확인",
+      "rejectSubtitle": "이 항목을 정말 검토 목록에서 제외하시겠습니까?",
+      "rejectConfirm": "제외"
     },
     "frontDesk": {
-      "title": "프론트 데스크",
+      "title": "실시간 상담",
       "createRequest": "+ 요청 생성",
       "tabs": {
         "unhandled": "미처리 대기",
@@ -151,6 +181,15 @@
     },
     "chatHistory": {
       "title": "채팅 히스토리",
+      "emptyMessage": "메시지 없음",
+      "systemCompleted": "이전 상담 및 처리가 모두 완료되었습니다.",
+      "systemMessageNote": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
+      "roomConversation": "{{room}}호 대화",
+      "roomChatRecord": "{{room}}호 채팅 기록",
+      "selectRoomPrompt": "대화를 확인할 객실을 선택해주세요",
+      "deleteTitle": "채팅 내역 삭제",
+      "deleteSubtitle": "정말 {{room}}호의 채팅 내역을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "deleteButton": "삭제",
       "searchPlaceholder": "검색어를 입력하세요...",
       "filterAll": "전체",
       "filterLatest": "최신순",
@@ -166,17 +205,83 @@
       "sending": "전송중...",
       "send": "전송",
       "sendFail": "메시지 전송에 실패했습니다."
+    },
+    "requestDetailModal": {
+      "title": "요청 상세",
+      "basicInfo": "기본 정보",
+      "roomNo": "객실",
+      "currentDept": "현재 부서",
+      "createdAt": "생성 시간",
+      "updatedAt": "최종 수정",
+      "requestContent": "요청 내용",
+      "summary": "요약",
+      "originalText": "고객 원문",
+      "orderDetail": "주문/요청 상세",
+      "transferReason": "부서 이관 사유",
+      "photo": "첨부 사진",
+      "aiAnalysis": "AI 분석 결과",
+      "confidence": "신뢰도",
+      "reasoning": "판단 근거",
+      "assignment": "배정 관리",
+      "priority": "우선순위",
+      "setUrgent": "긴급 작업으로 설정",
+      "assignDept": "배정 부서",
+      "selectDept": "부서를 선택하세요",
+      "buttons": {
+        "forceCancel": "강제 요청 취소",
+        "approveEscalation": "에스컬레이션 승인",
+        "rejectEscalation": "에스컬레이션 반려",
+        "save": "변경 저장",
+        "saving": "저장 중...",
+        "close": "닫기",
+        "approveCancel": "취소 승인",
+        "rejectCancel": "취소 반려"
+      },
+      "status": {
+        "cancelRequested": "고객 취소 요청됨"
+      },
+      "entityLabels": {
+        "is_contactless": "비대면 배달",
+        "target_time": "희망 시간",
+        "equipment": "대상 설비",
+        "symptom": "증상",
+        "location": "위치",
+        "destination": "목적지",
+        "passenger_count": "인원",
+        "restaurant_name": "식당",
+        "cuisine_type": "음식 종류",
+        "category": "카테고리",
+        "action": "요청 유형",
+        "item": "대상 물품",
+        "time": "시간",
+        "special_requests": "추가 요청",
+        "count": "수량",
+        "type": "유형",
+        "target": "대상",
+        "issue": "문제/증상",
+        "priority": "예상 긴급도",
+        "topic": "주제",
+        "question": "질문",
+        "language": "언어",
+        "items": "물품 요청",
+        "tasks": "작업 요청",
+        "menu_items": "주문 메뉴",
+        "countSuffix": "개",
+        "option": "옵션",
+        "none": "없음"
+      }
     }
   },
   "guestChat": {
     "welcomeMessage": "안녕하세요! 호텔 AI 비서입니다.\n머무시는 동안 편안한 휴식이 될 수 있도록 도와드릴게요.\n필요하신건 뭐든 말씀해 주세요!",
     "quickReplyPrompt": "무엇을 도와드릴까요? 아래에서 선택하시거나 직접 말씀해 주세요!",
     "quickReplyOptions": [
-      "🛏️ 수건 추가 요청",
-      "🍳 조식 시간 문의",
-      "🧹 객실 청소 요청",
-      "🔑 레이트 체크아웃"
+      "수건 2개 추가해 주세요",
+      "조식은 몇 시인가요?",
+      "객실 청소 부탁해요",
+      "체크아웃 연장 가능한가요?"
     ],
+    "activeRequestsCount": "{count}개의 진행 중인 요청",
     "progress": {
       "checking": "요청하신 내용을 확인하고 있습니다...",
       "forwardingPrefix": "",
@@ -189,6 +294,202 @@
         "FRONT": "프론트데스크",
         "EMERGENCY": "긴급 대응"
       }
+    }
+  },
+  "intents": {
+    "TOWEL": "수건 요청",
+    "WATER": "생수 요청",
+    "ROOM_CLEAN": "객실 청소 요청",
+    "CLEAN_ROOM": "객실 청소 요청",
+    "CLEANING": "청소 요청",
+    "MULTIPLE_HK": "하우스키핑 요청",
+    "AMENITY_DELIVERY": "어메니티 요청",
+    "LATE_CHECKOUT": "레이트 체크아웃",
+    "AMENITY": "어메니티 요청",
+    "BEDDING": "침구류 요청",
+    "ROOM_SERVICE": "룸서비스",
+    "MENU_INQUIRY": "메뉴 문의",
+    "ALLERGY_CHECK": "알러지 문의",
+    "ORDER_MODIFY": "주문 변경",
+    "ORDER_CANCEL": "주문 취소",
+    "OPERATING_HOURS": "운영시간 문의",
+    "RECOMMENDATION": "추천 요청",
+    "SPENDING_INQUIRY": "이용 금액 조회",
+    "AC_REPAIR": "에어컨 수리",
+    "HEATER_REPAIR": "히터 수리",
+    "PLUMBING": "배관 수리",
+    "WATER_LEAK": "누수",
+    "DRAIN_CLOG": "배수구 막힘",
+    "ELECTRICAL": "전기/콘센트 수리",
+    "LIGHTING": "조명 수리",
+    "TV_ISSUE": "TV 수리",
+    "WIFI_ISSUE": "와이파이 문제",
+    "APPLIANCE": "가전제품 수리",
+    "DOOR_LOCK": "도어락 수리",
+    "WINDOW": "창문 수리/방음",
+    "FURNITURE": "가구 수리",
+    "FIRE_ALARM": "화재경보기 문제",
+    "ODOR": "악취 문제",
+    "NOISE": "소음 불편",
+    "OTHER": "기타 요청",
+    "TAXI": "택시 호출",
+    "TOUR_INFO": "관광지 안내",
+    "LUGGAGE_STORAGE": "수하물 보관",
+    "RESTAURANT": "식당 예약",
+    "RESERVATION": "예약 문의",
+    "DELIVERY": "배달품 전달",
+    "WAKE_UP_CALL": "모닝콜",
+    "MEDICAL_INFO": "의료 정보",
+    "POSTAL_SERVICE": "우편물 발송",
+    "COMPLAINT": "컴플레인",
+    "INQUIRY": "일반 문의",
+    "AMBIGUOUS": "의도 불분명",
+    "ESCALATION": "직원 연결",
+    "LOST_FOUND": "분실물 접수",
+    "MEDICAL_EMERGENCY": "응급 환자 발생",
+    "FIRE_EMERGENCY": "화재 발생",
+    "VIOLENCE_EMERGENCY": "난동/폭행 발생"
+  },
+  "cardUI": {
+    "status": {
+      "pending": "대기 중",
+      "received": "접수 완료",
+      "inProgress": "처리 중",
+      "completed": "완료",
+      "completedMark": "완료됨",
+      "cancelled": "취소됨",
+      "cancelPending": "취소 대기 중",
+      "escalated": "상담 대기 중"
+    },
+    "statusBar": {
+      "checking": "확인 중",
+      "processing": "처리 중",
+      "completed": "처리 완료",
+      "templateWithDetailsPending": "{team} 팀에서 {details} 건을 확인하고 있습니다.",
+      "templateWithDetailsInProgress": "{team} 팀에서 {details} 건을 처리 중입니다.",
+      "templateWithDetailsCompleted": "{team} 팀에서 {details} 건을 완료했습니다.",
+      "templateNoDetailsPending": "{team} 담당 팀에서 확인하고 있습니다.",
+      "templateNoDetailsInProgress": "{team} 담당 팀에서 처리 중입니다.",
+      "templateNoDetailsCompleted": "{team} 담당 팀에서 완료했습니다.",
+      "emergencyPending": "프론트 데스크에서 긴급 요청건을 확인하고 있습니다.",
+      "emergencyInProgress": "프론트 데스크에서 긴급 요청건을 처리 중입니다.",
+      "emergencyCompleted": "긴급 요청건이 처리 완료되었습니다."
+    },
+    "message": {
+      "cancelPending": "🔄 취소 요청이 접수되어 직원이 확인 중입니다",
+      "escalated": "직원이 응대할 예정입니다",
+      "forwarded": "{team} 팀에 전달되었습니다",
+      "cancelledCard": "요청이 취소되었습니다",
+      "autoAcceptGuide": "요청 내용을 확인해 주세요. 잠시 후 자동 전달됩니다.",
+      "confirmGuide": "확인 후 진행 버튼을 눌러주세요.",
+      "cancelPendingShort": "취소 요청 확인 중",
+      "translating": "요약 중...",
+      "escalationRequest": "프론트 데스크 직원 연결 요청",
+      "cancelRequest": "요청 취소",
+      "proceed": "진행",
+      "urgentPrefix": "[긴급] ",
+      "cancelSuffix": " 취소",
+      "reserveSuffix": " 예약"
+    },
+    "button": {
+      "accept": "바로등록",
+      "cancel": "취소하기"
+    },
+    "time": {
+      "received": "접수",
+      "seconds": "초"
+    },
+    "title": "요청 처리 현황",
+    "items": "개",
+    "and": "외",
+    "others": "건"
+  },
+  "ticketUI": {
+    "department": {
+      "HK": "하우스키핑",
+      "FACILITY": "시설관리",
+      "FB": "F&B",
+      "CONCIERGE": "컨시어지",
+      "FRONT": "프론트",
+      "EMERGENCY": "긴급"
+    },
+    "badge": {
+      "cancelled": "취소됨",
+      "cancelPending": "취소 대기",
+      "urgent": "긴급",
+      "contactless": "비대면 배달",
+      "targetTime": "희망 시간"
+    },
+    "button": {
+      "accept": "수락하기",
+      "complete": "업무 완료"
+    },
+    "time": {
+      "justStarted": "방금 시작",
+      "elapsed": " 경과",
+      "hoursAgo": "시간 전",
+      "minsAgo": "분 전",
+      "justNow": "방금 전"
+    },
+    "entityLabels": {
+      "time": "시간",
+      "dest": "목적지",
+      "pax": "인원",
+      "paxUnit": "명",
+      "count": "수량",
+      "countUnit": "개",
+      "rest": "식당",
+      "target": "대상",
+      "req": "요청",
+      "store": "보관",
+      "pickup": "찾기",
+      "item": "물품",
+      "vendor": "업체",
+      "type": "분류",
+      "symptom": "증상",
+      "area": "지역",
+      "content": "내용"
+    }
+  },
+  "menu": {
+    "아메리카노": "아메리카노",
+    "한우 불고기 덮밥": "한우 불고기 덮밥",
+    "제로콜라": "제로콜라",
+    "콜라": "콜라",
+    "클래식 치즈버거": "클래식 치즈버거"
+  },
+  "chatInput": {
+    "placeholder": "무엇이든 물어보세요...",
+    "listening": "듣고 있습니다...",
+    "camera": "사진 찍기",
+    "gallery": "보관함",
+    "imageTooLarge": "이미지 크기가 초과되었습니다. 더 작은 이미지를 선택해 주세요.",
+    "speechUnsupported": "현재 브라우저에서는 음성 인식을 지원하지 않습니다."
+  },
+  "aiReplies": {
+    "forwardFb": "네, F&B(룸서비스) 팀으로 주문 내용을 바로 전달해 드릴게요!",
+    "forwardHk": "네, 알겠습니다! 하우스키핑 팀으로 요청 내용을 신속하게 전달해 드릴게요.",
+    "forwardFacility": "불편을 드려 죄송합니다. 🥲 시설관리 팀으로 내용을 전달하여 최대한 빠르게 조치해 드릴게요! 🛠️",
+    "forwardConcierge": "네, 알겠습니다! 컨시어지 팀으로 요청 내용을 바로 전달해 드릴게요. 🛎️",
+    "forwardFront": "지금 바로 프론트 데스크 직원에게 연결하여 도움을 드리겠습니다.",
+    "infoNotFound": "그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏",
+    "cancelSuccess": "해당 요청이 정상적으로 취소되었습니다. 😌 다른 필요하신 사항이 있다면 언제든 말씀해 주세요!",
+    "cancelPending": "해당 건은 이미 처리가 진행 중이어서 담당 부서로 취소 가능 여부를 확인 중입니다. 🏃‍♂️ 확인 후 바로 안내해 드릴게요!",
+    "piiGuard": "고객님의 소중한 개인정보 보호를 위해 채팅으로는 민감한 정보를 입력받지 않고 있습니다. 🔒 상세 확인이 필요하신 경우, 객실 내 전화기를 통해 프론트 데스크(내선 0번)로 연락해 주시면 안전하게 도와드리겠습니다. 😊"
+  },
+  "feedbackCard": {
+    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
+    "requestCompleted": "요청 완료",
+    "consultationCompleted": "상담이 완료되었습니다",
+    "satisfactionQuestion": "서비스가 만족스러우셨나요?",
+    "thankYou": "감사합니다!",
+    "ratings": {
+      "1": "별로예요",
+      "2": "그저 그래요",
+      "3": "보통이에요",
+      "4": "좋았어요",
+      "5": "최고예요!"
     }
   }
 }

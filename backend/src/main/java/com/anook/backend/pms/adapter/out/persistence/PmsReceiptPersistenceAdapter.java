@@ -24,21 +24,27 @@ public class PmsReceiptPersistenceAdapter implements PmsReceiptRepositoryPort {
 
     private static final String SELECT_WITH_MENU = """
             SELECT r.id, r.room_no, r.menu_id, m.name AS menu_name,
-                   r.quantity, r.total_price, r.status, r.created_at
+                   r.quantity, r.total_price, m.price_usd AS unit_price_usd,
+                   r.status, r.created_at
             FROM pms_receipt r
             JOIN pms_menu m ON r.menu_id = m.id
             """;
 
-    private static final RowMapper<PmsReceipt> RECEIPT_ROW_MAPPER = (rs, rowNum) -> new PmsReceipt(
-            rs.getLong("id"),
-            rs.getString("room_no"),
-            rs.getLong("menu_id"),
-            rs.getString("menu_name"),
-            rs.getInt("quantity"),
-            rs.getInt("total_price"),
-            rs.getString("status"),
-            rs.getTimestamp("created_at").toLocalDateTime()
-    );
+    private static final RowMapper<PmsReceipt> RECEIPT_ROW_MAPPER = (rs, rowNum) -> {
+        double priceUsd = rs.getDouble("unit_price_usd");
+        Double totalPriceUsd = rs.wasNull() ? null : priceUsd * rs.getInt("quantity");
+        return new PmsReceipt(
+                rs.getLong("id"),
+                rs.getString("room_no"),
+                rs.getLong("menu_id"),
+                rs.getString("menu_name"),
+                rs.getInt("quantity"),
+                rs.getInt("total_price"),
+                totalPriceUsd,
+                rs.getString("status"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        );
+    };
 
     @Override
     public void save(String roomNo, Long menuId, int quantity, int totalPrice) {

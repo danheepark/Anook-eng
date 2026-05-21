@@ -5,11 +5,12 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 0; /* Behind everything */
+  z-index: 0;
+  /* Behind everything */
   pointer-events: none;
-  background: 
+  background:
     radial-gradient(circle at center, rgba(255, 228, 214, 0.5) 0%, transparent 60%),
-    linear-gradient(180deg, #F5F5F8 0%, #EFEBF2 30%, #E8E0EC 100%);
+    linear-gradient(180deg, #F5F5F8 0%, #EFEBF2 30%, #ffffff 100%);
   transition: opacity 0.5s ease-in-out;
 }
 
@@ -17,7 +18,8 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.03); /* Very faint grayish darkening overlay */
+  background-color: rgba(0, 0, 0, 0.03);
+  /* Very faint grayish darkening overlay */
   z-index: 10;
   pointer-events: none;
 }
@@ -49,47 +51,47 @@
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Bottom Left: Peach to Pink */
+/* Bottom Right: Peach to Pink */
 .blob1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle at center, #FF7DB4 0%, #FFB494 80%, transparent 100%);
-  bottom: -100px;
-  left: -30px;
-  opacity: 0.85;
+  background: radial-gradient(circle at center, #FFB6C1 0%, #FFDAC1 80%, transparent 100%);
+  bottom: -50px;
+  right: -80px;
+  opacity: 0.6;
   animation: float1 10s infinite alternate ease-in-out;
 }
 
-/* Bottom Left Inner: Apricot */
+/* Bottom Right Inner: Apricot */
 .blob4 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle at center, #FFE4C4 0%, #FFCBA4 80%, transparent 100%);
+  background: radial-gradient(circle at center, #FFF0E0 0%, #FFDFD3 80%, transparent 100%);
   bottom: -50px;
-  left: 30px;
-  opacity: 0.9;
+  right: 30px;
+  opacity: 0.65;
   animation: float4 8s infinite alternate ease-in-out;
 }
 
-/* Bottom Right: Soft Blue to Violet */
+/* Bottom Left: Soft Blue to Violet */
 .blob2 {
   width: 550px;
   height: 550px;
   background: radial-gradient(circle at center, #7AD6FF 0%, #C49BFF 80%, transparent 100%);
-  bottom: -250px;
-  right: -250px;
-  opacity: 0.85;
+  bottom: -150px;
+  left: -100px;
+  opacity: 0.6;
   animation: float2 12s infinite alternate-reverse ease-in-out;
 }
 
-/* Extreme Bottom Right Corner: Deep Soft Blue */
+/* Extreme Bottom Left Corner: Deep Soft Blue */
 .blob5 {
   width: 250px;
   height: 450px;
   background: radial-gradient(ellipse at center, #689ED8 0%, #92C1D9 80%, transparent 100%);
   bottom: -200px;
-  right: -100px;
-  opacity: 0.95;
+  left: -100px;
+  opacity: 0.7;
   animation: float5 11s infinite alternate ease-in-out;
 }
 
@@ -99,90 +101,252 @@
   height: 400px;
   background: radial-gradient(circle at center, #E96DFF 0%, transparent 80%);
   bottom: -150px;
-  left: 10%;
-  opacity: 0.6;
+  right: 10%;
+  opacity: 0.4;
   animation: float3 15s infinite alternate ease-in-out;
 }
 
 /* When AI is typing, the blobs move like a glass prism reflecting light */
 .active1 {
   animation: prismShimmer1 3s infinite alternate ease-in-out;
-  opacity: 1;
+  opacity: 0.7;
 }
 
 .active2 {
   animation: prismShimmer2 3.5s infinite alternate-reverse ease-in-out;
-  opacity: 1;
+  opacity: 0.45;
 }
 
 .active3 {
   animation: prismShimmer3 4s infinite alternate ease-in-out;
-  opacity: 0.9;
+  opacity: 0.35;
 }
 
 .active4 {
   animation: prismShimmer4 2.5s infinite alternate ease-in-out;
-  opacity: 1;
+  opacity: 0.7;
 }
 
 .active5 {
   animation: prismShimmer5 3s infinite alternate-reverse ease-in-out;
+  opacity: 0.4;
+}
+
+/* Gentle idle movement for initial welcome screen */
+.idle1 {
+  animation: idleDrift1 4s infinite alternate ease-in-out;
   opacity: 1;
+}
+
+.idle2 {
+  animation: idleDrift2 5s infinite alternate-reverse ease-in-out;
+  opacity: 0.85;
+}
+
+.idle3 {
+  animation: idleDrift3 6s infinite alternate ease-in-out;
+  opacity: 0.7;
+}
+
+.idle4 {
+  animation: idleDrift4 3.5s infinite alternate ease-in-out;
+  opacity: 1;
+}
+
+.idle5 {
+  animation: idleDrift5 4.5s infinite alternate-reverse ease-in-out;
+  opacity: 0.9;
 }
 
 /* Slow idle floating animations */
 @keyframes float1 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(50px, -20px) scale(1.05); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(50px, -20px) scale(1.05);
+  }
 }
 
 @keyframes float2 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-50px, -40px) scale(1.1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(-50px, -40px) scale(1.1);
+  }
 }
 
 @keyframes float3 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(30px, -20px) scale(1.15); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(30px, -20px) scale(1.15);
+  }
 }
 
 @keyframes float4 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(40px, -10px) scale(1.1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(40px, -10px) scale(1.1);
+  }
 }
 
 @keyframes float5 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-30px, -30px) scale(1.08); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(-30px, -30px) scale(1.08);
+  }
 }
 
 /* Dramatic mixing animations for AI typing */
 @keyframes prismShimmer1 {
-  0% { transform: translate(0, 0) scale(1.1); }
-  50% { transform: translate(150px, -200px) scale(1.6); }
-  100% { transform: translate(300px, -400px) scale(1.3); }
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(150px, -200px) scale(1.6);
+  }
+
+  100% {
+    transform: translate(300px, -400px) scale(1.3);
+  }
 }
 
 @keyframes prismShimmer2 {
-  0% { transform: translate(0, 0) scale(1.1); }
-  50% { transform: translate(-200px, -200px) scale(1.5); }
-  100% { transform: translate(-400px, -400px) scale(1.2); }
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(200px, -300px) scale(1.5);
+  }
+
+  100% {
+    transform: translate(350px, -450px) scale(1.2);
+  }
 }
 
 @keyframes prismShimmer3 {
-  0% { transform: translate(0, 0) scale(1.15); }
-  50% { transform: translate(-50px, -300px) scale(1.8); }
-  100% { transform: translate(100px, -150px) scale(1.4); }
+  0% {
+    transform: translate(0, 0) scale(1.15);
+  }
+
+  50% {
+    transform: translate(-50px, -300px) scale(1.8);
+  }
+
+  100% {
+    transform: translate(100px, -150px) scale(1.4);
+  }
 }
 
 @keyframes prismShimmer4 {
-  0% { transform: translate(0, 0) scale(1.1); }
-  50% { transform: translate(200px, -150px) scale(1.6); }
-  100% { transform: translate(100px, -350px) scale(1.3); }
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(200px, -150px) scale(1.6);
+  }
+
+  100% {
+    transform: translate(100px, -350px) scale(1.3);
+  }
 }
 
 @keyframes prismShimmer5 {
-  0% { transform: translate(0, 0) scale(1.1); }
-  50% { transform: translate(-150px, -250px) scale(1.4); }
-  100% { transform: translate(-250px, -500px) scale(1.2); }
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-150px, -250px) scale(1.4);
+  }
+
+  100% {
+    transform: translate(-250px, -500px) scale(1.2);
+  }
+}
+
+/* Gentle idle drift animations for welcome screen */
+@keyframes idleDrift1 {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-60px, -80px) scale(1.4);
+  }
+
+  100% {
+    transform: translate(30px, -40px) scale(1.25);
+  }
+}
+
+@keyframes idleDrift2 {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(180px, -40px) scale(1.35);
+  }
+
+  100% {
+    transform: translate(100px, -20px) scale(1.2);
+  }
+}
+
+@keyframes idleDrift3 {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-100px, -20px) scale(1.3);
+  }
+
+  100% {
+    transform: translate(60px, -10px) scale(1.15);
+  }
+}
+
+@keyframes idleDrift4 {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-80px, -100px) scale(1.45);
+  }
+
+  100% {
+    transform: translate(40px, -60px) scale(1.3);
+  }
+}
+
+@keyframes idleDrift5 {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-80px, -30px) scale(1.25);
+  }
+
+  100% {
+    transform: translate(50px, -20px) scale(1.15);
+  }
 }

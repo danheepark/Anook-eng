@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import styles from './EmergencyBanner.module.css';
+import { CancelIcon } from '@/components/icons';
+import { AlertTriangle } from 'lucide-react';
 
 interface EmergencyAlert {
   requestId: number;
@@ -82,9 +84,7 @@ export default function EmergencyBanner({ alert, onDismiss, onClick }: Emergency
   return (
     <div className={styles.banner} onClick={onClick} role="alert">
       <div className={styles.iconPulse}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-        </svg>
+        <AlertTriangle size={20} />
       </div>
 
       <div className={styles.textArea}>
@@ -102,7 +102,7 @@ export default function EmergencyBanner({ alert, onDismiss, onClick }: Emergency
         }}
         aria-label="긴급 알림 닫기"
       >
-        ✕
+        <CancelIcon width={20} height={20} color="#fff" />
       </button>
     </div>
   );

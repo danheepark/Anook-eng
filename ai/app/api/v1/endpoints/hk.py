@@ -13,4 +13,4 @@ class DomainRequest(BaseModel):
 
 @router.post("", response_model=HotelRequestSchema)
 async def handle_hk(request: DomainRequest):
-    return run_hk_agent(request.message, request.room_no, request.chat_history)
+    return await run_hk_agent(request.message, request.room_no, request.chat_history)

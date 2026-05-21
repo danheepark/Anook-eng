@@ -29,7 +29,7 @@ public class GetStaffRequestsService implements GetStaffRequestsUseCase {
                     return new StaffTaskResult(
                             r.id(), r.status(), r.priority(), r.departmentId(), r.summary(),
                             r.rawText(), r.roomNumber(), r.assignedStaffId(), r.confidence(),
-                            r.createdAt(), r.version(), r.cancelRequested(), r.cancelRequestedAt(), r.entities(), imageUrl
+                            r.createdAt(), r.version(), r.cancelRequested(), r.cancelRequestedAt(), r.entities(), imageUrl, r.reasoning()
                     );
                 })
                 .collect(Collectors.toList());

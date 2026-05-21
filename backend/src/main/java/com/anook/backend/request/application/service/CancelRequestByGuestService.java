@@ -2,7 +2,7 @@ package com.anook.backend.request.application.service;
 
 import com.anook.backend.global.exception.BusinessException;
 import com.anook.backend.global.exception.ErrorCode;
-import com.anook.backend.request.application.dto.response.RequestWebSocketPayload;
+import com.anook.backend.request.application.dto.response.RequestSsePayload;
 import com.anook.backend.request.application.port.in.CancelRequestUseCase;
 import com.anook.backend.request.application.port.out.DispatchPort;
 import com.anook.backend.request.application.port.out.RequestRepositoryPort;
@@ -61,7 +61,7 @@ public class CancelRequestByGuestService implements CancelRequestUseCase {
         log.info("[CancelByGuest] 취소 완료 — requestId: {}, newStatus: CANCELLED", requestId);
 
         // 4. WebSocket 알림: 고객 UI 업데이트
-        RequestWebSocketPayload payload = RequestWebSocketPayload.statusChanged(
+        RequestSsePayload payload = RequestSsePayload.statusChanged(
                 request.getId(),
                 RequestStatus.CANCELLED.name(),
                 request.getDomainCode() != null ? request.getDomainCode().name() : null,

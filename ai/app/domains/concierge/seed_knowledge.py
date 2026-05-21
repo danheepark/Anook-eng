@@ -5,43 +5,45 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from app.infrastructure.database.connection import get_db_connection
-from app.domains.rag.service import embed_text
+from app.domains.rag.service import upsert_knowledge_entry
 from app.domains.concierge.knowledge_data import CONCIERGE_KNOWLEDGE
 
-def seed_concierge_knowledge():
+def seed_concierge_knowledge(force: bool = False):
     print("🚀 컨시어지(CONCIERGE) RAG 지식 시딩을 시작합니다...")
-    
+
     conn = get_db_connection()
+    stats = {"inserted": 0, "updated": 0, "skipped": 0}
     try:
         with conn.cursor() as cur:
-            # 기존 데이터 중복 방지를 위해 삭제
-            cur.execute("DELETE FROM knowledge_entry WHERE domain_code = 'CONCIERGE'")
-            
             for item in CONCIERGE_KNOWLEDGE:
                 question = item["question"]
                 answer = item["answer"]
-                
-                print(f"⏳ 임베딩 생성 중: {question[:20]}...")
-                # 질문과 답변을 합쳐서 임베딩 텍스트로 사용 (검색 품질 향상)
-                embed_text_input = f"질문: {question}\n답변: {answer}"
-                embedding_vector = embed_text(embed_text_input)
-                
-                # DB에 INSERT
-                sql = """
-                    INSERT INTO knowledge_entry (question, answer, domain_code, status, embedding)
-                    VALUES (%s, %s, %s, %s, %s::vector)
-                """
-                cur.execute(sql, (question, answer, "CONCIERGE", "APPROVED", embedding_vector))
-                print(f"✅ 삽입 완료: {question[:20]}...")
-                
+
+                result = upsert_knowledge_entry(cur, "CONCIERGE", question, answer, force=force)
+                stats[result] += 1
+
+                if result == "inserted":
+                    print(f"✅ 신규 등록: {question[:30]}...")
+                elif result == "updated":
+                    print(f"🔄 내용 수정: {question[:30]}...")
+                else:
+                    print(f"⏩ 변경 없음: {question[:30]}...")
+
         conn.commit()
-        print("\n🎉 모든 컨시어지 지식이 성공적으로 DB에 저장되었습니다!")
+        print(
+            f"\n🎉 [CONCIERGE] 시딩 완료 - "
+            f"신규 {stats['inserted']}건, 수정 {stats['updated']}건, 건너뜀 {stats['skipped']}건"
+        )
     except Exception as e:
-        print(f"❌ 시딩 중 오류 발생: {e}")
         conn.rollback()
+        print(f"\n❌ 시딩 중 오류 발생: {e}")
     finally:
         conn.close()
 
 # seed_all 코드 머지되면 이부분 삭제해도 됨!!
 if __name__ == "__main__":
-    seed_concierge_knowledge()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="answer 동일해도 강제 재임베딩")
+    args = parser.parse_args()
+    seed_concierge_knowledge(force=args.force)

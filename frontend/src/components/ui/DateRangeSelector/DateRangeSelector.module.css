@@ -1,0 +1,154 @@
+.container {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-family-base);
+}
+
+.triggerButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-8);
+  border: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  font: var(--text-body-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.triggerButton:hover {
+  background-color: var(--color-gray-50);
+  border-color: var(--color-gray-300);
+}
+
+.triggerButton.active {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  color: var(--color-primary-700);
+}
+
+.icon {
+  color: var(--color-gray-500);
+}
+
+.triggerButton.active .icon {
+  color: var(--color-primary-600);
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + var(--space-8));
+  right: 0;
+  width: 320px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-12);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  padding: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sectionTitle {
+  font: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--color-gray-500);
+  margin: 0;
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+}
+
+.presetButton {
+  padding: var(--space-8) var(--space-12);
+  background-color: var(--color-gray-50);
+  border: 1px solid transparent;
+  border-radius: var(--radius-6);
+  color: var(--color-gray-700);
+  font: var(--text-body-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.presetButton:hover {
+  background-color: var(--color-gray-100);
+}
+
+.presetButton.selected {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-200);
+  font-weight: 500;
+}
+
+.customRange {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.dateInputGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.dateInput {
+  flex: 1;
+  padding: var(--space-8);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-6);
+  font: var(--text-body-sm);
+  color: var(--color-gray-900);
+  outline: none;
+}
+
+.dateInput:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-100);
+}
+
+.dateSeparator {
+  color: var(--color-gray-400);
+  font-weight: 500;
+}
+
+.applyButton {
+  width: 100%;
+  padding: var(--space-10);
+  background-color: var(--color-primary-600);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-8);
+  font: var(--text-body-sm);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: var(--space-8);
+  transition: background-color 0.2s ease;
+}
+
+.applyButton:hover {
+  background-color: var(--color-primary-700);
+}

@@ -28,6 +28,7 @@ public class Request {
     private LocalDateTime updatedAt;
     private boolean cancelRequested;
     private LocalDateTime cancelRequestedAt;
+    private Integer rating;
 
     // === 생성자 (팩토리 메서드 + 재구성용) ===
 
@@ -81,6 +82,7 @@ public class Request {
                                         int version,
                                         boolean cancelRequested,
                                         LocalDateTime cancelRequestedAt,
+                                        Integer rating,
                                         LocalDateTime createdAt,
                                         LocalDateTime updatedAt) {
         Request request = new Request();
@@ -99,6 +101,7 @@ public class Request {
         request.version = version;
         request.cancelRequested = cancelRequested;
         request.cancelRequestedAt = cancelRequestedAt;
+        request.rating = rating;
         request.createdAt = createdAt;
         request.updatedAt = updatedAt;
         return request;
@@ -191,6 +194,17 @@ public class Request {
     }
 
     /**
+     * 고객 피드백 별점 등록 (1~5)
+     */
+    public void rate(int rating) {
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("별점은 1~5 사이여야 합니다: " + rating);
+        }
+        this.rating = rating;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
      * 초과 시간 여부 (30분 기준)
      */
     public boolean isOverdue() {
@@ -235,6 +249,7 @@ public class Request {
     public boolean isCancelRequested() { return cancelRequested; }
     public LocalDateTime getCancelRequestedAt() { return cancelRequestedAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public Integer getRating() { return rating; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     /**

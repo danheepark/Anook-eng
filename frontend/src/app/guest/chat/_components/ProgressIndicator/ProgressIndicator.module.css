@@ -1,22 +1,77 @@
-.content {
+.wrapper {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-4) 0;
+  animation: simpleFadeIn 0.4s ease-out forwards;
+}
+
+@keyframes simpleFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.lottieAvatar {
+  width: 44px;
+  height: 44px;
+  margin-left: -6px;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  position: relative;
+  overflow: visible !important;
+}
+
+
+
+.lottieAvatar>* {
+  position: relative;
+  z-index: 1;
+  transform: scale(2.6) translateY(-2%);
+  overflow: visible !important;
+}
+
+/* 내부 SVG, canvas 및 컨테이너가 드롭 섀도우 글로우를 잘라내지(clipping) 않도록 강제 노출 설정 */
+.lottieAvatar svg,
+.lottieAvatar canvas,
+.lottieAvatar div {
+  overflow: visible !important;
 }
 
 .description {
-  font-size: var(--font-size-xs);
+  font: var(--text-body-md-medium);
   color: var(--color-gray-500);
   line-height: 1.4;
-  animation: textPulse 1.5s ease-in-out infinite;
+  padding: var(--space-4) 0;
 }
 
-@keyframes textPulse {
+.breathingText {
+  display: inline-block;
+  font-weight: 500;
+  color: var(--color-gray-500);
+  animation: breathFade 2.5s ease-in-out infinite;
+}
+
+@keyframes breathFade {
   0%, 100% {
-    opacity: 1;
-  }
-  50% {
     opacity: 0.4;
   }
+  50% {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.fadeOut {
+  opacity: 0 !important;
+  transition: opacity 0.5s ease;
 }

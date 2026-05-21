@@ -12,13 +12,18 @@ import { sessionOptions, SessionData } from '@/lib/session';
  */
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
+const AI_SERVER_URL = process.env.AI_SERVER_URL || 'http://localhost:8000';
 
 async function handleProxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
   const targetPath = '/' + path.join('/');
   const url = new URL(req.url);
   const queryString = url.search;
-  const backendUrl = `${BACKEND_URL}${targetPath}${queryString}`;
+  
+  let backendUrl = `${BACKEND_URL}${targetPath}${queryString}`;
+  if (targetPath === '/translate') {
+    backendUrl = `${AI_SERVER_URL}${targetPath}${queryString}`;
+  }
 
   // 세션에서 JWT 토큰 추출
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
@@ -46,7 +51,8 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
       // 프론트에서 FormData로 넘긴 것을 백엔드 호환 JSON으로 변환
       const formData = await req.formData();
       const content = formData.get('content') as string || '';
-      
+      const language = formData.get('language') as string || 'ko';
+
       const images: string[] = [];
       for (const [key, value] of formData.entries()) {
         if (key === 'images' && typeof value === 'string') {
@@ -58,15 +64,15 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
           images.push(base64);
         }
       }
-      
-      const payload = { content, images: images.length > 0 ? images : undefined };
+
+      const payload = { content, language, images: images.length > 0 ? images : undefined };
       fetchOptions.body = JSON.stringify(payload);
       headers['Content-Type'] = 'application/json';
     } else {
       const bodyText = await req.text();
-    if (bodyText) {
-      fetchOptions.body = bodyText;
-    }
+      if (bodyText) {
+        fetchOptions.body = bodyText;
+      }
     }
   }
 
@@ -79,7 +85,7 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     }
 
     const data = await backendRes.text();
-    
+
     // 기본 응답 객체 생성
     const res = new NextResponse(data, {
       status: backendRes.status,
@@ -94,9 +100,9 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
           // 1. 현재 세션 쿠키 삭제 (설정된 이름 및 이전 이름 모두 정리)
           res.cookies.delete(sessionOptions.cookieName);
           res.cookies.delete('aneuk_session'); // 과도기 대비 이전 이름 삭제 추가
-          
+
           // 2. 미들웨어에서 인지할 수 있도록 임시 에러 마커 쿠키 설정 (10초 유효)
-          res.cookies.set('duplicate_login_error', 'true', { 
+          res.cookies.set('duplicate_login_error', 'true', {
             maxAge: 10,
             path: '/', // 모든 경로에서 보이도록 명시
           });

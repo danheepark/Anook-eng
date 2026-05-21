@@ -13,7 +13,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE TABLE IF NOT EXISTS department (
     id          VARCHAR(20)  PRIMARY KEY,
     name        VARCHAR(50)  NOT NULL,
-    is_admin    BOOLEAN      NOT NULL DEFAULT FALSE
+    is_frontdesk BOOLEAN     NOT NULL DEFAULT FALSE
 );
 
 -- 직원 역할
@@ -182,11 +182,12 @@ CREATE TABLE IF NOT EXISTS pms_guest (
 -- PMS 메뉴 (룸서비스 메뉴 마스터)
 CREATE TABLE IF NOT EXISTS pms_menu (
     id          BIGSERIAL    PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL,
+    name        VARCHAR(100) NOT NULL UNIQUE,
     price       INTEGER      NOT NULL,
+    price_usd   DOUBLE PRECISION,
     category    VARCHAR(30)  NOT NULL,
     allergens   VARCHAR(200),
-    options     VARCHAR(500),
+    options     TEXT,
     available   BOOLEAN      NOT NULL DEFAULT TRUE
 );
 
@@ -250,3 +251,29 @@ ALTER TABLE pms_menu ADD COLUMN IF NOT EXISTS options VARCHAR(500);
 
 -- [2026-05-13] AI 판단 근거 저장
 ALTER TABLE request ADD COLUMN IF NOT EXISTS reasoning TEXT;
+
+-- [2026-05-14] VOC 감성 분석 컬럼 추가
+ALTER TABLE message ADD COLUMN IF NOT EXISTS sentiment VARCHAR(10);
+
+-- [2026-05-15] 고객 피드백 별점 컬럼 추가 (1~5, NULL=미평가)
+ALTER TABLE request ADD COLUMN IF NOT EXISTS rating SMALLINT;
+
+-- [2026-05-19] Admin 역할을 Frontdesk로 변경 (안전한 교체 방식)
+ALTER TABLE department ADD COLUMN IF NOT EXISTS is_frontdesk BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE department DROP COLUMN IF EXISTS is_admin;
+
+-- [2026-05-20] RAG 동시성 보장을 위한 복합 UNIQUE 인덱스 추가 (AN-351)
+-- UNIQUE 제약을 걸기 전에 기존 중복 데이터를 먼저 제거 (가장 큰 id 1건만 유지).
+-- 이 DELETE 가 없으면 이미 중복이 있는 환경에서 인덱스 생성 시 PSQLException 발생 → 백엔드 부팅 실패.
+DELETE FROM knowledge_entry a
+USING knowledge_entry b
+WHERE a.id < b.id
+  AND a.domain_code = b.domain_code
+  AND a.question = b.question;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_knowledge_entry_unique_domain_question
+ON knowledge_entry(domain_code, question);
+
+-- [2026-05-20] 메뉴 테이블에 달러 가격(price_usd) 컬럼 추가
+ALTER TABLE pms_menu ADD COLUMN IF NOT EXISTS price_usd DOUBLE PRECISION;
+

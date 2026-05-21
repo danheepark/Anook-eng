@@ -1,6 +1,6 @@
 package com.anook.backend.request.application.service;
 
-import com.anook.backend.request.application.dto.response.RequestWebSocketPayload;
+import com.anook.backend.request.application.dto.response.RequestSsePayload;
 import com.anook.backend.request.application.port.out.DispatchPort;
 import com.anook.backend.request.application.port.out.RequestRepositoryPort;
 import com.anook.backend.request.domain.model.Request;
@@ -52,7 +52,7 @@ public class GracePeriodScheduler {
      * @param payload    직원에게 보낼 원본 WebSocket 페이로드
      */
     public void scheduleGraceExpiry(Long requestId, String roomNo,
-                                     String deptCode, RequestWebSocketPayload payload) {
+                                     String deptCode, RequestSsePayload payload) {
         log.info("[GracePeriod] 스케줄 등록 — requestId: {}, {}초 후 직원 알림 발송 예정", requestId, GRACE_SECONDS);
 
         ScheduledFuture<?> future = scheduler.schedule(() -> {
@@ -72,10 +72,10 @@ public class GracePeriodScheduler {
                     log.info("[GracePeriod] 만료 → 직원 알림 발송 — requestId: {}, dept: {}", requestId, deptCode);
 
                     dispatchPort.dispatchToDepartment(deptCode, payload);
-                    dispatchPort.dispatchToAdmin(payload);
+                    dispatchPort.dispatchToFrontdesk(payload);
 
                     // 고객 UI에 Grace 만료 알림 (버튼 숨기기)
-                    RequestWebSocketPayload graceExpired = RequestWebSocketPayload.graceExpired(requestId, roomNo);
+                    RequestSsePayload graceExpired = RequestSsePayload.graceExpired(requestId, roomNo);
                     dispatchPort.dispatchToRoom(roomNo, graceExpired);
                 } else {
                     // 고객이 이미 취소했거나 상태가 바뀐 경우 — 아무것도 안 함
@@ -111,7 +111,7 @@ public class GracePeriodScheduler {
                     log.info("[GracePeriod] 수락하기 즉시 발송 — requestId: {}, dept: {}", requestId, deptCode);
 
                     // 직원 대시보드 발송 시 graceRemaining을 0으로 설정하여 보냄
-                    RequestWebSocketPayload payload = RequestWebSocketPayload.newRequest(
+                    RequestSsePayload payload = RequestSsePayload.newRequest(
                             request.getId(),
                             request.getStatus().name(),
                             deptCode,
@@ -123,10 +123,10 @@ public class GracePeriodScheduler {
                     );
 
                     dispatchPort.dispatchToDepartment(deptCode, payload);
-                    dispatchPort.dispatchToAdmin(payload);
+                    dispatchPort.dispatchToFrontdesk(payload);
 
                     // 고객 UI에 완료(만료) 알림
-                    RequestWebSocketPayload graceExpired = RequestWebSocketPayload.graceExpired(requestId, roomNo);
+                    RequestSsePayload graceExpired = RequestSsePayload.graceExpired(requestId, roomNo);
                     dispatchPort.dispatchToRoom(roomNo, graceExpired);
                 }
             }

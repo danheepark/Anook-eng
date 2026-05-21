@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * "RAG 데이터로 등록하시겠어요?" 모달에서 확인을 눌렀을 때 호출된다.
  *
  * 경로: /staff/knowledge/** (SecurityConfig에서 ROLE_STAFF 이상 접근 가능)
- * 역할 계층: ROLE_ADMIN > ROLE_STAFF → 관리자도 접근 가능
+ * 역할 계층: ROLE_FRONTDESK > ROLE_STAFF → 관리자도 접근 가능
  *
  * ❌ Controller에서 비즈니스 로직 처리 금지 — UseCase에 위임
  */

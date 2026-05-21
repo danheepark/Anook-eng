@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './ChatBubble.module.css';
+import { CancelIcon } from '@/components/icons';
 
 export interface ChatBubbleProps {
   variant: 'sent' | 'received';
+  bubbleStyle?: 'sent' | 'received';
   isFallback?: boolean;
-  isLatest?: boolean;
   imageUrl?: string;
   children: React.ReactNode;
+  animate?: boolean;
 }
 
-export default function ChatBubble({ variant, isFallback, isLatest = false, imageUrl, children }: ChatBubbleProps) {
+export default function ChatBubble({ variant, bubbleStyle, isFallback, imageUrl, children }: ChatBubbleProps) {
+  const styleClass = bubbleStyle || variant;
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const renderContent = () => {
@@ -48,26 +51,25 @@ export default function ChatBubble({ variant, isFallback, isLatest = false, imag
       <div className={`${styles.wrapper} ${variant === 'sent' ? styles.sentWrapper : styles.receivedWrapper}`}>
         {variant === 'received' ? (
           <div className={styles.receivedContainer}>
-            {isLatest ? (
-              <div className={styles.aiLogoContainer}>
-                <div className={styles.aiLogoMask}>
-                  <div className={styles.orbBlue} />
-                  <div className={styles.orbPurple} />
-                  <div className={styles.orbPeach} />
-                </div>
+            {styleClass === 'received' && !isFallback && (
+              <div className={styles.aiAvatar}>
+                <img src="/moon_avatar.png" alt="Anook AI" />
               </div>
-            ) : (
-              <div className={styles.aiLogoStatic} />
             )}
-            <div className={`${styles.bubble} ${styles[variant]} ${isFallback ? styles.fallback : ''}`}>
+            <div className={`${styles.bubble} ${styles[styleClass]} ${isFallback ? styles.fallback : ''}`}>
               {renderContent()}
             </div>
           </div>
         ) : (
           <div className={styles.sentContainer}>
+            {styleClass === 'received' && !isFallback && (
+              <div className={styles.aiAvatar}>
+                <img src="/moon_avatar.png" alt="Anook AI" />
+              </div>
+            )}
             {renderImage()}
             {(typeof children === 'string' && children.trim()) || typeof children !== 'string' ? (
-              <div className={`${styles.bubble} ${styles[variant]} ${isFallback ? styles.fallback : ''}`}>
+              <div className={`${styles.bubble} ${styles[styleClass]} ${isFallback ? styles.fallback : ''}`}>
                 {renderContent()}
               </div>
             ) : null}
@@ -81,7 +83,7 @@ export default function ChatBubble({ variant, isFallback, isLatest = false, imag
           <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
             <img src={imageUrl} alt="첨부 이미지 확대" className={styles.lightboxImage} />
             <button className={styles.lightboxClose} onClick={() => setIsLightboxOpen(false)} aria-label="닫기">
-              ✕
+              <CancelIcon width={20} height={20} color="currentColor" />
             </button>
           </div>
         </div>

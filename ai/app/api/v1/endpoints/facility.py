@@ -13,4 +13,4 @@ class DomainRequest(BaseModel):
 
 @router.post("")
 async def handle_facility(request: DomainRequest):
-    return run_facility_agent(request.message, request.room_no, request.chat_history)
+    return await run_facility_agent(request.message, request.room_no, request.chat_history)

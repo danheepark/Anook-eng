@@ -74,6 +74,8 @@ public class RequestJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    private Integer rating;
+
     // === 팩토리 메서드: Domain → Entity ===
 
     public static RequestJpaEntity fromDomain(Request request) {
@@ -93,6 +95,7 @@ public class RequestJpaEntity {
         entity.version = request.getVersion();
         entity.cancelRequested = request.isCancelRequested();
         entity.cancelRequestedAt = request.getCancelRequestedAt();
+        entity.rating = request.getRating();
         entity.createdAt = request.getCreatedAt();
         entity.updatedAt = request.getUpdatedAt();
         return entity;
@@ -117,6 +120,7 @@ public class RequestJpaEntity {
                 this.version,
                 this.cancelRequested != null ? this.cancelRequested : false,
                 this.cancelRequestedAt,
+                this.rating,
                 this.createdAt,
                 this.updatedAt);
     }
@@ -125,6 +129,11 @@ public class RequestJpaEntity {
 
     public void updateStatus(String newStatus) {
         this.status = newStatus;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateRating(Integer rating) {
+        this.rating = rating;
         this.updatedAt = LocalDateTime.now();
     }
 }

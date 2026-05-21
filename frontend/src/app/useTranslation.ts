@@ -1,10 +1,14 @@
 import { useUiStore } from '@/stores/useUiStore';
 import ko from '@/locales/ko.json';
 import en from '@/locales/en.json';
+import zh from '@/locales/zh.json';
+import ja from '@/locales/ja.json';
 
 const dictionaries = {
   ko,
   en,
+  zh,
+  ja,
 };
 
 type Language = keyof typeof dictionaries;
@@ -18,3 +22,5 @@ export function useTranslation() {
 
   return { t, language };
 }
+
+// Force reload comment

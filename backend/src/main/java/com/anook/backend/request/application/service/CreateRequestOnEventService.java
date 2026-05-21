@@ -1,7 +1,7 @@
 package com.anook.backend.request.application.service;
 
 import com.anook.backend.message.application.event.RequestDetectedEvent;
-import com.anook.backend.request.application.dto.response.RequestWebSocketPayload;
+import com.anook.backend.request.application.dto.response.RequestSsePayload;
 import com.anook.backend.request.application.port.out.DispatchPort;
 import com.anook.backend.request.application.port.out.RequestRepositoryPort;
 import com.anook.backend.request.domain.model.DomainCode;
@@ -9,6 +9,8 @@ import com.anook.backend.request.domain.model.Priority;
 import com.anook.backend.request.domain.model.Request;
 import com.anook.backend.request.domain.model.RequestStatus;
 import com.anook.backend.global.util.RedisImageCacheUtil;
+import com.anook.backend.room.application.service.RoomInventoryService;
+import com.anook.backend.room.application.service.InventoryPolicyProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,18 +22,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
-/**
- * Message 도메인에서 발행한 RequestDetectedEvent를 수신하여 Request 생성
- *
- * [AN-252] Grace Period + Generative UI 적용:
- * - URGENT 요청: 즉시 직원 알림 (Grace Period 스킵)
- * - 일반 요청: 10초 Grace Period 후 직원 알림 (고객에게 수정/취소 기회 제공)
- * - WebSocket payload에 entities, graceRemaining, priority 포함 (위젯 카드 렌더링용)
- *
- * [Cancel & Replace] 대화형 수정 패턴:
- * - 같은 객실+게스트+부서에 PENDING 상태 요청이 이미 있으면 자동 취소 후 새 요청 생성
- * - "수건 2장" → "아니 3장으로 바꿔줘" 시나리오를 매끄럽게 처리
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,6 +32,8 @@ public class CreateRequestOnEventService {
     private final DispatchPort dispatchPort;
     private final GracePeriodScheduler gracePeriodScheduler;
     private final RedisImageCacheUtil redisImageCacheUtil;
+    private final RoomInventoryService roomInventoryService;
+    private final InventoryPolicyProperties inventoryPolicyProperties;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -58,26 +51,27 @@ public class CreateRequestOnEventService {
         if ("REPLACE".equalsIgnoreCase(event.getActionType())) {
             // [Keyword Targeting] targetKeyword가 있으면 키워드 매칭으로 대상 탐색
             java.util.Optional<Request> targetRequest = java.util.Optional.empty();
-            
+
             if (event.getTargetKeyword() != null && !event.getTargetKeyword().isBlank()) {
-                List<Request> cancellable = requestRepositoryPort.findAllCancellableByRoomNoAndGuestId(event.getRoomNo(), event.getGuestId());
+                List<Request> cancellable = requestRepositoryPort
+                        .findAllCancellableByRoomNoAndGuestId(event.getRoomNo(), event.getGuestId());
                 String lowerKeyword = event.getTargetKeyword().toLowerCase();
                 targetRequest = cancellable.stream()
                         .filter(r -> r.getDomainCode() == domainCode)
                         .filter(r -> r.getSummary() != null && r.getSummary().toLowerCase().contains(lowerKeyword))
                         .findFirst();
-                
+
                 if (targetRequest.isEmpty()) {
                     log.info("[Cancel&Replace] 키워드 '{}' 매칭 실패 → 최신 건 폴백", event.getTargetKeyword());
                 }
             }
-            
+
             // 키워드 매칭 실패 시 최신 건 폴백
             if (targetRequest.isEmpty()) {
                 targetRequest = requestRepositoryPort.findLatestCancellableByRoomNoAndGuestIdAndDomainCode(
                         event.getRoomNo(), event.getGuestId(), domainCode.name());
             }
-            
+
             if (targetRequest.isPresent()) {
                 Request existing = targetRequest.get();
                 if (existing.getStatus() == RequestStatus.PENDING) {
@@ -88,12 +82,14 @@ public class CreateRequestOnEventService {
                         log.info("[Cancel&Replace] PENDING 요청 자동 취소 — id: {}, summary: {}, keyword: {}",
                                 existing.getId(), existing.getSummary(), event.getTargetKeyword());
 
-                        RequestWebSocketPayload cancelPayload = RequestWebSocketPayload.statusChanged(
+                        RequestSsePayload cancelPayload = RequestSsePayload.statusChanged(
                                 existing.getId(),
                                 RequestStatus.CANCELLED.name(),
                                 existing.getDomainCode() != null ? existing.getDomainCode().name() : null,
                                 existing.getSummary(),
-                                existing.getRoomNo());
+                                existing.getRoomNo(),
+                                "AI",
+                                "REPLACED");
                         dispatchPort.dispatchToRoom(event.getRoomNo(), cancelPayload);
                     } catch (Exception e) {
                         log.warn("[Cancel&Replace] 기존 요청 자동 취소 실패: {}", e.getMessage());
@@ -104,20 +100,21 @@ public class CreateRequestOnEventService {
                     try {
                         existing.requestCancellation();
                         requestRepositoryPort.save(existing);
-                        
+
                         log.info("[Cancel&Replace] IN_PROGRESS 요청 취소 승인 대기 처리 — id: {}", existing.getId());
-                        
-                        RequestWebSocketPayload cancelPayload = RequestWebSocketPayload.cancelRequestReceived(
+
+                        RequestSsePayload cancelPayload = RequestSsePayload.cancelRequestReceived(
                                 existing.getId(),
                                 existing.getDomainCode() != null ? existing.getDomainCode().name() : null,
-                                existing.getSummary(), 
+                                existing.getSummary(),
                                 existing.getRoomNo());
                         dispatchPort.dispatchToRoom(event.getRoomNo(), cancelPayload);
                         if (existing.getDepartmentId() != null) {
                             dispatchPort.dispatchToDepartment(existing.getDepartmentId(), cancelPayload);
                         }
                     } catch (Exception e) {
-                        log.warn("[Cancel&Replace] 기존 요청 취소 대기 실패 — id: {}, reason: {}", existing.getId(), e.getMessage());
+                        log.warn("[Cancel&Replace] 기존 요청 취소 대기 실패 — id: {}, reason: {}", existing.getId(),
+                                e.getMessage());
                     }
                 }
             }
@@ -127,7 +124,7 @@ public class CreateRequestOnEventService {
         // 긴 문장일 경우에는 원문과 AI가 추출한 상세 내역을 모두 표시하여 직원의 가독성을 높임.
         String finalRawText = event.getRawText();
         String formattedEntities = formatEntities(event.getEntities());
-        
+
         if (finalRawText != null && finalRawText.length() <= 3) {
             finalRawText = formattedEntities.trim(); // "응"은 버리고 상세 내역만 사용
         } else if (formattedEntities != null && !formattedEntities.isEmpty()) {
@@ -150,7 +147,8 @@ public class CreateRequestOnEventService {
         boolean isEmergencyDetected = event.getEntities() != null
                 && event.getEntities().containsKey("emergency_category");
 
-        // 에스컬레이션 조건: confidence < 0.7 이거나 event.isEscalated() 가 true인 경우, 또는 forceEscalate 가 true인 경우
+        // 에스컬레이션 조건: confidence < 0.7 이거나 event.isEscalated() 가 true인 경우, 또는
+        // forceEscalate 가 true인 경우
         boolean isEscalated = event.isEscalated() || event.getConfidence() < 0.7 || forceEscalate;
 
         if (isEmergencyDetected) {
@@ -166,6 +164,52 @@ public class CreateRequestOnEventService {
         Request savedRequest = requestRepositoryPort.save(request);
         log.info("Request 생성 완료: id={}", savedRequest.getId());
 
+        // [Stateful Inventory] HK 요청 시 즉시 Redis 카운트 증가
+        if (domainCode == DomainCode.HK && savedRequest.getEntities() != null) {
+            Object itemsObj = savedRequest.getEntities().get("items");
+            if (itemsObj instanceof List<?> items) {
+                for (Object itemObj : items) {
+                    if (itemObj instanceof Map<?, ?> itemMap) {
+                        String name = (String) itemMap.get("item");
+                        Object countObj = itemMap.get("count");
+                        if (name != null && countObj != null) {
+                            int quantity = 0;
+                            if (countObj instanceof Integer)
+                                quantity = (Integer) countObj;
+                            else if (countObj instanceof Double)
+                                quantity = ((Double) countObj).intValue();
+                            else if (countObj instanceof String) {
+                                try {
+                                    quantity = Integer.parseInt((String) countObj);
+                                } catch (Exception ignored) {
+                                }
+                            }
+
+                            if (quantity > 0) {
+                                boolean matched = false;
+                                for (InventoryPolicyProperties.PolicyItem policy : inventoryPolicyProperties
+                                        .getPolicies()) {
+                                    for (String alias : policy.getAliases()) {
+                                        if (name.equalsIgnoreCase(policy.getCode())
+                                                || name.toLowerCase().contains(alias.toLowerCase())) {
+                                            roomInventoryService.incrementItem(savedRequest.getRoomNo(),
+                                                    policy.getCode(), quantity);
+                                            log.info("[Inventory] 즉시 인벤토리 반영: 객실 {} / {} x{}", savedRequest.getRoomNo(),
+                                                    policy.getCode(), quantity);
+                                            matched = true;
+                                            break;
+                                        }
+                                    }
+                                    if (matched)
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (event.getImages() != null && !event.getImages().isEmpty()) {
             java.time.Duration ttl = java.time.Duration.ofDays(3); // 최대 3일, 체크아웃 시 자동 파기
             for (String base64Image : event.getImages()) {
@@ -173,14 +217,31 @@ public class CreateRequestOnEventService {
             }
         }
 
-
-        // [AN-252] URGENT 판별: priority가 EMERGENCY인 경우에만 Grace Period 생략
+        // [AN-252] URGENT 판별: EMERGENCY이거나 FRONT(에스컬레이션) 도메인은 Grace Period 생략
         boolean isUrgent = savedRequest.getPriority() == Priority.EMERGENCY;
+        boolean isFrontEscalation = savedRequest.getDomainCode() == DomainCode.FRONT;
+        boolean isAddDuplicate = "ADD_DUPLICATE".equals(event.getActionType());
+        boolean skipGrace = isUrgent || isFrontEscalation || isAddDuplicate;
+
+        // [AN-344] FB/CONCIERGE는 AI가 이미 확인 질문을 했으므로 Grace Period 타이머 대신
+        // 고객의 명시적 확인(진행 버튼)을 기다림 → graceRemaining = -1 (무한 대기)
+        // 단, ADD_DUPLICATE로 이미 확인된 경우는 제외
+        boolean requiresExplicitConfirm = (savedRequest.getDomainCode() == DomainCode.FB
+                || savedRequest.getDomainCode() == DomainCode.CONCIERGE) 
+                && !isAddDuplicate;
+
         String deptCode = savedRequest.getDomainCode() != null ? savedRequest.getDomainCode().name() : "UNKNOWN";
-        int graceRemaining = isUrgent ? 0 : GracePeriodScheduler.GRACE_SECONDS;
+        int graceRemaining;
+        if (skipGrace) {
+            graceRemaining = 0;
+        } else if (requiresExplicitConfirm) {
+            graceRemaining = -1; // 고객 확인 대기 (타이머 없음)
+        } else {
+            graceRemaining = GracePeriodScheduler.GRACE_SECONDS;
+        }
 
         // [AN-252] Generative UI: entities 포함 WebSocket payload 생성
-        RequestWebSocketPayload payload = RequestWebSocketPayload.newRequest(
+        RequestSsePayload payload = RequestSsePayload.newRequest(
                 savedRequest.getId(),
                 savedRequest.getStatus().name(),
                 deptCode,
@@ -193,15 +254,19 @@ public class CreateRequestOnEventService {
         // 고객에게는 항상 즉시 알림 (위젯 카드 렌더링)
         dispatchPort.dispatchToRoom(savedRequest.getRoomNo(), payload);
 
-        if (isUrgent) {
-            // URGENT: 즉시 직원/관리자 알림 (Grace Period 없음)
-            log.info("[GracePeriod] URGENT 요청 → 즉시 직원 알림 발송 — id: {}", savedRequest.getId());
+        if (skipGrace) {
+            // URGENT / FRONT 에스컬레이션: 즉시 직원/관리자 알림 (Grace Period 없음)
+            log.info("[GracePeriod] 즉시 발송 (urgent={}, front={}) — id: {}", isUrgent, isFrontEscalation,
+                    savedRequest.getId());
             if (savedRequest.getDomainCode() != null) {
                 dispatchPort.dispatchToDepartment(deptCode, payload);
             }
-            dispatchPort.dispatchToAdmin(payload);
+            dispatchPort.dispatchToFrontdesk(payload);
+        } else if (requiresExplicitConfirm) {
+            // FB/CONCIERGE: 고객 확인 대기 — 타이머 없이 "진행" 버튼 클릭 시 confirmEarly로 발송
+            log.info("[GracePeriod] 고객 확인 대기 (domain={}) — id: {}", deptCode, savedRequest.getId());
         } else {
-            // 일반: Grace Period 적용 — 10초 후 직원 알림
+            // 일반(HK, FACILITY 등): Grace Period 적용 — 10초 후 직원 알림
             log.info("[GracePeriod] 일반 요청 → {}초 후 직원 알림 예정 — id: {}", graceRemaining, savedRequest.getId());
             gracePeriodScheduler.scheduleGraceExpiry(
                     savedRequest.getId(),
@@ -211,12 +276,11 @@ public class CreateRequestOnEventService {
         }
     }
 
-
-
     private String formatEntities(Map<String, Object> entities) {
-        if (entities == null || entities.isEmpty()) return "";
+        if (entities == null || entities.isEmpty())
+            return "";
         StringBuilder sb = new StringBuilder("[주문 상세]");
-        
+
         // 특별 취급: FB 메뉴 (menu_items 배열 구조)
         if (entities.containsKey("menu_items")) {
             Object menuItems = entities.get("menu_items");
@@ -224,7 +288,7 @@ public class CreateRequestOnEventService {
                 sb.append("\n- 메뉴: ");
                 List<String> menuStrs = new ArrayList<>();
                 for (Object itemObj : items) {
-                    if (itemObj instanceof Map<?,?> item) {
+                    if (itemObj instanceof Map<?, ?> item) {
                         String name = (String) item.get("name");
                         Object qty = item.get("quantity");
                         String opt = (String) item.get("selected_option");
@@ -240,14 +304,17 @@ public class CreateRequestOnEventService {
         } else {
             // 다른 부서는 key-value 순차 출력 (intent, allergen_warning 제외)
             for (Map.Entry<String, Object> entry : entities.entrySet()) {
-                if ("intent".equals(entry.getKey())) continue;
-                if ("allergen_warning".equals(entry.getKey())) continue;
-                if ("special_requests".equals(entry.getKey())) continue; // 아래에서 별도 처리
-                
+                if ("intent".equals(entry.getKey()))
+                    continue;
+                if ("allergen_warning".equals(entry.getKey()))
+                    continue;
+                if ("special_requests".equals(entry.getKey()))
+                    continue; // 아래에서 별도 처리
+
                 sb.append("\n- ").append(entry.getKey()).append(": ").append(entry.getValue());
             }
         }
-        
+
         // 추가 요청 사항이 있으면 표시
         if (entities.containsKey("special_requests")) {
             Object specialReq = entities.get("special_requests");
@@ -255,7 +322,7 @@ public class CreateRequestOnEventService {
                 sb.append("\n- 추가 요청: ").append(specialReq);
             }
         }
-        
+
         return sb.toString();
     }
 }

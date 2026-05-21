@@ -99,7 +99,9 @@ However, you MUST write staff-facing fields (e.g., 'summary', 'details', 'reason
     })
     
     try:
-        parsed = json.loads(raw_text)
+        # LLM의 응답 문자열 내에 이스케이프되지 않은 개행 문자(\n) 등이 포함되어 있어도 
+        # 파싱 에러를 던지지 않도록 strict=False 설정을 강제 부여합니다.
+        parsed = json.loads(raw_text, strict=False)
         
         # [추가] reasoning 필드가 리스트로 올 경우 문자열로 변환 (모든 에이전트 공통)
         # Gemini Vision의 경우 bullet point가 리스트로 반환되어 줄바꿈이 무시되는 현상 방지

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
-import Footer from '@/components/layout/Footer';
+
 import { ConfirmModal, ModalOverlay, ModalCard, LogDataModal } from '@/components/ui/Modal';
 import * as Icons from '@/components/icons';
 import Button from '@/components/ui/Button/Button';
@@ -14,14 +14,13 @@ import Pagination from '@/components/ui/Pagenation/Pagination';
 import RequestCard from '@/components/ui/Card/RequestCard';
 import GuestRequestCard from '@/app/guest/chat/_components/RequestCard/RequestCard';
 import RequestStatusBar from '@/app/guest/chat/_components/RequestStatusBar/RequestStatusBar';
-import RagCandidateCard from '@/components/ui/Card/RagCandidateCard';
 import ChatBubble from '@/app/guest/chat/_components/ChatBubble';
 import ChatInput from '@/app/guest/chat/_components/ChatInput';
 
 import ChatScreen from '@/app/guest/chat/_components/ChatScreen';
 import Pill from '@/components/ui/Pill/Pill';
-import StatusCard from '@/app/guest/chat/_components/StatusCard';
 import FeedbackCard from '@/app/guest/chat/_components/FeedbackCard';
+import ChatEndCard from '@/app/guest/chat/_components/ChatEndCard/ChatEndCard';
 import { HandoverRecord } from '@/components/ui/HandoverRecord';
 import TaskTicket from '@/components/ui/TaskBoard/TaskTicket';
 import TaskColumn from '@/components/ui/TaskBoard/TaskColumn';
@@ -32,11 +31,29 @@ import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/T
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import Toggle from '@/components/ui/Button/Toggle';
 import Toast from '@/components/ui/Modal/Toast';
-import ChatModal from '@/components/ui/Modal/ChatModal';
+
 import ChatHistory from '@/components/ui/ChatHistory/ChatHistory';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
 import KnowledgeModal from '@/components/ui/Knowledge/KnowledgeModal';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
+import BoardSkeleton from '@/app/staff/_components/BoardSkeleton/BoardSkeleton';
+
+// 실서비스 내 모든 모달 상세 수집 및 모킹용 임포트
+import CreateRequestModal from '@/app/frontdesk/requests/_components/CreateRequestModal/CreateRequestModal';
+import ApproveEscalationModal from '@/app/frontdesk/requests/_components/ApproveEscalationModal/ApproveEscalationModal';
+import RejectEscalationModal from '@/app/frontdesk/requests/_components/RejectEscalationModal/RejectEscalationModal';
+import ApproveCancellationModal from '@/app/frontdesk/requests/_components/ApproveCancellationModal/ApproveCancellationModal';
+import RejectCancellationModal from '@/app/frontdesk/requests/_components/RejectCancellationModal/RejectCancellationModal';
+import RegisterTrainingModal from '@/app/frontdesk/requests/_components/RegisterTrainingModal/RegisterTrainingModal';
+import AssignModal from '@/app/frontdesk/requests/_components/AssignModal/AssignModal';
+import ManualAssignModal from '@/app/frontdesk/requests/_components/ManualAssignModal/ManualAssignModal';
+import RequestDetailModal from '@/app/frontdesk/requests/_components/RequestDetailModal/RequestDetailModal';
+import StaffFormModal from '@/app/frontdesk/staff-management/_components/StaffFormModal/StaffFormModal';
+import RoleFormModal from '@/app/frontdesk/staff-management/_components/RoleFormModal/RoleFormModal';
+import TaskDetailModal from '@/app/staff/_components/TaskDetailModal/TaskDetailModal';
+import ChatHistoryModal from '@/app/staff/_components/TaskDetailModal/ChatHistoryModal';
+
+import chatScreenStyles from '@/app/guest/chat/_components/ChatScreen.module.css';
 import {
   LayoutDashboard, Inbox, AlertTriangle, Wrench, Home, Utensils,
   ConciergeBell, List, Database, Target, User, History,
@@ -61,16 +78,17 @@ export default function ComponentShowcasePage() {
   const { showToast } = useUiStore();
   const { messages, isTyping, sendMessage } = useChat();
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [sidebarRole, setSidebarRole] = useState<'admin' | 'housekeeping' | 'facility' | 'fb' | 'concierge'>('admin');
+  const [sidebarRole, setSidebarRole] = useState<'frontdesk' | 'housekeeping' | 'facility' | 'fb' | 'concierge'>('frontdesk');
   const [selectedQuickBtn, setSelectedQuickBtn] = useState<string>('');
   const [testProgress, setTestProgress] = useState<number>(33);
-  const [sidebarActivePath, setSidebarActivePath] = useState('/admin/dashboard');
+  const [sidebarActivePath, setSidebarActivePath] = useState('/frontdesk/dashboard');
   const [activeRoomId, setActiveRoomId] = useState<string | number>('1001');
   const [selectedKnowledge, setSelectedKnowledge] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [chatScreenStatus, setChatScreenStatus] = useState<'normal' | 'emergency' | 'escalated' | 'progress'>('normal');
+  const [requestCardKey, setRequestCardKey] = useState(0);
 
   const sampleRooms = [
     { id: '1001', roomNumber: '1001', statusText: '보관됨' },
@@ -86,7 +104,7 @@ export default function ComponentShowcasePage() {
       id: 1,
       domainCode: 'FRONT',
       question: '체크아웃 시간 연장(Late Checkout)',
-      answer: '오후 2시까지 연장 가능하며, 시간당 2,500엔의 추가 비용이 발생합니다. 멤버십 등급에 따라 무료 연장이 가능할 수 있으니 프런트에 문의 바랍니다.',
+      answer: '오후 2시까지 연장 가능하며, 시간당 2,500엔의 추가 비용이 발생합니다. 멤버십 등급에 따라 무료 연장이 가능할 수 있으니 프론트에 문의 바랍니다.',
       updatedAt: '2024-04-15'
     },
     {
@@ -131,7 +149,7 @@ export default function ComponentShowcasePage() {
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const role = e.target.value as any;
     setSidebarRole(role);
-    setSidebarActivePath(role === 'admin' ? '/admin/dashboard' : `/dept/${role}/my-tasks`);
+    setSidebarActivePath(role === 'frontdesk' ? '/frontdesk/dashboard' : `/dept/${role}/my-tasks`);
   };
 
   const handleSidebarClick = (e: React.MouseEvent, href: string) => {
@@ -148,7 +166,24 @@ export default function ComponentShowcasePage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const modalNames = [
-    'ConfirmModal', '기본 모달 (ModalOverlay+Card)',
+    'ConfirmModal',
+    '기본 모달 (ModalOverlay+Card)',
+    'CreateRequestModal',
+    'ApproveEscalationModal',
+    'RejectEscalationModal',
+    'ApproveCancellationModal',
+    'RejectCancellationModal',
+    'RegisterTrainingModal',
+    'AssignModal',
+    'ManualAssignModal',
+    'RequestDetailModal',
+    'StaffFormModal',
+    'RoleFormModal',
+    'TaskDetailModal',
+    'ChatHistoryModal',
+    'KnowledgeModal',
+    'KnowledgeEditModal',
+    'LogDataModal'
   ];
 
   return (
@@ -181,7 +216,7 @@ export default function ComponentShowcasePage() {
                 onChange={handleRoleChange}
                 style={{ font: 'var(--text-body-medium)', padding: 'var(--space-4)', borderRadius: 'var(--radius-sm)' }}
               >
-                <option value="admin">Admin</option>
+                <option value="frontdesk">Frontdesk</option>
                 <option value="housekeeping">하우스키핑</option>
                 <option value="fb">식음료(F&B)</option>
                 <option value="facility">시설관리</option>
@@ -390,16 +425,34 @@ export default function ComponentShowcasePage() {
                     </div>
                   </div>
 
+                  <div style={{ marginTop: 'var(--space-24)' }}>
+                    <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Staff Typing Indicator (상담사 입력 중)</h4>
+                    <ComponentLabel path="app/guest/chat/_components/ChatScreen.module.css (.typingDots)" />
+                    <div style={{ padding: 'var(--space-24)', background: 'var(--color-gray-50)', border: '1px solid var(--color-surface)', borderRadius: 'var(--radius-lg)' }}>
+                      <ChatBubble variant="received" isFallback>
+                        <span className={chatScreenStyles.typingDots}>
+                          <span className={chatScreenStyles.dot} />
+                          <span className={chatScreenStyles.dot} />
+                          <span className={chatScreenStyles.dot} />
+                        </span>
+                      </ChatBubble>
+                    </div>
+                  </div>
+
 
                   <div style={{ marginTop: 'var(--space-24)' }}>
-                    <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Guest Request Card (10초 타이머)</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-12)' }}>
+                      <h4 style={{ font: 'var(--text-body-bold)', margin: 0 }}>Guest Request Card (10초 타이머)</h4>
+                      <Button variant="outlined" onClick={() => setRequestCardKey(k => k + 1)}>타이머 재시작 🔄</Button>
+                    </div>
                     <ComponentLabel path="app/guest/chat/_components/RequestCard/RequestCard.tsx" />
-                    <div style={{ padding: 'var(--space-24)', background: 'var(--bg-bubble)', border: '1px solid var(--color-surface)', borderRadius: 'var(--radius-lg)' }}>
+                    <div style={{ padding: 'var(--space-24)', background: 'var(--bg-bubble)', border: '1px solid var(--color-surface)', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-16)' }}>
                       <GuestRequestCard
+                        key={requestCardKey}
                         requestId={1001}
                         domainCode="HK"
                         summary="수건 2장 추가 요청"
-                        entities={{ item: "수건", count: "2" }}
+                        entities={{ items: [{ item: "수건", count: 2 }] }}
                         status="PENDING"
                         progress={0}
                         graceRemaining={10}
@@ -408,6 +461,16 @@ export default function ComponentShowcasePage() {
                         onAccept={() => alert('요청 접수')}
                         onCancel={() => alert('취소')}
                       />
+                      
+                      {/* 색상 테스트용 카드들 (타이머 종료 상태) */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-16)', marginTop: 'var(--space-24)' }}>
+                        <GuestRequestCard requestId={2} domainCode="HK" summary="하우스키핑 컬러" status="PENDING" progress={0} graceRemaining={-1} priority="NORMAL" />
+                        <GuestRequestCard requestId={3} domainCode="FB" summary="식음료 컬러" status="PENDING" progress={0} graceRemaining={-1} priority="NORMAL" />
+                        <GuestRequestCard requestId={4} domainCode="FACILITY" summary="시설관리 컬러" status="PENDING" progress={0} graceRemaining={-1} priority="NORMAL" />
+                        <GuestRequestCard requestId={5} domainCode="CONCIERGE" summary="컨시어지 컬러" status="PENDING" progress={0} graceRemaining={-1} priority="NORMAL" />
+                        <GuestRequestCard requestId={6} domainCode="FRONT" summary="프론트 컬러" status="PENDING" progress={0} graceRemaining={-1} priority="NORMAL" />
+                        <GuestRequestCard requestId={7} domainCode="EMERGENCY" summary="긴급 컬러" status="PENDING" progress={0} graceRemaining={-1} priority="NORMAL" />
+                      </div>
                     </div>
                   </div>
 
@@ -441,37 +504,24 @@ export default function ComponentShowcasePage() {
                   </div>
                 </div>
                 
-                <div style={{ flex: 1, minWidth: '280px' }}>
-                  <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Status Card</h4>
-                  <ComponentLabel path="app/guest/chat/_components/StatusCard.tsx" />
-                  <div style={{ padding: 'var(--space-24)', background: 'var(--color-gray-50)', border: '1px solid var(--color-surface)', borderRadius: 'var(--radius-lg)', display: 'flex', justifyContent: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-16)' }}>
-                      <StatusCard progress={testProgress} />
-                      <button 
-                        onClick={() => setTestProgress(p => p === 33 ? 66 : p === 66 ? 100 : 33)}
-                        style={{ 
-                          padding: 'var(--space-8) var(--space-16)', 
-                          borderRadius: 'var(--radius-full)', 
-                          border: '1px solid var(--color-gray-300)', 
-                          background: 'var(--color-white)', 
-                          cursor: 'pointer', 
-                          font: 'var(--text-caption-medium)',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-gray-50)'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--color-white)'}
-                      >
-                        상태 업데이트 (현재: {testProgress}%)
-                      </button>
-                    </div>
-                  </div>
-                </div>
                 
                 <div style={{ flex: 1, minWidth: '280px' }}>
-                  <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Feedback Card</h4>
+                  <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Feedback Card (Deprecated)</h4>
                   <ComponentLabel path="app/guest/chat/_components/FeedbackCard.tsx" />
                   <div style={{ padding: 'var(--space-24)', background: 'var(--color-gray-50)', border: '1px solid var(--color-surface)', borderRadius: 'var(--radius-lg)', display: 'flex', justifyContent: 'center' }}>
                     <FeedbackCard onSubmit={(rating) => alert(`별점: ${rating}점 제출!`)} />
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, minWidth: '300px' }}>
+                  <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Chat End Card (New Feedback)</h4>
+                  <ComponentLabel path="app/guest/chat/_components/ChatEndCard/ChatEndCard.tsx" />
+                  <div style={{ padding: 'var(--space-24)', background: 'var(--color-gray-50)', border: '1px solid var(--color-surface)', borderRadius: 'var(--radius-lg)', display: 'flex', justifyContent: 'center' }}>
+                    <ChatEndCard 
+                      summary="[에어컨 수리] 기사님 방문 완료 및 정상 작동 확인"
+                      completedAt={new Date().toISOString()}
+                      onSubmitRating={(rating) => alert(`별점: ${rating}점 제출!`)}
+                    />
                   </div>
                 </div>
               </div>
@@ -509,16 +559,7 @@ export default function ComponentShowcasePage() {
                   </div>
                 </div>
                 
-                <div style={{ flex: 1, minWidth: '300px' }}>
-                  <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Chat Modal (직원 상담용)</h4>
-                  <ComponentLabel path="components/ui/Modal/ChatModal.tsx" />
-                  <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
-                    <Button variant="primary" onClick={() => setIsChatModalOpen(true)}>직접 Chat Modal 열기</Button>
-                    <p style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-500)' }}>
-                      * Group 5의 RequestCard '상담 시작' 버튼으로도 열립니다.
-                    </p>
-                  </div>
-                </div>
+
               </div>
 
 
@@ -599,54 +640,6 @@ export default function ComponentShowcasePage() {
                           Graph Placeholder
                         </div>
                       </ChartCard>
-                      <ChartCard title="최다 요청 항목" subtitle="MOST FREQUENT REQUESTS (%)">
-                        <div style={{ height: '200px', width: '100%', backgroundColor: 'var(--color-gray-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)' }}>
-                          Chart Placeholder
-                        </div>
-                      </ChartCard>
-                    </div>
-                  </div>
-
-                  {/* RAG Candidate Card 추가 */}
-                  <div>
-                    <h5 style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)', marginBottom: 'var(--space-8)' }}>RAG Candidate Card (신규 지식 후보 검토)</h5>
-                    <ComponentLabel path="components/ui/Card/RagCandidateCard.tsx" />
-                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--space-16)' }}>
-                      <RagCandidateCard
-                        department="하우스키핑"
-                        question="혹시 아기용 침대 가드 설치가 가능한가요?"
-                        answer="네, 고객님. 12개월 미만 유아용 침대 가드는 재고 확인 후 무상으로 설치해 드리고 있습니다. 바로 준비해드리겠습니다."
-                        timestamp="2026.10.26 15:30"
-                        onAddRag={() => {
-                          setSelectedKnowledge({
-                            category: "수동 상담 (하우스키핑)",
-                            title: "",
-                            description: "네, 고객님. 12개월 미만 유아용 침대 가드는 재고 확인 후 무상으로 설치해 드리고 있습니다. 바로 준비해드리겠습니다.",
-                            updatedAt: "방금 전",
-                            isNew: true
-                          });
-                          setIsEditModalOpen(true);
-                        }}
-                        onReject={() => alert('이 상담 내용은 무시합니다.')}
-                      />
-                      
-                      <RagCandidateCard
-                        department="프론트"
-                        question="저기요, 아까 예약했던 거 혹시 취소되나요?"
-                        answer="고객님, 혹시 예약하신 패키지가 어떤 상품이신지 말씀해 주실 수 있을까요? 취소 규정이 상품마다 달라서요."
-                        timestamp="2026.10.26 16:15"
-                        onAddRag={() => {
-                          setSelectedKnowledge({
-                            category: "의도 불명 (프론트)",
-                            title: "",
-                            description: "고객님, 혹시 예약하신 패키지가 어떤 상품이신지 말씀해 주실 수 있을까요? 취소 규정이 상품마다 달라서요.",
-                            updatedAt: "방금 전",
-                            isNew: true
-                          });
-                          setIsEditModalOpen(true);
-                        }}
-                        onReject={() => alert('이 상담 내용은 무시합니다.')}
-                      />
                     </div>
                   </div>
 
@@ -725,6 +718,26 @@ export default function ComponentShowcasePage() {
           />
         </section>
 
+        {/* Skeleton UI Showcase */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-16)', marginBottom: 'var(--space-32)' }}>
+          <h2 style={{ font: 'var(--text-h2-bold)', color: 'var(--color-gray-900)' }}>
+            Skeleton UI
+          </h2>
+
+          {/* Board Skeleton */}
+          <div style={{ background: 'var(--color-bg)', padding: 'var(--space-32)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)' }}>
+            <h3 style={{ font: 'var(--text-h3-bold)', marginBottom: 'var(--space-4)', color: 'var(--color-gray-700)' }}>Board Skeleton (Staff 칸반보드 로딩)</h3>
+            <ComponentLabel path="app/staff/_components/BoardSkeleton/BoardSkeleton.tsx" />
+            <p style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-500)', marginBottom: 'var(--space-16)' }}>
+              Staff 대시보드에서 태스크 데이터를 불러오는 동안 표시되는 Skeleton UI입니다.
+            </p>
+            <div style={{ padding: 'var(--space-24)', boxSizing: 'border-box', height: '360px', overflow: 'hidden', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-gray-100)' }}>
+              <BoardSkeleton />
+            </div>
+          </div>
+
+        </section>
+
         {/* 5. ICONS */}
         <section style={{ paddingBottom: 'var(--space-100)' }}>
           <h2 style={{ font: 'var(--text-h2-bold)', marginBottom: 'var(--space-16)', color: 'var(--color-gray-700)' }}>
@@ -785,49 +798,245 @@ export default function ComponentShowcasePage() {
       </div>
 
       {/* 6. REAL PAGE FOOTER */}
-      <Footer />
 
-      {selectedKnowledge && !isEditModalOpen && (
+
+      {(selectedKnowledge || activeModal === 'KnowledgeModal') && !isEditModalOpen && (
         <KnowledgeModal
-          isOpen={!!selectedKnowledge}
-          onClose={() => setSelectedKnowledge(null)}
-          domainCode={selectedKnowledge.domainCode}
-          question={selectedKnowledge.question}
-          answer={selectedKnowledge.answer}
-          updatedAt={selectedKnowledge.updatedAt}
-          onEdit={() => setIsEditModalOpen(true)}
+          isOpen={!!selectedKnowledge || activeModal === 'KnowledgeModal'}
+          onClose={() => {
+            setSelectedKnowledge(null);
+            closeModal();
+          }}
+          domainCode={selectedKnowledge?.domainCode || 'HK'}
+          question={selectedKnowledge?.question || '체크아웃 시간 연장(Late Checkout)'}
+          answer={selectedKnowledge?.answer || '오후 2시까지 연장 가능하며, 시간당 2,500엔의 추가 비용이 발생합니다.'}
+          updatedAt={selectedKnowledge?.updatedAt || '2026-05-20'}
+          onEdit={() => {
+            setIsEditModalOpen(true);
+            setActiveModal('KnowledgeEditModal');
+          }}
         />
       )}
 
-      {selectedKnowledge && isEditModalOpen && (
+      {((selectedKnowledge && isEditModalOpen) || activeModal === 'KnowledgeEditModal') && (
         <KnowledgeEditModal
-          isOpen={isEditModalOpen}
+          isOpen={isEditModalOpen || activeModal === 'KnowledgeEditModal'}
           onClose={() => {
             setIsEditModalOpen(false);
-            if (selectedKnowledge.isNew) {
+            closeModal();
+            if (selectedKnowledge?.isNew) {
               setSelectedKnowledge(null);
             }
           }}
-          initialDomainCode={selectedKnowledge.domainCode}
-          initialQuestion={selectedKnowledge.question}
-          initialAnswer={selectedKnowledge.answer}
+          initialDomainCode={selectedKnowledge?.domainCode || 'HK'}
+          initialQuestion={selectedKnowledge?.question || '체크아웃 시간 연장(Late Checkout)'}
+          initialAnswer={selectedKnowledge?.answer || '오후 2시까지 연장 가능하며, 시간당 2,500엔의 추가 비용이 발생합니다.'}
           onSave={(data) => {
             setIsEditModalOpen(false);
+            closeModal();
             setSelectedKnowledge(null);
           }}
         />
       )}
 
-      {/* Chat Modal */}
-      <ChatModal
-        isOpen={isChatModalOpen}
-        onClose={() => setIsChatModalOpen(false)}
-      />
 
       {/* Log Data Modal */}
       <LogDataModal
-        isOpen={isLogModalOpen}
-        onClose={() => setIsLogModalOpen(false)}
+        isOpen={isLogModalOpen || activeModal === 'LogDataModal'}
+        onClose={() => {
+          setIsLogModalOpen(false);
+          closeModal();
+        }}
+      />
+
+      {/* CreateRequestModal */}
+      <CreateRequestModal
+        isOpen={activeModal === 'CreateRequestModal'}
+        onClose={closeModal}
+        onSuccess={() => {
+          closeModal();
+          showToast('요청이 생성되었습니다.', 'success');
+        }}
+      />
+
+      {/* ApproveEscalationModal */}
+      <ApproveEscalationModal
+        isOpen={activeModal === 'ApproveEscalationModal'}
+        onClose={closeModal}
+        requestId={1001}
+        onSuccess={() => {
+          closeModal();
+          showToast('에스컬레이션이 승인되었습니다.', 'success');
+        }}
+      />
+
+      {/* RejectEscalationModal */}
+      <RejectEscalationModal
+        isOpen={activeModal === 'RejectEscalationModal'}
+        onClose={closeModal}
+        requestId={1001}
+        onSuccess={() => {
+          closeModal();
+          showToast('에스컬레이션이 반려되었습니다.', 'success');
+        }}
+      />
+
+      {/* ApproveCancellationModal */}
+      <ApproveCancellationModal
+        isOpen={activeModal === 'ApproveCancellationModal'}
+        onClose={closeModal}
+        requestId={1001}
+        onSuccess={() => {
+          closeModal();
+          showToast('취소가 승인되었습니다.', 'success');
+        }}
+      />
+
+      {/* RejectCancellationModal */}
+      <RejectCancellationModal
+        isOpen={activeModal === 'RejectCancellationModal'}
+        onClose={closeModal}
+        requestId={1001}
+        onSuccess={() => {
+          closeModal();
+          showToast('취소가 반려되었습니다.', 'success');
+        }}
+      />
+
+      {/* RegisterTrainingModal */}
+      <RegisterTrainingModal
+        isOpen={activeModal === 'RegisterTrainingModal'}
+        onClose={closeModal}
+        departmentId="HK"
+        summary="수건 추가 요청"
+        roomNo="707"
+        requestId={1001}
+      />
+
+      {/* AssignModal */}
+      <AssignModal
+        isOpen={activeModal === 'AssignModal'}
+        onClose={closeModal}
+        requestId={1001}
+        requestSummary="수건 2장 추가 요청"
+        roomNo="707"
+        onSuccess={() => {
+          closeModal();
+          showToast('수동 배정이 완료되었습니다.', 'success');
+        }}
+      />
+
+      {/* ManualAssignModal */}
+      <ManualAssignModal
+        isOpen={activeModal === 'ManualAssignModal'}
+        onClose={closeModal}
+        detail={{
+          id: 1001,
+          priority: 'NORMAL',
+          departmentId: 'HK',
+          departmentName: '하우스키핑',
+          roomNo: '707',
+          summary: '수건 2장 추가 요청',
+          createdAt: new Date().toISOString(),
+          status: 'PENDING'
+        }}
+        departments={[
+          { id: 'HK', name: '하우스키핑' },
+          { id: 'FACILITY', name: '시설관리' },
+          { id: 'FB', name: '식음료' },
+          { id: 'CONCIERGE', name: '컨시어지' }
+        ]}
+        onSave={async (editDeptId, editPriority, editSummary, editDescription) => {
+          closeModal();
+          showToast(`부서 ${editDeptId}로 이관/배정되었습니다.`, 'success');
+        }}
+        saving={false}
+      />
+
+      {/* RequestDetailModal */}
+      <RequestDetailModal
+        isOpen={activeModal === 'RequestDetailModal'}
+        onClose={closeModal}
+        requestId={1001}
+        onUpdate={() => {
+          closeModal();
+          showToast('요청 상세 정보가 업데이트되었습니다.', 'success');
+        }}
+      />
+
+      {/* StaffFormModal */}
+      <StaffFormModal
+        isOpen={activeModal === 'StaffFormModal'}
+        onClose={closeModal}
+        onSave={async (data) => {
+          closeModal();
+          showToast(`직원 ${data.name} 저장되었습니다.`, 'success');
+        }}
+        roles={[
+          { id: 1, name: '시니어 크루', departmentId: 'HK' },
+          { id: 2, name: '주니어 크루', departmentId: 'HK' }
+        ]}
+        departments={[
+          { id: 'HK', name: '하우스키핑' },
+          { id: 'FACILITY', name: '시설관리' }
+        ]}
+      />
+
+      {/* RoleFormModal */}
+      <RoleFormModal
+        isOpen={activeModal === 'RoleFormModal'}
+        onClose={closeModal}
+        onSave={async (data) => {
+          closeModal();
+          showToast(`역할 ${data.name} 저장되었습니다.`, 'success');
+        }}
+        departments={[
+          { id: 'HK', name: '하우스키핑' },
+          { id: 'FACILITY', name: '시설관리' }
+        ]}
+      />
+
+      {/* TaskDetailModal */}
+      <TaskDetailModal
+        isOpen={activeModal === 'TaskDetailModal'}
+        onClose={closeModal}
+        task={{
+          id: 1001,
+          roomNumber: '707',
+          priority: 'URGENT',
+          summary: '수건 2장 추가 및 화장실 전구 교체 요청',
+          status: 'PENDING',
+          departmentId: 'HK',
+          createdAt: new Date().toISOString(),
+          version: 1,
+          cancelRequested: false,
+          entities: { item: '수건', count: 2 },
+          reasoning: '고객이 수건 추가 및 긴급한 상황을 명시함',
+          rawText: '수건 2장 가져다주세요. 화장실 전구도 나갔어요.',
+          assignedStaffName: null,
+          assignedStaffId: null,
+          confidence: 1.0,
+          cancelRequestedAt: null
+        }}
+        onAccept={async (id, version) => {
+          closeModal();
+          showToast('업무를 수락했습니다.', 'success');
+        }}
+        onComplete={async (id, version) => {
+          closeModal();
+          showToast('업무를 완료했습니다.', 'success');
+        }}
+        onTransfer={async (id, version, toDept, reason) => {
+          closeModal();
+          showToast(`업무를 ${toDept} 부서로 이관했습니다. 사유: ${reason}`, 'success');
+        }}
+      />
+
+      {/* ChatHistoryModal */}
+      <ChatHistoryModal
+        isOpen={activeModal === 'ChatHistoryModal'}
+        onClose={closeModal}
+        roomNumber="707"
       />
     </div>
   );

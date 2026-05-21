@@ -1,6 +1,8 @@
 import os
 import sys
 import json
+import time
+import hashlib
 import importlib
 from neo4j import GraphDatabase
 from google import genai
@@ -21,9 +23,82 @@ if not GEMINI_API_KEY:
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+
+def compute_text_hash(text: str) -> str:
+    """텍스트의 SHA-256 해시를 16진수 문자열로 반환합니다."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def connect_neo4j_with_retry(max_attempts: int = 5, base_delay: float = 1.0):
+    """
+    Neo4j 드라이버를 생성하고 연결을 검증합니다.
+    컨테이너가 켜지는 중일 수 있으므로 지수 백오프(1s → 2s → 4s → 8s → 16s)로 재시도합니다.
+    """
+    auth = (NEO4J_USER, NEO4J_PASSWORD) if NEO4J_PASSWORD else None
+    last_error = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            driver = GraphDatabase.driver(NEO4J_URI, auth=auth)
+            driver.verify_connectivity()
+            if attempt > 1:
+                print(f"✅ Neo4j 연결 성공 (시도 {attempt}/{max_attempts})")
+            return driver
+        except Exception as e:
+            last_error = e
+            if attempt < max_attempts:
+                delay = base_delay * (2 ** (attempt - 1))
+                print(f"⏳ Neo4j 연결 실패 (시도 {attempt}/{max_attempts}): {e}. {delay:.0f}초 후 재시도...")
+                time.sleep(delay)
+    raise RuntimeError(f"Neo4j 연결 최종 실패: {last_error}")
+
+
+def should_skip_ingestion(session, domain: str, new_hash: str) -> bool:
+    """
+    이중 검증으로 스킵 여부를 판단합니다.
+    - 저장된 해시와 새 해시가 일치하고
+    - 실제 데이터 노드(SystemMeta 제외)가 존재하면 스킵
+    Neo4j가 초기화되어 데이터가 날아간 경우에도 안전하게 다시 적재됩니다.
+    """
+    record = session.run(
+        "MATCH (m:SystemMeta {domain: $domain}) RETURN m.hash AS hash",
+        domain=domain,
+    ).single()
+    stored_hash = record["hash"] if record else None
+
+    if stored_hash != new_hash:
+        return False
+
+    record = session.run(
+        "MATCH (n) WHERE NOT n:SystemMeta RETURN count(n) AS cnt"
+    ).single()
+    data_count = record["cnt"] if record else 0
+    return data_count > 0
+
+
+def update_system_meta_tx(tx, domain: str, new_hash: str):
+    """SystemMeta 노드의 해시를 갱신합니다. (트랜잭션 내부 실행)"""
+    tx.run(
+        """
+        MERGE (m:SystemMeta {domain: $domain})
+        SET m.hash = $hash, m.updated_at = datetime()
+        """,
+        domain=domain,
+        hash=new_hash,
+    )
+
+
+def execute_domain_ingestion_transaction(tx, domain: str, graph_data: dict, new_hash: str):
+    """
+    적재 + 해시 갱신을 단일 트랜잭션으로 처리 (ALL-OR-NOTHING).
+    적재 실패 시 SystemMeta가 갱신되지 않아 다음 실행 시 자동 재시도됨.
+    """
+    ingest_to_neo4j_tx(tx, graph_data)
+    update_system_meta_tx(tx, domain, new_hash)
+
+
 def extract_entities_and_relations(text):
     prompt = f"""
-    당신은 호텔 데이터베이스 데이터 마이닝 전문가입니다. 
+    당신은 호텔 데이터베이스 데이터 마이닝 전문가입니다.
     다음 제공된 호텔 규정 매뉴얼 텍스트를 분석하여, Knowledge Graph 구성을 위한 엔티티(Entity)와 관계(Relation)를 추출하세요.
     결과는 반드시 유효한 JSON 포맷의 문자열로만 반환하세요. (마크다운 백틱 제외)
 
@@ -52,7 +127,7 @@ def extract_entities_and_relations(text):
         ]
     }}
     """
-    
+
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=prompt
@@ -66,44 +141,30 @@ def extract_entities_and_relations(text):
         print("원본 응답:", response.text)
         return None
 
-def ingest_to_neo4j(graph_data):
-    # docker-compose.local.yml 에서 설정된 환경변수 기반으로 인증 처리
-    auth = (NEO4J_USER, NEO4J_PASSWORD) if NEO4J_PASSWORD else None
-    driver = GraphDatabase.driver(NEO4J_URI, auth=auth)
-    
-    with driver.session() as session:
-        # 1. 엔티티(Node) 병합 생성
-        print("-> 노드(Node) 생성 중...")
-        for entity in graph_data.get("entities", []):
-            label = entity["label"]
-            name = entity["id"]
-            # Cypher 쿼리: 이미 있으면 무시, 없으면 생성 (MERGE)
-            query = f"MERGE (n:{label} {{name: $name}})"
-            session.run(query, name=name)
-            
-        # 2. 관계(Edge) 병합 생성
-        print("-> 관계(Edge) 생성 중...")
-        for rel in graph_data.get("relations", []):
-            source_name = rel["source"]
-            target_name = rel["target"]
-            rel_type = rel["type"]
-            
-            # 소스와 타겟 노드를 매칭한 후 선으로 연결
-            query = f"""
-            MATCH (source {{name: $source_name}})
-            MATCH (target {{name: $target_name}})
-            MERGE (source)-[r:{rel_type}]->(target)
-            """
-            session.run(query, source_name=source_name, target_name=target_name)
-            
-    driver.close()
-    print("✅ Neo4j 데이터 적재가 성공적으로 완료되었습니다!")
+def ingest_to_neo4j_tx(tx, graph_data):
+    """트랜잭션을 통해 엔티티/관계를 MERGE 합니다."""
+    for entity in graph_data.get("entities", []):
+        label = entity["label"]
+        name = entity["id"]
+        query = f"MERGE (n:{label} {{name: $name}})"
+        tx.run(query, name=name)
+
+    for rel in graph_data.get("relations", []):
+        source_name = rel["source"]
+        target_name = rel["target"]
+        rel_type = rel["type"]
+        query = f"""
+        MATCH (source {{name: $source_name}})
+        MATCH (target {{name: $target_name}})
+        MERGE (source)-[r:{rel_type}]->(target)
+        """
+        tx.run(query, source_name=source_name, target_name=target_name)
 
 def get_all_knowledge_texts():
     """모든 도메인의 knowledge_data.py에서 질문과 답변을 추출하여 텍스트로 결합"""
     domains_dir = os.path.join(os.path.dirname(__file__), "app", "domains")
     domain_folders = [f for f in os.listdir(domains_dir) if os.path.isdir(os.path.join(domains_dir, f))]
-    
+
     domain_texts = {}
     for domain in domain_folders:
         knowledge_file = os.path.join(domains_dir, domain, "knowledge_data.py")
@@ -111,7 +172,7 @@ def get_all_knowledge_texts():
             try:
                 module_name = f"app.domains.{domain}.knowledge_data"
                 module = importlib.import_module(module_name)
-                
+
                 # 모듈에서 리스트 형태의 KNOWLEDGE 변수 찾기 (예: FB_KNOWLEDGE, HK_KNOWLEDGE)
                 for attr_name in dir(module):
                     if attr_name.endswith("_KNOWLEDGE") and isinstance(getattr(module, attr_name), list):
@@ -119,47 +180,95 @@ def get_all_knowledge_texts():
                         texts = []
                         for item in knowledge_list:
                             texts.append(f"Q: {item['question']}\nA: {item['answer']}")
+                        texts.sort()  # 항목 순서 변경에 의한 해시 만료 방지
                         domain_texts[domain] = "\n\n".join(texts)
                         break
             except Exception as e:
                 print(f"⚠️ [{domain.upper()}] 지식 로드 중 오류 발생: {e}")
-                
+
     return domain_texts
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="해시 일치해도 Gemini 재호출 및 재적재 강제 실행")
+    args = parser.parse_args()
+
     print("====================================")
     print("1. 모든 도메인의 RAG 지식 데이터 수집")
     print("====================================")
-    
+
     domain_texts = get_all_knowledge_texts()
     if not domain_texts:
         print("❌ 수집된 지식 데이터가 없습니다.")
         exit(1)
-        
+
     print(f"✅ 총 {len(domain_texts)}개 도메인의 지식 데이터를 찾았습니다: {list(domain_texts.keys())}")
-    
+
     print("\n====================================")
-    print("2. Gemini LLM을 통한 지식 추출 및 Neo4j 적재 시작")
+    print("2. Neo4j 연결 (필요 시 재시도)")
     print("====================================")
-    
+    driver = connect_neo4j_with_retry()
+
+    print("\n====================================")
+    print("3. 도메인별 해시 검증 후 적재 (Incremental)")
+    print("====================================")
+
+    stats = {"skipped": 0, "processed": 0, "failed": 0}
     total_entities = 0
     total_relations = 0
-    
-    for domain, text in domain_texts.items():
-        print(f"\n--- 🚀 [{domain.upper()}] 지식 그래프 추출 중 ---")
-        graph_data = extract_entities_and_relations(text)
-        
-        if graph_data:
-            entities_count = len(graph_data.get("entities", []))
-            relations_count = len(graph_data.get("relations", []))
-            total_entities += entities_count
-            total_relations += relations_count
-            
-            print(f"[{domain.upper()}] 추출 완료: 엔티티 {entities_count}개, 관계 {relations_count}개")
-            ingest_to_neo4j(graph_data)
-        else:
-            print(f"❌ [{domain.upper()}] 데이터 추출에 실패했습니다.")
-            
+
+    try:
+        for domain, text in domain_texts.items():
+            print(f"\n--- 🚀 [{domain.upper()}] ---")
+            new_hash = compute_text_hash(text)
+
+            # 도메인별로 세션을 새로 열어 한 도메인의 에러가 다음 도메인에 전파되지 않게 격리
+            try:
+                with driver.session() as session:
+                    if not args.force and should_skip_ingestion(session, domain, new_hash):
+                        print(
+                            f"⏩ [{domain.upper()}] 변경 없음 - Gemini 호출 스킵 "
+                            f"(hash: {new_hash[:8]}...)"
+                        )
+                        stats["skipped"] += 1
+                        continue
+
+                    print(f"🔄 [{domain.upper()}] 변경 감지 - Gemini로 분석 요청 중...")
+                    graph_data = extract_entities_and_relations(text)
+
+                    if not graph_data:
+                        print(f"❌ [{domain.upper()}] 데이터 추출 실패 - 다음 도메인으로 진행")
+                        stats["failed"] += 1
+                        continue
+
+                    entities_count = len(graph_data.get("entities", []))
+                    relations_count = len(graph_data.get("relations", []))
+                    total_entities += entities_count
+                    total_relations += relations_count
+
+                    print(
+                        f"[{domain.upper()}] 추출 완료: "
+                        f"엔티티 {entities_count}개, 관계 {relations_count}개"
+                    )
+                    session.execute_write(
+                        execute_domain_ingestion_transaction,
+                        domain,
+                        graph_data,
+                        new_hash,
+                    )
+                    stats["processed"] += 1
+                    print(f"✅ [{domain.upper()}] 적재 완료 (hash: {new_hash[:8]}...)")
+            except Exception as e:
+                print(f"❌ [{domain.upper()}] 처리 중 오류 발생: {e}")
+                stats["failed"] += 1
+    finally:
+        driver.close()
+
     print("\n====================================")
-    print(f"🎉 모든 파이프라인 완료! (총 엔티티: {total_entities}, 총 관계: {total_relations})")
+    print(
+        f"🎉 파이프라인 완료! "
+        f"처리 {stats['processed']}, 스킵 {stats['skipped']}, 실패 {stats['failed']} | "
+        f"누적 엔티티 {total_entities}, 관계 {total_relations}"
+    )
     print("http://localhost:7474 에서 확인하세요.")

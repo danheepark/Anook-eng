@@ -9,6 +9,7 @@ import com.anook.backend.pms.application.port.out.PmsMenuRepositoryPort;
 import com.anook.backend.pms.application.port.out.PmsReceiptRepositoryPort;
 import com.anook.backend.pms.domain.model.PmsMenu;
 import com.anook.backend.pms.domain.model.PmsReceipt;
+import com.anook.backend.global.exchangerate.application.port.in.GetExchangeRateUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class ManagePmsReceiptService implements ManagePmsReceiptUseCase {
 
     private final PmsReceiptRepositoryPort receiptRepository;
     private final PmsMenuRepositoryPort menuRepository;
+    private final GetExchangeRateUseCase exchangeRateUseCase;
 
     @Override
     public void createReceipt(CreateReceiptCommand command) {
@@ -82,6 +84,11 @@ public class ManagePmsReceiptService implements ManagePmsReceiptUseCase {
     }
 
     private GetPmsReceiptResult toResult(PmsReceipt receipt) {
+        Double totalPriceUsd = receipt.totalPriceUsd();
+        if (totalPriceUsd == null) {
+            double krwToUsdRate = exchangeRateUseCase.getKrwToUsdRate();
+            totalPriceUsd = receipt.totalPrice() * krwToUsdRate;
+        }
         return new GetPmsReceiptResult(
                 receipt.id(),
                 receipt.roomNo(),
@@ -89,6 +96,7 @@ public class ManagePmsReceiptService implements ManagePmsReceiptUseCase {
                 receipt.menuName(),
                 receipt.quantity(),
                 receipt.totalPrice(),
+                totalPriceUsd,
                 receipt.status(),
                 receipt.createdAt()
         );

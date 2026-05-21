@@ -2,11 +2,15 @@ package com.anook.backend.message.adapter.in.web;
 
 import com.anook.backend.message.application.dto.request.SendStaffMessageCommand;
 import com.anook.backend.message.application.port.in.SendMessageUseCase;
+import com.anook.backend.staff.application.port.out.StaffMessageQueryPort;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 직원/관리자 메시지 컨트롤러
@@ -18,6 +22,17 @@ import org.springframework.web.bind.annotation.*;
 public class StaffMessageController {
 
     private final SendMessageUseCase sendMessageUseCase;
+    private final StaffMessageQueryPort staffMessageQueryPort;
+
+    /**
+     * 특정 객실의 대화 내역 조회 (읽기 전용)
+     * GET /staff/messages/rooms/{roomNo}
+     */
+    @GetMapping("/rooms/{roomNo}")
+    public ResponseEntity<List<Map<String, Object>>> getRoomMessages(@PathVariable String roomNo) {
+        log.info("[StaffMessageController] 대화 내역 조회 - roomNo: {}", roomNo);
+        return ResponseEntity.ok(staffMessageQueryPort.findMessagesByRoomNo(roomNo));
+    }
 
     /**
      * 직원이 투숙객에게 메시지를 보냅니다. (자동 번역 포함)
@@ -39,3 +54,4 @@ public class StaffMessageController {
         return ResponseEntity.ok().build();
     }
 }
+

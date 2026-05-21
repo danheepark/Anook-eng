@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/login") {
     if (session.isLoggedIn) {
       let redirectUrl = "/staff";
-      if (session.role === "ADMIN") redirectUrl = "/admin/dashboard";
+      if (session.role === "FRONTDESK") redirectUrl = "/frontdesk/requests";
       if (session.role === "GUEST") redirectUrl = "/guest/chat";
 
       return NextResponse.redirect(new URL(redirectUrl, request.url));
@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. 보호된 경로 정의
   const isProtectedPath =
-    pathname.startsWith("/admin") ||
+    pathname.startsWith("/frontdesk") ||
     pathname.startsWith("/staff") ||
     pathname.startsWith("/guest");
 
@@ -63,17 +63,17 @@ export async function middleware(request: NextRequest) {
           return response;
         }
       }
-    } catch (e) {
+    } catch {
       // 백엔드 연결 실패 시에는 서비스 가용성을 위해 통과시킴
     }
   }
 
   // 5. 권한별 세부 통제
-  if (pathname.startsWith("/admin") && session.role !== "ADMIN") {
+  if (pathname.startsWith("/frontdesk") && session.role !== "FRONTDESK") {
     return NextResponse.redirect(new URL("/staff", request.url));
   }
 
-  if (pathname.startsWith("/staff") && (session.role !== "STAFF" && session.role !== "ADMIN")) {
+  if (pathname.startsWith("/staff") && (session.role !== "STAFF" && session.role !== "FRONTDESK")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -87,7 +87,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/login",
-    "/admin/:path*",
+    "/frontdesk/:path*",
     "/staff/:path*",
     "/guest/:path*",
   ],

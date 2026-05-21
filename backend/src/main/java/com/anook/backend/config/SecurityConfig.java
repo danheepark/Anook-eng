@@ -25,7 +25,7 @@ public class SecurityConfig {
     @Bean
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_STAFF");
+        roleHierarchy.setHierarchy("ROLE_FRONTDESK > ROLE_STAFF");
         return roleHierarchy;
     }
 
@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/chat/*/progress").permitAll() // AI
                                                                                                                    // 서버
                                                                                                                    // 진입점
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 API는 ADMIN 권한 필요
+                        .requestMatchers("/frontdesk/**").hasRole("FRONTDESK") // 프론트 데스크 API는 FRONTDESK 권한 필요
                         .requestMatchers("/staff/**").hasRole("STAFF") // 직원 API는 STAFF 권한 필요
                         .requestMatchers("/chat/**").hasRole("GUEST") // 채팅 API는 GUEST 권한 필요
                         .anyRequest().permitAll() // 임시로 나머지 요청은 모두 허용 (이후 점진적 통제)

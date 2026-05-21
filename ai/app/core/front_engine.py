@@ -6,7 +6,7 @@ from app.prompts.front_prompt import FRONT_SYSTEM_PROMPT
 from app.schemas.common import HotelRequestSchema
 from app.domains.rag import service as rag_service
 
-async def run_front_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None) -> dict:
+async def run_front_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "ko", active_requests: list = None, **kwargs) -> dict:
     """프론트데스크 에이전트: 고객 메시지에서 프론트 관련 정보를 추출"""
     
     # 1. RAG 검색 → FRONT 도메인 지식
@@ -35,7 +35,8 @@ async def run_front_agent(user_message: str, room_no: str, chat_history: list = 
         
     prompt += f"[현재 요청]\n고객: {user_message}"
     
-    raw = await call_gemini_async(prompt=prompt, system_instruction=FRONT_SYSTEM_PROMPT, images=images)
+    system_instruction_with_lang = FRONT_SYSTEM_PROMPT.replace("{system_language}", system_language)
+    raw = await call_gemini_async(prompt=prompt, system_instruction=system_instruction_with_lang, images=images)
     
     # 방어 로직: 배열로 오면 첫 번째 요소 추출
     if isinstance(raw, list):
@@ -53,15 +54,23 @@ async def run_front_agent(user_message: str, room_no: str, chat_history: list = 
     result = HotelRequestSchema(**raw)
     
     # 챗봇 응답(guest_reply) 분기 처리
-    guest_reply = "프론트데스크에서 확인 후 처리해 드리겠습니다."
+    final_response = getattr(result, "final_reply", "")
+    if not final_response:
+        final_response = "프론트데스크에서 확인 후 처리해 드리겠습니다."
+        
+    guest_reply = final_response
     domain_code = "FRONT"
     
-    if result.entities.get("intent") == "INFO":
+    intent = result.entities.get("intent")
+    has_options = bool(getattr(result, "clarification_options", []))
+
+    if intent == "INFO":
         guest_reply = result.entities.get("fallback_message", result.clarification_question)
         domain_code = None  # 정보 조회는 티켓 생성 X
-    elif result.needs_clarification:
-        guest_reply = result.clarification_question
-    elif result.entities.get("intent") == "ESCALATION":
+    elif result.needs_clarification or has_options or intent == "AMBIGUOUS":
+        guest_reply = result.clarification_question if result.clarification_question else result.entities.get("fallback_message", "어떻게 도와드릴까요?")
+        domain_code = None  # 질문/버튼 선택 단계이거나 의도 불분명일 때는 카드 노출 방지 (UX 최적화)
+    elif intent == "ESCALATION":
         guest_reply = result.entities.get("fallback_message", "프론트데스크 직원에게 즉시 연결해 드리겠습니다. 잠시만 기다려주세요.")
 
     # /analyze 응답 형태로 변환
@@ -70,7 +79,7 @@ async def run_front_agent(user_message: str, room_no: str, chat_history: list = 
         "clarification_options": result.clarification_options,
         "summary": result.summary,
         "domain_code": domain_code,
-        "priority": result.priority,
+        "priority": getattr(result, "priority", "NORMAL"),
         "entities": result.entities,
         "confidence": result.confidence,
         "missing_fields": result.missing_fields,

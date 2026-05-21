@@ -6,24 +6,7 @@ import { useUiStore } from '@/stores/useUiStore';
 const MAX_IMAGE_SIZE_MB = 5;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
-const LABELS = {
-  ko: {
-    placeholder: '무엇이든 물어보세요...',
-    listening: '듣고 있습니다...',
-    camera: '사진 찍기',
-    gallery: '보관함',
-    imageTooLarge: `이미지 크기가 ${MAX_IMAGE_SIZE_MB}MB를 초과합니다. 더 작은 이미지를 선택해 주세요.`,
-    speechUnsupported: '현재 브라우저에서는 음성 인식을 지원하지 않습니다.',
-  },
-  en: {
-    placeholder: 'Ask me anything...',
-    listening: 'Listening...',
-    camera: 'Take Photo',
-    gallery: 'Gallery',
-    imageTooLarge: `Image exceeds ${MAX_IMAGE_SIZE_MB}MB. Please select a smaller image.`,
-    speechUnsupported: 'Speech recognition is not supported in this browser.',
-  },
-};
+import { useTranslation } from '@/app/useTranslation';
 
 export interface ChatInputProps {
   placeholder?: string;
@@ -32,9 +15,10 @@ export interface ChatInputProps {
   onStop?: () => void;
   onUserTyping?: (isTyping: boolean) => void;
   isStaff?: boolean;
+  onFocus?: () => void;
 }
 
-export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isStaff }: ChatInputProps) {
+export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isStaff, onFocus }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -48,15 +32,25 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const language = useUiStore((state) => state.language) as 'ko' | 'en';
-  const l = LABELS[language] || LABELS.ko;
+  const language = useUiStore((state) => state.language);
+  const showToast = useUiStore((state) => state.showToast);
+  const { t } = useTranslation();
+  const l = t.chatInput;
 
   React.useEffect(() => {
     if (onUserTyping) {
       onUserTyping(isFocused || value.trim().length > 0 || imageFile !== null);
     }
   }, [isFocused, value, imageFile, onUserTyping]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 240)}px`;
+    }
+  }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -91,6 +85,23 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
         recognitionRef.current.onerror = (event: any) => {
           console.error('Speech recognition error', event.error);
           setIsRecording(false);
+          
+          if (event.error === 'not-allowed') {
+            showToast(
+              language === 'ko' ? '마이크 권한을 허용해 주세요. 🎙️' : 'Please allow microphone access. 🎙️',
+              'error'
+            );
+          } else if (event.error === 'no-speech') {
+            showToast(
+              language === 'ko' ? '음성이 감지되지 않았습니다. 🥲' : 'No speech detected. 🥲',
+              'error'
+            );
+          } else if (event.error !== 'aborted') {
+            showToast(
+              language === 'ko' ? '음성 인식 중 오류가 발생했습니다.' : 'Speech recognition error occurred.',
+              'error'
+            );
+          }
         };
 
         recognitionRef.current.onend = () => {
@@ -103,7 +114,7 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
 
   const toggleRecording = () => {
     if (!recognitionRef.current) {
-      alert(l.speechUnsupported);
+      showToast(l.speechUnsupported, 'error');
       return;
     }
     
@@ -111,7 +122,12 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      recognitionRef.current.lang = language === 'ko' ? 'ko-KR' : 'en-US';
+      let speechLang = 'en-US';
+      if (language === 'ko') speechLang = 'ko-KR';
+      else if (language === 'ja') speechLang = 'ja-JP';
+      else if (language === 'zh') speechLang = 'zh-CN';
+      
+      recognitionRef.current.lang = speechLang;
       recognitionRef.current.start();
       setIsRecording(true);
     }
@@ -139,9 +155,10 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldAutoSend, value]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.nativeEvent.isComposing) return;
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSend();
     }
   };
@@ -244,14 +261,19 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
           style={{ display: 'none' }} 
           onChange={handleImageSelect}
         />
-        <input 
+        <textarea
+          ref={textareaRef}
           className={styles.input} 
           placeholder={isRecording ? l.listening : l.placeholder} 
           value={value} 
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => setIsFocused(true)}
+          onFocus={() => {
+            setIsFocused(true);
+            onFocus?.();
+          }}
           onBlur={() => setIsFocused(false)}
+          rows={1}
         />
         <div className={styles.actionGroup}>
           {isStaff ? (
@@ -260,7 +282,7 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
             </button>
           ) : isTyping ? (
             <button className={`${styles.iconButton} ${styles.stopButton}`} onClick={onStop} aria-label="답변 멈추기">
-              <StopIcon size={24} color="#EF4444" />
+              <StopIcon size={24} color="#b4a8c9" />
             </button>
           ) : (value.trim() === '' && !imageFile && !isRecording) ? (
             <button className={`${styles.iconButton} ${styles.micButton}`} onClick={toggleRecording} aria-label="음성 입력 시작">

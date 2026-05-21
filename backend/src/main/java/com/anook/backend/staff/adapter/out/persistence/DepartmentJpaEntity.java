@@ -21,14 +21,14 @@ public class DepartmentJpaEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "is_admin", nullable = false)
-    private boolean isAdmin;
+    @Column(name = "is_frontdesk", nullable = false)
+    private boolean isFrontdesk;
 
     public Department toDomain() {
         return Department.builder()
                 .id(id)
                 .name(name)
-                .isAdmin(isAdmin)
+                .isFrontdesk(isFrontdesk)
                 .build();
     }
 }

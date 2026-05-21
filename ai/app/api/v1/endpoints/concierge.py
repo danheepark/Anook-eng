@@ -18,4 +18,4 @@ async def handle_concierge(request: DomainRequest):
     ──────────────────────────────────────
     개별 테스트 및 직접 호출을 위한 API.
     """
-    return run_concierge_agent(request.message, request.room_no, request.chat_history)
+    return await run_concierge_agent(request.message, request.room_no, request.chat_history)

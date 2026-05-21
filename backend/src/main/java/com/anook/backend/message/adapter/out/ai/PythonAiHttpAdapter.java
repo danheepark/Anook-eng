@@ -44,7 +44,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
     }
 
     @Override
-    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images) {
+    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images, java.util.List<java.util.Map<String, Object>> activeRequests, java.util.Map<String, Integer> roomInventory) {
         log.info("[PythonAI] 분석 요청 — room: {}, lang: {}, text: {}", roomNo, language, text);
 
         try {
@@ -52,9 +52,16 @@ public class PythonAiHttpAdapter implements MessageAiPort {
             body.put("text", text);
             body.put("room_no", roomNo);
             body.put("language", language);
+            body.put("system_language", language);
             body.put("chat_history", chatHistory);
             if (images != null && !images.isEmpty()) {
                 body.put("images", images);
+            }
+            if (activeRequests != null) {
+                body.put("active_requests", activeRequests);
+            }
+            if (roomInventory != null) {
+                body.put("room_inventory", roomInventory);
             }
 
             java.util.List<Map<String, Object>> responses = webClient.post()
@@ -62,7 +69,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
                     .bodyValue(body)
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<java.util.List<Map<String, Object>>>() {})
-                    .timeout(Duration.ofSeconds(30))
+                    .timeout(Duration.ofSeconds(60))
                     .block();
 
             if (responses == null || responses.isEmpty()) {
@@ -96,6 +103,10 @@ public class PythonAiHttpAdapter implements MessageAiPort {
                         : null;
 
                 String targetKeyword = (String) response.get("target_keyword");
+                
+                Long targetRequestId = response.containsKey("target_request_id") && response.get("target_request_id") != null
+                        ? ((Number) response.get("target_request_id")).longValue()
+                        : null;
 
                 @SuppressWarnings("unchecked")
                 java.util.List<String> clarificationOptions = response.containsKey("clarification_options")
@@ -107,7 +118,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
                 log.info("[PythonAI] 개별 분석 완료 — domain: {}, confidence: {}, action: {}, actionType: {}, targetKeyword: {}, options: {}, reasoning: {}",
                         domainCode, confidence, action, actionType, targetKeyword, clarificationOptions, reasoning);
 
-                results.add(new MessageAiResult(guestReply, summary, domainCode, priority, entities, confidence, action, actionType, aiLogMeta, targetKeyword, clarificationOptions, reasoning));
+                results.add(new MessageAiResult(guestReply, summary, domainCode, priority, entities, confidence, action, actionType, aiLogMeta, targetKeyword, targetRequestId, clarificationOptions, reasoning));
             }
 
             return results;
@@ -135,6 +146,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
                 0.0, 
                 "ADD", 
                 "ADD", 
+                null,
                 null,
                 null,
                 null,

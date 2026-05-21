@@ -18,13 +18,13 @@ public class RoomStatusJdbcAdapter implements MessageRoomStatusPort {
     private final JdbcTemplate jdbcTemplate;
 
     /**
-     * 해당 객실에 FRONT 부서의 IN_PROGRESS 요청이 존재하는지 확인합니다.
-     * FRONT + IN_PROGRESS = 직원이 실시간 상담을 인수한 상태이므로 AI 개입 불필요.
+     * 해당 객실에 FRONT 또는 EMERGENCY 부서의 ASSIGNED 또는 IN_PROGRESS 요청이 존재하는지 확인합니다.
+     * FRONT/EMERGENCY + (ASSIGNED | IN_PROGRESS) = 직원이 실시간 상담을 인수한 상태이므로 AI 개입 불필요.
      */
     @Override
     public boolean isStaffHandlingRoom(String roomNo) {
         String sql = "SELECT COUNT(*) FROM request " +
-                     "WHERE room_no = ? AND department_id = 'FRONT' AND status = 'IN_PROGRESS'";
+                     "WHERE room_no = ? AND department_id IN ('FRONT', 'EMERGENCY') AND status IN ('ASSIGNED', 'IN_PROGRESS')";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, roomNo);
         return count != null && count > 0;
     }
