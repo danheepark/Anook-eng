@@ -6,6 +6,7 @@ export interface KnowledgeCandidate {
   answer: string;
   domainCode: string;
   confidence: number;
+  roomNo?: string;
 }
 
 export function useExtractKnowledge() {

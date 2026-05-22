@@ -24,7 +24,13 @@ export function useKnowledge(domainCode?: string) {
       const url = domainCode 
         ? `/api/frontdesk/knowledge?domain=${domainCode}` 
         : `/api/frontdesk/knowledge`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
+      });
       const result = await handleResponse(response);
       setData(Array.isArray(result) ? (result as KnowledgeEntry[]) : []);
     } catch (err: any) {

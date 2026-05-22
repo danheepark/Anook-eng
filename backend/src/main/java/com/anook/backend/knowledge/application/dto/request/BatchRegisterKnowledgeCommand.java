@@ -9,6 +9,7 @@ public record BatchRegisterKnowledgeCommand(
     public record KnowledgeItem(
         String question,
         String answer,
-        String domainCode
+        String domainCode,
+        String roomNo
     ) {}
 }

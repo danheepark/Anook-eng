@@ -11,5 +11,6 @@ public interface KnowledgeRepositoryPort {
     List<KnowledgeEntry> findByDomainCode(String domainCode);
     List<KnowledgeEntry> findAll();
     void deleteById(Long id);
+    void deleteByRoomNoAndStatus(String roomNo, String status);
     boolean existsByDomainCodeAndQuestion(String domainCode, String question);
 }

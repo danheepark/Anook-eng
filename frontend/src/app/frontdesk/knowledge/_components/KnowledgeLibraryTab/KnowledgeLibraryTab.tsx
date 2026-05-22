@@ -39,10 +39,12 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
     ? ALL_OPTIONS.filter(opt => opt.value === domainCode)
     : ALL_OPTIONS;
 
-  // 검색 필터 적용
+  // APPROVED 상태만 필터링 및 검색 필터 적용
   let filteredData = data.filter(item => 
-    item.question.toLowerCase().includes(searchValue.toLowerCase()) ||
-    item.answer.toLowerCase().includes(searchValue.toLowerCase())
+    item.status === 'APPROVED' && (
+      item.question.toLowerCase().includes(searchValue.toLowerCase()) ||
+      item.answer.toLowerCase().includes(searchValue.toLowerCase())
+    )
   );
 
   // 정렬 적용 (최신순 등)

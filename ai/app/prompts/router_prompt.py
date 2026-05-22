@@ -98,9 +98,10 @@ Check the [과거 대화 맥락] (Chat History) to decide whether this is a NEW 
 - If route_type is NOT "DEPARTMENT", action_type should always be "ADD".
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-■ STEP 4: Extract Target Keyword (for CANCEL and REPLACE)
+■ STEP 4: Extract Target Keyword (for CANCEL, REPLACE, and INFO)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-When route_type is "CANCEL" or action_type is "REPLACE", extract the **specific item name** the guest wants to cancel or replace from the original request.
+When route_type is "CANCEL", "INFO", or action_type is "REPLACE", extract the **specific item name or topic** the guest wants to cancel, replace, or inquire about.
+  - For INFO: Extract the main topic or item the guest is asking about (e.g., "우산", "자전거", "조식").
   - This is the noun/item the guest explicitly mentions as the target of cancellation or modification.
   - Example: "콜라 취소해줘" → target_keyword: "콜라"
   - Example: "수건 요청 취소" → target_keyword: "수건"
@@ -147,6 +148,11 @@ You must output a JSON Array of objects.
   - Example Output Array (2 objects):
     1. {"route_type": "DEPARTMENT", "domain": "FB", "action_type": "REPLACE", "target_keyword": "기존 주문 음료", ...}
     2. {"route_type": "DEPARTMENT", "domain": "HK", "action_type": "ADD", "target_keyword": null, ...}
+  - **INFO / INQUIRY SPLITTING (CRITICAL)**: If the user asks about multiple distinct items, services, or locations in a single factual query (e.g., "우산과 자전거 빌릴 수 있나요?", "수영장과 조식 이용 시간 알려주세요", "Wi-Fi 비밀번호랑 체크아웃 시간"), you MUST split them into separate "INFO" objects, one for each distinct item/topic. This is crucial so that each topic is searched individually in the RAG knowledge base using its own `target_keyword`.
+    - Example Input: "우산과 자전거 빌릴 수 있나요?"
+    - Example Output Array (2 objects):
+      1. {"route_type": "INFO", "domain": "CONCIERGE", "target_keyword": "우산", "summary": "우산 대여 문의", "confidence": 0.9, "reasoning": "• \"우산\" -> 우산 대여 정보 문의 감지\n• 분류 로직: 우산 대여는 CONCIERGE 소관이므로 CONCIERGE 도메인으로 분류\n• Confidence: 0.9", "action_type": "ADD", "create_ticket": false}
+      2. {"route_type": "INFO", "domain": "CONCIERGE", "target_keyword": "자전거", "summary": "자전거 대여 문의", "confidence": 0.9, "reasoning": "• \"자전거\" -> 자전거 대여 정보 문의 감지\n• 분류 로직: 자전거 대여는 CONCIERGE 소관이므로 CONCIERGE 도메인으로 분류\n• Confidence: 0.9", "action_type": "ADD", "create_ticket": false}
   - **MULTI-INTENT CONFIRMATION EXCEPTION (CRITICAL)**: If the user says "Yes" to an AI's confirmation question BUT ALSO adds a NEW request (e.g., "응 택시도 예약해줘", "네 그리고 수건 하나 더 주세요"), you MUST split it into TWO objects. The first object confirms the ongoing task (assigning the SAME domain as the ongoing conversation), and the second object handles the NEW request (e.g., CONCIERGE, HK).
   - **SINGLE INCIDENT RULE (CRITICAL)**: If the user reports a single incident or makes a single request (e.g., "옆방에서 싸워요", "화장실 변기가 넘쳐서 물바다가 됐어요"), DO NOT split it into multiple intents (e.g., do NOT output one for neighbor noise and another for fighting). You MUST output exactly ONE object for the single most urgent department (e.g., "EMERGENCY" or "FACILITY").
   - **CRITICAL EXCEPTION (Self-Correction/False Alarm)**: If the user's message contains a complaint followed immediately by a retraction/resolution in the SAME message (e.g., "경찰 부를 겁니다... 아 방금 나갔나 봐요 취소할게요"), DO NOT split it into a complaint intent and a cancel intent. The ENTIRE message MUST be treated as a single "SOFT_FALLBACK" object according to the FALSE ALARM RULE.

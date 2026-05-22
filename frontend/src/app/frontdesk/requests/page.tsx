@@ -199,6 +199,11 @@ export default function FrontDeskPage() {
       if (refetch) refetch();
       if (emergRefetch) emergRefetch();
       if (allRefetch) allRefetch();
+      
+      if (newStatus === 'COMPLETED') {
+        setActiveTab('completed');
+      }
+
       if (activeChatRoom && ids.includes(activeChatRoom.representativeId)) {
         // COMPLETED일 때도 ChatPanel을 유지 (RAG 등록 모달 플로우를 위해)
         // ChatPanel의 onClose 콜백에서 setActiveChatRoom(null)이 호출됨

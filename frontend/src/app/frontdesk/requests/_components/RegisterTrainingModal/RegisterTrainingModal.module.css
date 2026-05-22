@@ -123,7 +123,6 @@
 
 .cellTextarea {
   width: 100%;
-  min-height: 60px;
   max-height: 120px;
   padding: var(--space-8) var(--space-10);
   border: 1px solid transparent;
@@ -133,6 +132,7 @@
   resize: vertical;
   background-color: transparent;
   transition: border-color 0.2s, background-color 0.2s;
+  field-sizing: content;
 }
 
 .cellTextarea:hover {

@@ -90,6 +90,12 @@ public class KnowledgePersistenceAdapter implements KnowledgeRepositoryPort {
     }
 
     @Override
+    @Transactional
+    public void deleteByRoomNoAndStatus(String roomNo, String status) {
+        knowledgeJpaRepository.deleteByRoomNoAndStatus(roomNo, status);
+    }
+
+    @Override
     public boolean existsByDomainCodeAndQuestion(String domainCode, String question) {
         DomainCode code = DomainCode.valueOf(domainCode.toUpperCase());
         return knowledgeJpaRepository.existsByDomainCodeAndQuestion(code, question);

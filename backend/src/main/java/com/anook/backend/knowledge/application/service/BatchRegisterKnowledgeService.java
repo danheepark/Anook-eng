@@ -52,10 +52,21 @@ public class BatchRegisterKnowledgeService implements BatchRegisterKnowledgeUseC
                     .answer(item.answer())
                     .domainCode(domainCode)
                     .status(KnowledgeStatus.APPROVED)
+                    .roomNo(item.roomNo())
                     .build();
 
             KnowledgeEntry saved = knowledgeRepositoryPort.save(entry, embedding);
             results.add(new CreateKnowledgeResult(saved.getId()));
+            
+            // 즉시 등록이든 일괄 등록이든, 특정 방에 대한 RAG 지식이 적재되었으므로 해당 방에 대기 중이던(PENDING) 지식 내역은 정리한다.
+            if (item.roomNo() != null && !item.roomNo().isBlank()) {
+                log.info("[RAG Batch] Deleting pending entries for roomNo: {}", item.roomNo());
+                try {
+                    knowledgeRepositoryPort.deleteByRoomNoAndStatus(item.roomNo(), "PENDING");
+                } catch (Exception e) {
+                    log.error("[RAG Batch] Failed to delete pending entries for roomNo: {}", item.roomNo(), e);
+                }
+            }
             
             log.info("[RAG Batch] Registered knowledge entry: id: {}, Q: {}", saved.getId(), saved.getQuestion());
         }

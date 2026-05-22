@@ -99,6 +99,7 @@ export default function RegisterTrainingModal({
       question: c.question,
       answer: c.answer,
       domainCode: c.domainCode,
+      roomNo, // Pass roomNo to clear any existing PENDING statuses
     }));
 
     const success = await batchRegister(payload);
