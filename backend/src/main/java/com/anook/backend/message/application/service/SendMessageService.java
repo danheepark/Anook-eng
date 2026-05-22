@@ -393,10 +393,10 @@ public class SendMessageService implements SendMessageUseCase {
                                 .findFirst()
                                 .orElse(null);
 
-                        // [AN-380] 고객의 원문이 단순 수락/확인 응답인지 판별 (길이 대신 정규식 사용)
-                        // 단순 수락 → 기존 요청 수락, 그 외 메시지 → 신규 주문 가능성
+                        // [AN-380] 고객의 원문이 단순 수락/확인 응답인지 판별 (다국어 임시 지원)
+                        // 한국어, 영어, 일본어, 중국어의 대표적인 수락/긍정 단어 포함
                         boolean isShortConfirmation = content != null && content.trim().toLowerCase()
-                                .matches("^(네|응|어|예|ㅇㅇ|ok|okay|yes|yep|y|확인|진행|진행해|진행해줘|부탁해|알겠어|좋아|맞아)$");
+                                .matches("^(네|응|어|예|ㅇㅇ|ok|okay|yes|yep|y|확인|진행|진행해|진행해줘|부탁해|알겠어|좋아|맞아|확인했습니다|수락|승인|sure|agree|confirm|はい|ええ|そうだ|お願い|お願いします|確認|是的|对|好|好的|没问题|是|确认|同意)$");
 
                         if (pendingRequest != null) {
                             // [AN-380] 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
