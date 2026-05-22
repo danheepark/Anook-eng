@@ -404,7 +404,7 @@ export default function RequestCard({
             )}
           </div>
 
-          <div style={{ marginTop: 'auto', font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)' }}>
+          <div style={{ marginTop: 'auto', textAlign: 'right', font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)' }}>
             #{requestId}
           </div>
         </div>
