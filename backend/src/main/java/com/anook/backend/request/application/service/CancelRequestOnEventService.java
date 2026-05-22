@@ -47,7 +47,7 @@ public class CancelRequestOnEventService {
                 Request req = matched.get();
                 // 권한 검증: 본인(동일 객실/고객)의 취소 가능한 요청인지 확인
                 if (req.getRoomNo().equals(event.getRoomNo()) && req.getGuestId().equals(event.getGuestId()) && 
-                    (req.getStatus() == RequestStatus.PENDING || req.getStatus() == RequestStatus.IN_PROGRESS || req.getStatus() == RequestStatus.ESCALATED)) {
+                    (req.getStatus() == RequestStatus.CREATED || req.getStatus() == RequestStatus.PENDING || req.getStatus() == RequestStatus.IN_PROGRESS || req.getStatus() == RequestStatus.ESCALATED)) {
                     cancelSingleRequest(req, event.getRoomNo());
                     return;
                 }
@@ -98,7 +98,7 @@ public class CancelRequestOnEventService {
 
     private void cancelSingleRequest(Request request, String roomNo) {
         try {
-            if (request.getStatus() == RequestStatus.PENDING || request.getStatus() == RequestStatus.ESCALATED) {
+            if (request.getStatus() == RequestStatus.CREATED || request.getStatus() == RequestStatus.PENDING || request.getStatus() == RequestStatus.ESCALATED) {
                 request.changeStatus(RequestStatus.CANCELLED);
                 requestPort.save(request);
 

@@ -9,6 +9,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 설정 파일 매핑
+      - /etc/letsencrypt:/etc/letsencrypt:ro # SSL 인증서 매핑
     depends_on:
       - backend
       - frontend
@@ -115,6 +116,7 @@ services:
     environment:
       - BACKEND_URL=http://backend:8080
       - AI_SERVER_URL=http://ai:8000
+      - DISABLE_SECURE_COOKIE=${DISABLE_SECURE_COOKIE:-false}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
