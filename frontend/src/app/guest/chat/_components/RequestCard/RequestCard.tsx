@@ -100,7 +100,22 @@ export default function RequestCard({
 
   const rawDynamicTitle = React.useMemo(() => {
     const intent = entities?.intent as string | undefined;
-    if (domainCode === 'FB') {
+    if (domainCode === 'HK') {
+      const items = entities?.items as any[] | undefined;
+      const tasks = entities?.tasks as string[] | undefined;
+      const totalCount = (items?.length || 0) + (tasks?.length || 0);
+      if (totalCount > 0) {
+        let firstLabel = '';
+        if (items && items.length > 0) {
+          const first = items[0];
+          firstLabel = `${first.item} ${first.count || 1}개`;
+        } else if (tasks && tasks.length > 0) {
+          firstLabel = tasks[0];
+        }
+        const rest = totalCount > 1 ? ` 외 ${totalCount - 1}건` : '';
+        return `${firstLabel}${rest}`;
+      }
+    } else if (domainCode === 'FB') {
       const menuItems = entities?.menu_items as any[] | undefined;
       if (menuItems && menuItems.length > 0) {
         const first = menuItems[0];
@@ -256,13 +271,36 @@ export default function RequestCard({
   // Render entities description
   const renderDetails = () => {
     if (!entities) return null;
-    
-    // 심플한 요청(HK, FACILITY, EMERGENCY, FRONT)은 메인 타이틀(summary)만 보여주고 디테일은 생략
-    if (domainCode === 'HK' || domainCode === 'FACILITY' || domainCode === 'EMERGENCY' || domainCode === 'FRONT') return null;
 
     const l = t.ticketUI?.entityLabels || {};
     const parts: string[] = [];
     
+    // HK: items + tasks
+    if (domainCode === 'HK') {
+      if (Array.isArray(entities.items)) {
+        entities.items.forEach((it: { item: string; count?: number }) => {
+          parts.push(`- ${it.item} ${it.count ? `×${it.count}` : ''}`.trim());
+        });
+      }
+      if (Array.isArray(entities.tasks)) {
+        entities.tasks.forEach((tStr: string) => parts.push(`- ${tStr}`));
+      }
+      if (entities.is_contactless) parts.push(`- ${l.contactless || '비대면'}`);
+      if (entities.target_time) parts.push(`- ${l.time || '시간'}: ${entities.target_time}`);
+      return parts.length > 0 ? parts.join('\n') : null;
+    }
+
+    // FACILITY: equipment + symptom + location
+    if (domainCode === 'FACILITY') {
+      if (entities.equipment) parts.push(`${l.equip || '대상'}: ${entities.equipment}`);
+      if (entities.symptom) parts.push(`${l.content || '내용'}: ${entities.symptom}`);
+      if (entities.location && entities.location !== '객실') parts.push(`${l.loc || '위치'}: ${entities.location}`);
+      return parts.length > 0 ? parts.join('\n') : null;
+    }
+
+    // EMERGENCY / FRONT: 디테일 불필요
+    if (domainCode === 'EMERGENCY' || domainCode === 'FRONT') return null;
+
     if (entities.intent === 'TAXI') {
       if (entities.time) parts.push(`${l.time || '시간'}: ${entities.time}`);
       if (entities.destination) parts.push(`${l.dest || '목적지'}: ${entities.destination}`);
