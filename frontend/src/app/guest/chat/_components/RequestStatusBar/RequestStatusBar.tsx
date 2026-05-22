@@ -288,6 +288,9 @@ export default function RequestStatusBar({
               )}
             </div>
           </div>
+          <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', whiteSpace: 'nowrap', marginLeft: 'var(--space-8)' }}>
+            #{requestId}
+          </div>
         </div>
       )}
       
