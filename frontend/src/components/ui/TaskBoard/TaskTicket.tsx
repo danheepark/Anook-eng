@@ -318,7 +318,7 @@ export default function TaskTicket({
   return (
     <div 
       id={ticketId ? `ticket-${ticketId}` : undefined}
-      className={`${styles.taskTicket} ${styles[deptKey]} ${isCancelled ? styles.isCancelled : ''}`}
+      className={`${styles.taskTicket} ${styles[deptKey]} ${isCancelled ? styles.isCancelled : ''} ${cancelRequested ? styles.cancelPendingCard : ''}`}
       style={{
         boxShadow: isActiveMatch ? '0 0 0 2px var(--color-primary-400), 0 4px 16px rgba(0, 0, 0, 0.12)' : undefined,
         transition: 'all 0.2s ease-in-out'

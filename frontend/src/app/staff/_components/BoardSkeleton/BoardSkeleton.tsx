@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './BoardSkeleton.module.css';
 
-const COLUMNS = ['대기 중', '진행 중', '완료됨'];
+const COLUMNS = ['대기 중', '진행 중', '완료'];
 const TICKET_COUNTS = [3, 2, 1]; // 각 컬럼별 스켈레톤 티켓 수
 
 function SkeletonTicket({ hasButton = false }: { hasButton?: boolean }) {

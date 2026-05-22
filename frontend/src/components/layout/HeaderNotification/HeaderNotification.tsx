@@ -6,6 +6,7 @@ import RejectCancellationModal from '@/app/frontdesk/requests/_components/Reject
 import RejectEscalationModal from '@/app/frontdesk/requests/_components/RejectEscalationModal/RejectEscalationModal';
 import RequestDetailModal from '@/app/frontdesk/requests/_components/RequestDetailModal/RequestDetailModal';
 import { useUiStore } from '@/stores/useUiStore';
+import NotificationCard from '@/components/ui/NotificationCard/NotificationCard';
 import styles from './HeaderNotification.module.css';
 
 export default function HeaderNotification() {
@@ -122,31 +123,38 @@ export default function HeaderNotification() {
             ) : (
               <div className={styles.list}>
                 {delayedCancelRequests.map(req => (
-                  <div key={`cancel-${req.id}`} className={styles.item} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                    <div className={styles.itemHeader}>
-                      <span className={styles.tagCancel}>취소 요청 지연</span>
-                      <span className={styles.roomNo}>객실 {req.roomNo}</span>
-                    </div>
-                    <p className={styles.summary}>{req.summary}</p>
-                    <div className={styles.actions}>
-                      <button className={styles.btnApprove} onClick={(e) => { e.stopPropagation(); handleApproveCancel(req.id); }}>취소 승인</button>
-                      <button className={styles.btnReject} onClick={(e) => { e.stopPropagation(); handleRejectCancel(req.id); }}>반려</button>
-                    </div>
-                  </div>
+                  <NotificationCard
+                    key={`cancel-${req.id}`}
+                    variant="cancel"
+                    title={req.summary}
+                    description={req.rawText}
+                    roomNumber={req.roomNo}
+                    departmentName={req.departmentName}
+                    createdAt={req.createdAt}
+                    priority={req.priority}
+                    primaryLabel="취소 승인"
+                    secondaryLabel="반려"
+                    onPrimaryClick={() => handleApproveCancel(req.id)}
+                    onSecondaryClick={() => handleRejectCancel(req.id)}
+                    onClick={() => setDetailTarget(req.id)}
+                  />
                 ))}
                 
                 {nonEmergencyEscalations.map(req => (
-                  <div key={`esc-${req.id}`} className={styles.item} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                    <div className={styles.itemHeader}>
-                      <span className={styles.tagEscalate}>이관 요청</span>
-                      <span className={styles.roomNo}>객실 {req.roomNo}</span>
-                    </div>
-                    <p className={styles.summary}>{req.summary}</p>
-                    <div className={styles.actions}>
-                      <button className={styles.btnApprove} onClick={(e) => { e.stopPropagation(); handleApproveEscalation(req.id); }}>수락 (배정)</button>
-                      <button className={styles.btnReject} onClick={(e) => { e.stopPropagation(); handleRejectEscalation(req.id); }}>반려</button>
-                    </div>
-                  </div>
+                  <NotificationCard
+                    key={`esc-${req.id}`}
+                    variant="escalation"
+                    title={req.summary}
+                    roomNumber={req.roomNo}
+                    departmentName={req.departmentName}
+                    createdAt={req.createdAt}
+                    priority={req.priority}
+                    primaryLabel="수락 (배정)"
+                    secondaryLabel="반려"
+                    onPrimaryClick={() => handleApproveEscalation(req.id)}
+                    onSecondaryClick={() => handleRejectEscalation(req.id)}
+                    onClick={() => setDetailTarget(req.id)}
+                  />
                 ))}
               </div>
             )}

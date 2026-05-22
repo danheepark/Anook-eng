@@ -70,7 +70,7 @@
 
 /* 포커스 시 */
 .inputContainer:focus-within:not(.inputContainerDisabled):not(.inputContainerError) {
-  border-color: var(--color-gray-900);
+  border-color: var(--color-gray-600);
 }
 
 /* 실제 input 태그 (초기화) */
@@ -132,7 +132,7 @@
 }
 
 .searchContainer:focus-within {
-  border-color: var(--color-gray-900);
+  border-color: var(--color-gray-600);
   background: var(--color-white, #ffffff);
 }
 

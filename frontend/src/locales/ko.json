@@ -85,7 +85,7 @@
       "columns": {
         "pending": "대기 중",
         "inProgress": "진행 중",
-        "completed": "완료됨"
+        "completed": "완료"
       },
       "titles": {
         "housekeeping": "하우스키핑",

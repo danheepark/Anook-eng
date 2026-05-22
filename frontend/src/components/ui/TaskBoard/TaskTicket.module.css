@@ -236,3 +236,26 @@
   /* 약간의 회색 오버레이 */
   pointer-events: none;
 }
+
+/* --- 취소 대기중인 카드 특별 경고 스타일 (디자인 시스템 변수 활용) --- */
+@keyframes cancelAlertPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.cancelPendingCard {
+  border-color: var(--color-error) !important;
+  background-color: var(--color-tag-background-red) !important; /* #FEF2F2 */
+  animation: cancelAlertPulse 2s infinite;
+}
+
+.cancelPendingCard .topColorBar {
+  background-color: var(--color-error) !important; /* #EF4444 */
+}
