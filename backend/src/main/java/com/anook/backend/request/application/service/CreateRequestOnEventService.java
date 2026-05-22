@@ -79,6 +79,9 @@ public class CreateRequestOnEventService {
                         existing.changeStatus(RequestStatus.CANCELLED);
                         requestRepositoryPort.save(existing);
 
+                        // Grace Period 타이머도 취소 (CREATED→PENDING 레이스 컨디션 방지)
+                        gracePeriodScheduler.cancelGrace(existing.getId());
+
                         log.info("[Cancel&Replace] PENDING 요청 자동 취소 — id: {}, summary: {}, keyword: {}",
                                 existing.getId(), existing.getSummary(), event.getTargetKeyword());
 

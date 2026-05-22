@@ -147,6 +147,19 @@ public class GracePeriodScheduler {
     }
 
     /**
+     * Grace Period 타이머만 취소한다 (상태 전환 없이).
+     * REPLACE 흐름에서 기존 요청을 CANCELLED로 변경한 뒤,
+     * 아직 남아 있는 타이머가 CREATED→PENDING 전환을 시도하는 것을 방지한다.
+     */
+    public void cancelGrace(Long requestId) {
+        ScheduledFuture<?> future = scheduledTasks.remove(requestId);
+        if (future != null) {
+            future.cancel(false);
+            log.info("[GracePeriod] 타이머 취소 (REPLACE/CANCEL) — requestId: {}", requestId);
+        }
+    }
+
+    /**
      * 애플리케이션 종료 시 스케줄러 정리
      */
     @PreDestroy

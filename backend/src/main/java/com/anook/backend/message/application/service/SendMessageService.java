@@ -290,8 +290,10 @@ public class SendMessageService implements SendMessageUseCase {
                     boolean isFinalized = analysis.guestReply() != null &&
                             analysis.guestReply().contains("[FORWARD_" + domain + "]");
 
-                    // If the user explicitly confirmed a NEW duplicate request, we skip auto-confirm
-                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !isAddDuplicate) {
+                    // If the user explicitly confirmed a NEW duplicate request or REPLACE, skip auto-confirm
+                    // REPLACE must go through CreateRequestOnEventService (cancel old + create new)
+                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !isAddDuplicate
+                            && !"REPLACE".equals(analysis.actionType())) {
                         java.util.Map<String, Object> pendingRequest = activeRequests.stream()
                                 .filter(req -> ("CREATED".equals(req.get("status")) || "PENDING".equals(req.get("status"))) && domain.equals(req.get("department_id")))
                                 .findFirst()
