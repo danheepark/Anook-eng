@@ -24,6 +24,12 @@ public class HandoverRequestPersistenceAdapter implements HandoverRequestQueryPo
                 "LEFT JOIN department d ON r.department_id = d.id " +
                 "LEFT JOIN staff s ON r.assigned_staff_id = s.id " +
                 "WHERE r.created_at >= ? AND r.created_at < ? " +
+                "AND (" +
+                "  UPPER(r.priority) = 'EMERGENCY' " +
+                "  OR r.department_id = 'FACILITY' " +
+                "  OR r.department_id = 'FRONT' " +
+                "  OR UPPER(r.entities->>'intent') = 'COMPLAINT'" +
+                ") " +
                 "ORDER BY r.created_at DESC";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
