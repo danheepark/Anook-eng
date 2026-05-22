@@ -1362,7 +1362,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 has_in_progress = False
                 for r in targets:
                     status = r.get("status")
-                    if status in ("PENDING", "ESCALATED"):
+                    if status in ("CREATED", "PENDING", "ESCALATED"):
                         has_pending = True
                     elif status in ("IN_PROGRESS", "ASSIGNED", "ACCEPTED"):
                         has_in_progress = True
