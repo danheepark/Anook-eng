@@ -81,7 +81,14 @@ export default function RequestCard({
   onModify,
   onAccept,
 }: RequestCardProps) {
-  const { t } = useTranslation();
+  const { chatLanguage } = useUiStore();
+  const [targetLang, setTargetLang] = useState<string>(chatLanguage);
+
+  useEffect(() => {
+    setTargetLang(chatLanguage);
+  }, [chatLanguage]);
+
+  const { t } = useTranslation(targetLang);
 
   const isUrgent = priority === 'URGENT';
   const isCancelled = status === 'CANCELLED';
@@ -89,14 +96,6 @@ export default function RequestCard({
   const isEscalatedChat = domainCode === 'FRONT' && entities?.intent === 'ESCALATION';
   const isInProgress = progress >= 50 && progress < 100 && !isCancelled;
   const isCompleted = progress >= 100 && !isCancelled;
-  
-  const { language: uiLanguage, chatLanguage } = useUiStore();
-  const [targetLang, setTargetLang] = useState<string>(chatLanguage);
-
-  useEffect(() => {
-    // chatLanguage가 변경될 때마다 업데이트 (초기 렌더링 또는 스토어 변경 시)
-    setTargetLang(chatLanguage);
-  }, [chatLanguage]);
 
   const rawDynamicTitle = React.useMemo(() => {
     const intent = entities?.intent as string | undefined;
