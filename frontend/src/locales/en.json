@@ -448,7 +448,10 @@
       "type": "Type",
       "symptom": "Symptom",
       "area": "Area",
-      "content": "Details"
+      "content": "Details",
+      "contactless": "Contactless",
+      "equip": "Equipment",
+      "loc": "Location"
     }
   },
   "menu": {
