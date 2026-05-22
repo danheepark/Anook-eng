@@ -48,11 +48,10 @@ export default function RequestStatusCard({
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.titleGroup}>
-          <span className={styles.department}>{deptName}</span>
+          <span className={styles.department}>{deptName} <span style={{ fontSize: '10px', color: 'var(--color-gray-400)', fontWeight: 'normal', marginLeft: '4px' }}>#{requestId}</span></span>
           <h3 className={styles.title}>{displayTitle}</h3>
         </div>
-        <div className={styles.timeInfo} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-          <span style={{ fontSize: '10px', color: 'var(--color-gray-400)', lineHeight: '1' }}>#{requestId}</span>
+        <div className={styles.timeInfo}>
           <span>접수: {formatTime(createdAt)}</span>
           {status !== 'CREATED' && status !== 'PENDING' && <span>업데이트: {formatTime(updatedAt)}</span>}
         </div>
