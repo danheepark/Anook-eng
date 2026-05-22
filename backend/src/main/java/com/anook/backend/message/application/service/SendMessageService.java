@@ -217,6 +217,32 @@ public class SendMessageService implements SendMessageUseCase {
                                     || newSummary.contains(existingSummary);
 
                             if (!seemsSameRequest) {
+                                // 키워드 기반 동일성 검증 (핵심 서비스가 같은 경우 허용) - 다국어(영어/일어/중어) 포함 및 대소문자 무시
+                                java.util.List<String> coreKeywords = java.util.Arrays.asList(
+                                        "택시", "taxi", "タクシー", "出租车",
+                                        "수건", "타올", "towel", "タオル", "毛巾",
+                                        "물", "생수", "water", "水",
+                                        "짐", "luggage", "荷物", "行李",
+                                        "보관", "storage", "保管", "寄存",
+                                        "모닝콜", "wake up call", "モーニングコール", "叫醒服务",
+                                        "배달", "delivery", "配達", "送货",
+                                        "식당", "restaurant", "レストラン", "餐厅",
+                                        "예약", "reservation", "予約", "预订",
+                                        "가운", "robe", "ガウン", "浴衣",
+                                        "이불", "blanket", "布団", "被子",
+                                        "베개", "pillow", "枕", "枕头",
+                                        "슬리퍼", "slipper", "スリッパ", "拖鞋");
+                                String lowerExisting = existingSummary.toLowerCase();
+                                String lowerNew = newSummary.toLowerCase();
+                                for (String kw : coreKeywords) {
+                                    if (lowerExisting.contains(kw) && lowerNew.contains(kw)) {
+                                        seemsSameRequest = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!seemsSameRequest) {
                                 log.info(
                                         "[Message] targetRequestId={} ignored due to item mismatch (existing: '{}', new: '{}')",
                                         validTargetRequestId, existingSummary, newSummary);

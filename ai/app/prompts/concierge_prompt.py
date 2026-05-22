@@ -396,5 +396,31 @@ Output:
   "final_reply": "",
   "missing_fields": []
 }
+
+[Example 9]
+[현재 활성화된 예약 내역]
+- ID: 1016, 서비스: TAXI, 요약: 택시 호출 (신촌, 3명, 지금), 상태: CREATED
+
+Guest: "택시 서울역으로 가는데 불러주세요"
+Output:
+{
+  "request_id": "auto",
+  "room_no": "unknown",
+  "domain": "CONCIERGE",
+  "summary": "택시 추가/변경 여부 확인 중",
+  "priority": "NORMAL",
+  "confidence": 0.95,
+  "action_type": null,
+  "target_request_id": 1016,
+  "entities": {
+    "intent": "TAXI",
+    "destination": "서울역"
+  },
+  "needs_clarification": true,
+  "clarification_question": "이미 신촌으로 가시는 택시 예약이 있습니다. 기존 예약 외에 추가로 예약해 드릴까요, 아니면 기존 예약을 취소하고 서울역으로 변경해 드릴까요?",
+  "clarification_options": ["신규 추가", "기존 예약 변경", "기존 예약 유지"],
+  "final_reply": "",
+  "missing_fields": []
+}
 """.strip()
 

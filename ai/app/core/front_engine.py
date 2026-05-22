@@ -56,7 +56,13 @@ async def run_front_agent(user_message: str, room_no: str, chat_history: list = 
     # 챗봇 응답(guest_reply) 분기 처리
     final_response = getattr(result, "final_reply", "")
     if not final_response:
-        final_response = "프론트데스크에서 확인 후 처리해 드리겠습니다."
+        replies = {
+            "ko": "프론트데스크에서 확인 후 처리해 드리겠습니다.",
+            "en": "The front desk will process this shortly.",
+            "ja": "フロントデスクで確認後、対応いたします。",
+            "zh": "前台确认后将为您处理。"
+        }
+        final_response = replies.get(system_language, replies["en"])
         
     guest_reply = final_response
     domain_code = "FRONT"
@@ -68,10 +74,22 @@ async def run_front_agent(user_message: str, room_no: str, chat_history: list = 
         guest_reply = result.entities.get("fallback_message", result.clarification_question)
         domain_code = None  # 정보 조회는 티켓 생성 X
     elif result.needs_clarification or has_options or intent == "AMBIGUOUS":
-        guest_reply = result.clarification_question if result.clarification_question else result.entities.get("fallback_message", "어떻게 도와드릴까요?")
+        fallback_question = {
+            "ko": "어떻게 도와드릴까요?",
+            "en": "How can I help you?",
+            "ja": "どのようなご用件でしょうか？",
+            "zh": "有什么我可以帮您的吗？"
+        }
+        guest_reply = result.clarification_question if result.clarification_question else result.entities.get("fallback_message", fallback_question.get(system_language, fallback_question["en"]))
         domain_code = None  # 질문/버튼 선택 단계이거나 의도 불분명일 때는 카드 노출 방지 (UX 최적화)
     elif intent == "ESCALATION":
-        guest_reply = result.entities.get("fallback_message", "프론트데스크 직원에게 즉시 연결해 드리겠습니다. 잠시만 기다려주세요.")
+        escalation_msg = {
+            "ko": "프론트데스크 직원에게 즉시 연결해 드리겠습니다. 잠시만 기다려주세요.",
+            "en": "I will connect you to a front desk agent immediately. Please wait a moment.",
+            "ja": "フロントデスクのスタッフに直ちにお繋ぎいたします。少々お待ちください。",
+            "zh": "我将立即为您连接前台员工。请稍候。"
+        }
+        guest_reply = result.entities.get("fallback_message", escalation_msg.get(system_language, escalation_msg["en"]))
 
     # /analyze 응답 형태로 변환
     return {

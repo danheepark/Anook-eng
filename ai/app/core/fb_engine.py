@@ -123,8 +123,13 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
     if result.needs_clarification:
         guest_reply = result.clarification_question
     else:
-        # 주문 확정 시 AI가 고객 언어로 작성한 final_reply 사용 (다국어 미러링)
-        guest_reply = result.final_reply or "식음료 주문이 접수되었습니다."
+        fallback_msg = {
+            "ko": "식음료 주문이 접수되었습니다.",
+            "en": "Your food and beverage order has been received.",
+            "ja": "飲食の注文が受付されました。",
+            "zh": "餐饮订单已收到。"
+        }
+        guest_reply = result.final_reply or fallback_msg.get(system_language, fallback_msg["en"])
 
     # 8. analyze.py 응답 포맷 반환
     # [수정] 주문 확인 단계(needs_clarification=True, missing_fields가 비어있고, intent가 주문/변경 관련인 경우)

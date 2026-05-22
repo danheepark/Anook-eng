@@ -117,6 +117,12 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
     except Exception as e:
         print(f"[Concierge] ⚠️ 에러 발생: {e}")
         # 에러 발생 시 안전한 Fallback 응답 반환
+        fallback_err = {
+            "ko": "죄송합니다. 요청을 처리하는 중에 잠시 문제가 발생했습니다. 잠시 후 다시 말씀해 주시거나 프론트 데스크(내선 0번)로 연락 부탁드립니다.",
+            "en": "Sorry, there was a problem processing your request. Please try again later or contact the front desk.",
+            "ja": "申し訳ありません。リクエストの処理中に問題が発生しました。しばらくしてから再度お試しいただくか、フロントデスクまでご連絡ください。",
+            "zh": "抱歉，处理您的请求时出现问题。请稍后再试或联系前台。"
+        }
         return {
             "request_id": "REQ_ERR",
             "room_no": room_no,
@@ -125,7 +131,7 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
             "priority": "NORMAL",
             "entities": {"intent": "OTHER", "error": str(e)},
             "confidence": 0.0,
-            "guest_reply": "죄송합니다. 요청을 처리하는 중에 잠시 문제가 발생했습니다. 잠시 후 다시 말씀해 주시거나 프론트 데스크(내선 0번)로 연락 부탁드립니다.",
+            "guest_reply": fallback_err.get(system_language, fallback_err["en"]),
             "needs_clarification": False,
             "clarification_question": "",
             "clarification_options": [],
@@ -169,10 +175,10 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
     elif intent == 'POSTAL_SERVICE':
         item = entities.get('item', '우편물')
         default_reply = f"요청하신 {item} 발송 대행 업무를 도와드릴까요? (1층 컨시어지 데스크 방문 필요)"
-    elif intent == 'INFO':
-        default_reply = entities.get('fallback_message', "안내해 드리겠습니다.")
+    if intent == 'INFO':
+        default_reply = entities.get('fallback_message', "안내해 드리겠습니다." if system_language == "ko" else "I will assist you with that.")
     else:
-        default_reply = f"요청하신 컨시어지 서비스({intent or '문의사항'})를 확인하였습니다. 담당 직원이 곧 안내해 드릴까요?"
+        default_reply = "안내해 드리겠습니다." if system_language == "ko" else "I will assist you with that."
     
     # [AN-344] 더블체크 UX 및 정보 제공 인텐트 처리 고도화:
     # 1. 정보 안내 목적의 인텐트 (INFO, TOUR_INFO, MEDICAL_INFO)는 티켓을 생성하지 않도록 domain_code = None 처리합니다.
