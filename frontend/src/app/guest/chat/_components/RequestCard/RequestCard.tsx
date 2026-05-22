@@ -374,10 +374,7 @@ export default function RequestCard({
                   finalTitle
                 )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
-                <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', fontSize: '10px', lineHeight: '1', marginBottom: '2px' }}>#{requestId}</div>
-                <div className={styles.timeLabel} style={{ marginTop: 0 }}>{formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}</div>
-              </div>
+              <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)' }}>#{requestId}</div>
             </div>
           </div>
 
@@ -405,6 +402,10 @@ export default function RequestCard({
             ) : (
               <>{(t.cardUI?.message?.forwarded || '{team} 팀에 전달되었습니다').replace('{team}', domainLabel)}</>
             )}
+          </div>
+
+          <div className={styles.timeLabel} style={{ marginTop: 'auto', textAlign: 'right' }}>
+            {formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}
           </div>
         </div>
       </div>
