@@ -1621,6 +1621,13 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                             if isinstance(_item_dict, dict) and _item_dict.get("item"):
                                 _new_items.add(str(_item_dict["item"]).strip().lower())
 
+                    # menu_items 필드 (FB 에이전트 형식: [{name, quantity}, ...])
+                    _menu_items = final_entities.get("menu_items", [])
+                    if isinstance(_menu_items, list):
+                        for _mi in _menu_items:
+                            if isinstance(_mi, dict) and _mi.get("name"):
+                                _new_items.add(str(_mi["name"]).strip().lower())
+
                 # 2) 기존 활성 요청 중 아이템이 겹치는 건만 매칭
                 _existing_req = None
                 for req in request.active_requests:
@@ -1652,6 +1659,8 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         _get_static_reply("OPTION_YES", _lang),
                         _get_static_reply("OPTION_NO", _lang)
                     ]
+                    # 기존 요청 ID를 agent_result에 주입 → L1693에서 response에 복사됨
+                    agent_result["target_request_id"] = _existing_id
 
             # 🛡️ [컨시어지 확인 질문 방어] 로직 삭제됨 (AN-344: 확인 질문과 동시에 정적 카드를 띄우기 위해 차단 해제)
             
