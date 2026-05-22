@@ -16,7 +16,7 @@
 .rightColumn {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-8);
   flex: 1;
 }
 
@@ -151,7 +151,7 @@
 
 .timeLabel {
   font: var(--text-caption-regular);
-  color: var(--color-gray-400);
+  color: var(--color-gray-500);
   text-align: right;
   flex-shrink: 0;
   margin-top: 2px;
@@ -201,7 +201,6 @@
   font: var(--text-body-medium);
   color: var(--color-gray-500);
   line-height: 1.4;
-  margin-bottom: var(--space-4);
   word-break: keep-all;
   white-space: pre-wrap;
 }
