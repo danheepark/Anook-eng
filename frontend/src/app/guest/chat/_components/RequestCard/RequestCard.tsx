@@ -387,26 +387,28 @@ export default function RequestCard({
             </div>
           )}
 
-          <div className={`${styles.completionMessage} ${isCancelled ? styles.cancelledText : ''}`}>
-            {isCancelled ? (
-              <>{t.cardUI?.message?.cancelledCard || '요청이 취소되었습니다'}</>
-            ) : showButtons && isStaticConfirm ? (
-              <>{t.cardUI?.message?.confirmGuide || '확인 후 진행 버튼을 눌러주세요.'}</>
-            ) : showButtons ? (
-              <>{t.cardUI?.message?.autoAcceptGuide || '요청 내용을 확인해 주세요. 잠시 후 자동 전달됩니다.'}</>
-            ) : isCancelPending ? (
-              <>{t.cardUI?.message?.cancelPendingShort || '취소 요청 확인 중'}</>
-            ) : isEscalatedChat ? (
-              <>{t.cardUI?.message?.escalated || '직원이 응대할 예정입니다'}</>
-            ) : (
-              <>{(t.cardUI?.message?.forwarded || '{team} 팀에 전달되었습니다').replace('{team}', domainLabel)}</>
-            )}
-          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', gap: 'var(--space-8)' }}>
+            <div className={`${styles.completionMessage} ${isCancelled ? styles.cancelledText : ''}`}>
+              {isCancelled ? (
+                <>{t.cardUI?.message?.cancelledCard || '요청이 취소되었습니다'}</>
+              ) : showButtons && isStaticConfirm ? (
+                <>{t.cardUI?.message?.confirmGuide || '확인 후 진행 버튼을 눌러주세요.'}</>
+              ) : showButtons ? (
+                <>{t.cardUI?.message?.autoAcceptGuide || '요청 내용을 확인해 주세요. 잠시 후 자동 전달됩니다.'}</>
+              ) : isCancelPending ? (
+                <>{t.cardUI?.message?.cancelPendingShort || '취소 요청 확인 중'}</>
+              ) : isEscalatedChat ? (
+                <>{t.cardUI?.message?.escalated || '직원이 응대할 예정입니다'}</>
+              ) : (
+                <>{(t.cardUI?.message?.forwarded || '{team} 팀에 전달되었습니다').replace('{team}', domainLabel)}</>
+              )}
+            </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: 'auto', flexShrink: 0 }}>
-            <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', marginBottom: '2px' }}>#{requestId}</div>
-            <div className={styles.timeLabel}>
-              {formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
+              <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', marginBottom: '2px' }}>#{requestId}</div>
+              <div className={styles.timeLabel}>
+                {formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}
+              </div>
             </div>
           </div>
         </div>
