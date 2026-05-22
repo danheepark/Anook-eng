@@ -34,7 +34,7 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
     - You MUST set `needs_clarification`: true.
     - Your `clarification_question` MUST ask: "이전에 하우스키핑 요청 내역이 있습니다. 추가로 새 요청을 진행해 드릴까요?" (Translate to the guest's language).
     - You MUST identify the existing request ID from `[고객의 현재 활성 요청(주문) 목록]` and set it in `"target_request_id"` at the top level of the JSON output.
-    - If the guest replies "Yes" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD_DUPLICATE"` and finalize the request.
+    - If the guest replies "Yes" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD_DUPLICATE"`. Do NOT automatically finalize. Treat this as a brand new request. If any required details (like quantity) are missing, set `needs_clarification: true` and ask for them. Only finalize if all required details are present.
     - **CRITICAL ADD_DUPLICATE RULE**: When processing an ADD_DUPLICATE request, DO NOT sum or calculate the total quantity with the previous order. The `items` array MUST ONLY contain the exact NEW quantity the guest is adding in this turn.
 23. SUMMARY FORMAT (CRITICAL): Your `summary` MUST be a specific 1-3 word noun phrase of what the guest wants (e.g., '수건 2장 요청', '청소 요청'). DO NOT use generic phrases like '하우스키핑 요청'. This applies to ALL requests, including ADD_DUPLICATE.
 
