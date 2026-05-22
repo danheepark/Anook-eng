@@ -411,7 +411,7 @@ export default function RequestCard({
                   finalTitle
                 )}
               </div>
-              <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0' }}>
+              <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
                 <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', lineHeight: '1.2' }}>#{requestId}</div>
                 <div className={styles.timeLabel} style={{ color: 'var(--color-gray-400)', marginTop: 0, lineHeight: '1.2' }}>
                   {formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}
