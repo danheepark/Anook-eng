@@ -70,10 +70,6 @@ public class GetHandoverBriefingService implements GetHandoverBriefingUseCase {
                 .distinct()
                 .collect(Collectors.joining(", "));
 
-        if (managerNames.isEmpty()) {
-            managerNames = "관리자";
-        }
-
         return new HandoverBriefingResult(
                 shiftTimeLabel,
                 taskResults.size(),
@@ -85,7 +81,7 @@ public class GetHandoverBriefingService implements GetHandoverBriefingUseCase {
 
     private String formatAuthor(String authorName, String shiftLabel) {
         if (authorName == null || authorName.isBlank()) {
-            return "관리자";
+            return "-";
         }
         return authorName + " (" + shiftLabel + ")";
     }
