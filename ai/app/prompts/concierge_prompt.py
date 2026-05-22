@@ -146,8 +146,9 @@ For each intent, you MUST extract the corresponding fields into the "entities" o
    - Example `final_reply`: "날씨(조건)에 따라 요청이 달라지는군요. 이 내용은 담당 직원이 직접 확인하고 챙겨드릴 수 있도록 프론트 데스크로 전달해 드릴까요?"
    - Example `clarification_options`: `["프론트 전달", "다시 입력"]`
    - Set `needs_clarification`: true.
-8. RESERVATION CONFLICT RESOLUTION: If the guest requests a service (e.g., TAXI, WAKE_UP_CALL, RESERVATION) AND `[현재 활성화된 예약 내역]` contains an existing reservation for the EXACT SAME service:
-   - AND the guest did NOT explicitly state whether to "add another one" or "change the existing one":
+8. RESERVATION CONFLICT RESOLUTION (SAME SERVICE ONLY): If the guest requests a service (e.g., TAXI, WAKE_UP_CALL, RESERVATION) AND `[현재 활성화된 예약 내역]` contains an existing reservation for the EXACT SAME service (e.g., booked a taxi before, now books another taxi):
+   - CRITICAL: If the guest requests a DIFFERENT service (e.g., booked a taxi before, now books a restaurant), DO NOT trigger this rule. Process it normally as a brand new request and DO NOT set `target_request_id`.
+   - If it IS the exact same service, and the guest did NOT explicitly state whether to "add another one" or "change the existing one":
    - You MUST set `needs_clarification`: true.
    - Your `clarification_question` MUST ask: "이미 [서비스명] 예약이 있습니다. 기존 예약 외에 추가해 드릴까요, 아니면 기존 예약을 취소하고 변경해 드릴까요?" (Translate to the guest's language).
    - You MUST set `clarification_options` to `["신규 추가", "기존 예약 변경", "기존 예약 유지"]`.

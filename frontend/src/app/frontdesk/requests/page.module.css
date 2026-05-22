@@ -51,7 +51,6 @@
   border-right: 1px solid var(--color-gray-200);
   overflow: hidden;
   background-color: var(--color-white);
-  transition: all 0.2s ease;
 }
 
 .leftPaneContent {
@@ -60,7 +59,6 @@
   padding: var(--space-24);
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease;
 }
 
 .leftPaneHeader {
@@ -73,7 +71,6 @@
   background-color: var(--color-white);
   flex-shrink: 0;
   box-sizing: border-box;
-  transition: all 0.2s ease;
 }
 
 .leftPaneHeaderLeft {
@@ -100,7 +97,6 @@
   flex-direction: column;
   background-color: var(--color-white);
   overflow: hidden;
-  transition: all 0.2s ease;
 }
 
 .detailPane {
@@ -113,7 +109,6 @@
   border-left: 1px solid var(--color-gray-200);
   background-color: var(--color-white);
   overflow: hidden;
-  transition: all 0.2s ease;
 }
 
 .sectionTitle {
@@ -127,7 +122,6 @@
   flex-direction: column;
   gap: 0;
   margin: 0 calc(var(--space-24) * -1);
-  transition: all 0.2s ease;
 }
 
 /* Gradual spacing & width compression when space is constrained on tablet/small desktops */
