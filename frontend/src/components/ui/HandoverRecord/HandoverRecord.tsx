@@ -43,14 +43,10 @@ export default function HandoverRecord({ managerName, briefing, items }: Handove
               <td className={styles.infoTd}>{managerName || '-'}</td>
             </tr>
             <tr>
-              <th className={styles.infoTh}>총 요청 수</th>
-              <td className={styles.infoTd}>{briefing.totalRequestCount}</td>
-              <th className={styles.infoTh}>미처리 수</th>
-              <td className={styles.infoTd}>{briefing.pendingCount}</td>
-            </tr>
-            <tr>
+              <th className={styles.infoTh}>처리 현황</th>
+              <td className={styles.infoTd}>{briefing.totalRequestCount - briefing.pendingCount} / {briefing.totalRequestCount}</td>
               <th className={styles.infoTh}>작성 일시</th>
-              <td className={styles.infoTd} colSpan={3}>{briefing.createdAt}</td>
+              <td className={styles.infoTd}>{briefing.createdAt}</td>
             </tr>
           </tbody>
         </table>

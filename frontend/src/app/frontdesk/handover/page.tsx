@@ -6,6 +6,7 @@ import { HandoverRecord } from '@/components/ui/HandoverRecord';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useHandover } from './useHandover';
+import FilterButton from '@/components/ui/FilterButton/FilterButton';
 
 const sampleHandoverItems = [
   { id: 1, status: 'PENDING', category: '컴플레인', roomNumber: '812', summary: '에어컨 소음 발생 ➡️ 시설팀 조치 완료했으나 Evening조에서 18시경 객실로 사과 음료 서비스하며 재확인(Follow-up) 요망.', author: '김모닝 (Morning)', time: '10:15' },
@@ -16,6 +17,7 @@ const sampleHandoverItems = [
 export default function HandoverPage() {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   
   const {
     targetDate,
@@ -30,6 +32,9 @@ export default function HandoverPage() {
   } = useHandover();
 
   const filteredItems = itemsData.filter(item => {
+    if (statusFilter !== 'ALL' && item.status !== statusFilter) {
+      return false;
+    }
     const search = searchValue.toLowerCase();
     if (!search) return true;
     return (
@@ -69,6 +74,16 @@ export default function HandoverPage() {
             placeholder={t.frontdeskPage.taskBoard.searchPlaceholder} 
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <FilterButton
+            filterOptions={[
+              { value: 'ALL', label: '전체 상태' },
+              { value: 'PENDING', label: '대기중' },
+              { value: 'IN_PROGRESS', label: '진행중' },
+              { value: 'DONE', label: '처리 완료' }
+            ]}
+            selectedFilter={statusFilter}
+            onFilterSelect={setStatusFilter}
           />
         </div>
       </div>
