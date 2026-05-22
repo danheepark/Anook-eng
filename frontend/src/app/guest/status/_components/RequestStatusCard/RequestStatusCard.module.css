@@ -50,3 +50,29 @@
   padding: var(--space-16) 0;
   border-top: 1px solid var(--color-gray-100);
 }
+
+.isCancelled {
+  opacity: 0.75;
+  border: 1.5px dashed var(--color-gray-300) !important;
+  background-color: var(--color-gray-50) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.isCancelled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.isCancelled .title {
+  color: var(--color-gray-400) !important;
+  text-decoration: line-through;
+}
+
+.isCancelled .department {
+  color: var(--color-gray-400) !important;
+}
+
+.isCancelled .timeInfo {
+  color: var(--color-gray-400) !important;
+}

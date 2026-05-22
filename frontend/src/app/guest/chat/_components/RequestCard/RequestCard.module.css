@@ -211,9 +211,21 @@
 }
 
 .cancelledCard {
-  opacity: 0.7;
-  background: rgba(255, 255, 255, 0.5) !important;
-  border-color: rgba(255, 255, 255, 0.7) !important;
+  opacity: 0.75;
+  background: rgba(255, 255, 255, 0.3) !important;
+  border: 1.5px dashed var(--color-gray-300) !important;
   box-shadow: none !important;
-  filter: grayscale(100%);
+}
+
+.cancelledCard .summary {
+  color: var(--color-gray-400) !important;
+  text-decoration: line-through;
+}
+
+.cancelledCard .detailsText {
+  color: var(--color-gray-400) !important;
+}
+
+.cancelledCard .completionMessage {
+  color: var(--color-gray-400) !important;
 }

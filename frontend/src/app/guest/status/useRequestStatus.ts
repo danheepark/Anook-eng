@@ -6,6 +6,7 @@ export interface RequestStatusItem {
   status: 'CREATED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SETTLED' | 'CANCELLED';
   domainCode: string;
   summary: string;
+  entities?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,7 +34,10 @@ export function useRequestStatus(roomNo: string = '707') {
       }
     };
 
-    fetchRequests();
+    const cleanRoomNo = roomNo.trim();
+    if (cleanRoomNo) {
+      fetchRequests();
+    }
   }, [roomNo]);
 
   // WebSocket 구독 (실시간 상태 업데이트)
@@ -46,6 +50,7 @@ export function useRequestStatus(roomNo: string = '707') {
             status: payload.status,
             domainCode: payload.domainCode,
             summary: payload.summary,
+            entities: payload.entities,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           },

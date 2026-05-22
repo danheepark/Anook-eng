@@ -14,7 +14,7 @@ import styles from './page.module.css';
 const COLUMN_CONFIG = [
   { id: 'PENDING', title: '대기 중', status: 'TODO' },
   { id: 'IN_PROGRESS', title: '진행 중', status: 'IN_PROGRESS' },
-  { id: 'COMPLETED', title: '완료됨', status: 'DONE' },
+  { id: 'COMPLETED', title: '완료', status: 'DONE' },
 ];
 
 const PRIORITY_OPTIONS = [
@@ -142,14 +142,23 @@ function DashboardContent() {
   const boardData = useMemo(() => {
     const sortByCancelRequested = (taskList: typeof filteredTasks) => {
       return [...taskList].sort((a, b) => {
+        // 1. 취소 요청(cancelRequested) 건이 무조건 최상위
         if (a.cancelRequested && !b.cancelRequested) return -1;
         if (!a.cancelRequested && b.cancelRequested) return 1;
-        return 0;
+        
+        // 2. 둘 다 취소 요청이거나 둘 다 아닌 경우, 긴급(URGENT)이 다음 순위
+        const aUrgent = a.priority === 'URGENT';
+        const bUrgent = b.priority === 'URGENT';
+        if (aUrgent && !bUrgent) return -1;
+        if (!aUrgent && bUrgent) return 1;
+        
+        // 3. 우선순위도 같으면 최신 생성일 순 정렬
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
     };
 
     return {
-      TODO: sortByCancelRequested(filteredTasks.filter(t => t.status === 'PENDING' || t.status === 'ESCALATED')),
+      TODO: filteredTasks.filter(t => (t.status === 'PENDING' || t.status === 'ESCALATED') && !t.cancelRequested),
       IN_PROGRESS: sortByCancelRequested(filteredTasks.filter(t => t.status === 'IN_PROGRESS')),
       DONE: filteredTasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED'),
     };
@@ -186,7 +195,7 @@ function DashboardContent() {
               options={[
                 { label: '대기 중', value: 'TODO', count: boardData.TODO.length },
                 { label: '진행 중', value: 'IN_PROGRESS', count: boardData.IN_PROGRESS.length },
-                { label: '완료됨', value: 'DONE', count: boardData.DONE.length }
+                { label: '완료', value: 'DONE', count: boardData.DONE.length }
               ]}
               activeValue={activeTab}
               onChange={(val) => val && setActiveTab(val as 'TODO' | 'IN_PROGRESS' | 'DONE')}

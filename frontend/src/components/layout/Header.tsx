@@ -6,6 +6,7 @@ import { Menu } from 'lucide-react';
 import { useUiStore } from '@/stores/useUiStore';
 import styles from './Header.module.css';
 import HeaderNotification from './HeaderNotification/HeaderNotification';
+import StaffNotification from './StaffNotification/StaffNotification';
 import Button from '@/components/ui/Button/Button';
 
 interface HeaderProps {
@@ -34,6 +35,11 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
               <HeaderNotification />
             </Suspense>
           </>
+        )}
+        {role === 'staff' && (
+          <Suspense fallback={<div style={{ width: 24, height: 24 }}></div>}>
+            <StaffNotification />
+          </Suspense>
         )}
         <LanguageToggle />
       </div>
