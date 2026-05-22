@@ -293,7 +293,7 @@ public class SendMessageService implements SendMessageUseCase {
                     // If the user explicitly confirmed a NEW duplicate request, we skip auto-confirm
                     if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !isAddDuplicate) {
                         java.util.Map<String, Object> pendingRequest = activeRequests.stream()
-                                .filter(req -> "PENDING".equals(req.get("status")) && domain.equals(req.get("department_id")))
+                                .filter(req -> ("CREATED".equals(req.get("status")) || "PENDING".equals(req.get("status"))) && domain.equals(req.get("department_id")))
                                 .findFirst()
                                 .orElse(null);
 
