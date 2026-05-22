@@ -44,6 +44,10 @@ export function useChat() {
   const cancelEventsBatch = useRef<Set<'SUCCESS' | 'PENDING' | 'STAFF_SUCCESS' | 'GUEST_CANCEL_APPROVED'>>(new Set());
   const cancelBatchTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // [AN-358] FRONT 상담 완료 배치 처리 (프론트 연결 요청 N건 → 상담 완료 카드 1개)
+  const frontCompletedBatch = useRef<{ requestId: number; summary: string; domainCode: string } | null>(null);
+  const frontCompletedTimer = useRef<NodeJS.Timeout | null>(null);
+
   // Update welcome message if language changes and it is the only message
   useEffect(() => {
     setMessages(prev => {
@@ -148,12 +152,22 @@ export function useChat() {
           'PENDING': 10, 'ESCALATED': 10, 'ASSIGNED': 50, 'IN_PROGRESS': 50, 'COMPLETED': 100, 'CANCELLED': 0
         };
 
+        // FRONT 도메인 CHAT_END 카드는 방 단위로 1개만 복원 (중복 방지)
+        let frontChatEndAdded = false;
+
         const requestCards: (ChatMessage & { _ts: number })[] = reqData.flatMap((r: any) => {
           const cards: (ChatMessage & { _ts: number })[] = [];
 
           if (r.status === 'COMPLETED') {
             // 완료된 요청 → FeedbackCard(일반) / ChatEndCard(FRONT 상담)로 복원
             const isFrontConsultation = r.domainCode === 'FRONT';
+
+            // FRONT 상담은 가장 최근 1건만 CHAT_END로 복원
+            if (isFrontConsultation && frontChatEndAdded) {
+              return cards; // 이미 CHAT_END가 추가되었으면 건너뜀
+            }
+            if (isFrontConsultation) frontChatEndAdded = true;
+
             cards.push({
               id: `system-feedback-${r.id}`,
               variant: 'received',
@@ -429,24 +443,58 @@ export function useChat() {
         } else {
           // COMPLETED: 도메인별 분기
           const isFrontConsultation = payload.domainCode === 'FRONT';
-          setMessages(prev => {
-            const cardId = `system-feedback-${payload.requestId}`;
-            if (prev.some(m => m.id === cardId)) return prev;
 
-            return [...prev, {
-              id: cardId,
-              variant: 'received' as const,
-              // FRONT → 상담 완료 (직원 평가), 기타 → 요청 완료 (서비스 평가)
-              type: (isFrontConsultation ? 'CHAT_END' : 'FEEDBACK') as any,
-              content: '',
-              meta: {
-                requestId: payload.requestId,
-                summary: payload.summary || '',
-                domainCode: payload.domainCode || '',
-                completedAt: new Date().toISOString(),
-              }
-            }];
-          });
+          if (isFrontConsultation) {
+            // FRONT 상담 완료: 배치 debounce 처리
+            // 프론트 연결 요청이 N건이어도 CHAT_END 카드는 1개만 생성
+            frontCompletedBatch.current = {
+              requestId: payload.requestId,
+              summary: payload.summary || '',
+              domainCode: payload.domainCode || '',
+            };
+            if (frontCompletedTimer.current) clearTimeout(frontCompletedTimer.current);
+            frontCompletedTimer.current = setTimeout(() => {
+              const batch = frontCompletedBatch.current;
+              frontCompletedBatch.current = null;
+              if (!batch) return;
+
+              setMessages(prev => {
+                const cardId = `system-chatend-${batch.requestId}`;
+                if (prev.some(m => m.id === cardId)) return prev;
+                return [...prev, {
+                  id: cardId,
+                  variant: 'received' as const,
+                  type: 'CHAT_END' as any,
+                  content: '',
+                  meta: {
+                    requestId: batch.requestId,
+                    summary: batch.summary,
+                    domainCode: batch.domainCode,
+                    completedAt: new Date().toISOString(),
+                  }
+                }];
+              });
+            }, 800);
+          } else {
+            // 기타 도메인 (HK, FB 등): 요청별 개별 피드백 카드
+            setMessages(prev => {
+              const cardId = `system-feedback-${payload.requestId}`;
+              if (prev.some(m => m.id === cardId)) return prev;
+
+              return [...prev, {
+                id: cardId,
+                variant: 'received' as const,
+                type: 'FEEDBACK' as any,
+                content: '',
+                meta: {
+                  requestId: payload.requestId,
+                  summary: payload.summary || '',
+                  domainCode: payload.domainCode || '',
+                  completedAt: new Date().toISOString(),
+                }
+              }];
+            });
+          }
         }
 
         // --- System messages for cancel flow ---
@@ -509,28 +557,31 @@ export function useChat() {
         }
 
         if (payload.status === 'COMPLETED') {
-          setTimeout(() => {
-            setMessages(prev => {
-              const msgId = `system-feedback-${payload.requestId}`;
-              if (prev.some(m => m.id === msgId)) return prev;
-              // Remove the original RequestCard for this requestId
-              const filtered = prev.filter(m =>
-                !(m.type === 'REQUEST_CARD' && m.meta?.requestId === payload.requestId)
-              );
-              return [...filtered, {
-                id: msgId,
-                variant: 'received',
-                type: 'FEEDBACK',
-                content: '',
-                meta: {
-                  requestId: payload.requestId,
-                  summary: payload.summary || '',
-                  domainCode: payload.domainCode || '',
-                  completedAt: new Date().toISOString()
-                }
-              }];
-            });
-          }, 1000);
+          // FRONT 도메인은 배치 debounce에서 이미 처리되므로 건너뜀
+          if (payload.domainCode !== 'FRONT') {
+            setTimeout(() => {
+              setMessages(prev => {
+                const msgId = `system-feedback-${payload.requestId}`;
+                if (prev.some(m => m.id === msgId)) return prev;
+                // Remove the original RequestCard for this requestId
+                const filtered = prev.filter(m =>
+                  !(m.type === 'REQUEST_CARD' && m.meta?.requestId === payload.requestId)
+                );
+                return [...filtered, {
+                  id: msgId,
+                  variant: 'received',
+                  type: 'FEEDBACK',
+                  content: '',
+                  meta: {
+                    requestId: payload.requestId,
+                    summary: payload.summary || '',
+                    domainCode: payload.domainCode || '',
+                    completedAt: new Date().toISOString()
+                  }
+                }];
+              });
+            }, 1000);
+          }
         }
 
         // CANCEL_REJECTED 처리: 제네릭 메시지 대신 관리자가 입력한 반려 사유가

@@ -183,7 +183,8 @@ export default function RequestStatusBar({
     } else {
       if (Array.isArray(entities.menu_items)) {
         entities.menu_items.forEach((it: any) => {
-          parts.push(`${it.name} ${it.quantity ? `×${it.quantity}` : ''}`.trim());
+          const opt = it.selected_option ? `(${it.selected_option})` : '';
+          parts.push(`${it.name}${opt} ${it.quantity ? `×${it.quantity}` : ''}`.trim());
         });
       } else if (Array.isArray(entities.items)) {
         entities.items.forEach((it: any) => {
