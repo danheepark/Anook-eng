@@ -422,15 +422,8 @@ public class SendMessageService implements SendMessageUseCase {
                                     "[Message] 동일 도메인이지만 다른 아이템 → auto-confirm 스킵, 신규 요청 생성 — existing: '{}', new: '{}'",
                                     existingSummary, newSummary);
                             // fall through → RequestDetectedEvent 발행 (신규 아이템 요청 생성)
-                        } else if (isShortConfirmation) {
-                            // [AN-380] 짧은 확인 메시지이지만 auto-confirm 대상 없음
-                            // (트랜잭션 타이밍 이슈 방어 — 중복 생성 방지)
-                            log.info(
-                                    "[Message] isFinalized=true, 짧은 확인 메시지이지만 auto-confirm 대상 없음 → 신규 생성 스킵 — domain: {}, room: {}",
-                                    domain, roomNo);
-                            continue;
                         }
-                        // 나머지: 새 아이템이 포함된 신규 주문 → fall through → RequestDetectedEvent 발행
+                        // 나머지: 새 아이템이 포함된 신규 주문이거나 auto-confirm 대상이 없으면 → fall through → RequestDetectedEvent 발행
                     }
 
                     boolean escalated = analysis.confidence() < 0.7;
