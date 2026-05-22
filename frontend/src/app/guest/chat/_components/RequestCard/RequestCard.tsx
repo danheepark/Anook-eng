@@ -366,7 +366,7 @@ export default function RequestCard({
         {/* Right Column: Content */}
         <div className={styles.rightColumn}>
           <div className={styles.content}>
-            <div className={styles.summaryRow}>
+            <div className={styles.summaryRow} style={{ position: 'relative', paddingRight: '50px' }}>
               <div className={styles.summary}>
                 {isTranslating ? (
                   <span className={styles.translatingText}>{t.cardUI?.message?.translating || 'Translating...'}</span>
@@ -374,7 +374,12 @@ export default function RequestCard({
                   finalTitle
                 )}
               </div>
-              <div className={styles.timeLabel}>{formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}</div>
+              <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0' }}>
+                <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', lineHeight: '1.2' }}>#{requestId}</div>
+                <div className={styles.timeLabel} style={{ color: 'var(--color-gray-400)', marginTop: 0, lineHeight: '1.2' }}>
+                  {formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}
+                </div>
+              </div>
             </div>
           </div>
 

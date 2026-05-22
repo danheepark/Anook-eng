@@ -1,19 +1,20 @@
 version: '3.8'
 
 services:
-  # 1. Nginx 리버스 프록시 (미니PC 환경에서는 호스트 Nginx 사용하므로 주석 처리. AWS 배포 시 주석 해제)
-  # nginx:
-  #   image: nginx:alpine
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 방금 생성한 설정 파일 매핑
-  #   depends_on:
-  #     - backend
-  #     - frontend
-  #   networks:
-  #     - Anook-network
+  # 1. Nginx 리버스 프록시
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 설정 파일 매핑
+      - /etc/letsencrypt:/etc/letsencrypt:ro # SSL 인증서 매핑
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - Anook-network
   # 2. PostgreSQL + pgvector (RAG 용)
   db:
     image: pgvector/pgvector:pg16
@@ -93,10 +94,9 @@ services:
       - NEO4J_USER=${NEO4J_USER}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD}
     volumes:
-      - ./ai:/app # 소스 코드 실시간 동기화 (Hot Reload)
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     depends_on:
       db:
         condition: service_started
@@ -116,6 +116,7 @@ services:
     environment:
       - BACKEND_URL=http://backend:8080
       - AI_SERVER_URL=http://ai:8000
+      - DISABLE_SECURE_COOKIE=${DISABLE_SECURE_COOKIE:-false}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro

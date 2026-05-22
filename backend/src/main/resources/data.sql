@@ -167,6 +167,8 @@ ON CONFLICT (room_no) DO UPDATE SET
 -- 시퀀스 동기화
 SELECT setval('pms_guest_id_seq', (SELECT COALESCE(MAX(id), 1) FROM pms_guest));
 
+
+
 -- ============================================================
 -- AI 대화 메시지 시드 데이터 (격리 테스트용)
 -- ============================================================

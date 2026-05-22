@@ -86,7 +86,12 @@ public enum ErrorCode {
 
         DEBOUNCE_ERROR(HttpStatus.BAD_REQUEST,
                         "메시지를 너무 빨리 보냈습니다.",
-                        "연속된 메시지 발송은 1초 이상의 간격이 필요합니다.");
+                        "연속된 메시지 발송은 1초 이상의 간격이 필요합니다."),
+
+        // ── Knowledge ──
+        DUPLICATE_KNOWLEDGE(HttpStatus.CONFLICT,
+                        "이미 등록된 질문입니다.",
+                        "동일한 도메인에 같은 질문이 이미 존재합니다. 기존 항목을 수정하거나 다른 질문을 사용하세요.");
 
         private final HttpStatus status;
         private final String message;

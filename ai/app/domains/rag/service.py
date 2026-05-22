@@ -81,13 +81,14 @@ def embed_text(text: str) -> List[float]:
     return generate_embedding(text)
 
 
-def upsert_knowledge_entry(cur, domain_code: str, question: str, answer: str) -> str:
+def upsert_knowledge_entry(cur, domain_code: str, question: str, answer: str, force: bool = False) -> str:
     """
     질문 단위로 knowledge_entry를 INSERT/UPDATE/SKIP 분기 처리합니다.
 
     - 신규 질문: 임베딩 생성 후 INSERT
     - 기존 질문 & answer 변경됨: 임베딩 재생성 후 UPDATE
     - 기존 질문 & answer 동일: 재임베딩 없이 SKIP
+    - force=True: answer 동일해도 강제 재임베딩 후 UPDATE (모델 교체 시 사용)
 
     반환값: "inserted" | "updated" | "skipped"
     """
@@ -97,32 +98,24 @@ def upsert_knowledge_entry(cur, domain_code: str, question: str, answer: str) ->
     )
     row = cur.fetchone()
 
-    if row is None:
-        embedding_vector = embed_text(f"질문: {question}\n답변: {answer}")
-        cur.execute(
-            """
-            INSERT INTO knowledge_entry (question, answer, domain_code, status, embedding)
-            VALUES (%s, %s, %s, 'APPROVED', %s::vector)
-            """,
-            (question, answer, domain_code, embedding_vector),
-        )
-        return "inserted"
+    if row is not None and row[0] == answer and not force:
+        return "skipped"
 
-    if row[0] != answer:
-        embedding_vector = embed_text(f"질문: {question}\n답변: {answer}")
-        cur.execute(
-            """
-            UPDATE knowledge_entry
-               SET answer = %s,
-                   embedding = %s::vector,
-                   updated_at = NOW()
-             WHERE domain_code = %s AND question = %s
-            """,
-            (answer, embedding_vector, domain_code, question),
-        )
-        return "updated"
+    embedding_vector = embed_text(f"질문: {question}\n답변: {answer}")
 
-    return "skipped"
+    # ON CONFLICT DO UPDATE로 race condition 원천 차단 (AN-351 UNIQUE 제약과 연동)
+    cur.execute(
+        """
+        INSERT INTO knowledge_entry (question, answer, domain_code, status, embedding)
+        VALUES (%s, %s, %s, 'APPROVED', %s::vector)
+        ON CONFLICT (domain_code, question) DO UPDATE SET
+            answer = EXCLUDED.answer,
+            embedding = EXCLUDED.embedding,
+            updated_at = NOW()
+        """,
+        (question, answer, domain_code, embedding_vector),
+    )
+    return "inserted" if row is None else "updated"
 
 def search_similar(query: str, domain_code: str, top_k: int = 3, threshold: float = 0.7) -> List[Dict[str, Any]]:
     """

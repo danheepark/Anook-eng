@@ -1,6 +1,8 @@
 package com.anook.backend.global.exception;
 
 import com.anook.backend.global.dto.ErrorResponse;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,6 +21,16 @@ public class GlobalExceptionHandler {
                                 .body(ErrorResponse.of(
                                                 code.name(),
                                                 e.getMessage(),
+                                                code.getDetail()));
+        }
+
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+                ErrorCode code = ErrorCode.DUPLICATE_KNOWLEDGE;
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                                .body(ErrorResponse.of(
+                                                code.name(),
+                                                code.getMessage(),
                                                 code.getDetail()));
         }
 

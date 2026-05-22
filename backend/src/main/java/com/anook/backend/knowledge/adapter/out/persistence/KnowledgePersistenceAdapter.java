@@ -88,6 +88,12 @@ public class KnowledgePersistenceAdapter implements KnowledgeRepositoryPort {
         knowledgeJpaRepository.deleteById(id);
     }
 
+    @Override
+    public boolean existsByDomainCodeAndQuestion(String domainCode, String question) {
+        DomainCode code = DomainCode.valueOf(domainCode.toUpperCase());
+        return knowledgeJpaRepository.existsByDomainCodeAndQuestion(code, question);
+    }
+
     private KnowledgeEntry mapToDomain(KnowledgeJpaEntity entity) {
         return KnowledgeEntry.builder()
                 .id(entity.getId())

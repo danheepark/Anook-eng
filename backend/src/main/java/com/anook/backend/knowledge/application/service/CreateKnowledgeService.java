@@ -3,6 +3,8 @@ package com.anook.backend.knowledge.application.service;
 import com.anook.backend.knowledge.application.dto.request.CreateKnowledgeCommand;
 import com.anook.backend.knowledge.application.dto.response.CreateKnowledgeResult;
 import com.anook.backend.knowledge.application.port.in.CreateKnowledgeUseCase;
+import com.anook.backend.global.exception.BusinessException;
+import com.anook.backend.global.exception.ErrorCode;
 import com.anook.backend.knowledge.application.port.out.EmbeddingPort;
 import com.anook.backend.knowledge.application.port.out.KnowledgeRepositoryPort;
 import com.anook.backend.knowledge.domain.model.KnowledgeEntry;
@@ -22,11 +24,16 @@ public class CreateKnowledgeService implements CreateKnowledgeUseCase {
     @Override
     @Transactional
     public CreateKnowledgeResult create(CreateKnowledgeCommand command) {
-        // 1. 임베딩 생성 (질문과 답변을 조합하여 생성)
+        // 1. 중복 질문 확인
+        if (knowledgeRepositoryPort.existsByDomainCodeAndQuestion(command.getDomainCode(), command.getQuestion())) {
+            throw new BusinessException(ErrorCode.DUPLICATE_KNOWLEDGE);
+        }
+
+        // 2. 임베딩 생성 (질문과 답변을 조합하여 생성)
         String contentToEmbed = "Q: " + command.getQuestion() + "\nA: " + command.getAnswer();
         float[] embedding = embeddingPort.generateEmbedding(contentToEmbed);
 
-        // 2. 도메인 모델 생성 (즉시 APPROVED)
+        // 3. 도메인 모델 생성 (즉시 APPROVED)
         KnowledgeEntry entry = KnowledgeEntry.builder()
                 .question(command.getQuestion())
                 .answer(command.getAnswer())
@@ -34,7 +41,7 @@ public class CreateKnowledgeService implements CreateKnowledgeUseCase {
                 .status(KnowledgeStatus.APPROVED)
                 .build();
 
-        // 3. 저장
+        // 4. 저장
         KnowledgeEntry savedEntry = knowledgeRepositoryPort.save(entry, embedding);
 
         return new CreateKnowledgeResult(savedEntry.getId());

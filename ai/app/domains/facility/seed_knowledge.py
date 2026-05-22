@@ -8,7 +8,7 @@ from app.infrastructure.database.connection import get_db_connection
 from app.domains.rag.service import upsert_knowledge_entry
 from app.domains.facility.knowledge_data import FACILITY_KNOWLEDGE
 
-def seed_facility_knowledge():
+def seed_facility_knowledge(force: bool = False):
     print("🚀 시설관리(FACILITY) RAG 지식 시딩을 시작합니다...")
 
     conn = get_db_connection()
@@ -19,7 +19,7 @@ def seed_facility_knowledge():
                 question = item["question"]
                 answer = item["answer"]
 
-                result = upsert_knowledge_entry(cur, "FACILITY", question, answer)
+                result = upsert_knowledge_entry(cur, "FACILITY", question, answer, force=force)
                 stats[result] += 1
 
                 if result == "inserted":
@@ -41,4 +41,8 @@ def seed_facility_knowledge():
         conn.close()
 
 if __name__ == "__main__":
-    seed_facility_knowledge()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="answer 동일해도 강제 재임베딩")
+    args = parser.parse_args()
+    seed_facility_knowledge(force=args.force)

@@ -3,7 +3,7 @@ import { useSSE } from '@/app/useSSE';
 
 export interface RequestStatusItem {
   id: number;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SETTLED' | 'CANCELLED';
+  status: 'CREATED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SETTLED' | 'CANCELLED';
   domainCode: string;
   summary: string;
   entities?: Record<string, any>;

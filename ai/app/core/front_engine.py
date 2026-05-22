@@ -61,12 +61,16 @@ async def run_front_agent(user_message: str, room_no: str, chat_history: list = 
     guest_reply = final_response
     domain_code = "FRONT"
     
-    if result.entities.get("intent") == "INFO":
+    intent = result.entities.get("intent")
+    has_options = bool(getattr(result, "clarification_options", []))
+
+    if intent == "INFO":
         guest_reply = result.entities.get("fallback_message", result.clarification_question)
         domain_code = None  # 정보 조회는 티켓 생성 X
-    elif result.needs_clarification:
-        guest_reply = result.clarification_question
-    elif result.entities.get("intent") == "ESCALATION":
+    elif result.needs_clarification or has_options or intent == "AMBIGUOUS":
+        guest_reply = result.clarification_question if result.clarification_question else result.entities.get("fallback_message", "어떻게 도와드릴까요?")
+        domain_code = None  # 질문/버튼 선택 단계이거나 의도 불분명일 때는 카드 노출 방지 (UX 최적화)
+    elif intent == "ESCALATION":
         guest_reply = result.entities.get("fallback_message", "프론트데스크 직원에게 즉시 연결해 드리겠습니다. 잠시만 기다려주세요.")
 
     # /analyze 응답 형태로 변환

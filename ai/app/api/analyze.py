@@ -207,6 +207,12 @@ STATIC_REPLIES = {
         "en": "No",
         "ja": "いいえ",
         "zh": "不是"
+    },
+    "DUPLICATE_CONFIRM": {
+        "ko": "이미 '{summary}'을(를) 요청하셨는데, 이번 요청을 추가로 접수할까요? 아니면 기존 요청을 변경하시겠어요?",
+        "en": "You already have an active request: '{summary}'. Would you like to add this as a new request, or replace the existing one?",
+        "ja": "すでに「{summary}」をリクエストされていますが、追加でリクエストしますか？それとも既存のリクエストを変更しますか？",
+        "zh": "您已经请求了「{summary}」，您想追加请求还是修改现有请求？"
     }
 }
 
@@ -490,6 +496,115 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "confidence": 1.0,
                     "action": "VOC_FEEDBACK"
                 }]
+
+    # ── FB/CONCIERGE 확인 응답 인터셉트 ──────────────────────────
+    # 직전 AI가 주문/예약 확인 질문을 했고, 해당 부서에 고객 확인 대기 중(PENDING) 요청이 있으면
+    # Router를 스킵하고 바로 해당 부서 에이전트를 호출합니다.
+    # "네"/"아니요" 판단은 LLM(에이전트)에게 맡기므로 키워드 하드코딩 없음.
+    # ──────────────────────────────────────────────
+    if request.chat_history and request.active_requests:
+        _last_ai_for_confirm = None
+        for msg in reversed(request.chat_history):
+            if msg.get("role") == "ai":
+                _last_ai_for_confirm = msg.get("content", "")
+                break
+
+        if _last_ai_for_confirm and "?" in _last_ai_for_confirm:
+            # PENDING FB/CONCIERGE 요청이 존재한다는 것 자체가 "AI가 확인 질문을 한 상태"를 의미.
+            # (이 부서들은 graceRemaining=-1로 고객 확인 대기 상태로 생성되므로)
+            # 하드코딩 패턴 없이, 마지막 AI 메시지가 질문(?)인지만 확인.
+            _is_confirm_q = True
+
+            if _is_confirm_q:
+                # [AN-342] 취소 의도가 감지되면 인터셉트를 스킵하고 정상 라우터(CANCEL)로 흐르게 함
+                _cancel_keywords = ["취소", "캔슬", "cancel", "안 할", "안할", "그만"]
+                _is_cancel_intent = any(kw in request.text.lower() for kw in _cancel_keywords)
+                
+                if _is_cancel_intent:
+                    print(f"[Analyze] ⚡ 확인 질문 응답이지만 취소 의도 감지 → 인터셉트 스킵, 정상 Router 경유")
+                else:
+                    # PENDING/CREATED 상태의 FB/CONCIERGE 요청 찾기 (graceRemaining=-1 대기 중인 요청)
+                    _pending_domain = None
+                    for req in request.active_requests:
+                        dept = req.get("department_id")
+                        if req.get("status") in ("PENDING", "CREATED") and dept in ("FB", "CONCIERGE"):
+                            _pending_domain = dept
+                            break
+
+                    if _pending_domain and _pending_domain in DOMAIN_AGENTS:
+                        print(f"[Analyze] ⚡ 확인 질문 후 응답 감지 → {_pending_domain} 에이전트 직접 호출 (Router 스킵)")
+
+                        # active_requests 컨텍스트 주입 (에이전트가 기존 주문을 인지하도록)
+                        _enriched_text = request.text
+                        if request.active_requests:
+                            import json as _json_confirm
+                            _filtered = [{"id": r.get("id"), "summary": r.get("summary")} for r in request.active_requests]
+                            _enriched_text = request.text + "\n\n[고객의 현재 활성 요청(주문) 목록]\n" + _json_confirm.dumps(_filtered, ensure_ascii=False) + "\n"
+
+                        try:
+                            _agent_result = await invoke_domain_agent(
+                                _pending_domain,
+                                user_message=_enriched_text,
+                                room_no=request.room_no,
+                                chat_history=request.chat_history,
+                                images=request.images,
+                                system_language=request.language,
+                                active_requests=request.active_requests,
+                                room_inventory=getattr(request, 'room_inventory', {})
+                            )
+
+                            # 에이전트 결과 조립 (STEP 3-g 병렬 처리 완료 후와 동일한 로직)
+                            _final_domain = _agent_result.get("domain_code", _pending_domain)
+                            _final_entities = _agent_result.get("entities", {})
+                            _is_esc = _final_entities.get("intent") in ["ESCALATION", "COMPLAINT", "EMERGENCY"]
+
+                            _act_type = _agent_result.get("action_type")
+                            if _act_type is None:
+                                _act_type = _final_entities.get("action_type")
+                            if _act_type is None:
+                                _act_type = "ADD"
+
+                            # 카드 생성 방지: 필수값 미충족이거나 확정되지 않으면 domain_code=None
+                            if (_agent_result.get("missing_fields") or _act_type not in ["ADD", "REPLACE", "ADD_DUPLICATE"]) and not _is_esc:
+                                _final_domain = None
+
+                            _response = {
+                                "guest_reply": _agent_result.get("guest_reply", "요청을 접수하였습니다."),
+                                "summary": _agent_result.get("summary", f"{_pending_domain} 요청"),
+                                "domain_code": _final_domain,
+                                "agent_domain": _pending_domain,
+                                "priority": _agent_result.get("priority", "NORMAL"),
+                                "entities": _final_entities,
+                                "confidence": _agent_result.get("confidence", 0.95),
+                                "missing_fields": _agent_result.get("missing_fields", []),
+                                "clarification_options": _agent_result.get("clarification_options", []),
+                                "reasoning": _agent_result.get("reasoning", "확인 응답 인터셉트")
+                            }
+
+                            # action_type 전달 (우선순위: entities > agent root)
+                            if "action_type" in _final_entities:
+                                _response["action_type"] = _final_entities["action_type"]
+                            elif "action_type" in _agent_result:
+                                _response["action_type"] = _agent_result["action_type"]
+
+                            # target_keyword 전달
+                            if "target_keyword" in _final_entities:
+                                _response["target_keyword"] = _final_entities["target_keyword"]
+                            elif "target_keyword" in _agent_result:
+                                _response["target_keyword"] = _agent_result["target_keyword"]
+
+                            # target_request_id 전달
+                            if "target_request_id" in _final_entities:
+                                _response["target_request_id"] = _final_entities["target_request_id"]
+                            elif "target_request_id" in _agent_result:
+                                _response["target_request_id"] = _agent_result["target_request_id"]
+
+                            print(f"[Analyze] ✅ 확인 응답 인터셉트: {_pending_domain} 에이전트 결과 — domain_code={_final_domain}, action_type={_act_type}")
+                            return [_response]
+
+                        except Exception as e:
+                            print(f"[Analyze] ⚠️ 확인 응답 인터셉트: {_pending_domain} 에이전트 호출 실패, Router 정상 경유: {e}")
+                            # 실패 시 기존 Router 플로우로 폴백 (아래 STEP 0~3으로 계속 진행)
 
     # ──────────────────────────────────────────────
     # STEP 0: 지식 베이스 정확 일치 검색 (Exact Match)
@@ -948,7 +1063,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 additional_instructions = ""
                 import random
                 if domain == "CONCIERGE" and rag_results:
-                    rag_results = [r for r in rag_results if r.get('similarity', 1.0) >= 0.3]
+                    rag_results = [r for r in rag_results if r.get('similarity', 1.0) >= 0.5]
                     
                     # --- [추가] 카테고리 주입 및 목표 카테고리 감지 ---
                     from app.domains.concierge.knowledge_data import CONCIERGE_KNOWLEDGE
@@ -1073,9 +1188,9 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         info_prompt = (
                             f"고객 질문: {request.text}\n\n"
                             f"아래 제공된 [호텔 지식]을 바탕으로 고객의 질문에 친절하게 답변하세요. {additional_instructions}\n"
-                            f"**중요**: [호텔 지식]에 해당 서비스에 대한 정보가 조금이라도 포함되어 있다면, '모른다'고 하지 말고 제공된 지식 안에서 최대한 정보를 제공하세요. "
-                            f"만약 답변 내용이 택시, 꽃배달, 예약 등 서비스 관련 내용이라면, 답변 마지막에 반드시 '지금 바로 예약을 도와드릴까요?' 또는 '필요하시면 바로 접수해 드릴까요?'와 같이 서비스 이용을 유도하는 질문을 포함하세요.\n"
-                            f"**주의**: 서비스 유도 질문을 포함했다면, 절대로 '{_get_static_reply('NEED_MORE_INFO', request.language)}' 라는 문장은 사용하지 마세요.\n"
+                            f"**중요**: 제공된 [호텔 지식]이 고객의 명시적인 질문(예: 특정 목적지)과 무관하다면, 억지로 답변을 지어내지 말고 '죄송합니다. 현재 해당 정보는 안내가 어렵습니다. 프론트 데스크로 연결해 드릴까요?' 라고 정중하게 답변하세요.\n"
+                            f"만약 답변 내용이 택시, 꽃배달, 예약 등 서비스 관련 내용이거나, 프론트 데스크 연결을 제안하는 내용이라면, 답변 마지막에 반드시 '지금 바로 예약을 도와드릴까요?' 또는 '필요하시면 바로 접수해 드릴까요?'와 같이 서비스 이용을 유도하는 질문을 포함하세요.\n"
+                            f"**주의**: 질문형으로 대화를 끝맺었다면, 고객이 누를 수 있는 답변 버튼(예: ['네', '아니오'])을 clarification_options에 반드시 제공하세요.\n"
                             f"서비스 유도 질문이 없는 일반적인 정보 안내인 경우에만 마지막에 '{_get_static_reply('NEED_MORE_INFO', request.language)}'를 덧붙이세요.\n\n"
                             f"[호텔 지식]\n{knowledge}"
                         )
@@ -1091,9 +1206,10 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         )
                     raw = await call_gemini_async(
                         prompt=info_prompt, 
-                        system_instruction='당신은 친절한 아눅(Anook) 호텔 컨시어지입니다. 반드시 {"reply": "답변내용"} 형식의 JSON으로만 출력하세요.'
+                        system_instruction='당신은 친절한 아눅(Anook) 호텔 컨시어지입니다. 반드시 {"reply": "답변내용", "clarification_options": ["옵션1", "옵션2"]} 형식의 JSON으로만 출력하세요. 선택지가 필요 없으면 빈 배열을 넣으세요.'
                     )
                     guest_reply = raw.get("reply", _get_static_reply("INFO_NOT_FOUND", request.language)) if isinstance(raw, dict) else _get_static_reply("INFO_NOT_FOUND", request.language)
+                    info_clarification_options = raw.get("clarification_options", []) if isinstance(raw, dict) else []
                 else:
                     # [수정] RAG 결과가 없을 때 에이전트 폴백 실행 시, 에이전트의 전체 결과를 response로 활용함
                     if domain == "CONCIERGE" and "CONCIERGE" in DOMAIN_AGENTS:
@@ -1170,6 +1286,8 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "reasoning": getattr(primary, 'reasoning', '알 수 없음')
                 }
             else:
+                # LLM이 생성한 clarification_options가 있으면 사용
+                options = info_clarification_options if 'info_clarification_options' in locals() else []
                 response = {
                     "guest_reply": guest_reply,
                     "summary": "정보 문의",
@@ -1177,6 +1295,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "priority": "NORMAL",
                     "entities": {},
                     "confidence": primary.confidence,
+                    "clarification_options": options
                 }
                 
             print(f"[Analyze] ℹ️ INFO 응답")
@@ -1477,7 +1596,79 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             
             if (agent_result.get("missing_fields") or action_type not in ["ADD", "REPLACE", "ADD_DUPLICATE"]) and not is_escalation:
                 final_domain_code = None
-            
+
+            # ── 중복 주문 감지 게이트 ──────────────────────────
+            # 에이전트가 ADD로 판단했지만 같은 부서에 동일 아이템의 활성 요청이 있으면,
+            # LLM이 놓친 중복을 코드 레벨에서 잡아 확인 질문을 강제합니다.
+            # "네" → ADD_DUPLICATE / "아니 그거 취소해" → REPLACE
+            #
+            # [AN-342] 부서(department) 단위가 아닌 아이템(item) 단위로 비교.
+            # 브라우니 주문 후 콜라를 추가 주문하는 것은 정상이므로 중복 질문 X.
+            # 브라우니 주문 후 브라우니를 다시 주문하면 중복 질문 O.
+            # ──────────────────────────────────────────────
+            if (final_domain_code
+                    and action_type == "ADD"
+                    and not is_escalation
+                    and hasattr(request, 'active_requests') and request.active_requests):
+
+                # 1) 새 요청의 아이템 키워드 추출
+                _new_items = set()
+                if isinstance(final_entities, dict):
+                    # REQ_ITEM 필드 (라우터/에이전트 공통)
+                    _req_items = final_entities.get("REQ_ITEM", [])
+                    if isinstance(_req_items, list):
+                        _new_items.update(str(i).strip().lower() for i in _req_items if i)
+                    elif isinstance(_req_items, str) and _req_items.strip():
+                        _new_items.add(_req_items.strip().lower())
+
+                    # items 필드 (에이전트 상세 형식: [{item, count}, ...])
+                    _items_list = final_entities.get("items", [])
+                    if isinstance(_items_list, list):
+                        for _item_dict in _items_list:
+                            if isinstance(_item_dict, dict) and _item_dict.get("item"):
+                                _new_items.add(str(_item_dict["item"]).strip().lower())
+
+                    # menu_items 필드 (FB 에이전트 형식: [{name, quantity}, ...])
+                    _menu_items = final_entities.get("menu_items", [])
+                    if isinstance(_menu_items, list):
+                        for _mi in _menu_items:
+                            if isinstance(_mi, dict) and _mi.get("name"):
+                                _new_items.add(str(_mi["name"]).strip().lower())
+
+                # 2) 기존 활성 요청 중 아이템이 겹치는 건만 매칭
+                _existing_req = None
+                for req in request.active_requests:
+                    if (req.get("department_id") == domain
+                            and req.get("status") in ("PENDING", "IN_PROGRESS", "ASSIGNED")):
+                        _existing_summary = (req.get("summary") or "").lower()
+                        # 아이템 키워드가 없으면 (엔티티 파싱 실패 등) 중복 감지 스킵
+                        if not _new_items:
+                            break
+                        # 새 요청의 아이템 중 하나라도 기존 요청 summary에 포함되면 중복
+                        if any(item in _existing_summary for item in _new_items):
+                            _existing_req = req
+                            break
+
+                if _existing_req:
+                    _existing_summary = _existing_req.get("summary", "이전 요청")
+                    _existing_id = _existing_req.get("id")
+
+                    print(f"[Analyze] 🔄 중복 주문 감지: 동일 아이템 발견 (id={_existing_id}, summary='{_existing_summary}', matched_items={_new_items})")
+
+                    _lang = getattr(request, 'language', 'ko')
+                    _dup_question = _get_static_reply("DUPLICATE_CONFIRM", _lang).format(summary=_existing_summary)
+
+                    # 티켓 생성 차단 + 확인 질문 강제
+                    final_domain_code = None
+                    final_guest_reply = _dup_question
+                    agent_result["missing_fields"] = []
+                    agent_result["clarification_options"] = [
+                        _get_static_reply("OPTION_YES", _lang),
+                        _get_static_reply("OPTION_NO", _lang)
+                    ]
+                    # 기존 요청 ID를 agent_result에 주입 → L1693에서 response에 복사됨
+                    agent_result["target_request_id"] = _existing_id
+
             # 🛡️ [컨시어지 확인 질문 방어] 로직 삭제됨 (AN-344: 확인 질문과 동시에 정적 카드를 띄우기 위해 차단 해제)
             
             # 이중 방어: FRONT 에이전트이고 에스컬레이션인데 여전히 domain_code가 없다면 강제 복구

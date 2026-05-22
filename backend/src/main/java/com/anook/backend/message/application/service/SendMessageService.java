@@ -247,10 +247,6 @@ public class SendMessageService implements SendMessageUseCase {
                     .map(MessageAiResult::clarificationOptions)
                     .filter(java.util.Objects::nonNull)
                     .flatMap(java.util.List::stream)
-                    .filter(opt -> {
-                        String s = opt.trim().toLowerCase();
-                        return !s.equals("네") && !s.equals("아니오") && !s.equals("아니요") && !s.equals("yes") && !s.equals("no");
-                    })
                     .toList();
 
             if (!options.isEmpty() && conflictRequestId == null) {
@@ -270,15 +266,22 @@ public class SendMessageService implements SendMessageUseCase {
                             this, roomNo, guestId, analysis.domainCode(), analysis.targetKeyword(), analysis.targetRequestId()));
                     log.info("[Message] RequestCancelledByGuestEvent 발행 — room: {}, domain: {}, targetKeyword: {}, targetRequestId: {}", roomNo, analysis.domainCode(), analysis.targetKeyword(), analysis.targetRequestId());
                 } else if (analysis.domainCode() != null) {
-                    // 중복 요청 경고 시점(targetRequestId가 존재하고 취소가 아닌 경우)에는 신규 요청 생성을 스킵합니다.
-                    // 단, 고객이 중복 추가를 확정한 경우(ADD_DUPLICATE)는 스킵하지 않고 진행합니다.
+                    // [AN-342] targetRequestId가 존재 + actionType=ADD인 경우:
+                    // 고객이 "추가요"로 기존 요청에 추가를 확정한 것이므로 ADD_DUPLICATE로 자동 전환.
+                    // 이전에는 무조건 스킵했지만, 이는 고객의 확인 응답을 무시하는 버그였음.
                     if (analysis.targetRequestId() != null 
+                            && !isAddDuplicate
                             && !"CANCEL_REQUEST".equals(analysis.action()) 
                             && !"CANCEL_ALL_REQUESTS".equals(analysis.action())
-                            && !"ADD_DUPLICATE".equals(analysis.actionType())
                             && !"REPLACE".equals(analysis.actionType())) {
-                        log.info("[Message] 중복 요청 발생으로 신규 생성 스킵 — targetRequestId: {}", analysis.targetRequestId());
-                        continue;
+                        if ("ADD".equals(analysis.actionType())) {
+                            // ADD + targetRequestId = 고객이 기존 요청에 추가 확인 → ADD_DUPLICATE로 전환
+                            log.info("[Message] targetRequestId 존재 + ADD → ADD_DUPLICATE로 자동 전환 — targetRequestId: {}", analysis.targetRequestId());
+                            isAddDuplicate = true;
+                        } else {
+                            log.info("[Message] 중복 요청 발생으로 신규 생성 스킵 — targetRequestId: {}", analysis.targetRequestId());
+                            continue;
+                        }
                     }
 
                     // 수락 대기 중인 기존 요청이 있는 상황에서 AI가 주문을 확정(Finalize)한 경우,
@@ -287,10 +290,12 @@ public class SendMessageService implements SendMessageUseCase {
                     boolean isFinalized = analysis.guestReply() != null &&
                             analysis.guestReply().contains("[FORWARD_" + domain + "]");
 
-                    // If the user explicitly confirmed a NEW duplicate request, we skip auto-confirm
-                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType())) {
+                    // If the user explicitly confirmed a NEW duplicate request or REPLACE, skip auto-confirm
+                    // REPLACE must go through CreateRequestOnEventService (cancel old + create new)
+                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !isAddDuplicate
+                            && !"REPLACE".equals(analysis.actionType())) {
                         java.util.Map<String, Object> pendingRequest = activeRequests.stream()
-                                .filter(req -> "PENDING".equals(req.get("status")) && domain.equals(req.get("department_id")))
+                                .filter(req -> ("CREATED".equals(req.get("status")) || "PENDING".equals(req.get("status"))) && domain.equals(req.get("department_id")))
                                 .findFirst()
                                 .orElse(null);
 

@@ -75,9 +75,9 @@ def should_skip_ingestion(session, domain: str, new_hash: str) -> bool:
     return data_count > 0
 
 
-def update_system_meta(session, domain: str, new_hash: str):
-    """적재 완료 후 SystemMeta 노드의 해시를 갱신합니다."""
-    session.run(
+def update_system_meta_tx(tx, domain: str, new_hash: str):
+    """SystemMeta 노드의 해시를 갱신합니다. (트랜잭션 내부 실행)"""
+    tx.run(
         """
         MERGE (m:SystemMeta {domain: $domain})
         SET m.hash = $hash, m.updated_at = datetime()
@@ -85,6 +85,15 @@ def update_system_meta(session, domain: str, new_hash: str):
         domain=domain,
         hash=new_hash,
     )
+
+
+def execute_domain_ingestion_transaction(tx, domain: str, graph_data: dict, new_hash: str):
+    """
+    적재 + 해시 갱신을 단일 트랜잭션으로 처리 (ALL-OR-NOTHING).
+    적재 실패 시 SystemMeta가 갱신되지 않아 다음 실행 시 자동 재시도됨.
+    """
+    ingest_to_neo4j_tx(tx, graph_data)
+    update_system_meta_tx(tx, domain, new_hash)
 
 
 def extract_entities_and_relations(text):
@@ -132,31 +141,24 @@ def extract_entities_and_relations(text):
         print("원본 응답:", response.text)
         return None
 
-def ingest_to_neo4j(session, graph_data):
-    """전달받은 세션을 통해 엔티티/관계를 MERGE 합니다."""
-    # 1. 엔티티(Node) 병합 생성
-    print("-> 노드(Node) 생성 중...")
+def ingest_to_neo4j_tx(tx, graph_data):
+    """트랜잭션을 통해 엔티티/관계를 MERGE 합니다."""
     for entity in graph_data.get("entities", []):
         label = entity["label"]
         name = entity["id"]
-        # Cypher 쿼리: 이미 있으면 무시, 없으면 생성 (MERGE)
         query = f"MERGE (n:{label} {{name: $name}})"
-        session.run(query, name=name)
+        tx.run(query, name=name)
 
-    # 2. 관계(Edge) 병합 생성
-    print("-> 관계(Edge) 생성 중...")
     for rel in graph_data.get("relations", []):
         source_name = rel["source"]
         target_name = rel["target"]
         rel_type = rel["type"]
-
-        # 소스와 타겟 노드를 매칭한 후 선으로 연결
         query = f"""
         MATCH (source {{name: $source_name}})
         MATCH (target {{name: $target_name}})
         MERGE (source)-[r:{rel_type}]->(target)
         """
-        session.run(query, source_name=source_name, target_name=target_name)
+        tx.run(query, source_name=source_name, target_name=target_name)
 
 def get_all_knowledge_texts():
     """모든 도메인의 knowledge_data.py에서 질문과 답변을 추출하여 텍스트로 결합"""
@@ -178,6 +180,7 @@ def get_all_knowledge_texts():
                         texts = []
                         for item in knowledge_list:
                             texts.append(f"Q: {item['question']}\nA: {item['answer']}")
+                        texts.sort()  # 항목 순서 변경에 의한 해시 만료 방지
                         domain_texts[domain] = "\n\n".join(texts)
                         break
             except Exception as e:
@@ -186,6 +189,11 @@ def get_all_knowledge_texts():
     return domain_texts
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="해시 일치해도 Gemini 재호출 및 재적재 강제 실행")
+    args = parser.parse_args()
+
     print("====================================")
     print("1. 모든 도메인의 RAG 지식 데이터 수집")
     print("====================================")
@@ -218,7 +226,7 @@ if __name__ == "__main__":
             # 도메인별로 세션을 새로 열어 한 도메인의 에러가 다음 도메인에 전파되지 않게 격리
             try:
                 with driver.session() as session:
-                    if should_skip_ingestion(session, domain, new_hash):
+                    if not args.force and should_skip_ingestion(session, domain, new_hash):
                         print(
                             f"⏩ [{domain.upper()}] 변경 없음 - Gemini 호출 스킵 "
                             f"(hash: {new_hash[:8]}...)"
@@ -243,8 +251,12 @@ if __name__ == "__main__":
                         f"[{domain.upper()}] 추출 완료: "
                         f"엔티티 {entities_count}개, 관계 {relations_count}개"
                     )
-                    ingest_to_neo4j(session, graph_data)
-                    update_system_meta(session, domain, new_hash)
+                    session.execute_write(
+                        execute_domain_ingestion_transaction,
+                        domain,
+                        graph_data,
+                        new_hash,
+                    )
                     stats["processed"] += 1
                     print(f"✅ [{domain.upper()}] 적재 완료 (hash: {new_hash[:8]}...)")
             except Exception as e:

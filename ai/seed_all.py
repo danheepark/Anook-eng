@@ -1,11 +1,12 @@
 import sys
 import os
+import argparse
 import importlib
 
 # ai 디렉토리를 파이썬 경로에 추가
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-def run_all_seeds():
+def run_all_seeds(force: bool = False):
     print("========================================")
     print("🌟 아늑(Aneuk) AI RAG 지식 통합 시딩 🌟")
     print("========================================")
@@ -43,7 +44,7 @@ def run_all_seeds():
     for domain, func in seed_functions:
         print(f"\n--- 🚀 [{domain.upper()}] 시딩 시작 ---")
         try:
-            func()
+            func(force=force)
             success_count += 1
         except Exception as e:
             print(f"❌ [{domain.upper()}] 시딩 실패: {e}")
@@ -56,4 +57,7 @@ def run_all_seeds():
     print("========================================")
 
 if __name__ == "__main__":
-    run_all_seeds()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="answer 동일해도 강제 재임베딩")
+    args = parser.parse_args()
+    run_all_seeds(force=args.force)

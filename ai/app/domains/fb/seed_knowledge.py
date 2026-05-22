@@ -13,7 +13,7 @@ from app.infrastructure.database.connection import get_db_connection
 from app.domains.rag.service import upsert_knowledge_entry
 from app.domains.fb.knowledge_data import FB_KNOWLEDGE
 
-def seed_fb_knowledge():
+def seed_fb_knowledge(force: bool = False):
     print("🚀 식음료(F&B) RAG 지식 시딩을 시작합니다...")
 
     conn = get_db_connection()
@@ -24,7 +24,7 @@ def seed_fb_knowledge():
                 question = item["question"]
                 answer = item["answer"]
 
-                result = upsert_knowledge_entry(cur, "FB", question, answer)
+                result = upsert_knowledge_entry(cur, "FB", question, answer, force=force)
                 stats[result] += 1
 
                 if result == "inserted":
@@ -46,4 +46,8 @@ def seed_fb_knowledge():
         conn.close()
 
 if __name__ == "__main__":
-    seed_fb_knowledge()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="answer 동일해도 강제 재임베딩")
+    args = parser.parse_args()
+    seed_fb_knowledge(force=args.force)

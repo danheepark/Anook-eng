@@ -5,7 +5,7 @@ from app.infrastructure.database.connection import get_db_connection
 from app.domains.rag.service import upsert_knowledge_entry
 from app.domains.housekeeping.knowledge_data import HK_KNOWLEDGE
 
-def seed_housekeeping_knowledge():
+def seed_housekeeping_knowledge(force: bool = False):
     print("🚀 하우스키핑(HK) RAG 지식 시딩을 시작합니다...")
 
     conn = get_db_connection()
@@ -16,7 +16,7 @@ def seed_housekeeping_knowledge():
                 question = item["question"]
                 answer = item["answer"]
 
-                result = upsert_knowledge_entry(cur, "HK", question, answer)
+                result = upsert_knowledge_entry(cur, "HK", question, answer, force=force)
                 stats[result] += 1
 
                 if result == "inserted":
@@ -38,4 +38,8 @@ def seed_housekeeping_knowledge():
         conn.close()
 
 if __name__ == "__main__":
-    seed_housekeeping_knowledge()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="answer 동일해도 강제 재임베딩")
+    args = parser.parse_args()
+    seed_housekeeping_knowledge(force=args.force)

@@ -66,22 +66,29 @@ async def run_hk_agent(user_message: str, room_no: str, chat_history: list = Non
     result = HotelRequestSchema(**raw)
 
     # 7. analyze.py 응답 형태로 변환
-    # 되묻기(needs_clarification)일 때는 domain_code=None → 백엔드가 request를 생성하지 않음
+    # 되묻기(needs_clarification)일 때나 에스컬레이션(관할 밖)일 때는 domain_code=None → 백엔드가 불필요한 티켓을 생성하지 않음
     action_type = raw.get("action_type")
     if action_type is None:
         action_type = result.entities.get("action_type")
     if action_type is None:
         action_type = "ADD"
 
+    is_escalation = result.entities.get("intent") == "ESCALATION"
+    if is_escalation or result.needs_clarification:
+        domain_code = None
+    else:
+        domain_code = result.domain if result.domain else "HK"
+
     return {
         "guest_reply": result.clarification_question if result.needs_clarification else result.final_reply,
         "summary": result.summary,
-        "domain_code": None if result.needs_clarification else "HK",
+        "domain_code": domain_code,
         "priority": result.priority,
         "entities": result.entities,
         "confidence": result.confidence,
         "missing_fields": result.missing_fields,
         "clarification_options": getattr(result, "clarification_options", []),
+
         "reasoning": result.reasoning,
         "action_type": action_type,
         "target_keyword": result.entities.get("target_keyword") if result.entities.get("target_keyword") else raw.get("target_keyword"),

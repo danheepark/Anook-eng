@@ -3,10 +3,14 @@ package com.anook.backend.request.domain.model;
 /**
  * 요청 상태 Enum
  *
- * PENDING → IN_PROGRESS → COMPLETED → SETTLED / CANCELLED
+ * CREATED → PENDING → IN_PROGRESS → COMPLETED → SETTLED / CANCELLED
+ *
+ * CREATED: 요청 생성됨 (Grace Period / 고객 확인 대기 중). 아직 직원에게 알림 전.
+ * PENDING: 고객 확인 완료, 직원 배정 대기 중.
  */
 public enum RequestStatus {
 
+    CREATED,
     PENDING,
     IN_PROGRESS,
     COMPLETED,

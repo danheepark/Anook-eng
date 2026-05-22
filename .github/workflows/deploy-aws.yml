@@ -1,35 +1,33 @@
 # ============================================================
-# Anook CI/CD Pipeline (Self-hosted Runner)
+# Anook CI/CD Pipeline (AWS Self-hosted Runner)
 # ============================================================
-# 트리거: main 브랜치 push
+# 트리거: main 브랜치 push (dev 브랜치 머지 시 동작)
 # 흐름: checkout → .env 생성 → rsync 동기화 → docker compose build → health check
 # ============================================================
 
-name: Anook Deploy
+name: Anook AWS Deploy
 
 on:
   push:
-    branches: [ dev ] # 아늑 프로젝트는 main 브랜치 기준
+    branches: [ dev ] # 아늑 프로젝트는 dev 브랜치 머지 기준
   workflow_dispatch: # 수동 실행 지원 (Actions 탭에서 직접 실행 가능)
 
 jobs:
   deploy:
-    runs-on: [self-hosted, minipc] # 미니PC에 설치된 Github Runner를 직접 사용! (SSH 접속 불필요)
+    runs-on: [self-hosted, aws] # AWS EC2에 설치된 Github Runner를 사용!
 
-    # ⭐ 프로젝트에 필요한 환경변수들 (나중에 Github Secrets/Variables 에 추가해야 함)
+    # ⭐ 프로젝트에 필요한 환경변수들
     env:
       POSTGRES_USER: ${{ vars.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ vars.POSTGRES_DB }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      # GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       DB_PORT: ${{ vars.DB_PORT }}
       FRONTEND_PORT: ${{ vars.FRONTEND_PORT }}
       SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
       NEO4J_USER: ${{ vars.NEO4J_USER }}
       NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
       KOREAEXIM_AUTH_KEY: ${{ secrets.KOREAEXIM_AUTH_KEY }}
-      # 추가로 필요한 환경변수가 생기면 여기에 계속 추가하세요.
 
     steps:
       # 1. 소스코드 체크아웃
@@ -62,23 +60,23 @@ jobs:
           ENVEOF
           sed -i 's/^[[:space:]]*//' .env
 
-      # 4. Docker Compose 로 빌드 & 배포 (nginx 컨테이너 배제)
+      # 4. Docker Compose 로 빌드 & 배포
       - name: Build and Deploy
         run: |
           cd ~/workspace/team3-Anook
           docker compose down
-          docker compose up -d --build --scale nginx=0
+          docker compose up -d --build
 
-      # 5. Health Check (배포 정상 확인)
+      # 5. Health Check (배포 정상 확인 - AWS 포트 80은 Nginx로 열려 있으므로 80포트로 확인)
       - name: Health Check
         run: |
           cd ~/workspace/team3-Anook
           echo "⏳ Waiting for services to start..."
           sleep 30
 
-          echo "🔍 Checking Frontend (Next.js)..."
-          curl -f http://localhost:${FRONTEND_PORT:-3000} || exit 1
-          echo "✅ Frontend OK"
+          echo "🔍 Checking Nginx Gateway (Port 80)..."
+          curl -f http://localhost:80 || exit 1
+          echo "✅ Gateway OK"
 
           echo "🔍 Checking Backend (via docker network)..."
           docker compose exec -T backend curl -sf http://localhost:8080/actuator/health || echo "⚠️ Backend health endpoint not yet configured (skipping)"
@@ -89,20 +87,8 @@ jobs:
         run: |
           cd ~/workspace/team3-Anook
           echo "⏳ Seeding RAG Knowledge Data to pgvector..."
-          # docker compose 환경에서 ai 컨테이너를 지정하여 스크립트 실행
           docker compose exec -T ai python seed_all.py || echo "⚠️ Seeding failed but continuing"
 
       # 7. 불필요한 쓰레기 이미지 정리
       - name: Cleanup
         run: docker image prune -f
-
-      # 7. Rollback (문제가 생겼을 때 이전 커밋으로 되돌리기 - 필요시 주석 해제)
-      # - name: Rollback on failure
-      #   if: failure()
-      #   run: |
-      #     echo "❌ Deployment failed! Rolling back..."
-      #     cd ~/workspace/team3-Anook
-      #     docker compose down
-      #     git reset --hard HEAD~1
-      #     docker compose up -d --build
-      #     echo "🔄 Rollback completed (reverted to previous commit)"

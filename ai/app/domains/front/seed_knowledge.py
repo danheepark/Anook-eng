@@ -5,7 +5,7 @@ from app.infrastructure.database.connection import get_db_connection
 from app.domains.rag.service import upsert_knowledge_entry
 from app.domains.front.knowledge_data import FRONT_KNOWLEDGE
 
-def seed_front_knowledge():
+def seed_front_knowledge(force: bool = False):
     print("🚀 프론트데스크(FRONT) RAG 지식 시딩을 시작합니다...")
 
     conn = get_db_connection()
@@ -16,7 +16,7 @@ def seed_front_knowledge():
                 question = item["question"]
                 answer = item["answer"]
 
-                result = upsert_knowledge_entry(cur, "FRONT", question, answer)
+                result = upsert_knowledge_entry(cur, "FRONT", question, answer, force=force)
                 stats[result] += 1
 
                 if result == "inserted":
@@ -38,4 +38,8 @@ def seed_front_knowledge():
         conn.close()
 
 if __name__ == "__main__":
-    seed_front_knowledge()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="answer 동일해도 강제 재임베딩")
+    args = parser.parse_args()
+    seed_front_knowledge(force=args.force)
