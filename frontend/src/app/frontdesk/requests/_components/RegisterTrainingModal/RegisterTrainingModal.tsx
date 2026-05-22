@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
-import { useRegisterTraining } from './useRegisterTraining';
 import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button/Button';
+import { useTranslation } from '@/app/useTranslation';
+import { useExtractKnowledge } from './useExtractKnowledge';
+import styles from './RegisterTrainingModal.module.css';
 
 interface RegisterTrainingModalProps {
   isOpen: boolean;
@@ -12,6 +13,13 @@ interface RegisterTrainingModalProps {
   departmentId?: string;
   summary?: string;
   roomNo?: string;
+}
+
+interface LocalCandidate {
+  question: string;
+  answer: string;
+  domainCode: string;
+  selected: boolean;
 }
 
 export default function RegisterTrainingModal({
@@ -22,60 +30,78 @@ export default function RegisterTrainingModal({
   roomNo = '',
   requestId,
 }: RegisterTrainingModalProps & { requestId?: number }) {
-  const { registerTraining } = useRegisterTraining();
-  
-  const [step, setStep] = useState<'select' | 'edit'>('select');
-  const [staffMessages, setStaffMessages] = useState<any[]>([]);
-  const [selectedMsgIds, setSelectedMsgIds] = useState<Set<string>>(new Set());
-  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const { t } = useTranslation();
+  const { extractFromChat, batchRegister, extracting, registering, error } = useExtractKnowledge();
+  const [localCandidates, setLocalCandidates] = useState<LocalCandidate[]>([]);
 
   useEffect(() => {
     if (isOpen && roomNo) {
-      setStep('select');
-      setLoadingMsgs(true);
-      fetch(`/api/frontdesk/messages/rooms/${roomNo}/messages`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            const msgs = data.filter((m: any) => m.senderType === 'STAFF');
-            setStaffMessages(msgs);
-            setSelectedMsgIds(new Set(msgs.map((m: any) => String(m.id))));
-          } else {
-            setStaffMessages([]);
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch messages', err);
-          setStaffMessages([]);
-        })
-        .finally(() => {
-          setLoadingMsgs(false);
-        });
+      setLocalCandidates([]);
+      extractFromChat(roomNo).then(data => {
+        if (data && Array.isArray(data)) {
+          setLocalCandidates(
+            data.map(item => ({
+              question: item.question || '',
+              answer: item.answer || '',
+              domainCode: item.domainCode || departmentId || 'COMMON',
+              selected: true, // Default to selected
+            }))
+          );
+        }
+      });
     }
-  }, [isOpen, roomNo]);
+  }, [isOpen, roomNo, departmentId]);
 
-  const handleToggle = (id: string) => {
-    const newSet = new Set(selectedMsgIds);
-    if (newSet.has(id)) {
-      newSet.delete(id);
-    } else {
-      newSet.add(id);
-    }
-    setSelectedMsgIds(newSet);
+  const DOMAIN_OPTIONS = [
+    { value: 'FRONT', label: (t.frontdeskPage?.rag?.tabs as any)?.FRONT || '프론트' },
+    { value: 'HK', label: (t.frontdeskPage?.rag?.tabs as any)?.HK || '하우스키핑' },
+    { value: 'FACILITY', label: (t.frontdeskPage?.rag?.tabs as any)?.FACILITY || '시설관리' },
+    { value: 'FB', label: (t.frontdeskPage?.rag?.tabs as any)?.FB || '식음료' },
+    { value: 'CONCIERGE', label: (t.frontdeskPage?.rag?.tabs as any)?.CONCIERGE || '컨시어지' },
+    { value: 'EMERGENCY', label: (t.frontdeskPage?.rag?.tabs as any)?.EMERGENCY || '긴급' },
+    { value: 'COMMON', label: (t.frontdeskPage?.rag?.tabs as any)?.COMMON || '공통' },
+  ];
+
+  const handleToggle = (index: number) => {
+    setLocalCandidates(prev =>
+      prev.map((item, idx) => (idx === index ? { ...item, selected: !item.selected } : item))
+    );
   };
 
-  const handleNext = () => {
-    setStep('edit');
+  const handleTextChange = (index: number, field: 'question' | 'answer', value: string) => {
+    setLocalCandidates(prev =>
+      prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item))
+    );
   };
 
-  const handleSave = async (data: { domainCode: string; question: string; answer: string }) => {
-    const success = await registerTraining({
-      question: data.question,
-      answer: data.answer,
-      domainCode: data.domainCode,
-      roomNo,
-    });
+  const handleDomainChange = (index: number, value: string) => {
+    setLocalCandidates(prev =>
+      prev.map((item, idx) => (idx === index ? { ...item, domainCode: value } : item))
+    );
+  };
 
+  const allSelected = localCandidates.length > 0 && localCandidates.every(item => item.selected);
+  
+  const handleSelectAll = () => {
+    setLocalCandidates(prev =>
+      prev.map(item => ({ ...item, selected: !allSelected }))
+    );
+  };
+
+  const handleSave = async () => {
+    const selectedItems = localCandidates.filter(c => c.selected);
+    if (selectedItems.length === 0) {
+      alert('등록할 항목을 선택해주세요.');
+      return;
+    }
+
+    const payload = selectedItems.map(c => ({
+      question: c.question,
+      answer: c.answer,
+      domainCode: c.domainCode,
+    }));
+
+    const success = await batchRegister(payload);
     if (success) {
       if (requestId) {
         const saved = localStorage.getItem('registeredRagIds');
@@ -90,60 +116,110 @@ export default function RegisterTrainingModal({
 
   if (!isOpen) return null;
 
-  const initialAnswer = staffMessages
-    .filter(m => selectedMsgIds.has(String(m.id)))
-    .map(m => m.content)
-    .join('\n');
-
-  if (step === 'select') {
-    return (
-      <ModalOverlay isOpen={isOpen} onClose={onClose}>
-        <ModalCard size="md" onClose={onClose}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>학습할 상담 내용 선택</h2>
-            <p style={{ fontSize: '14px', color: 'var(--color-gray-500)' }}>
-              지식 라이브러리에 등록할 상담사(직원)의 메시지를 선택해주세요. AI와 고객의 메시지는 제외되었습니다.
-            </p>
-            
-            {loadingMsgs ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-gray-400)' }}>대화 내역을 불러오는 중...</div>
-            ) : staffMessages.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-gray-400)' }}>선택할 수 있는 상담사 메시지가 없습니다.</div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
-                {staffMessages.map(msg => (
-                  <label key={msg.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer', padding: '8px', backgroundColor: 'var(--color-gray-50)', borderRadius: '4px' }}>
-                    <input 
-                      type="checkbox" 
-                      checked={selectedMsgIds.has(String(msg.id))} 
-                      onChange={() => handleToggle(String(msg.id))}
-                      style={{ marginTop: '4px' }}
-                    />
-                    <span style={{ fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-all' }}>{msg.content}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
-              <Button variant="secondary" onClick={onClose}>취소</Button>
-              <Button variant="primary" onClick={handleNext}>다음 단계로</Button>
-            </div>
-          </div>
-        </ModalCard>
-      </ModalOverlay>
-    );
-  }
-
   return (
-    <KnowledgeEditModal
-      isOpen={isOpen}
-      onClose={onClose}
-      mode="register"
-      initialDomainCode={departmentId}
-      initialQuestion={summary}
-      initialAnswer={initialAnswer}
-      onSave={handleSave}
-    />
+    <ModalOverlay isOpen={isOpen} onClose={onClose}>
+      <ModalCard size="lg" onClose={onClose}>
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <h2 className={styles.title}>AI RAG 지식 추출 및 등록</h2>
+            <p className={styles.subtitle}>
+              상담 대화 내용에서 RAG 학습에 적합한 Q&A 지식을 AI가 분석하고 추출했습니다. 내용을 검토 및 수정 후 등록하세요.
+            </p>
+          </div>
+
+          {extracting ? (
+            <div className={styles.loadingContainer}>
+              <div className={styles.spinner} />
+              <div>상담 대화 내용을 AI 분석 중입니다...</div>
+            </div>
+          ) : error ? (
+            <div className={styles.errorBox}>
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          ) : localCandidates.length === 0 ? (
+            <div className={styles.emptyState}>
+              상담 대화에서 추출된 Q&A 후보가 없습니다. 대화 내용에 명확한 답변이 적재되었는지 확인해주세요.
+            </div>
+          ) : (
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th className={`${styles.th} ${styles.thCheckbox}`}>
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={handleSelectAll}
+                        className={styles.checkboxInput}
+                      />
+                    </th>
+                    <th className={`${styles.th} ${styles.thQuestion}`}>질문 (Question)</th>
+                    <th className={`${styles.th} ${styles.thAnswer}`}>답변 (Answer)</th>
+                    <th className={`${styles.th} ${styles.thDomain}`}>분류 부서</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {localCandidates.map((item, idx) => (
+                    <tr key={idx}>
+                      <td className={`${styles.td} ${styles.tdCheckbox}`}>
+                        <input
+                          type="checkbox"
+                          checked={item.selected}
+                          onChange={() => handleToggle(idx)}
+                          className={styles.checkboxInput}
+                        />
+                      </td>
+                      <td className={styles.td}>
+                        <textarea
+                          value={item.question}
+                          onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
+                          className={styles.cellTextarea}
+                          placeholder="질문을 입력하세요..."
+                        />
+                      </td>
+                      <td className={styles.td}>
+                        <textarea
+                          value={item.answer}
+                          onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
+                          className={styles.cellTextarea}
+                          placeholder="답변을 입력하세요..."
+                        />
+                      </td>
+                      <td className={styles.td}>
+                        <select
+                          value={item.domainCode}
+                          onChange={(e) => handleDomainChange(idx, e.target.value)}
+                          className={styles.selectInput}
+                        >
+                          {DOMAIN_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className={styles.footer}>
+            <Button variant="secondary" onClick={onClose} disabled={registering}>
+              취소
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={extracting || registering || localCandidates.length === 0}
+            >
+              {registering ? '등록 중...' : '선택 항목 등록하기'}
+            </Button>
+          </div>
+        </div>
+      </ModalCard>
+    </ModalOverlay>
   );
 }

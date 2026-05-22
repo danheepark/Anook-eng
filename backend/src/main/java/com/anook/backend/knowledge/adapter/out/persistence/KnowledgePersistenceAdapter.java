@@ -27,7 +27,8 @@ public class KnowledgePersistenceAdapter implements KnowledgeRepositoryPort {
                 entry.getAnswer(),
                 entry.getDomainCode(),
                 entry.getStatus() != null ? entry.getStatus().name() : KnowledgeStatus.PENDING.name(),
-                entry.getApprovedBy()
+                entry.getApprovedBy(),
+                entry.getRoomNo()
         );
 
         KnowledgeJpaEntity savedEntity = knowledgeJpaRepository.saveAndFlush(entity);
@@ -102,6 +103,7 @@ public class KnowledgePersistenceAdapter implements KnowledgeRepositoryPort {
                 .domainCode(entity.getDomainCode())
                 .status(KnowledgeStatus.valueOf(entity.getStatus()))
                 .approvedBy(entity.getApprovedBy())
+                .roomNo(entity.getRoomNo())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();

@@ -38,22 +38,24 @@ public class RegisterKnowledgeFromAnswerService implements RegisterKnowledgeFrom
     @Override
     @Transactional
     public CreateKnowledgeResult register(RegisterKnowledgeFromAnswerCommand command) {
-        // 1. 중복 질문 확인
-        if (knowledgeRepositoryPort.existsByDomainCodeAndQuestion(
-                command.domainCode() != null ? command.domainCode() : "COMMON",
-                command.question())) {
-            throw new BusinessException(ErrorCode.DUPLICATE_KNOWLEDGE);
+        // 1. status 결정 — "PENDING"이면 나중에 검토, 그 외 즉시 APPROVED
+        boolean isPending = "PENDING".equalsIgnoreCase(command.status());
+        KnowledgeStatus status = isPending ? KnowledgeStatus.PENDING : KnowledgeStatus.APPROVED;
+
+        // 2. 중복 질문 확인 (PENDING인 경우 중복 체크 스킵)
+        if (!isPending) {
+            if (knowledgeRepositoryPort.existsByDomainCodeAndQuestion(
+                    command.domainCode() != null ? command.domainCode() : "COMMON",
+                    command.question())) {
+                throw new BusinessException(ErrorCode.DUPLICATE_KNOWLEDGE);
+            }
         }
 
-        // 2. domainCode 기본값 처리 — null 또는 빈 문자열이면 COMMON
+        // 3. domainCode 기본값 처리 — null 또는 빈 문자열이면 COMMON
         String domainCodeStr = (command.domainCode() != null && !command.domainCode().isBlank())
                 ? command.domainCode().trim().toUpperCase()
                 : "COMMON";
         DomainCode domainCode = DomainCode.from(domainCodeStr);
-
-        // 3. status 결정 — "PENDING"이면 나중에 검토, 그 외 즉시 APPROVED
-        boolean isPending = "PENDING".equalsIgnoreCase(command.status());
-        KnowledgeStatus status = isPending ? KnowledgeStatus.PENDING : KnowledgeStatus.APPROVED;
 
         // 4. 임베딩 생성 (PENDING이면 스킵 — 승인 시 생성)
         float[] embedding = null;
@@ -68,6 +70,7 @@ public class RegisterKnowledgeFromAnswerService implements RegisterKnowledgeFrom
                 .answer(command.answer())
                 .domainCode(domainCode)
                 .status(status)
+                .roomNo(command.roomNo())
                 .build();
 
         // 6. 저장 (PENDING은 임베딩 없이 저장)

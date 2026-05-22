@@ -7,6 +7,7 @@ export interface KnowledgeEntry {
   answer: string;
   domainCode: string;
   status: string;
+  roomNo?: string;
   createdAt: string;
   updatedAt: string;
 }

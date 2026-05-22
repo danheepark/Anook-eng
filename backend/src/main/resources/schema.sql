@@ -277,3 +277,12 @@ ON knowledge_entry(domain_code, question);
 -- [2026-05-20] 메뉴 테이블에 달러 가격(price_usd) 컬럼 추가
 ALTER TABLE pms_menu ADD COLUMN IF NOT EXISTS price_usd DOUBLE PRECISION;
 
+-- [2026-05-22] "나중에 하기" 시 방번호 저장 (message 테이블 조회용)
+ALTER TABLE knowledge_entry ADD COLUMN IF NOT EXISTS room_no VARCHAR(10);
+
+-- [2026-05-22] UNIQUE 인덱스를 APPROVED 상태에만 적용 (PENDING 중복 허용)
+DROP INDEX IF EXISTS idx_knowledge_entry_unique_domain_question;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_knowledge_entry_unique_domain_question
+ON knowledge_entry(domain_code, question) WHERE status = 'APPROVED';
+
+

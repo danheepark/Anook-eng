@@ -14,6 +14,7 @@ public class KnowledgeEntry {
     private DomainCode domainCode;
     private KnowledgeStatus status;
     private final Long approvedBy;
+    private final String roomNo;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
