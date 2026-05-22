@@ -1591,27 +1591,55 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 final_domain_code = None
 
             # ── 중복 주문 감지 게이트 ──────────────────────────
-            # 에이전트가 ADD로 판단했지만 같은 부서에 이미 활성 요청이 있으면,
+            # 에이전트가 ADD로 판단했지만 같은 부서에 동일 아이템의 활성 요청이 있으면,
             # LLM이 놓친 중복을 코드 레벨에서 잡아 확인 질문을 강제합니다.
             # "네" → ADD_DUPLICATE / "아니 그거 취소해" → REPLACE
+            #
+            # [AN-342] 부서(department) 단위가 아닌 아이템(item) 단위로 비교.
+            # 브라우니 주문 후 콜라를 추가 주문하는 것은 정상이므로 중복 질문 X.
+            # 브라우니 주문 후 브라우니를 다시 주문하면 중복 질문 O.
             # ──────────────────────────────────────────────
             if (final_domain_code
                     and action_type == "ADD"
                     and not is_escalation
                     and hasattr(request, 'active_requests') and request.active_requests):
 
+                # 1) 새 요청의 아이템 키워드 추출
+                _new_items = set()
+                if isinstance(final_entities, dict):
+                    # REQ_ITEM 필드 (라우터/에이전트 공통)
+                    _req_items = final_entities.get("REQ_ITEM", [])
+                    if isinstance(_req_items, list):
+                        _new_items.update(str(i).strip().lower() for i in _req_items if i)
+                    elif isinstance(_req_items, str) and _req_items.strip():
+                        _new_items.add(_req_items.strip().lower())
+
+                    # items 필드 (에이전트 상세 형식: [{item, count}, ...])
+                    _items_list = final_entities.get("items", [])
+                    if isinstance(_items_list, list):
+                        for _item_dict in _items_list:
+                            if isinstance(_item_dict, dict) and _item_dict.get("item"):
+                                _new_items.add(str(_item_dict["item"]).strip().lower())
+
+                # 2) 기존 활성 요청 중 아이템이 겹치는 건만 매칭
                 _existing_req = None
                 for req in request.active_requests:
                     if (req.get("department_id") == domain
                             and req.get("status") in ("PENDING", "IN_PROGRESS", "ASSIGNED")):
-                        _existing_req = req
-                        break
+                        _existing_summary = (req.get("summary") or "").lower()
+                        # 아이템 키워드가 없으면 (엔티티 파싱 실패 등) 중복 감지 스킵
+                        if not _new_items:
+                            break
+                        # 새 요청의 아이템 중 하나라도 기존 요청 summary에 포함되면 중복
+                        if any(item in _existing_summary for item in _new_items):
+                            _existing_req = req
+                            break
 
                 if _existing_req:
                     _existing_summary = _existing_req.get("summary", "이전 요청")
                     _existing_id = _existing_req.get("id")
 
-                    print(f"[Analyze] 🔄 중복 주문 감지: {domain} 부서에 기존 활성 요청 존재 (id={_existing_id}, summary='{_existing_summary}')")
+                    print(f"[Analyze] 🔄 중복 주문 감지: 동일 아이템 발견 (id={_existing_id}, summary='{_existing_summary}', matched_items={_new_items})")
 
                     _lang = getattr(request, 'language', 'ko')
                     _dup_question = _get_static_reply("DUPLICATE_CONFIRM", _lang).format(summary=_existing_summary)
