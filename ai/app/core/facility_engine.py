@@ -28,9 +28,15 @@ def _normalize_equipment(equipment: str) -> str:
     return EQUIPMENT_ALIASES.get(equipment, equipment)
 
 
-def _build_guest_reply(result: HotelRequestSchema) -> str:
+def _build_guest_reply(result: HotelRequestSchema, system_language: str) -> str:
     """다국어 지원을 위해 프롬프트에서 생성된 final_reply를 직접 매핑"""
-    return result.clarification_question if result.needs_clarification else getattr(result, "final_reply", "접수되었습니다.")
+    fallback_msg = {
+        "ko": "접수되었습니다.",
+        "en": "Your request has been received.",
+        "ja": "受付されました。",
+        "zh": "已收到您的请求。"
+    }
+    return result.clarification_question if result.needs_clarification else getattr(result, "final_reply", fallback_msg.get(system_language, fallback_msg["en"]))
 
 
 async def run_facility_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "ko", active_requests: list = None, **kwargs) -> dict:
@@ -89,7 +95,7 @@ async def run_facility_agent(user_message: str, room_no: str, chat_history: list
 
     # /analyze 응답 형태로 변환
     return {
-        "guest_reply": _build_guest_reply(result),
+        "guest_reply": _build_guest_reply(result, system_language),
         "summary": result.summary,
         "domain_code": None if result.needs_clarification else "FACILITY",
         "priority": result.priority,

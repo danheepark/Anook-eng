@@ -291,7 +291,8 @@
         "FACILITY": "Facility",
         "CONCIERGE": "Concierge",
         "FRONT": "Front Desk",
-        "EMERGENCY": "Emergency"
+        "EMERGENCY": "Emergency",
+        "COMMON": "Hotel Info"
       }
     }
   },

@@ -291,7 +291,8 @@
         "FACILITY": "施設",
         "CONCIERGE": "コンシェルジュ",
         "FRONT": "フロントデスク",
-        "EMERGENCY": "緊急"
+        "EMERGENCY": "緊急",
+        "COMMON": "ホテル案内"
       }
     }
   },

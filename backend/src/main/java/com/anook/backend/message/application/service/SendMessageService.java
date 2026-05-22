@@ -113,7 +113,8 @@ public class SendMessageService implements SendMessageUseCase {
             dispatchPort.sendToRoom(cmd.roomNo(), Map.of("type", "AI_SKIPPED"));
         } else {
             // AI 처리는 비동기로 위임 (마스킹된 텍스트를 전송하여 외부 LLM 정보 유출 방지)
-            self.processAiAsync(guestMsg.getId(), cmd.roomNo(), cmd.guestId(), maskedContent, guestLang, piiDetected, cmd.images());
+            self.processAiAsync(guestMsg.getId(), cmd.roomNo(), cmd.guestId(), maskedContent, guestLang, piiDetected,
+                    cmd.images());
         }
 
         return new SendMessageResult(guestMsg.getId());
@@ -124,11 +125,12 @@ public class SendMessageService implements SendMessageUseCase {
      *
      * @Async → aiTaskExecutor 스레드풀에서 실행
      *        ⚠️ @Async는 같은 클래스 내부 호출 시 프록시를 타지 않으므로,
-     *        @Lazy로 주입받은 self 인스턴스를 통해 호출하여 프록시를 통과하게 합니다.
+     * @Lazy로 주입받은 self 인스턴스를 통해 호출하여 프록시를 통과하게 합니다.
      */
     @Async("aiTaskExecutor")
     @Transactional
-    public void processAiAsync(Long messageId, String roomNo, Long guestId, String content, String language, boolean piiDetected, java.util.List<String> images) {
+    public void processAiAsync(Long messageId, String roomNo, Long guestId, String content, String language,
+            boolean piiDetected, java.util.List<String> images) {
         try {
             // 3. AI 호출을 위해 최근 10개 메시지 조회 (대화 맥락 확장)
             java.util.List<Message> recentMessages = new java.util.ArrayList<>(
@@ -157,7 +159,8 @@ public class SendMessageService implements SendMessageUseCase {
             Map<String, Integer> roomInventory = roomInventoryService.getInventory(roomNo);
 
             // AI 호출
-            java.util.List<MessageAiResult> analyses = aiPort.analyze(content, roomNo, language, chatHistory, images, activeRequests, roomInventory);
+            java.util.List<MessageAiResult> analyses = aiPort.analyze(content, roomNo, language, chatHistory, images,
+                    activeRequests, roomInventory);
 
             // 4. AI 응답 메시지 저장
             String combinedReply = analyses.stream()
@@ -165,7 +168,7 @@ public class SendMessageService implements SendMessageUseCase {
                     .filter(reply -> reply != null && !reply.isBlank())
                     .distinct()
                     .collect(java.util.stream.Collectors.joining("\n"));
-            
+
             if (combinedReply.isEmpty()) {
                 combinedReply = "알겠습니다.";
             }
@@ -183,8 +186,7 @@ public class SendMessageService implements SendMessageUseCase {
                     "type", "AI_RESPONSE",
                     "roomNo", roomNo, // 추가: 전체 대시보드 레드닷 표시용
                     "messageId", aiMsg.getId(),
-                    "content", combinedReply
-            ));
+                    "content", combinedReply));
 
             // [AN-344] 중복 예약/주문 방지 및 이전 예약 카드 노출
             // AI가 targetRequestId를 반환하였고, 이것이 취소(CANCEL) 흐름이 아닌 경우
@@ -194,41 +196,76 @@ public class SendMessageService implements SendMessageUseCase {
             java.util.List<MessageAiResult> validatedAnalyses = new java.util.ArrayList<>();
             for (MessageAiResult analysis : analyses) {
                 Long validTargetRequestId = analysis.targetRequestId();
-                
+
                 // [AN-380] ADD, REPLACE 로직은 아이템이 똑같을 때만 적용되어야 함.
                 // AI가 완전 다른 아이템(수건 vs 물)에 대해 targetRequestId를 설정한 경우 무시.
                 if (validTargetRequestId != null) {
-                    boolean isCancel = "CANCEL_REQUEST".equals(analysis.action()) || "CANCEL_ALL_REQUESTS".equals(analysis.action());
+                    boolean isCancel = "CANCEL_REQUEST".equals(analysis.action())
+                            || "CANCEL_ALL_REQUESTS".equals(analysis.action());
                     if (!isCancel) {
-                        java.util.Map<String, Object> existingReq = activeRequestPort.findRequestById(validTargetRequestId);
+                        java.util.Map<String, Object> existingReq = activeRequestPort
+                                .findRequestById(validTargetRequestId);
                         if (existingReq != null) {
-                            String existingSummary = existingReq.get("summary") != null ? existingReq.get("summary").toString() : "";
+                            String existingSummary = existingReq.get("summary") != null
+                                    ? existingReq.get("summary").toString()
+                                    : "";
                             String newSummary = analysis.summary() != null ? analysis.summary() : "";
-                            
+
                             // 텍스트 기반 단순 동일성 검증
-                            boolean seemsSameRequest = newSummary.isEmpty() 
-                                    || existingSummary.contains(newSummary) 
+                            boolean seemsSameRequest = newSummary.isEmpty()
+                                    || existingSummary.contains(newSummary)
                                     || newSummary.contains(existingSummary);
-                            
+
                             if (!seemsSameRequest) {
-                                log.info("[Message] targetRequestId={} ignored due to item mismatch (existing: '{}', new: '{}')", validTargetRequestId, existingSummary, newSummary);
+                                // 키워드 기반 동일성 검증 (핵심 서비스가 같은 경우 허용) - 다국어(영어/일어/중어) 포함 및 대소문자 무시
+                                java.util.List<String> coreKeywords = java.util.Arrays.asList(
+                                        "택시", "taxi", "タクシー", "出租车",
+                                        "수건", "타올", "towel", "タオル", "毛巾",
+                                        "물", "생수", "water", "水",
+                                        "짐", "luggage", "荷物", "行李",
+                                        "보관", "storage", "保管", "寄存",
+                                        "모닝콜", "wake up call", "モーニングコール", "叫醒服务",
+                                        "배달", "delivery", "配達", "送货",
+                                        "식당", "restaurant", "レストラン", "餐厅",
+                                        "예약", "reservation", "予約", "预订",
+                                        "가운", "robe", "ガウン", "浴衣",
+                                        "이불", "blanket", "布団", "被子",
+                                        "베개", "pillow", "枕", "枕头",
+                                        "슬리퍼", "slipper", "スリッパ", "拖鞋");
+                                String lowerExisting = existingSummary.toLowerCase();
+                                String lowerNew = newSummary.toLowerCase();
+                                for (String kw : coreKeywords) {
+                                    if (lowerExisting.contains(kw) && lowerNew.contains(kw)) {
+                                        seemsSameRequest = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!seemsSameRequest) {
+                                log.info(
+                                        "[Message] targetRequestId={} ignored due to item mismatch (existing: '{}', new: '{}')",
+                                        validTargetRequestId, existingSummary, newSummary);
                                 validTargetRequestId = null; // 무효화
                             }
                         }
                     }
                 }
-                
+
                 // 검증된 targetRequestId로 새 객체 생성 (record 이므로)
-                MessageAiResult validatedAnalysis = java.util.Objects.equals(validTargetRequestId, analysis.targetRequestId()) ? analysis :
-                        new MessageAiResult(
-                                analysis.guestReply(), analysis.summary(), analysis.domainCode(), analysis.priority(),
-                                analysis.entities(), analysis.confidence(), analysis.action(), analysis.actionType(),
-                                analysis.aiLogMeta(), analysis.targetKeyword(), validTargetRequestId, analysis.clarificationOptions(),
-                                analysis.reasoning()
-                        );
-                        
+                MessageAiResult validatedAnalysis = java.util.Objects.equals(validTargetRequestId,
+                        analysis.targetRequestId()) ? analysis
+                                : new MessageAiResult(
+                                        analysis.guestReply(), analysis.summary(), analysis.domainCode(),
+                                        analysis.priority(),
+                                        analysis.entities(), analysis.confidence(), analysis.action(),
+                                        analysis.actionType(),
+                                        analysis.aiLogMeta(), analysis.targetKeyword(), validTargetRequestId,
+                                        analysis.clarificationOptions(),
+                                        analysis.reasoning());
+
                 validatedAnalyses.add(validatedAnalysis);
-                
+
                 if (validatedAnalysis.targetRequestId() != null) {
                     conflictRequestId = validatedAnalysis.targetRequestId();
                 }
@@ -242,7 +279,7 @@ public class SendMessageService implements SendMessageUseCase {
                 java.util.Map<String, Object> existingReq = activeRequestPort.findRequestById(conflictRequestId);
                 if (existingReq != null) {
                     payload.put("uiType", "REQUEST_CARD");
-                    
+
                     java.util.Map<String, Object> meta = new java.util.HashMap<>();
                     meta.put("requestId", existingReq.get("id"));
                     meta.put("domainCode", existingReq.get("departmentId"));
@@ -251,13 +288,14 @@ public class SendMessageService implements SendMessageUseCase {
                     meta.put("priority", existingReq.get("priority"));
                     meta.put("entities", existingReq.get("entities"));
                     meta.put("graceRemaining", 0); // 수락/취소 버튼 제거
-                    
+
                     payload.put("meta", meta);
                     log.info("[Message] 중복 요청 감지 — 기존 요청 ID: {}, uiType: REQUEST_CARD 지정", conflictRequestId);
                 }
             }
 
-            // [Contextual Pill Fix] Extract meta context for option pills (e.g. contextual cancellation/modification)
+            // [Contextual Pill Fix] Extract meta context for option pills (e.g. contextual
+            // cancellation/modification)
             String metaDomainCode = null;
             String metaSummary = null;
             String metaTargetKeyword = null;
@@ -273,13 +311,19 @@ public class SendMessageService implements SendMessageUseCase {
                 }
             }
 
-            if (!payload.containsKey("meta") && (metaDomainCode != null || metaSummary != null || metaTargetKeyword != null)) {
+            if (!payload.containsKey("meta")
+                    && (metaDomainCode != null || metaSummary != null || metaTargetKeyword != null)) {
                 java.util.Map<String, Object> meta = new java.util.HashMap<>();
-                if (metaDomainCode != null) meta.put("domainCode", metaDomainCode);
-                if (metaSummary != null) meta.put("summary", metaSummary);
-                if (metaTargetKeyword != null) meta.put("targetKeyword", metaTargetKeyword);
+                if (metaDomainCode != null)
+                    meta.put("domainCode", metaDomainCode);
+                if (metaSummary != null)
+                    meta.put("summary", metaSummary);
+                if (metaTargetKeyword != null)
+                    meta.put("targetKeyword", metaTargetKeyword);
                 payload.put("meta", meta);
-                log.info("[Message] Option context meta added to AI_RESPONSE payload: domainCode={}, summary={}, targetKeyword={}", metaDomainCode, metaSummary, metaTargetKeyword);
+                log.info(
+                        "[Message] Option context meta added to AI_RESPONSE payload: domainCode={}, summary={}, targetKeyword={}",
+                        metaDomainCode, metaSummary, metaTargetKeyword);
             }
 
             java.util.List<String> options = analyses.stream()
@@ -301,24 +345,30 @@ public class SendMessageService implements SendMessageUseCase {
             // 6. 태스크형 요청 감지 시 이벤트 발행 (여기서 message 책임 끝!)
             for (MessageAiResult analysis : analyses) {
                 if ("CANCEL_ALL_REQUESTS".equals(analysis.action())) {
-                    eventPublisher.publishEvent(new com.anook.backend.message.application.event.AllRequestsCancelledByGuestEvent(this, roomNo, guestId));
+                    eventPublisher.publishEvent(
+                            new com.anook.backend.message.application.event.AllRequestsCancelledByGuestEvent(this,
+                                    roomNo, guestId));
                     log.info("[Message] AllRequestsCancelledByGuestEvent 발행 — room: {}", roomNo);
                 } else if ("CANCEL_REQUEST".equals(analysis.action())) {
                     eventPublisher.publishEvent(new RequestCancelledByGuestEvent(
-                            this, roomNo, guestId, analysis.domainCode(), analysis.targetKeyword(), analysis.targetRequestId()));
-                    log.info("[Message] RequestCancelledByGuestEvent 발행 — room: {}, domain: {}, targetKeyword: {}, targetRequestId: {}", roomNo, analysis.domainCode(), analysis.targetKeyword(), analysis.targetRequestId());
+                            this, roomNo, guestId, analysis.domainCode(), analysis.targetKeyword(),
+                            analysis.targetRequestId()));
+                    log.info(
+                            "[Message] RequestCancelledByGuestEvent 발행 — room: {}, domain: {}, targetKeyword: {}, targetRequestId: {}",
+                            roomNo, analysis.domainCode(), analysis.targetKeyword(), analysis.targetRequestId());
                 } else if (analysis.domainCode() != null) {
                     // [AN-342] targetRequestId가 존재 + actionType=ADD인 경우:
                     // 고객이 "추가요"로 기존 요청에 추가를 확정한 것이므로 ADD_DUPLICATE로 자동 전환.
                     // 이전에는 무조건 스킵했지만, 이는 고객의 확인 응답을 무시하는 버그였음.
-                    if (analysis.targetRequestId() != null 
+                    if (analysis.targetRequestId() != null
                             && !isAddDuplicate
-                            && !"CANCEL_REQUEST".equals(analysis.action()) 
+                            && !"CANCEL_REQUEST".equals(analysis.action())
                             && !"CANCEL_ALL_REQUESTS".equals(analysis.action())
                             && !"REPLACE".equals(analysis.actionType())) {
                         if ("ADD".equals(analysis.actionType())) {
                             // ADD + targetRequestId = 고객이 기존 요청에 추가 확인 → ADD_DUPLICATE로 전환
-                            log.info("[Message] targetRequestId 존재 + ADD → ADD_DUPLICATE로 자동 전환 — targetRequestId: {}", analysis.targetRequestId());
+                            log.info("[Message] targetRequestId 존재 + ADD → ADD_DUPLICATE로 자동 전환 — targetRequestId: {}",
+                                    analysis.targetRequestId());
                             isAddDuplicate = true;
                         } else {
                             log.info("[Message] 중복 요청 발생으로 신규 생성 스킵 — targetRequestId: {}", analysis.targetRequestId());
@@ -333,12 +383,16 @@ public class SendMessageService implements SendMessageUseCase {
                             analysis.guestReply().contains("[FORWARD_" + domain + "]");
 
                     // If the user explicitly confirmed a NEW duplicate request, skip auto-confirm.
-                    // For REPLACE requests, we can auto-confirm the pending replacement request that was already
-                    // created in the database during the confirmation stage. If no pending request exists,
+                    // For REPLACE requests, we can auto-confirm the pending replacement request
+                    // that was already
+                    // created in the database during the confirmation stage. If no pending request
+                    // exists,
                     // it will naturally fall through and publish the RequestDetectedEvent.
                     if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !isAddDuplicate) {
                         java.util.Map<String, Object> pendingRequest = activeRequests.stream()
-                                .filter(req -> ("CREATED".equals(req.get("status")) || "PENDING".equals(req.get("status"))) && domain.equals(req.get("department_id")))
+                                .filter(req -> ("CREATED".equals(req.get("status"))
+                                        || "PENDING".equals(req.get("status")))
+                                        && domain.equals(req.get("department_id")))
                                 .findFirst()
                                 .orElse(null);
 
@@ -350,7 +404,8 @@ public class SendMessageService implements SendMessageUseCase {
                             // [AN-380] 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
                             // 다른 아이템의 신규 주문(수건 vs 물)이면 auto-confirm 하지 않고 새 요청 생성
                             String existingSummary = pendingRequest.get("summary") != null
-                                    ? pendingRequest.get("summary").toString() : "";
+                                    ? pendingRequest.get("summary").toString()
+                                    : "";
                             String newSummary = analysis.summary() != null ? analysis.summary() : "";
 
                             boolean seemsSameRequest = isShortConfirmation
@@ -360,17 +415,21 @@ public class SendMessageService implements SendMessageUseCase {
 
                             if (seemsSameRequest) {
                                 Long pendingRequestId = ((Number) pendingRequest.get("id")).longValue();
-                                log.info("[Message] 기존 수락 대기 중인 요청 발견, 자동 수락 처리 진행 — ID: {}, room: {}", pendingRequestId, roomNo);
+                                log.info("[Message] 기존 수락 대기 중인 요청 발견, 자동 수락 처리 진행 — ID: {}, room: {}",
+                                        pendingRequestId, roomNo);
                                 confirmRequestUseCase.confirmRequest(pendingRequestId, roomNo);
                                 continue; // 새 요청 중복 생성 방지
                             }
-                            log.info("[Message] 동일 도메인이지만 다른 아이템 → auto-confirm 스킵, 신규 요청 생성 — existing: '{}', new: '{}'",
+                            log.info(
+                                    "[Message] 동일 도메인이지만 다른 아이템 → auto-confirm 스킵, 신규 요청 생성 — existing: '{}', new: '{}'",
                                     existingSummary, newSummary);
                             // fall through → RequestDetectedEvent 발행 (신규 아이템 요청 생성)
                         } else if (isShortConfirmation) {
                             // [AN-380] 짧은 확인 메시지이지만 auto-confirm 대상 없음
                             // (트랜잭션 타이밍 이슈 방어 — 중복 생성 방지)
-                            log.info("[Message] isFinalized=true, 짧은 확인 메시지이지만 auto-confirm 대상 없음 → 신규 생성 스킵 — domain: {}, room: {}", domain, roomNo);
+                            log.info(
+                                    "[Message] isFinalized=true, 짧은 확인 메시지이지만 auto-confirm 대상 없음 → 신규 생성 스킵 — domain: {}, room: {}",
+                                    domain, roomNo);
                             continue;
                         }
                         // 나머지: 새 아이템이 포함된 신규 주문 → fall through → RequestDetectedEvent 발행
@@ -393,7 +452,8 @@ public class SendMessageService implements SendMessageUseCase {
                             analysis.targetKeyword(),
                             images,
                             analysis.reasoning()));
-                    log.info("[Message] RequestDetectedEvent 발행 — domain: {}, escalated: {}, actionType: {}, targetKeyword: {}",
+                    log.info(
+                            "[Message] RequestDetectedEvent 발행 — domain: {}, escalated: {}, actionType: {}, targetKeyword: {}",
                             analysis.domainCode(), escalated, analysis.actionType(), analysis.targetKeyword());
                 } else if ("STATUS_CHECK".equals(analysis.action())) {
                     eventPublisher.publishEvent(new RequestStatusCheckByGuestEvent(this, roomNo, guestId, content));
@@ -415,12 +475,17 @@ public class SendMessageService implements SendMessageUseCase {
                             .modelName((String) meta.get("model_name"))
                             .rawPrompt((String) meta.get("raw_prompt"))
                             .rawResponse((String) meta.get("raw_response"))
-                            .promptTokens(meta.get("prompt_tokens") != null ? ((Number) meta.get("prompt_tokens")).intValue() : 0)
-                            .completionTokens(meta.get("completion_tokens") != null ? ((Number) meta.get("completion_tokens")).intValue() : 0)
-                            .latencyMs(meta.get("latency_ms") != null ? ((Number) meta.get("latency_ms")).intValue() : 0)
+                            .promptTokens(
+                                    meta.get("prompt_tokens") != null ? ((Number) meta.get("prompt_tokens")).intValue()
+                                            : 0)
+                            .completionTokens(meta.get("completion_tokens") != null
+                                    ? ((Number) meta.get("completion_tokens")).intValue()
+                                    : 0)
+                            .latencyMs(
+                                    meta.get("latency_ms") != null ? ((Number) meta.get("latency_ms")).intValue() : 0)
                             .isFallback(meta.get("is_fallback") != null && (Boolean) meta.get("is_fallback"))
                             .build();
-                            
+
                     asyncAiLoggingService.saveAiLogAsync(aiLog);
                 }
             }
@@ -545,18 +610,23 @@ public class SendMessageService implements SendMessageUseCase {
      * - 그 외 기본값 "ko"
      */
     private String detectLanguage(String text) {
-        if (text == null || text.isBlank()) return "ko";
+        if (text == null || text.isBlank())
+            return "ko";
         for (char c : text.toCharArray()) {
-            if (c >= '\uAC00' && c <= '\uD7A3') return "ko";
+            if (c >= '\uAC00' && c <= '\uD7A3')
+                return "ko";
         }
         for (char c : text.toCharArray()) {
-            if ((c >= '\u3040' && c <= '\u309F') || (c >= '\u30A0' && c <= '\u30FF')) return "ja";
+            if ((c >= '\u3040' && c <= '\u309F') || (c >= '\u30A0' && c <= '\u30FF'))
+                return "ja";
         }
         for (char c : text.toCharArray()) {
-            if (c >= '\u4E00' && c <= '\u9FFF') return "zh";
+            if (c >= '\u4E00' && c <= '\u9FFF')
+                return "zh";
         }
         long alphaCount = text.chars().filter(c -> (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')).count();
-        if (alphaCount > text.length() / 2) return "en";
+        if (alphaCount > text.length() / 2)
+            return "en";
         return "ko";
     }
 }

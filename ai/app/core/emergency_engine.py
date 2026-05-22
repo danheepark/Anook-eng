@@ -100,8 +100,14 @@ async def run_emergency_agent(user_message: str, room_no: str, chat_history: lis
     except Exception as e:
         print(f"[Emergency Engine] Schema Validation Error: {e}, Raw: {raw}")
         # Fallback to a valid dictionary
+        fallback_msg = {
+            "ko": "긴급 상황이 접수되었습니다. 즉시 직원이 출동하겠습니다.",
+            "en": "Emergency situation has been reported. Staff will be dispatched immediately.",
+            "ja": "緊急事態が受付されました。直ちにスタッフが向かいます。",
+            "zh": "紧急情况已收到，工作人员将立即前往。"
+        }
         return {
-            "guest_reply": "긴급 상황이 접수되었습니다. 즉시 직원이 출동하겠습니다.",
+            "guest_reply": fallback_msg.get(system_language, fallback_msg["en"]),
             "summary": "긴급 상황 접수",
             "domain_code": "EMERGENCY",
             "priority": "EMERGENCY",
