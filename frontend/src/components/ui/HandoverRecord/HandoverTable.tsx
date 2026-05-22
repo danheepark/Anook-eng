@@ -13,10 +13,9 @@ export default function HandoverTable({ items }: HandoverTableProps) {
         <colgroup>
           <col style={{ width: '12%' }} />
           <col style={{ width: '12%' }} />
-          <col style={{ width: '8%' }} />
-          <col style={{ width: '48%' }} />
-          <col style={{ width: '12%' }} />
-          <col style={{ width: '8%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '56%' }} />
+          <col style={{ width: '10%' }} />
         </colgroup>
         <thead>
           <tr>
@@ -24,14 +23,13 @@ export default function HandoverTable({ items }: HandoverTableProps) {
             <th className={styles.th}>카테고리</th>
             <th className={styles.th}>객실</th>
             <th className={styles.th}>제목/내용 요약</th>
-            <th className={styles.th}>작성자</th>
             <th className={styles.th}>시간</th>
           </tr>
         </thead>
         <tbody>
           {items.length === 0 ? (
             <tr>
-              <td colSpan={6} className={styles.td} style={{ textAlign: 'center', padding: '32px' }}>
+              <td colSpan={5} className={styles.td} style={{ textAlign: 'center', padding: '32px' }}>
                 해당 근무 시간에 발생한 요청이 없습니다.
               </td>
             </tr>
@@ -59,7 +57,6 @@ export default function HandoverTable({ items }: HandoverTableProps) {
                   <td className={`${styles.td} ${styles.center}`}>{item.category}</td>
                   <td className={`${styles.td} ${styles.center} ${styles.roomNo}`}>{item.roomNumber}</td>
                   <td className={styles.td}>{item.summary}</td>
-                  <td className={`${styles.td} ${styles.center}`}>{item.author}</td>
                   <td className={`${styles.td} ${styles.center} ${styles.time}`}>{item.time}</td>
                 </tr>
               );

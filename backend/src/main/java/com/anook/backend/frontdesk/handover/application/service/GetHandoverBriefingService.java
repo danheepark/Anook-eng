@@ -71,7 +71,7 @@ public class GetHandoverBriefingService implements GetHandoverBriefingUseCase {
                 .collect(Collectors.joining(", "));
 
         if (managerNames.isEmpty()) {
-            managerNames = "미배정";
+            managerNames = "관리자";
         }
 
         return new HandoverBriefingResult(
@@ -85,7 +85,7 @@ public class GetHandoverBriefingService implements GetHandoverBriefingUseCase {
 
     private String formatAuthor(String authorName, String shiftLabel) {
         if (authorName == null || authorName.isBlank()) {
-            return "미배정";
+            return "관리자";
         }
         return authorName + " (" + shiftLabel + ")";
     }

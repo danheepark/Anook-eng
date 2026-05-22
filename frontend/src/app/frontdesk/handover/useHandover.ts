@@ -31,7 +31,7 @@ export function useHandover() {
     return `${yyyy}-${mm}-${dd}`;
   });
   const [shiftType, setShiftType] = useState<string>('DAY');
-  const [managerName, setManagerName] = useState<string>('미배정');
+  const [managerName, setManagerName] = useState<string>('관리자');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [briefingData, setBriefingData] = useState<HandoverBriefing | null>(null);
@@ -49,7 +49,7 @@ export function useHandover() {
         if (!active) return;
         
         // Set the dynamic manager names from the API response
-        setManagerName(data.managerNames || '미배정');
+        setManagerName(data.managerNames || '관리자');
 
         const [start, end] = data.shiftTimeLabel ? data.shiftTimeLabel.split(' - ') : ['-', '-'];
 
@@ -83,7 +83,7 @@ export function useHandover() {
             category: task.category || '기타',
             roomNumber: task.roomNo || '-',
             summary: task.summary || '-',
-            author: task.author || '미배정',
+            author: task.author || '관리자',
             time: task.time || '-',
           };
         });
