@@ -190,6 +190,8 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
     
     if not is_request_intent:
         domain_code = None
+    elif intent == "ESCALATION":
+        domain_code = "FRONT"
     else:
         if result.needs_clarification:
             domain_code = None

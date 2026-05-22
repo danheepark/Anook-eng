@@ -396,9 +396,10 @@ public class SendMessageService implements SendMessageUseCase {
                                 .findFirst()
                                 .orElse(null);
 
-                        // [AN-380] 고객의 원문이 짧은 확인 응답(≤3자: 네/응/OK 등)인지 판별
-                        // 짧은 확인 → 기존 요청 수락, 긴 메시지(물 1개 등) → 신규 주문 가능성
-                        boolean isShortConfirmation = content != null && content.trim().length() <= 3;
+                        // [AN-380] 고객의 원문이 단순 수락/확인 응답인지 판별 (다국어 임시 지원)
+                        // 한국어, 영어, 일본어, 중국어의 대표적인 수락/긍정 단어 포함
+                        boolean isShortConfirmation = content != null && content.trim().toLowerCase()
+                                .matches("^(네|응|어|예|ㅇㅇ|ok|okay|yes|yep|y|확인|진행|진행해|진행해줘|부탁해|알겠어|좋아|맞아|확인했습니다|수락|승인|sure|agree|confirm|はい|ええ|そうだ|お願い|お願いします|確認|是的|对|好|好的|没问题|是|确认|同意)$");
 
                         if (pendingRequest != null) {
                             // [AN-380] 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
@@ -424,15 +425,8 @@ public class SendMessageService implements SendMessageUseCase {
                                     "[Message] 동일 도메인이지만 다른 아이템 → auto-confirm 스킵, 신규 요청 생성 — existing: '{}', new: '{}'",
                                     existingSummary, newSummary);
                             // fall through → RequestDetectedEvent 발행 (신규 아이템 요청 생성)
-                        } else if (isShortConfirmation) {
-                            // [AN-380] 짧은 확인 메시지이지만 auto-confirm 대상 없음
-                            // (트랜잭션 타이밍 이슈 방어 — 중복 생성 방지)
-                            log.info(
-                                    "[Message] isFinalized=true, 짧은 확인 메시지이지만 auto-confirm 대상 없음 → 신규 생성 스킵 — domain: {}, room: {}",
-                                    domain, roomNo);
-                            continue;
                         }
-                        // 나머지: 새 아이템이 포함된 신규 주문 → fall through → RequestDetectedEvent 발행
+                        // 나머지: 새 아이템이 포함된 신규 주문이거나 auto-confirm 대상이 없으면 → fall through → RequestDetectedEvent 발행
                     }
 
                     boolean escalated = analysis.confidence() < 0.7;

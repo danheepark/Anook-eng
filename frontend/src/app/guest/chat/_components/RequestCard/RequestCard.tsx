@@ -160,6 +160,10 @@ export default function RequestCard({
           if (target) return `${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
           return `예약`; // Changed from '예약 요청'
         }
+        case 'OTHER': {
+          const desc = entities.description as string | undefined;
+          return desc ? `${desc}` : displaySummary;
+        }
       }
     }
     return null;
