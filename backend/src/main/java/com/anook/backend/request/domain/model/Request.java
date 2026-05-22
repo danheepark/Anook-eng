@@ -50,7 +50,7 @@ public class Request {
         request.roomNo = roomNo;
         request.guestId = guestId;
         request.domainCode = domainCode;
-        request.status = RequestStatus.PENDING;
+        request.status = RequestStatus.CREATED;
         request.priority = Priority.from(priority);
         request.entities = entities;
         request.confidence = confidence;
@@ -137,6 +137,17 @@ public class Request {
     }
 
     /**
+     * Grace Period 만료 또는 고객 확인 → CREATED → PENDING 전환
+     */
+    public void confirmGrace() {
+        if (this.status != RequestStatus.CREATED) {
+            throw new IllegalStateException("CREATED 상태에서만 확인 전환이 가능합니다: " + this.status);
+        }
+        this.status = RequestStatus.PENDING;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
      * 직원 배정
      */
     public void assignStaff(Long staffId) {
@@ -208,7 +219,7 @@ public class Request {
      * 초과 시간 여부 (30분 기준)
      */
     public boolean isOverdue() {
-        if (status == RequestStatus.COMPLETED || status == RequestStatus.SETTLED || status == RequestStatus.CANCELLED) {
+        if (status == RequestStatus.CREATED || status == RequestStatus.COMPLETED || status == RequestStatus.SETTLED || status == RequestStatus.CANCELLED) {
             return false;
         }
         return createdAt != null && createdAt.plusMinutes(30).isBefore(LocalDateTime.now());
@@ -218,11 +229,12 @@ public class Request {
 
     private void validateTransition(RequestStatus from, RequestStatus to) {
         boolean valid = switch (to) {
+            case PENDING -> from == RequestStatus.CREATED;
             case IN_PROGRESS -> from == RequestStatus.PENDING || from == RequestStatus.ESCALATED;
             case COMPLETED -> from == RequestStatus.IN_PROGRESS;
             case SETTLED -> from == RequestStatus.COMPLETED;
             case CANCELLED -> from != RequestStatus.SETTLED && from != RequestStatus.CANCELLED;
-            case ESCALATED -> from == RequestStatus.PENDING || from == RequestStatus.IN_PROGRESS;
+            case ESCALATED -> from == RequestStatus.CREATED || from == RequestStatus.PENDING || from == RequestStatus.IN_PROGRESS;
             default -> false;
         };
         if (!valid) {

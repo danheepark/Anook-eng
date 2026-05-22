@@ -51,7 +51,7 @@ export default function RequestStatusCard({
         </div>
         <div className={styles.timeInfo}>
           <span>접수: {formatTime(createdAt)}</span>
-          {status !== 'PENDING' && <span>업데이트: {formatTime(updatedAt)}</span>}
+          {status !== 'CREATED' && status !== 'PENDING' && <span>업데이트: {formatTime(updatedAt)}</span>}
         </div>
       </div>
       

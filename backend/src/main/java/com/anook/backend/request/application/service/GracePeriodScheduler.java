@@ -67,8 +67,13 @@ public class GracePeriodScheduler {
 
                 Request request = requestOpt.get();
 
-                if (request.getStatus() == RequestStatus.PENDING) {
-                    // Grace Period 만료 — 직원에게 알림 발송
+                if (request.getStatus() == RequestStatus.CREATED || request.getStatus() == RequestStatus.PENDING) {
+                    // Grace Period 만료 — CREATED→PENDING 전환 후 직원에게 알림 발송
+                    if (request.getStatus() == RequestStatus.CREATED) {
+                        request.confirmGrace();
+                        requestPort.save(request);
+                        log.info("[GracePeriod] CREATED→PENDING 전환 완료 — requestId: {}", requestId);
+                    }
                     log.info("[GracePeriod] 만료 → 직원 알림 발송 — requestId: {}, dept: {}", requestId, deptCode);
 
                     dispatchPort.dispatchToDepartment(deptCode, payload);
@@ -105,7 +110,13 @@ public class GracePeriodScheduler {
             Optional<Request> requestOpt = requestPort.findById(requestId);
             if (requestOpt.isPresent()) {
                 Request request = requestOpt.get();
-                if (request.getStatus() == RequestStatus.PENDING) {
+                if (request.getStatus() == RequestStatus.CREATED || request.getStatus() == RequestStatus.PENDING) {
+                    // CREATED→PENDING 전환
+                    if (request.getStatus() == RequestStatus.CREATED) {
+                        request.confirmGrace();
+                        requestPort.save(request);
+                        log.info("[GracePeriod] 고객 수락 → CREATED→PENDING 전환 — requestId: {}", requestId);
+                    }
                     String deptCode = request.getDomainCode() != null ? request.getDomainCode().name() : "UNKNOWN";
                     
                     log.info("[GracePeriod] 수락하기 즉시 발송 — requestId: {}, dept: {}", requestId, deptCode);

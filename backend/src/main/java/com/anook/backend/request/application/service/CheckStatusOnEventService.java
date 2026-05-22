@@ -45,7 +45,7 @@ public class CheckStatusOnEventService {
 
         // 2. 키워드 매칭 시도 (주로 명사 위주 매칭)
         for (Request req : allRequests) {
-            if (req.getStatus() == RequestStatus.PENDING || req.getStatus() == RequestStatus.IN_PROGRESS) {
+            if (req.getStatus() == RequestStatus.CREATED || req.getStatus() == RequestStatus.PENDING || req.getStatus() == RequestStatus.IN_PROGRESS) {
                 String summary = req.getSummary() != null ? req.getSummary() : "";
                 String entities = req.getEntities() != null ? req.getEntities().toString() : "";
                 
@@ -69,7 +69,8 @@ public class CheckStatusOnEventService {
         //    (b) 활성 요청이 없으면 전체 요청 중 가장 최근 것 선택
         if (matchedRequest == null && !allRequests.isEmpty()) {
             for (Request req : allRequests) {
-                if (req.getStatus() == RequestStatus.PENDING || 
+                if (req.getStatus() == RequestStatus.CREATED ||
+                    req.getStatus() == RequestStatus.PENDING || 
                     req.getStatus() == RequestStatus.IN_PROGRESS || 
                     req.getStatus() == RequestStatus.ESCALATED) {
                     matchedRequest = req;
@@ -85,7 +86,9 @@ public class CheckStatusOnEventService {
 
         if (matchedRequest != null) {
             String prefix = matchedRequest.getSummary() != null ? "[" + matchedRequest.getSummary() + "] 건 확인 결과, " : "확인 결과, ";
-            if (matchedRequest.getStatus() == RequestStatus.PENDING) {
+            if (matchedRequest.getStatus() == RequestStatus.CREATED) {
+                replyMessage = prefix + "요청이 접수되었습니다. 잠시 후 담당 부서로 전달될 예정이니 조금만 기다려 주세요.";
+            } else if (matchedRequest.getStatus() == RequestStatus.PENDING) {
                 replyMessage = prefix + "요청이 접수되어 담당 부서 배정을 기다리고 있습니다. 곧 처리가 시작될 예정이니 조금만 더 기다려 주시면 감사하겠습니다.";
             } else if (matchedRequest.getStatus() == RequestStatus.IN_PROGRESS) {
                 replyMessage = prefix + "현재 담당 직원이 요청을 처리하고 있습니다. 보통 15~30분 정도 소요되니 조금만 더 기다려 주시면 감사하겠습니다.";
