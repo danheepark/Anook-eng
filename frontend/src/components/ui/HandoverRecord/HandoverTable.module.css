@@ -71,6 +71,12 @@
   font-weight: 600;
 }
 
+.roomNoGrouped {
+  background-color: var(--color-gray-50);
+  border-right: 2px solid var(--color-gray-300);
+  vertical-align: middle;
+}
+
 .time {
   color: var(--color-gray-600);
 }

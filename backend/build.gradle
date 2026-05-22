@@ -34,6 +34,9 @@ dependencies {
     // ── Database ──
     runtimeOnly 'org.postgresql:postgresql'
 
+    // ── Excel (Apache POI) ──
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
     // ── Test ──
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'

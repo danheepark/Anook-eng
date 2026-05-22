@@ -18,7 +18,8 @@ export default function HandoverPage() {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  
+  const [downloading, setDownloading] = useState(false);
+
   const {
     targetDate,
     setTargetDate,
@@ -30,6 +31,31 @@ export default function HandoverPage() {
     briefingData,
     itemsData,
   } = useHandover();
+
+  const handleExcelDownload = async () => {
+    setDownloading(true);
+    try {
+      const res = await fetch(
+        `/api/frontdesk/handover/export?date=${targetDate}&shiftType=${shiftType}`
+      );
+      if (!res.ok) throw new Error('엑셀 다운로드에 실패했습니다.');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const shiftLabel = shiftType === 'DAY' ? '주간' : shiftType === 'EVENING' ? '야간' : '심야';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `인수인계_${targetDate}_${shiftLabel}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '엑셀 다운로드 중 오류가 발생했습니다.');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const filteredItems = itemsData.filter(item => {
     if (statusFilter !== 'ALL' && item.status !== statusFilter) {
@@ -51,13 +77,13 @@ export default function HandoverPage() {
         <div className={styles.headerTop}>
           <h1 className={styles.title}>{t.frontdeskPage.taskBoard.titles.handover}</h1>
           <div className={styles.pickerActions}>
-            <input 
-              type="date" 
+            <input
+              type="date"
               className={styles.datePicker}
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
             />
-            <select 
+            <select
               className={styles.shiftSelect}
               value={shiftType}
               onChange={(e) => setShiftType(e.target.value)}
@@ -66,6 +92,13 @@ export default function HandoverPage() {
               <option value="EVENING">야간 (15:00 - 23:00)</option>
               <option value="NIGHT">심야 (23:00 - 07:00)</option>
             </select>
+            <button
+              className={styles.downloadButton}
+              onClick={handleExcelDownload}
+              disabled={downloading || loading}
+            >
+              {downloading ? '다운로드 중...' : '📥 엑셀 다운로드'}
+            </button>
           </div>
         </div>
         <div className={styles.searchBarRow}>
