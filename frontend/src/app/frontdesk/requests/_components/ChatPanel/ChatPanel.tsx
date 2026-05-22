@@ -288,8 +288,6 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     if (staffMessages.length > 0) {
       setIsRagConfirmOpen(true);
       onRagFlowChange?.(true);
-    } else {
-      if(onClose) onClose();
     }
   };
 
@@ -306,13 +304,14 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
   // "나중에 하기" → PENDING 상태로 저장 후 완료 처리
   const handleRagLater = async () => {
-    const { question, answer } = extractInitialContent();
+    const { answer } = extractInitialContent();
+    const cleanSummary = summary ? summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '') : '미분류 상담';
     try {
       const res = await fetch('/api/staff/knowledge/register-from-answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question,
+          question: cleanSummary,
           answer,
           domainCode: 'COMMON',
           roomNo: roomNumber,
@@ -333,29 +332,51 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     }
     setIsRagConfirmOpen(false);
     onRagFlowChange?.(false);
-    if (onClose) onClose();
   };
 
   const handleRagSkip = () => {
     setIsRagConfirmOpen(false);
     onRagFlowChange?.(false);
-    if (onClose) onClose();
   };
 
   const handleRagCancel = () => {
     setIsRagConfirmOpen(false);
     onRagFlowChange?.(false);
-    if (onClose) onClose();
   };
 
   // 상담 내용에서 초기 질문/답변 추출
   const extractInitialContent = () => {
-    const staffMessages = messages
+    const chunks: ChatMessage[][] = [];
+    let currentChunk: ChatMessage[] = [];
+    
+    for (const msg of messages) {
+      const content = msg.content || '';
+      if (content.includes('이전 상담 및 처리가 모두 완료되었습니다') || content.includes('[SYSTEM]')) {
+        if (currentChunk.length > 0) {
+          chunks.push([...currentChunk]);
+          currentChunk = [];
+        }
+      } else {
+        currentChunk.push(msg);
+      }
+    }
+    
+    if (currentChunk.length > 0) {
+      chunks.push(currentChunk);
+    }
+    
+    const latestChunk = chunks.length > 0 ? chunks[chunks.length - 1] : [];
+    
+    const guestMessages = latestChunk
+      .filter(m => m.senderType === 'GUEST')
+      .map(m => m.content);
+      
+    const staffMessages = latestChunk
       .filter(m => m.senderType === 'STAFF')
       .map(m => m.content);
 
     return {
-      question: '',
+      question: guestMessages.length > 0 ? guestMessages.join('\n') : '대화 기록 기반 요약',
       answer: staffMessages.join('\n'),
     };
   };

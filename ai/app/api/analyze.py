@@ -266,6 +266,46 @@ def _fallback_response(guest_reply: str) -> dict:
         "confidence": 0.0,
     }
 
+async def _synthesize_multi_replies(replies: List[str], original_text: str, language: str) -> str:
+    if not replies:
+        return ""
+    
+    # [FORWARD_...] 나 [PII_...] 등 특수 액션 코드가 있는 경우는 합성하지 않고 결합하여 폴백 처리
+    has_special_code = any(("[FORWARD_" in r) or ("[PII_" in r) or ("INFO_NOT_FOUND" in r) for r in replies)
+    if has_special_code:
+        return "\n".join(replies)
+        
+    valid_replies = [r for r in replies if r.strip()]
+    if len(valid_replies) <= 1:
+        return "\n".join(replies)
+        
+    try:
+        replies_text = "\n---\n".join([f"답변 {i+1}: {r}" for i, r in enumerate(valid_replies)])
+        prompt = (
+            f"[고객의 원본 질문]\n{original_text}\n\n"
+            f"[AI가 작성한 개별 답변 리스트]\n{replies_text}\n\n"
+            f"위 개별 답변들을 하나로 자연스럽게 흐르도록 병합하고 윤문하여 친절하고 완벽한 단일 답변으로 작성해 주세요.\n\n"
+            f"**지침**:\n"
+            f"1. 각 개별 답변의 핵심 정보(예: 장소, 정책, 대여 방법 등)는 누락 없이 모두 포함하세요.\n"
+            f"2. **[매우 중요]** 각 답변에 흩어져 있는 되묻기 및 연결 제안 멘트(예: '연결해 드릴까요?', '도와드릴까요?', '확인해 드릴까요?')는 **중간에 중복 노출되지 않도록 모두 삭제하고, 답변의 맨 마지막에만 단 한 번만** 오도록 자연스럽게 하나로 통합하세요.\n"
+            f"   - *나쁜 예시*: '우산은 프런트에서 대여 가능합니다. 프런트로 연결해 드릴까요? 자전거는 대여가 어렵습니다. 더 필요한 정보가 있다면 연결해 드릴까요?'\n"
+            f"   - *좋은 예시*: '우산은 프런트 데스크에서 대여하실 수 있으며, 자전거는 대여가 어렵지만 호텔 앞 따릉이를 이용하실 수 있습니다. 혹시 이와 관련하여 프런트 데스크로 연결해 드릴까요?'\n"
+            f"3. 절대로 답변을 새로 지어내거나 기존 답변에 없던 정보를 추가하지 마세요.\n"
+            f"4. 고객 질문 언어(또는 {language})로 친절하고 예의 바르게 답변하세요.\n"
+            f"5. 마크다운 강조(**)는 사용하지 마세요.\n"
+        )
+        
+        raw = await call_gemini_async(
+            prompt=prompt,
+            system_instruction='당신은 호텔 컨시어지 답변 합성 전문가입니다. 반드시 {"reply": "합성 및 윤문된 단일 답변 내용"} 형식의 JSON으로만 출력하세요. 연결/되묻기 질문은 전체 답변의 맨 끝에 딱 한 번만 포함해야 하며, 절대 본문 중간에 중복해서 넣지 마십시오.'
+        )
+        if isinstance(raw, dict) and "reply" in raw:
+            return raw["reply"]
+        return "\n".join(valid_replies)
+    except Exception as e:
+        print(f"[Analyze] ⚠️ 다중 답변 합성 실패 (폴백 사용): {e}")
+        return "\n".join(replies)
+
 @router.post("/analyze")
 async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
     """
@@ -441,6 +481,31 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
             
         final_responses.append(response)
         
+    if len(final_responses) > 1:
+        valid_replies = [r.get("guest_reply", "").strip() for r in final_responses]
+        synthesized = await _synthesize_multi_replies(valid_replies, request.text, request.language)
+        
+        # 첫 번째 응답에만 합성된 답변을 세팅하고, 나머지는 ""로 비움
+        final_responses[0]["guest_reply"] = synthesized
+        for resp in final_responses[1:]:
+            resp["guest_reply"] = ""
+            
+        # 옵션 중복 제거 및 "아니요" -> "아니오" 표준화
+        all_options = []
+        for resp in final_responses:
+            opts = resp.get("clarification_options")
+            if opts and isinstance(opts, list):
+                for opt in opts:
+                    cleaned_opt = opt.strip()
+                    if cleaned_opt == "아니요":
+                        cleaned_opt = "아니오"
+                    if cleaned_opt not in all_options:
+                        all_options.append(cleaned_opt)
+                        
+        final_responses[0]["clarification_options"] = all_options
+        for resp in final_responses[1:]:
+            resp["clarification_options"] = []
+            
     return final_responses
 
 
@@ -498,57 +563,9 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 }]
 
 
-    # ──────────────────────────────────────────────
-    # STEP 0: 지식 베이스 정확 일치 검색 (Exact Match)
-    # ──────────────────────────────────────────────
-    # "내 이름", "test" 같은 짧은 단어들이 임베딩 유사도에서 밀리는 현상을 방지하기 위해
-    # 사용자의 입력이 지식 베이스의 Question과 100% 일치하면 즉시 답변을 반환합니다.
-    try:
-        exact_results = rag_service.search_exact(request.text.strip())
-        if exact_results:
-            best = exact_results[0]
-            response = {
-                "guest_reply": best["answer"],
-                "summary": "AI 자동 답변 (정확 일치)",
-                "domain_code": None,
-                "priority": "NORMAL",
-                "entities": {},
-                "confidence": 1.0,
-                "reasoning": f"• “{request.text}” → 지식 베이스(RAG) 100% 일치 정보 감지\n• 자동 답변 처리\n• Confidence: 1.0"
-            }
-            print(f"\n[Analyze] ✅ Exact Match (100% 일치)")
-            print(f"[Analyze] 응답: {response}\n")
-            return [response]
-    except Exception as e:
-        print(f"[Analyze] ⚠️ Exact Match 검색 실패 (무시하고 RAG로 진행): {e}")
-
-    # ──────────────────────────────────────────────
-    # STEP 1: 지식 베이스 검색 (RAG - 임베딩 기반)
-    # ──────────────────────────────────────────────
-    try:
-        # threshold를 0.85로 상향하여 너무 느슨한 일치 방지
-        rag_results = rag_service.search_similar(request.text, domain_code=None, top_k=1, threshold=0.85)
-        if rag_results:
-            best = rag_results[0]
-            rag_domain = best.get("domain_code")
-            
-            # 단순 정보 제공(FAQ)이므로 부서 상관없이 티켓 생성 방지
-            final_domain = None
-            
-            response = {
-                "guest_reply": best["answer"],
-                "summary": best.get("summary") or _summarize_from_context(request.text, request.chat_history, best["question"]),
-                "domain_code": final_domain,
-                "priority": "URGENT" if rag_domain == "EMERGENCY" else "NORMAL",
-                "entities": {},
-                "confidence": best["similarity"],
-                "reasoning": f"• “{request.text}” → 지식 베이스(RAG) 유사 정보 감지 ({rag_domain})\n• 자동 답변 처리 및 부서 전달\n• Confidence: {best['similarity']:.2f}"
-            }
-            print(f"\n[Analyze] ✅ RAG 매칭 (유사도: {best['similarity']:.2f})")
-            print(f"[Analyze] 응답: {response}\n")
-            return [response]
-    except Exception as e:
-        print(f"[Analyze] ⚠️ RAG 검색 실패 (무시하고 라우터로 진행): {e}")
+    # [수정] STEP 0, STEP 1 (라우터 이전의 조기 RAG 검색)은 다중 의도(멀티 인텐트)
+    # 분할을 방해하므로 제거되었습니다. 대신 라우터 엔진(STEP 2)이 
+    # 문장을 의도별로 분할한 뒤, 각 INFO 의도(STEP 3-d)에서 개별적으로 RAG를 수행합니다.
 
     # ──────────────────────────────────────────────
     # STEP 1-5: [초기 Progress Indicator] 라우터 분석 시작 알림
@@ -918,22 +935,24 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     context_lines.append(f"{role}: {msg.get('content')}")
                 context_str = "\n".join(context_lines)
 
+                target_word = getattr(primary, 'target_keyword', None) or primary.summary or "관련 정보"
                 rewrite_prompt = (
                     f"[과거 대화 맥락]\n{context_str}\n\n"
-                    f"[고객의 질문]\n{request.text}\n\n"
-                    f"위 맥락을 참고하여, 고객이 궁극적으로 알고 싶은 '호텔 정책/정보'가 무엇인지 파악하고 지식 베이스 검색에 최적화된 구체적인 문장으로 재작성하세요."
+                    f"[고객의 전체 질문]\n{request.text}\n\n"
+                    f"[이번 검색 타겟 키워드]\n{target_word}\n\n"
+                    f"위 맥락과 검색 타겟 키워드({target_word})를 반드시 참고하여, 고객의 여러 질문 중 이 키워드에 해당하는 특정 '호텔 정책/정보'에 대해서만 지식 베이스 검색에 최적화된 구체적인 문장 하나로만 재작성하세요."
                 )
                 if domain == "CONCIERGE":
                     sys_instruction = (
                         "당신은 호텔 검색 엔진 최적화 전문가입니다. "
-                        "사용자가 대명사('이거', '다른데')나 생략된 표현을 사용했더라도, 반드시 [과거 대화 맥락]을 파악하여 사용자가 찾고자 하는 '명확한 대상(예: 식당, 관광지, 카페 등)'을 명시적으로 포함한 '단일 검색 쿼리 문장' 하나만 작성하세요. "
+                        "사용자가 대명사('이거', '다른데')나 생략된 표현을 사용했더라도, 반드시 [과거 대화 맥락]을 파악하여 타겟 키워드에 해당하는 '명확한 대상(예: 식당, 관광지, 카페 등)'을 명시적으로 포함한 '단일 검색 쿼리 문장' 하나만 작성하세요. "
                         "절대로 고객에게 대답하거나 말을 걸지 마세요. 질문형으로 끝내지 말고, 검색어 형태로 명사형이나 평서문으로 작성하세요. "
                         "반드시 {\"reply\": \"재작성된 문장\"} 형식의 JSON으로만 출력하세요."
                     )
                 else:
                     sys_instruction = (
                         "당신은 호텔 검색 엔진 최적화 전문가입니다. "
-                        "사용자가 특정 사물이나 서비스를 지칭하지 않고 '왜', '얼마야' 등 생략된 표현을 사용했더라도, 반드시 [과거 대화 맥락]을 파악하여 질문 대상을 찾아 명시적으로 포함시키세요. (예: '생수 추가 요금이 발생하는 이유가 무엇인가요?') "
+                        "사용자가 특정 사물이나 서비스를 지칭하지 않고 '왜', '얼마야' 등 생략된 표현을 사용했더라도, 반드시 [과거 대화 맥락]과 타겟 키워드를 파악하여 질문 대상을 찾아 명시적으로 포함시키세요. "
                         "**주의**: 사용자가 직접 언급하지 않은 구체적인 음식 이름이나 카테고리를 무단으로 추가하지 마세요. "
                         "반드시 {\"reply\": \"재작성된 문장\"} 형식의 JSON으로만 출력하세요."
                     )
@@ -1051,7 +1070,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         already_said = [r for r in rag_results if any(p in r['answer'] for p in mentioned_places)]
                         if is_another_request and last_category:
                             already_said = [r for r in already_said if r.get('category') == last_category]
-                        rag_results = fact_results + already_said
+                        rag_results = fact_results + other_results + already_said
 
                     is_fact_included = any("[fact]" in r['question'] for r in rag_results)
                     fact_instruction = "\n- **중요**: [fact] 태그 정보는 질문에 대한 확정적 답변이므로 즉시 활용하세요." if is_fact_included else ""
@@ -1075,11 +1094,13 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 if rag_results:
                     knowledge = "\n".join([f"Q: {r['question']}\nA: {r['answer']}" for r in rag_results])
                     
+                    target_focus = f"\n- **핀포인트 답변 지침 (중요)**: 고객의 전체 질문 중 오직 '{target_word}'에 직접적으로 관련된 정보만 핀포인트로 친절하게 답변하세요. 질문의 다른 동시 주제나 질문 대상(예: 다른 키워드에 해당하는 항목)에 대한 언급은 답변에서 완전히 제외하고 무시하세요." if target_word else ""
+                    
                     # [수정] 컨시어지 도메인인 경우, 지식 베이스를 더 적극적으로 활용하고 서비스 유도를 지시함
                     if domain == "CONCIERGE":
                         info_prompt = (
                             f"고객 질문: {request.text}\n\n"
-                            f"아래 제공된 [호텔 지식]을 바탕으로 고객의 질문에 친절하게 답변하세요. {additional_instructions}\n"
+                            f"아래 제공된 [호텔 지식]을 바탕으로 고객의 질문에 친절하게 답변하세요. {additional_instructions}{target_focus}\n"
                             f"**중요**: 제공된 [호텔 지식]이 고객의 명시적인 질문(예: 특정 목적지)과 무관하다면, 억지로 답변을 지어내지 말고 '죄송합니다. 현재 해당 정보는 안내가 어렵습니다. 프론트 데스크로 연결해 드릴까요?' 라고 정중하게 답변하세요.\n"
                             f"만약 답변 내용이 택시, 꽃배달, 예약 등 서비스 관련 내용이거나, 프론트 데스크 연결을 제안하는 내용이라면, 답변 마지막에 반드시 '지금 바로 예약을 도와드릴까요?' 또는 '필요하시면 바로 접수해 드릴까요?'와 같이 서비스 이용을 유도하는 질문을 포함하세요.\n"
                             f"**주의**: 질문형으로 대화를 끝맺었다면, 고객이 누를 수 있는 답변 버튼(예: ['네', '아니오'])을 clarification_options에 반드시 제공하세요.\n"
@@ -1089,7 +1110,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     else:
                         info_prompt = (
                             f"고객 질문: {request.text}\n\n"
-                            f"아래 제공된 [호텔 지식]은 고객 질문에 대해 검색된 공식 답변입니다. 반드시 이 지식을 활용하여 고객의 질문에 사용된 언어(또는 {request.language} 언어)로 친절하게 답변하세요. {additional_instructions}\n"
+                            f"아래 제공된 [호텔 지식]은 고객 질문에 대해 검색된 공식 답변입니다. 반드시 이 지식을 활용하여 고객의 질문에 사용된 언어(또는 {request.language} 언어)로 친절하게 답변하세요. {additional_instructions}{target_focus}\n"
                             f"고객이 한 번 더 묻거나 구체적으로 묻더라도, 제공된 [호텔 지식]을 명확한 답으로 간주하고 답변을 작성하세요. "
                             f"그리고 답변 마지막에 반드시 '{_get_static_reply('NEED_MORE_INFO', request.language)}' 라는 문장을 덧붙이세요.\n"
                             f"만약 [호텔 지식]이 고객의 질문과 아예 무관하다면, 절대 유추하거나 지어내지 말고 "

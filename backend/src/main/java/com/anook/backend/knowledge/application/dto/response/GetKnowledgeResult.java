@@ -15,5 +15,6 @@ public class GetKnowledgeResult {
     private String answer;
     private String domainCode;
     private String status;
+    private String roomNo;
     private LocalDateTime updatedAt;
 }

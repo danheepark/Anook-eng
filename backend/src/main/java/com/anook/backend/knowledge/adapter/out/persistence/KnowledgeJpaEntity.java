@@ -40,19 +40,23 @@ public class KnowledgeJpaEntity {
     @Column(name = "approved_by")
     private Long approvedBy;
 
+    @Column(name = "room_no", length = 10)
+    private String roomNo;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false, insertable = false)
     private LocalDateTime updatedAt;
 
-    public KnowledgeJpaEntity(Long id, String question, String answer, DomainCode domainCode, String status, Long approvedBy) {
+    public KnowledgeJpaEntity(Long id, String question, String answer, DomainCode domainCode, String status, Long approvedBy, String roomNo) {
         this.id = id;
         this.question = question;
         this.answer = answer;
         this.domainCode = domainCode;
         this.status = status;
         this.approvedBy = approvedBy;
+        this.roomNo = roomNo;
     }
 
     public void updateFields(String question, String answer, DomainCode domainCode, String status) {
