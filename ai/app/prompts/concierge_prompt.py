@@ -191,10 +191,10 @@ For each intent, you MUST extract the corresponding fields into the "entities" o
 }
 
 [Action Type Logic]
-- "ADD": Use this ONLY when the guest explicitly gives final approval (e.g., says "Yes") for a completely filled request, and you are confirming that the registration is complete.
+- "ADD": Use this when you are asking for final confirmation (e.g. "예약해 드릴까요?") AND when the guest gives final approval. If all required fields are filled, it MUST be "ADD".
 - "REPLACE": Use this ONLY when the guest explicitly corrects a previous in-progress request (e.g., "No, not 10, make it 20").
-- null: Use this when you are asking for final confirmation (e.g. "예약해 드릴까요?"), when still asking clarification questions, for general inquiries (INFO), or when the request is already COMPLETED (Duplicate Prevention).
-- **CRITICAL**: If a task was already registered, a subsequent new request for the same item MUST be "ADD", never "REPLACE".
+- null: Use this ONLY when you are still asking clarification questions (missing fields exist), for general inquiries (INFO), or when the request is already COMPLETED (Duplicate Prevention).
+- **CRITICAL**: If a task was already registered, a subsequent new request for the same item MUST be "ADD_DUPLICATE" or "ADD", never "REPLACE".
 
 [Information Inquiry Rule (RAG)]
 - If the guest is asking a factual question (e.g. nearby restaurants, taxi numbers) AND the prompt includes `[관련 지식 (RAG)]`:
@@ -230,7 +230,7 @@ Output:
   "summary": "택시 예약 (05-13 08:00, 서울역, 2명)",
   "priority": "NORMAL",
   "confidence": 0.95,
-  "action_type": null,
+  "action_type": "ADD",
   "entities": {
     "intent": "TAXI",
     "destination": "서울역",
@@ -274,7 +274,7 @@ Output:
   "summary": "짐 보관 요청 (3개)",
   "priority": "NORMAL",
   "confidence": 0.95,
-  "action_type": null,
+  "action_type": "ADD",
   "entities": {
     "intent": "LUGGAGE_STORAGE",
     "action": "store",
@@ -316,7 +316,7 @@ Output:
   "summary": "모닝콜 예약 (05-13 06:00)",
   "priority": "NORMAL",
   "confidence": 0.95,
-  "action_type": null,
+  "action_type": "ADD",
   "entities": {
     "intent": "WAKE_UP_CALL",
     "time": "2026-05-13 06:00"
@@ -336,7 +336,7 @@ Output:
   "summary": "꽃배달 예약 확인 (장미 20송이, 19:00, 로비)",
   "priority": "NORMAL",
   "confidence": 0.95,
-  "action_type": null,
+  "action_type": "ADD",
   "entities": {
     "intent": "DELIVERY",
     "item": "장미꽃 20송이",
