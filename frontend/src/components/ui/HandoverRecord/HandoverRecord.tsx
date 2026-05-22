@@ -4,9 +4,12 @@ import styles from './HandoverRecord.module.css';
 
 export interface HandoverItem {
   id: string | number;
+  status: string;
+  category: string;
   roomNumber: string;
-  guestName: string;
-  requestDetails: string;
+  summary: string;
+  author: string;
+  time: string;
 }
 
 export interface HandoverBriefing {
