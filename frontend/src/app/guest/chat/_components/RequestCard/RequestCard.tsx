@@ -374,7 +374,10 @@ export default function RequestCard({
                   finalTitle
                 )}
               </div>
-              <div className={styles.timeLabel}>{formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
+                <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', fontSize: '10px', lineHeight: '1', marginBottom: '2px' }}>#{requestId}</div>
+                <div className={styles.timeLabel} style={{ marginTop: 0 }}>{formatTime(isCancelled && cancelledAt ? cancelledAt : createdAt)}</div>
+              </div>
             </div>
           </div>
 

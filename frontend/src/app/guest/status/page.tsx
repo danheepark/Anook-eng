@@ -35,6 +35,7 @@ export default function GuestStatusPage() {
             {requests.map(req => (
               <RequestStatusCard
                 key={req.id}
+                requestId={req.id}
                 summary={req.summary}
                 domainCode={req.domainCode}
                 status={req.status}

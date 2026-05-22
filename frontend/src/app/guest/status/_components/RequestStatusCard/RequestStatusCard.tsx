@@ -3,6 +3,7 @@ import styles from './RequestStatusCard.module.css';
 import StatusTimeline, { RequestStatus } from '../StatusTimeline/StatusTimeline';
 
 export interface RequestStatusCardProps {
+  requestId: number;
   summary: string;
   domainCode: string;
   status: RequestStatus;
@@ -19,6 +20,7 @@ const DOMAIN_MAP: Record<string, string> = {
 };
 
 export default function RequestStatusCard({
+  requestId,
   summary,
   domainCode,
   status,
@@ -49,7 +51,8 @@ export default function RequestStatusCard({
           <span className={styles.department}>{deptName}</span>
           <h3 className={styles.title}>{displayTitle}</h3>
         </div>
-        <div className={styles.timeInfo}>
+        <div className={styles.timeInfo} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+          <span style={{ fontSize: '10px', color: 'var(--color-gray-400)', lineHeight: '1' }}>#{requestId}</span>
           <span>접수: {formatTime(createdAt)}</span>
           {status !== 'CREATED' && status !== 'PENDING' && <span>업데이트: {formatTime(updatedAt)}</span>}
         </div>
