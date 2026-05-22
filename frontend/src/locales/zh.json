@@ -452,7 +452,10 @@
       "type": "分类",
       "symptom": "症状",
       "area": "区域",
-      "content": "内容"
+      "content": "内容",
+      "contactless": "无接触",
+      "equip": "设备",
+      "loc": "位置"
     }
   },
   "menu": {

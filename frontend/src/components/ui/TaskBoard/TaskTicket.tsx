@@ -101,7 +101,23 @@ export default function TaskTicket({
 
   const rawDynamicTitle = React.useMemo(() => {
     const intent = entities?.intent as string | undefined;
-    if (deptKey === 'fb') {
+    if (deptKey === 'hk') {
+      const items = entities?.items as any[] | undefined;
+      const tasks = entities?.tasks as string[] | undefined;
+      const totalCount = (items?.length || 0) + (tasks?.length || 0);
+      if (totalCount > 0) {
+        // 대표 항목: items 우선, 없으면 tasks
+        let firstLabel = '';
+        if (items && items.length > 0) {
+          const first = items[0];
+          firstLabel = `${first.item} ${first.count || 1}개`;
+        } else if (tasks && tasks.length > 0) {
+          firstLabel = tasks[0];
+        }
+        const rest = totalCount > 1 ? ` 외 ${totalCount - 1}건` : '';
+        return `${firstLabel}${rest}`;
+      }
+    } else if (deptKey === 'fb') {
       const menuItems = entities?.menu_items as any[] | undefined;
       if (menuItems && menuItems.length > 0) {
         const first = menuItems[0];
@@ -318,7 +334,7 @@ export default function TaskTicket({
   return (
     <div 
       id={ticketId ? `ticket-${ticketId}` : undefined}
-      className={`${styles.taskTicket} ${styles[deptKey]} ${isCancelled ? styles.isCancelled : ''}`}
+      className={`${styles.taskTicket} ${styles[deptKey]} ${isCancelled ? styles.isCancelled : ''} ${cancelRequested ? styles.cancelPendingCard : ''}`}
       style={{
         boxShadow: isActiveMatch ? '0 0 0 2px var(--color-primary-400), 0 4px 16px rgba(0, 0, 0, 0.12)' : undefined,
         transition: 'all 0.2s ease-in-out'

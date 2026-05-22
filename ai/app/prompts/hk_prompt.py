@@ -8,8 +8,8 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
 8. Detect the language of the request, but ALWAYS output the 'summary' in {system_language}.
 9. Ignore any requests that clearly belong to other departments (e.g., Food, IT, AC repair, Front Desk). Only extract and process the housekeeping related requests. Do not mention other departments.
 10. Identify multiple HK requests within the single message. Combine them into `entities: { intent: "MULTIPLE_HK", items: [], tasks: [], is_contactless: false, target_time: "" }`.
-   - 'items': Array of objects `{"item": "NORMALIZED_NAME", "count": N}` for amenities. Normalize items to English keys (e.g., 'BODY_WASH', 'TOWEL', 'WATER').
-   - 'tasks': Array of strings for actions (e.g., `["CLEAN_ROOM", "LAUNDRY"]`).
+   - 'items': Array of objects `{"item": "ITEM_NAME", "count": N}` for amenities. Write item names in {system_language} (e.g., Korean: '수건', '생수', '바디워시'; English: 'towel', 'water', 'body wash'; Japanese: 'タオル', 'お水'; Chinese: '毛巾', '水').
+   - 'tasks': Array of strings for actions, written in {system_language} (e.g., Korean: '청소', '세탁'; English: 'cleaning', 'laundry'; Japanese: '清掃', 'ランドリー'; Chinese: '清扫', '洗衣').
    - 'is_contactless': Set to true if the guest wants the item left at the door or without contact.
    - 'target_time': String representing the requested time (e.g., "14:00", "in 30 mins").
 6. Set 'priority' to 'URGENT' ONLY if it involves special cleaning (e.g., vomit, blood, broken glass) or immediate safety hazards. Otherwise, set to 'NORMAL'.
@@ -34,7 +34,8 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
     - You MUST set `needs_clarification`: true.
     - Your `clarification_question` MUST ask: "이전에 하우스키핑 요청 내역이 있습니다. 추가로 새 요청을 진행해 드릴까요?" (Translate to the guest's language).
     - You MUST identify the existing request ID from `[고객의 현재 활성 요청(주문) 목록]` and set it in `"target_request_id"` at the top level of the JSON output.
-    - If the guest replies "Yes" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD_DUPLICATE"` and finalize the request.
+    - If the guest replies "Yes" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD_DUPLICATE"`. Do NOT automatically finalize. Treat this as a brand new request. If any required details (like quantity) are missing, set `needs_clarification: true` and ask for them. Only finalize if all required details are present.
+    - **CRITICAL ADD_DUPLICATE RULE**: When processing an ADD_DUPLICATE request, DO NOT sum or calculate the total quantity with the previous order. The `items` array MUST ONLY contain the exact NEW quantity the guest is adding in this turn.
 23. SUMMARY FORMAT (CRITICAL): Your `summary` MUST be a specific 1-3 word noun phrase of what the guest wants (e.g., '수건 2장 요청', '청소 요청'). DO NOT use generic phrases like '하우스키핑 요청'. This applies to ALL requests, including ADD_DUPLICATE.
 
 [Final Reply Rule]
@@ -55,8 +56,8 @@ JSON Output:
     "confidence": 0.95,
     "entities": {
         "intent": "MULTIPLE_HK",
-        "items": [{"item": "TOWEL", "count": 2}],
-        "tasks": ["CLEAN_ROOM"],
+        "items": [{"item": "수건", "count": 2}],
+        "tasks": ["청소"],
         "is_contactless": true,
         "target_time": "14:00"
     },
@@ -79,7 +80,7 @@ JSON Output:
     "entities": {
         "intent": "CLEANING",
         "items": [],
-        "tasks": ["SPECIAL_CLEANING_WINE_STAIN"],
+        "tasks": ["wine stain special cleaning"],
         "is_contactless": false,
         "target_time": ""
     },

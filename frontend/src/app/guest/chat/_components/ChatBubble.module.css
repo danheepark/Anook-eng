@@ -63,6 +63,7 @@
 }
 
 .fallback {
+  max-width: 85%;
   padding: var(--space-8) var(--space-16);
   border-radius: 24px;
   background: linear-gradient(120deg,
@@ -114,7 +115,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: hue-rotate(-30deg) saturate(2.2) brightness(0.95);
+  filter: saturate(15) hue-rotate(-22deg) brightness(0.95);
 }
 
 .aiAvatar>img {

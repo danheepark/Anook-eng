@@ -85,7 +85,7 @@
       "columns": {
         "pending": "대기 중",
         "inProgress": "진행 중",
-        "completed": "완료됨"
+        "completed": "완료"
       },
       "titles": {
         "housekeeping": "하우스키핑",
@@ -448,7 +448,10 @@
       "type": "분류",
       "symptom": "증상",
       "area": "지역",
-      "content": "내용"
+      "content": "내용",
+      "contactless": "비대면",
+      "equip": "대상",
+      "loc": "위치"
     }
   },
   "menu": {

@@ -72,28 +72,31 @@ public class RequestPersistenceAdapter implements RequestRepositoryPort {
     @Override
     public Optional<Request> findLatestCancellableByRoomNoAndGuestId(String roomNo, Long guestId) {
         return jpaRepository.findFirstByRoomNoAndGuestIdAndStatusInOrderByCreatedAtDesc(
-                roomNo, guestId, List.of("PENDING", "IN_PROGRESS", "ESCALATED")
+                roomNo, guestId, List.of("CREATED", "PENDING", "IN_PROGRESS", "ESCALATED")
         ).map(RequestJpaEntity::toDomain);
     }
 
     @Override
     public List<Request> findAllCancellableByRoomNoAndGuestId(String roomNo, Long guestId) {
         return jpaRepository.findByRoomNoAndGuestIdAndStatusIn(
-                roomNo, guestId, List.of("PENDING", "IN_PROGRESS", "ESCALATED")
+                roomNo, guestId, List.of("CREATED", "PENDING", "IN_PROGRESS", "ESCALATED")
         ).stream().map(RequestJpaEntity::toDomain).toList();
     }
 
     @Override
     public Optional<Request> findLatestCancellableByRoomNoAndGuestIdAndDomainCode(String roomNo, Long guestId, String domainCode) {
         return jpaRepository.findFirstByRoomNoAndGuestIdAndDepartmentIdAndStatusInOrderByCreatedAtDesc(
-                roomNo, guestId, domainCode, List.of("PENDING", "IN_PROGRESS", "ESCALATED")
+                roomNo, guestId, domainCode, List.of("CREATED", "PENDING", "IN_PROGRESS", "ESCALATED")
         ).map(RequestJpaEntity::toDomain);
     }
 
     @Override
     public List<Request> findPendingByRoomNoAndGuestIdAndDepartmentId(String roomNo, Long guestId, String departmentId) {
-        return jpaRepository.findByRoomNoAndGuestIdAndDepartmentIdAndStatus(roomNo, guestId, departmentId, "PENDING")
-                .stream()
+        List<RequestJpaEntity> created = jpaRepository.findByRoomNoAndGuestIdAndDepartmentIdAndStatus(roomNo, guestId, departmentId, "CREATED");
+        List<RequestJpaEntity> pending = jpaRepository.findByRoomNoAndGuestIdAndDepartmentIdAndStatus(roomNo, guestId, departmentId, "PENDING");
+        List<RequestJpaEntity> combined = new java.util.ArrayList<>(created);
+        combined.addAll(pending);
+        return combined.stream()
                 .map(RequestJpaEntity::toDomain)
                 .toList();
     }

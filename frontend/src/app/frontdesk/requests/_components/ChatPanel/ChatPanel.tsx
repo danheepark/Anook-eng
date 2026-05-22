@@ -439,6 +439,16 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
             messages.map((msg, idx) => {
               const isSystemMsg = msg.senderType === 'SYSTEM' || msg.content.includes('[SYSTEM]');
               
+              // 연속된 동일 [SYSTEM] 메시지는 첫 번째만 렌더링 (N건 동시 완료 → 카드 1개)
+              // 대화 사이에 끼인 [SYSTEM]은 이전 메시지가 시스템이 아니므로 정상 표시
+              if (isSystemMsg && idx > 0) {
+                const prevMsg = messages[idx - 1];
+                const isPrevSystem = prevMsg.senderType === 'SYSTEM' || prevMsg.content.includes('[SYSTEM]');
+                if (isPrevSystem && prevMsg.content === msg.content) {
+                  return null; // 연속 중복 → 건너뜀
+                }
+              }
+
               if (isSystemMsg) {
                 let cleanContent = msg.content.replace(/^\[SYSTEM\]\s*/, '');
                 if (cleanContent === '이전 상담 및 처리가 모두 완료되었습니다.') {

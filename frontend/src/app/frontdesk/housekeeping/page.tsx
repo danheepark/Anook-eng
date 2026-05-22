@@ -211,7 +211,7 @@ export default function HousekeepingPage() {
               </TaskColumn>
             </div>
 
-            {/* Column 3: 완료됨 */}
+            {/* Column 3: 완료 */}
             <div className={`${styles.columnWrapper} ${activeTab !== 'completed' ? styles.mobileHidden : ''}`}>
               <TaskColumn title={t.frontdeskPage.taskBoard.columns.completed} count={completed.length} status="DONE">
                 {completed.map(req => (

@@ -23,6 +23,14 @@ public class FrontdeskRequestMessageAdapter implements FrontdeskRequestMessagePo
 
     @Override
     public void sendStaffMessage(String roomNo, String content) {
+        // [SYSTEM] 메시지 중복 삽입 방지: 마지막 메시지가 동일 내용이면 건너뜀
+        if (content != null && content.startsWith("[SYSTEM]")) {
+            var lastMsg = adminMessageJpaRepository.findFirstByRoomNoOrderByCreatedAtDesc(roomNo);
+            if (lastMsg.isPresent() && content.equals(lastMsg.get().getContent())) {
+                return; // 이미 동일한 시스템 메시지가 있으므로 중복 삽입 방지
+            }
+        }
+
         FrontdeskMessageJpaEntity entity = FrontdeskMessageJpaEntity.createStaffMessage(roomNo, content);
         adminMessageJpaRepository.save(entity);
     }
