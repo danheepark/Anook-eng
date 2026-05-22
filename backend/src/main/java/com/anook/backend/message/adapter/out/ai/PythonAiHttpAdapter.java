@@ -1,5 +1,6 @@
 package com.anook.backend.message.adapter.out.ai;
 
+import com.anook.backend.global.aihealth.AiHealthMonitor;
 import com.anook.backend.message.application.port.out.MessageAiPort;
 import com.anook.backend.message.application.port.out.MessageAiResult;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +35,16 @@ import java.util.Map;
 public class PythonAiHttpAdapter implements MessageAiPort {
 
     private final WebClient webClient;
+    private final AiHealthMonitor aiHealthMonitor;
 
     public PythonAiHttpAdapter(
-            @Value("${ai.service.url:http://localhost:8000}") String aiServiceUrl
+            @Value("${ai.service.url:http://localhost:8000}") String aiServiceUrl,
+            AiHealthMonitor aiHealthMonitor
     ) {
         this.webClient = WebClient.builder()
                 .baseUrl(aiServiceUrl)
                 .build();
+        this.aiHealthMonitor = aiHealthMonitor;
     }
 
     @Override
@@ -74,8 +78,11 @@ public class PythonAiHttpAdapter implements MessageAiPort {
 
             if (responses == null || responses.isEmpty()) {
                 log.warn("[PythonAI] 응답이 null 또는 비어있음 — 폴백 응답 반환");
+                aiHealthMonitor.onAnalyzeFailure();
                 return fallbackResult();
             }
+
+            aiHealthMonitor.onAnalyzeSuccess();
 
             java.util.List<MessageAiResult> results = new java.util.ArrayList<>();
             for (Map<String, Object> response : responses) {
@@ -125,9 +132,11 @@ public class PythonAiHttpAdapter implements MessageAiPort {
 
         } catch (WebClientResponseException e) {
             log.error("[PythonAI] HTTP 에러 — status: {}, body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            aiHealthMonitor.onAnalyzeFailure();
             return fallbackResult();
         } catch (Exception e) {
             log.error("[PythonAI] 연결 실패 — {}", e.getMessage());
+            aiHealthMonitor.onAnalyzeFailure();
             return fallbackResult();
         }
     }
