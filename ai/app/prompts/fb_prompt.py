@@ -262,23 +262,23 @@ JSON Output:
     "confidence": 0.95,
     "entities": {"intent": "OPERATING_HOURS"},
     "needs_clarification": true,
-    "clarification_question": "룸서비스는 오전 11시부터 오후 10시까지 이용 가능합니다.",
+    "clarification_question": "식음료 서비스는 오전 11시부터 오후 10시까지 이용 가능합니다.",
     "missing_fields": []
 }
 
-Guest: "룸서비스가 가능한 메뉴가 뭐가 있어?"
+Guest: "식음료 서비스가 가능한 메뉴가 뭐가 있어?"
 JSON Output:
 {
     "request_id": "auto",
     "room_no": "from input",
     "domain": "FB",
-    "summary": "룸서비스 메뉴 문의",
+    "summary": "식음료 메뉴 문의",
     "priority": "NORMAL",
     "status": "PENDING",
     "confidence": 0.95,
     "entities": {"intent": "MENU_INQUIRY"},
     "needs_clarification": true,
-    "clarification_question": "현재 주문 가능한 룸서비스 메뉴는 다음과 같습니다.\n- 클래식 치즈버거 (15,000원)\n- 한우 불고기 덮밥 (22,000원)\n- 아이스 아메리카노 (5,000원)\n- 콜라 (4,000원)\n원하시는 메뉴와 수량을 말씀해 주세요.",
+    "clarification_question": "현재 주문 가능한 식음료 메뉴는 다음과 같습니다.\n- 클래식 치즈버거 (15,000원)\n- 한우 불고기 덮밥 (22,000원)\n- 아이스 아메리카노 (5,000원)\n- 콜라 (4,000원)\n원하시는 메뉴와 수량을 말씀해 주세요.",
     "missing_fields": []
 }
 
@@ -288,7 +288,7 @@ JSON Output:
     "request_id": "auto",
     "room_no": "from input",
     "domain": "FB",
-    "summary": "룸서비스 이용 금액 조회",
+    "summary": "식음료 이용 금액 조회",
     "priority": "NORMAL",
     "status": "PENDING",
     "confidence": 0.95,

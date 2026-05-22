@@ -24,6 +24,57 @@
   background-color: var(--color-white);
 }
 
+.tr {
+  transition: background-color 0.2s ease;
+}
+
+.tr:hover .td {
+  background-color: var(--color-gray-50);
+}
+
+.center {
+  text-align: center;
+}
+
+.statusWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  vertical-align: middle;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusPending {
+  background-color: var(--color-error);
+}
+
+.statusDone {
+  background-color: var(--color-success);
+}
+
+.statusInProgress {
+  background-color: var(--color-warning);
+}
+
+.statusText {
+  font-weight: 500;
+}
+
+.roomNo {
+  font-weight: 600;
+}
+
+.time {
+  color: var(--color-gray-600);
+}
+
 /* 데스크탑 및 모바일 반응형 처리 */
 @media (max-width: 768px) {
   .th,

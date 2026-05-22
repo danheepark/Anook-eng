@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class HandoverTask {
-    private String roomNo;
-    private String guestName;
-    private String category;
-    private String summary;
     private String status;
+    private String category;
+    private String roomNo;
+    private String summary;
+    private String authorName;
     private LocalDateTime createdAt;
 }

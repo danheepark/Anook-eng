@@ -645,6 +645,7 @@ export function useChat() {
     const hasEnglish = /[a-zA-Z]/.test(text);
 
     const currentLanguage = useUiStore.getState().language;
+    const currentChatLanguage = useUiStore.getState().chatLanguage;
     let detectedChatLang = currentLanguage; // Default to CURRENT language
 
     if (hasKorean) detectedChatLang = 'ko';
@@ -654,6 +655,8 @@ export function useChat() {
 
     if (detectedChatLang !== currentLanguage) {
       setLanguage(detectedChatLang as any);
+    }
+    if (detectedChatLang !== currentChatLanguage) {
       setChatLanguage(detectedChatLang);
     }
 

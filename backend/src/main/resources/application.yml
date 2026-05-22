@@ -46,6 +46,9 @@ inventory:
         - "물"
         - "워터"
         - "water"
+        - "お水"
+        - "水"
+        - "ウォーター"
       allowance: 2
       extra-charge: 2000
     - code: TOWEL
@@ -53,6 +56,8 @@ inventory:
         - "수건"
         - "타월"
         - "towel"
+        - "タオル"
+        - "毛巾"
       allowance: 4
       extra-charge: 1000
 

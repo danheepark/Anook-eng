@@ -169,7 +169,7 @@ export default function RequestStatusCard({
   }
 
   return (
-    <div className={`${styles.card} ${isCancelled ? styles.isCancelled : ''}`}>
+    <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.titleGroup}>
           <span className={styles.department}>{deptName}</span>

@@ -112,7 +112,7 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
         guest_reply = await asyncio.to_thread(_handle_billing_inquiry, room_no, user_message, system_language)
         return {
             "guest_reply": guest_reply,
-            "summary": "룸서비스 이용 금액 조회",
+            "summary": "식음료 이용 금액 조회",
             "domain_code": None,  # 정보 조회일 뿐, request 생성 불필요
             "priority": "NORMAL",
             "entities": {"intent": "BILLING_INQUIRY"},
@@ -124,7 +124,7 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
         guest_reply = result.clarification_question
     else:
         # 주문 확정 시 AI가 고객 언어로 작성한 final_reply 사용 (다국어 미러링)
-        guest_reply = result.final_reply or "룸서비스 주문이 접수되었습니다."
+        guest_reply = result.final_reply or "식음료 주문이 접수되었습니다."
 
     # 8. analyze.py 응답 포맷 반환
     # [수정] 주문 확인 단계(needs_clarification=True, missing_fields가 비어있고, intent가 주문/변경 관련인 경우)
@@ -182,7 +182,7 @@ def _handle_billing_inquiry(room_no: str, user_message: str, system_language: st
             total = data.get("totalAmount", 0)
 
             if not items:
-                return "현재까지 룸서비스 이용 내역이 없습니다."
+                return "현재까지 식음료 이용 내역이 없습니다."
 
             # 항목별 내역 구성
             lines = []
@@ -200,7 +200,7 @@ def _handle_billing_inquiry(room_no: str, user_message: str, system_language: st
             if is_english:
                 return f"Here is your room service usage so far:\n{detail}\n\nTotal: ${total:.2f}"
             else:
-                return f"현재까지 룸서비스 이용 내역입니다:\n{detail}\n\n총 금액: ${total:.2f}"
+                return f"현재까지 식음료 이용 내역입니다:\n{detail}\n\n총 금액: ${total:.2f}"
         else:
             print(f"[FB Agent] 영수증 조회 API 실패: HTTP {resp.status_code}")
             return "이용 내역 조회 중 오류가 발생했습니다. 프론트데스크로 문의 부탁드립니다."

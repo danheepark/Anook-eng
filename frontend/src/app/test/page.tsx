@@ -124,13 +124,13 @@ export default function ComponentShowcasePage() {
   ];
 
   const sampleHandoverItems = [
-    { id: 1, roomNumber: '1204', guestName: '김민수', requestDetails: '[에어컨 수리] 에어컨 작동 안 됨' },
-    { id: 2, roomNumber: '1204', guestName: '김민수', requestDetails: '[수건 교체] 새 수건 3장 추가 요청' },
-    { id: 3, roomNumber: '805', guestName: '박지원', requestDetails: '[룸서비스] 치즈버거 1세트 주문' },
-    { id: 4, roomNumber: '502', guestName: '이지현', requestDetails: '[침구류 정리] 엑스트라 베드 설치 요청' },
-    { id: 5, roomNumber: '302', guestName: '최승우', requestDetails: '[샤워기 헤드 교체] 수압 약함' },
-    { id: 6, roomNumber: '2105', guestName: '홍길동', requestDetails: '[레스토랑 예약] 오늘 저녁 7시 미슐랭 레스토랑 2명 예약 요청' },
-    { id: 7, roomNumber: '1001', guestName: '홍길동', requestDetails: '[객실 내 응급 환자] 심한 복통 호소, 의료진 지원 필요' },
+    { id: 1, status: 'DONE', category: '시설관리', roomNumber: '1204', summary: '에어컨 수리: 에어컨 작동 안 됨', author: '김직원', time: '10:00' },
+    { id: 2, status: 'DONE', category: '하우스키핑', roomNumber: '1204', summary: '수건 교체: 새 수건 3장 추가 요청', author: '김직원', time: '10:15' },
+    { id: 3, status: 'DONE', category: '식음료', roomNumber: '805', summary: '룸서비스: 치즈버거 1세트 주문', author: '김음료', time: '10:30' },
+    { id: 4, status: 'DONE', category: '하우스키핑', roomNumber: '502', summary: '침구류 정리: 엑스트라 베드 설치 요청', author: '김직원', time: '10:45' },
+    { id: 5, status: 'DONE', category: '시설관리', roomNumber: '302', summary: '샤워기 헤드 교체: 수압 약함', author: '김직원', time: '11:00' },
+    { id: 6, status: 'DONE', category: '컨시어지', roomNumber: '2105', summary: '레스토랑 예약: 오늘 저녁 7시 미슐랭 레스토랑 2명 예약 요청', author: '김직원', time: '11:15' },
+    { id: 7, status: 'DONE', category: '긴급', roomNumber: '1001', summary: '객실 내 응급 환자: 심한 복통 호소, 의료진 지원 필요', author: '김직원', time: '11:30' },
   ];
 
   const sampleHandoverBriefing = {
