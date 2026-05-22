@@ -67,8 +67,13 @@ public class GracePeriodScheduler {
 
                 Request request = requestOpt.get();
 
-                if (request.getStatus() == RequestStatus.PENDING) {
-                    // Grace Period 만료 — 직원에게 알림 발송
+                if (request.getStatus() == RequestStatus.CREATED || request.getStatus() == RequestStatus.PENDING) {
+                    // Grace Period 만료 — CREATED→PENDING 전환 후 직원에게 알림 발송
+                    if (request.getStatus() == RequestStatus.CREATED) {
+                        request.confirmGrace();
+                        requestPort.save(request);
+                        log.info("[GracePeriod] CREATED→PENDING 전환 완료 — requestId: {}", requestId);
+                    }
                     log.info("[GracePeriod] 만료 → 직원 알림 발송 — requestId: {}, dept: {}", requestId, deptCode);
 
                     dispatchPort.dispatchToDepartment(deptCode, payload);
@@ -105,7 +110,13 @@ public class GracePeriodScheduler {
             Optional<Request> requestOpt = requestPort.findById(requestId);
             if (requestOpt.isPresent()) {
                 Request request = requestOpt.get();
-                if (request.getStatus() == RequestStatus.PENDING) {
+                if (request.getStatus() == RequestStatus.CREATED || request.getStatus() == RequestStatus.PENDING) {
+                    // CREATED→PENDING 전환
+                    if (request.getStatus() == RequestStatus.CREATED) {
+                        request.confirmGrace();
+                        requestPort.save(request);
+                        log.info("[GracePeriod] 고객 수락 → CREATED→PENDING 전환 — requestId: {}", requestId);
+                    }
                     String deptCode = request.getDomainCode() != null ? request.getDomainCode().name() : "UNKNOWN";
                     
                     log.info("[GracePeriod] 수락하기 즉시 발송 — requestId: {}, dept: {}", requestId, deptCode);
@@ -132,6 +143,19 @@ public class GracePeriodScheduler {
             }
         } catch (Exception e) {
             log.error("[GracePeriod] 고객 수락 처리 중 오류 — requestId: {}, error: {}", requestId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Grace Period 타이머만 취소한다 (상태 전환 없이).
+     * REPLACE 흐름에서 기존 요청을 CANCELLED로 변경한 뒤,
+     * 아직 남아 있는 타이머가 CREATED→PENDING 전환을 시도하는 것을 방지한다.
+     */
+    public void cancelGrace(Long requestId) {
+        ScheduledFuture<?> future = scheduledTasks.remove(requestId);
+        if (future != null) {
+            future.cancel(false);
+            log.info("[GracePeriod] 타이머 취소 (REPLACE/CANCEL) — requestId: {}", requestId);
         }
     }
 

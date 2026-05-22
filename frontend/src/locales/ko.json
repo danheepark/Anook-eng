@@ -85,7 +85,7 @@
       "columns": {
         "pending": "대기 중",
         "inProgress": "진행 중",
-        "completed": "완료됨"
+        "completed": "완료"
       },
       "titles": {
         "housekeeping": "하우스키핑",
@@ -134,9 +134,9 @@
       "tabs": {
         "ALL": "전체",
         "HK": "하우스키핑",
-        "FB": "F&B",
+        "FB": "식음료",
         "FACILITY": "시설",
-        "CONCIERGE": "컨시어지",
+        "CONCIERGE": "컨시어즈",
         "FRONT": "프론트 데스크",
         "EMERGENCY": "긴급 대응",
         "COMMON": "공통 (호텔 전반)"
@@ -288,9 +288,9 @@
       "forwardingSuffix": " 팀에 내용을 전달하고 있습니다...",
       "domains": {
         "HK": "하우스키핑",
-        "FB": "룸서비스",
-        "FACILITY": "시설관리",
-        "CONCIERGE": "컨시어지",
+        "FB": "식음료",
+        "FACILITY": "시설 관리",
+        "CONCIERGE": "컨시어즈",
         "FRONT": "프론트데스크",
         "EMERGENCY": "긴급 대응"
       }
@@ -407,9 +407,9 @@
   "ticketUI": {
     "department": {
       "HK": "하우스키핑",
-      "FACILITY": "시설관리",
-      "FB": "F&B",
-      "CONCIERGE": "컨시어지",
+      "FACILITY": "시설 관리",
+      "FB": "식음료",
+      "CONCIERGE": "컨시어즈",
       "FRONT": "프론트",
       "EMERGENCY": "긴급"
     },
@@ -448,7 +448,10 @@
       "type": "분류",
       "symptom": "증상",
       "area": "지역",
-      "content": "내용"
+      "content": "내용",
+      "contactless": "비대면",
+      "equip": "대상",
+      "loc": "위치"
     }
   },
   "menu": {
@@ -467,10 +470,10 @@
     "speechUnsupported": "현재 브라우저에서는 음성 인식을 지원하지 않습니다."
   },
   "aiReplies": {
-    "forwardFb": "네, F&B(룸서비스) 팀으로 주문 내용을 바로 전달해 드릴게요!",
+    "forwardFb": "네, 식음료 팀으로 주문 내용을 바로 전달해 드릴게요!",
     "forwardHk": "네, 알겠습니다! 하우스키핑 팀으로 요청 내용을 신속하게 전달해 드릴게요.",
-    "forwardFacility": "불편을 드려 죄송합니다. 🥲 시설관리 팀으로 내용을 전달하여 최대한 빠르게 조치해 드릴게요! 🛠️",
-    "forwardConcierge": "네, 알겠습니다! 컨시어지 팀으로 요청 내용을 바로 전달해 드릴게요. 🛎️",
+    "forwardFacility": "불편을 드려 죄송합니다. 🥲 시설 관리 팀으로 내용을 전달하여 최대한 빠르게 조치해 드릴게요! 🛠️",
+    "forwardConcierge": "네, 알겠습니다! 컨시어즈 팀으로 요청 내용을 바로 전달해 드릴게요. 🛎️",
     "forwardFront": "지금 바로 프론트 데스크 직원에게 연결하여 도움을 드리겠습니다.",
     "infoNotFound": "그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏",
     "cancelSuccess": "해당 요청이 정상적으로 취소되었습니다. 😌 다른 필요하신 사항이 있다면 언제든 말씀해 주세요!",

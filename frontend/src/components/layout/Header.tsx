@@ -6,7 +6,9 @@ import { Menu } from 'lucide-react';
 import { useUiStore } from '@/stores/useUiStore';
 import styles from './Header.module.css';
 import HeaderNotification from './HeaderNotification/HeaderNotification';
+import StaffNotification from './StaffNotification/StaffNotification';
 import Button from '@/components/ui/Button/Button';
+import AiServerStatusIndicator from '@/components/ui/AiServerStatusIndicator/AiServerStatusIndicator';
 
 interface HeaderProps {
   className?: string;
@@ -22,6 +24,7 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
         <button className={styles.hamburgerBtn} onClick={toggleSidebar} aria-label="메뉴 열기">
           <Menu size={24} />
         </button>
+        {role === 'frontdesk' && <AiServerStatusIndicator />}
       </div>
 
       <div className={styles.right} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-16)' }}>
@@ -34,6 +37,11 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
               <HeaderNotification />
             </Suspense>
           </>
+        )}
+        {role === 'staff' && (
+          <Suspense fallback={<div style={{ width: 24, height: 24 }}></div>}>
+            <StaffNotification />
+          </Suspense>
         )}
         <LanguageToggle />
       </div>

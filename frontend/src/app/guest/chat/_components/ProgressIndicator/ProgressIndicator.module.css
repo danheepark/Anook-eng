@@ -25,6 +25,7 @@
   justify-content: center;
   position: relative;
   overflow: visible !important;
+  filter: saturate(15) hue-rotate(-22deg) brightness(0.95);
 }
 
 

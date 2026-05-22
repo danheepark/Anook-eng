@@ -14,8 +14,9 @@ const dictionaries = {
 type Language = keyof typeof dictionaries;
 type Dictionary = typeof ko;
 
-export function useTranslation() {
-  const language = useUiStore((state) => state.language) as Language;
+export function useTranslation(overrideLang?: string) {
+  const storeLanguage = useUiStore((state) => state.language) as Language;
+  const language = (overrideLang || storeLanguage) as Language;
   
   // Safe fallback to 'ko'
   const t = dictionaries[language] || dictionaries['ko'];

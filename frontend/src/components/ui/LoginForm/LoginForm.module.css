@@ -22,7 +22,7 @@
   transform: translateX(-50%);
   width: 660px;
   height: 660px;
-  background: radial-gradient(50% 50% at 50% 50%, var(--color-surface) 0%, rgba(216, 223, 245, 0.8) 35%, rgba(216, 223, 245, 0.4) 65%, rgba(216, 223, 245, 0) 100%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(216, 223, 245, 0.8) 0%, rgba(216, 223, 245, 0.4) 65%, rgba(216, 223, 245, 0) 100%);
   border-radius: 50%;
   opacity: 0.85;
   pointer-events: none;

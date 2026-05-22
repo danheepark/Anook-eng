@@ -149,7 +149,7 @@ export function useChat() {
 
         // 요청 카드 변환 (시간순 삽입을 위해 _ts 포함)
         const progressMap: Record<string, number> = {
-          'PENDING': 10, 'ESCALATED': 10, 'ASSIGNED': 50, 'IN_PROGRESS': 50, 'COMPLETED': 100, 'CANCELLED': 0
+          'CREATED': 5, 'PENDING': 10, 'ESCALATED': 10, 'ASSIGNED': 50, 'IN_PROGRESS': 50, 'COMPLETED': 100, 'CANCELLED': 0
         };
 
         // FRONT 도메인 CHAT_END 카드는 방 단위로 1개만 복원 (중복 방지)
@@ -329,7 +329,7 @@ export function useChat() {
         });
       } else if (['NEW_REQUEST', 'STATUS_CHANGED', 'CANCEL_APPROVED', 'CANCEL_REJECTED', 'CANCEL_REQUEST_RECEIVED'].includes(payload.type)) {
         const progressMap: Record<string, number> = {
-          'PENDING': 10, 'ESCALATED': 10, 'ASSIGNED': 50, 'IN_PROGRESS': 50, 'COMPLETED': 100, 'CANCELLED': 0
+          'CREATED': 5, 'PENDING': 10, 'ESCALATED': 10, 'ASSIGNED': 50, 'IN_PROGRESS': 50, 'COMPLETED': 100, 'CANCELLED': 0
         };
         const isCancelled = payload.status === 'CANCELLED';
         const isCancelPending = payload.type === 'CANCEL_REQUEST_RECEIVED';
@@ -645,6 +645,7 @@ export function useChat() {
     const hasEnglish = /[a-zA-Z]/.test(text);
 
     const currentLanguage = useUiStore.getState().language;
+    const currentChatLanguage = useUiStore.getState().chatLanguage;
     let detectedChatLang = currentLanguage; // Default to CURRENT language
 
     if (hasKorean) detectedChatLang = 'ko';
@@ -654,6 +655,8 @@ export function useChat() {
 
     if (detectedChatLang !== currentLanguage) {
       setLanguage(detectedChatLang as any);
+    }
+    if (detectedChatLang !== currentChatLanguage) {
       setChatLanguage(detectedChatLang);
     }
 

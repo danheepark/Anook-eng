@@ -1,0 +1,145 @@
+.card {
+  display: flex;
+  align-items: flex-start; /* 상단 정렬로 세로 찌그러짐 방지 및 정갈한 레이아웃 */
+  padding: var(--space-16);
+  gap: var(--space-12);
+  border: none;
+  border-bottom: 1px solid var(--color-gray-200);
+  border-radius: 0;
+  background: transparent;
+  transition: background-color 0.15s;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card:hover {
+  background-color: var(--color-gray-50);
+}
+
+.card.clickable {
+  cursor: pointer;
+}
+
+/* 객실 동그라미 박스 */
+.roomBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--color-gray-100);
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: flex-start; /* 세로 늘어남 완전 방지 */
+}
+
+.roomNumber {
+  font: var(--text-body-bold);
+  color: var(--color-gray-800);
+}
+
+/* 중단 컨텐츠 영역 */
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+.tagsRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  line-height: 1;
+}
+
+.tag {
+  font: var(--text-caption-bold);
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.tagCancel {
+  color: var(--color-error);
+  background-color: var(--color-tag-background-red);
+}
+
+.tagEscalation {
+  color: var(--color-warning-dark, #92400E);
+  background-color: var(--color-tag-background-yellow, #FEF3C7);
+}
+
+.tagUrgent {
+  font: var(--text-caption-bold);
+  color: var(--color-white);
+  background-color: var(--color-error);
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.department {
+  font: var(--text-caption-medium);
+  color: var(--color-gray-400);
+}
+
+.title {
+  font: var(--text-body-bold);
+  color: var(--color-gray-900);
+  margin: var(--space-4) 0 var(--space-2) 0;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+}
+
+.description {
+  font: var(--text-caption-regular);
+  color: var(--color-gray-500);
+  margin: 0 0 var(--space-8) 0;
+  line-height: 1.4;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 액션 버튼 영역 */
+.actions {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-4);
+  width: 100%;
+}
+
+.actionButton {
+  flex: 1;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md, 6px);
+}
+
+/* 우측 시간 섹션 */
+.rightSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: var(--space-4);
+  padding-top: 2px;
+}
+
+.timeText {
+  font: var(--text-caption-medium);
+  color: var(--color-gray-400);
+  white-space: nowrap;
+  flex-shrink: 0;
+}

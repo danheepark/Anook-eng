@@ -10,6 +10,7 @@ name: Anook AWS Deploy
 on:
   push:
     branches: [ dev ] # 아늑 프로젝트는 dev 브랜치 머지 기준
+  workflow_dispatch: # 수동 실행 지원 (Actions 탭에서 직접 실행 가능)
 
 jobs:
   deploy:

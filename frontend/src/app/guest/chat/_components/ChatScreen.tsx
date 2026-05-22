@@ -176,7 +176,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           }
           if (msg.type === 'REQUEST_CARD') {
             return (
-              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-12)' }}>
                 {msg.content && msg.content.trim() !== '' && (
                   <ChatBubble variant="received" animate={index === messages.length - 1}>
                     {msg.content}

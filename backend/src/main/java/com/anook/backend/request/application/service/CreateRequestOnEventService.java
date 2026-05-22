@@ -74,10 +74,13 @@ public class CreateRequestOnEventService {
 
             if (targetRequest.isPresent()) {
                 Request existing = targetRequest.get();
-                if (existing.getStatus() == RequestStatus.PENDING) {
+                if (existing.getStatus() == RequestStatus.CREATED || existing.getStatus() == RequestStatus.PENDING) {
                     try {
                         existing.changeStatus(RequestStatus.CANCELLED);
                         requestRepositoryPort.save(existing);
+
+                        // Grace Period 타이머도 취소 (CREATED→PENDING 레이스 컨디션 방지)
+                        gracePeriodScheduler.cancelGrace(existing.getId());
 
                         log.info("[Cancel&Replace] PENDING 요청 자동 취소 — id: {}, summary: {}, keyword: {}",
                                 existing.getId(), existing.getSummary(), event.getTargetKeyword());
@@ -256,6 +259,11 @@ public class CreateRequestOnEventService {
 
         if (skipGrace) {
             // URGENT / FRONT 에스컬레이션: 즉시 직원/관리자 알림 (Grace Period 없음)
+            // CREATED → PENDING 즉시 전환 (ESCALATED는 이미 markEmergency()에서 전환됨)
+            if (savedRequest.getStatus() == RequestStatus.CREATED) {
+                savedRequest.confirmGrace();
+                savedRequest = requestRepositoryPort.save(savedRequest);
+            }
             log.info("[GracePeriod] 즉시 발송 (urgent={}, front={}) — id: {}", isUrgent, isFrontEscalation,
                     savedRequest.getId());
             if (savedRequest.getDomainCode() != null) {

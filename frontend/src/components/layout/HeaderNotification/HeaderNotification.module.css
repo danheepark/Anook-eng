@@ -40,7 +40,7 @@
   top: 100%;
   right: 0;
   margin-top: var(--space-8);
-  width: 360px;
+  width: 380px;
   background-color: var(--color-white);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
@@ -52,9 +52,7 @@
 }
 
 .header {
-  padding: var(--space-16);
-  border-bottom: 1px solid var(--color-gray-200);
-  background-color: var(--color-gray-50);
+  padding: var(--space-16) var(--space-16) var(--space-8) var(--space-16);
 }
 
 .title {
@@ -64,7 +62,7 @@
 }
 
 .content {
-  max-height: 400px;
+  max-height: 440px;
   overflow-y: auto;
 }
 
@@ -78,89 +76,4 @@
 .list {
   display: flex;
   flex-direction: column;
-}
-
-.item {
-  padding: var(--space-16);
-  border-bottom: 1px solid var(--color-gray-100);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-  transition: background-color 0.2s;
-}
-
-.item:hover {
-  background-color: var(--color-gray-50);
-}
-
-.item:last-child {
-  border-bottom: none;
-}
-
-.itemHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.tagCancel {
-  font: var(--text-caption-bold);
-  color: var(--color-error);
-  background-color: var(--color-error-light);
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.tagEscalate {
-  font: var(--text-caption-bold);
-  color: var(--color-warning-dark);
-  background-color: var(--color-warning-light);
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.roomNo {
-  font: var(--text-caption-regular);
-  color: var(--color-gray-500);
-}
-
-.summary {
-  font: var(--text-body-medium);
-  color: var(--color-gray-900);
-  margin: 0;
-  word-break: break-word;
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-8);
-  margin-top: var(--space-4);
-}
-
-.btnApprove, .btnReject {
-  flex: 1;
-  padding: 8px 0;
-  border-radius: 4px;
-  font: var(--text-button-small);
-  cursor: pointer;
-  border: none;
-  transition: background-color 0.2s;
-}
-
-.btnApprove {
-  background-color: var(--color-primary);
-  color: white;
-}
-
-.btnApprove:hover {
-  background-color: var(--color-primary-dark);
-}
-
-.btnReject {
-  background-color: var(--color-gray-100);
-  color: var(--color-gray-700);
-}
-
-.btnReject:hover {
-  background-color: var(--color-gray-200);
 }
