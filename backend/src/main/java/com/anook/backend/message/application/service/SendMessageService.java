@@ -247,6 +247,9 @@ public class SendMessageService implements SendMessageUseCase {
                     .map(MessageAiResult::clarificationOptions)
                     .filter(java.util.Objects::nonNull)
                     .flatMap(java.util.List::stream)
+                    .map(String::trim)
+                    .map(opt -> opt.equals("아니요") ? "아니오" : opt)
+                    .distinct()
                     .toList();
 
             if (!options.isEmpty() && conflictRequestId == null) {

@@ -27,7 +27,8 @@ public class KnowledgePersistenceAdapter implements KnowledgeRepositoryPort {
                 entry.getAnswer(),
                 entry.getDomainCode(),
                 entry.getStatus() != null ? entry.getStatus().name() : KnowledgeStatus.PENDING.name(),
-                entry.getApprovedBy()
+                entry.getApprovedBy(),
+                entry.getRoomNo()
         );
 
         KnowledgeJpaEntity savedEntity = knowledgeJpaRepository.saveAndFlush(entity);
@@ -89,6 +90,12 @@ public class KnowledgePersistenceAdapter implements KnowledgeRepositoryPort {
     }
 
     @Override
+    @Transactional
+    public void deleteByRoomNoAndStatus(String roomNo, String status) {
+        knowledgeJpaRepository.deleteByRoomNoAndStatus(roomNo, status);
+    }
+
+    @Override
     public boolean existsByDomainCodeAndQuestion(String domainCode, String question) {
         DomainCode code = DomainCode.valueOf(domainCode.toUpperCase());
         return knowledgeJpaRepository.existsByDomainCodeAndQuestion(code, question);
@@ -102,6 +109,7 @@ public class KnowledgePersistenceAdapter implements KnowledgeRepositoryPort {
                 .domainCode(entity.getDomainCode())
                 .status(KnowledgeStatus.valueOf(entity.getStatus()))
                 .approvedBy(entity.getApprovedBy())
+                .roomNo(entity.getRoomNo())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();

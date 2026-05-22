@@ -58,6 +58,7 @@ public class GetKnowledgeService implements GetKnowledgeListUseCase, GetKnowledg
                 .answer(entry.getAnswer())
                 .domainCode(entry.getDomainCode().name())
                 .status(entry.getStatus().name())
+                .roomNo(entry.getRoomNo())
                 .updatedAt(entry.getUpdatedAt())
                 .build();
     }
