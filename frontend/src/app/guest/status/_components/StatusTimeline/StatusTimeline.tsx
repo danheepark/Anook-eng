@@ -1,14 +1,14 @@
 import React from 'react';
 import styles from './StatusTimeline.module.css';
 
-export type RequestStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SETTLED' | 'CANCELLED';
+export type RequestStatus = 'CREATED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SETTLED' | 'CANCELLED';
 
 interface StatusTimelineProps {
   status: RequestStatus;
 }
 
 const STEPS = [
-  { key: 'PENDING', label: '요청 접수' },
+  { key: 'PENDING', label: '요청 접수' },  // CREATED 도 여기에 매핑
   { key: 'IN_PROGRESS', label: '요청 처리중' },
   { key: 'COMPLETED', label: '처리 완료' },
 ];

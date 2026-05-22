@@ -34,7 +34,7 @@ public class MessageActiveRequestPersistenceAdapter implements MessageActiveRequ
     public java.util.List<java.util.Map<String, Object>> findActiveRequests(String roomNo, Long guestId) {
         String sql = "SELECT id, department_id, summary, status " +
                      "FROM request " +
-                     "WHERE room_no = ? AND guest_id = ? AND status IN ('PENDING', 'IN_PROGRESS', 'ESCALATED') " +
+                     "WHERE room_no = ? AND guest_id = ? AND status IN ('CREATED', 'PENDING', 'IN_PROGRESS', 'ESCALATED') " +
                      "ORDER BY created_at DESC " +
                      "LIMIT 10"; // AI에 보낼 문맥이므로 최근 10개로 제한
                      

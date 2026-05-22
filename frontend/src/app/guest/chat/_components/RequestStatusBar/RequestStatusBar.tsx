@@ -26,6 +26,7 @@ const DOMAIN_MAP: Record<string, { icon: string, key: string }> = {
 };
 
 export default function RequestStatusBar({
+  requestId,
   domainCode,
   summary,
   status,
@@ -225,7 +226,7 @@ export default function RequestStatusBar({
   const detailsText = translatedDetails || rawDetails;
   
   let computedProgress = 0;
-  if (status === 'PENDING' || status === 'CANCEL_PENDING' || status === 'ESCALATED') {
+  if (status === 'CREATED' || status === 'PENDING' || status === 'CANCEL_PENDING' || status === 'ESCALATED') {
     computedProgress = 0;
   } else if (status === 'IN_PROGRESS') {
     computedProgress = 50;
@@ -276,18 +277,21 @@ export default function RequestStatusBar({
             <div className={styles.statusMessage}>
               {domainCode === 'EMERGENCY' ? (
                 <>
-                  {(status === 'PENDING' || status === 'CANCEL_PENDING') && (t.cardUI.statusBar?.emergencyPending || '프론트 데스크에서 긴급 요청건을 확인하고 있습니다.')}
+                  {(status === 'CREATED' || status === 'PENDING' || status === 'CANCEL_PENDING') && (t.cardUI.statusBar?.emergencyPending || '프론트 데스크에서 긴급 요청건을 확인하고 있습니다.')}
                   {status === 'IN_PROGRESS' && (t.cardUI.statusBar?.emergencyInProgress || '프론트 데스크에서 긴급 요청건을 처리 중입니다.')}
                   {status === 'COMPLETED' && (t.cardUI.statusBar?.emergencyCompleted || '긴급 요청건이 처리 완료되었습니다.')}
                 </>
               ) : (
                 <>
-                  {(status === 'PENDING' || status === 'CANCEL_PENDING') && t.cardUI.statusBar?.templateNoDetailsPending?.replace('{team}', domainLabel)}
+                  {(status === 'CREATED' || status === 'PENDING' || status === 'CANCEL_PENDING') && t.cardUI.statusBar?.templateNoDetailsPending?.replace('{team}', domainLabel)}
                   {status === 'IN_PROGRESS' && t.cardUI.statusBar?.templateNoDetailsInProgress?.replace('{team}', domainLabel)}
                   {status === 'COMPLETED' && t.cardUI.statusBar?.templateNoDetailsCompleted?.replace('{team}', domainLabel)}
                 </>
               )}
             </div>
+          </div>
+          <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-400)', whiteSpace: 'nowrap', marginLeft: 'var(--space-8)' }}>
+            #{requestId}
           </div>
         </div>
       )}
