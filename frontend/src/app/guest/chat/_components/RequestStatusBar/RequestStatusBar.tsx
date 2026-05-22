@@ -26,6 +26,7 @@ const DOMAIN_MAP: Record<string, { icon: string, key: string }> = {
 };
 
 export default function RequestStatusBar({
+  requestId,
   domainCode,
   summary,
   status,
