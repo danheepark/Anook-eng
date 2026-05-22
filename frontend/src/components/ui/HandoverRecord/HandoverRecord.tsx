@@ -44,7 +44,7 @@ export default function HandoverRecord({ managerName, briefing, items }: Handove
             </tr>
             <tr>
               <th className={styles.infoTh}>처리 현황</th>
-              <td className={styles.infoTd}>{briefing.pendingCount} / {briefing.totalRequestCount}</td>
+              <td className={styles.infoTd}>{briefing.totalRequestCount - briefing.pendingCount} / {briefing.totalRequestCount}</td>
               <th className={styles.infoTh}>작성 일시</th>
               <td className={styles.infoTd}>{briefing.createdAt}</td>
             </tr>
