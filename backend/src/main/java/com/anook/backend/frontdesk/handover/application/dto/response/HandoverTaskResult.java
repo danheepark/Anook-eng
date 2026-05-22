@@ -6,9 +6,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class HandoverTaskResult {
-    private String roomNo;
-    private String guestName;
-    private String category;
-    private String summary;
     private String status;
+    private String category;
+    private String roomNo;
+    private String summary;
+    private String author;
+    private String time;
 }

@@ -37,6 +37,10 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+    
+    // Inject the logged in user's name from the session
+    data.loggedInUserName = session.name;
+    
     return NextResponse.json(data);
   } catch (error) {
     console.error("Handover API Error:", error);

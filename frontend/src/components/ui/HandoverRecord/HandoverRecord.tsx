@@ -4,9 +4,12 @@ import styles from './HandoverRecord.module.css';
 
 export interface HandoverItem {
   id: string | number;
+  status: string;
+  category: string;
   roomNumber: string;
-  guestName: string;
-  requestDetails: string;
+  summary: string;
+  author: string;
+  time: string;
 }
 
 export interface HandoverBriefing {
@@ -34,28 +37,16 @@ export default function HandoverRecord({ managerName, briefing, items }: Handove
         <table className={styles.infoTable}>
           <tbody>
             <tr>
-              <th className={styles.infoTh}>ID</th>
-              <td className={styles.infoTd}>{briefing.id}</td>
+              <th className={styles.infoTh}>근무시간</th>
+              <td className={styles.infoTd}>{briefing.shiftStart} ~ {briefing.shiftEnd}</td>
               <th className={styles.infoTh}>담당자명</th>
               <td className={styles.infoTd}>{managerName || '-'}</td>
             </tr>
             <tr>
-              <th className={styles.infoTh}>교대 시작</th>
-              <td className={styles.infoTd}>{briefing.shiftStart}</td>
-              <th className={styles.infoTh}>교대 종료</th>
-              <td className={styles.infoTd}>{briefing.shiftEnd}</td>
-            </tr>
-            <tr>
-              <th className={styles.infoTh}>총 요청 수</th>
-              <td className={styles.infoTd}>{briefing.totalRequestCount}</td>
+              <th className={styles.infoTh}>처리 현황</th>
+              <td className={styles.infoTd}>{briefing.totalRequestCount - briefing.pendingCount} / {briefing.totalRequestCount}</td>
               <th className={styles.infoTh}>작성 일시</th>
               <td className={styles.infoTd}>{briefing.createdAt}</td>
-            </tr>
-            <tr>
-              <th className={styles.infoTh}>미처리 수</th>
-              <td className={styles.infoTd}>{briefing.pendingCount}</td>
-              <th className={styles.infoTh}>에스컬레이션 수</th>
-              <td className={styles.infoTd}>{briefing.escalatedCount}</td>
             </tr>
           </tbody>
         </table>

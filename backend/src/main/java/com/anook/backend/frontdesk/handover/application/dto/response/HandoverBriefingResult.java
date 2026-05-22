@@ -10,5 +10,6 @@ public class HandoverBriefingResult {
     private String shiftTimeLabel;
     private int totalRequestCount;
     private int pendingCount;
+    private String managerNames;
     private List<HandoverTaskResult> tasks;
 }
