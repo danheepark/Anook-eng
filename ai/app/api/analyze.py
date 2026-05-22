@@ -208,6 +208,18 @@ STATIC_REPLIES = {
         "ja": "いいえ",
         "zh": "不是"
     },
+    "OPTION_ADD": {
+        "ko": "추가",
+        "en": "Add",
+        "ja": "追加",
+        "zh": "追加"
+    },
+    "OPTION_REPLACE": {
+        "ko": "변경",
+        "en": "Replace",
+        "ja": "変更",
+        "zh": "修改"
+    },
     "DUPLICATE_CONFIRM": {
         "ko": "이미 '{summary}'을(를) 요청하셨는데, 이번 요청을 추가로 접수할까요? 아니면 기존 요청을 변경하시겠어요?",
         "en": "You already have an active request: '{summary}'. Would you like to add this as a new request, or replace the existing one?",
@@ -1576,8 +1588,8 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     final_guest_reply = _dup_question
                     agent_result["missing_fields"] = []
                     agent_result["clarification_options"] = [
-                        _get_static_reply("OPTION_YES", _lang),
-                        _get_static_reply("OPTION_NO", _lang)
+                        _get_static_reply("OPTION_ADD", _lang),
+                        _get_static_reply("OPTION_REPLACE", _lang)
                     ]
                     # 기존 요청 ID를 agent_result에 주입 → L1693에서 response에 복사됨
                     agent_result["target_request_id"] = _existing_id

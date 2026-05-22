@@ -190,14 +190,53 @@ public class SendMessageService implements SendMessageUseCase {
             // AI가 targetRequestId를 반환하였고, 이것이 취소(CANCEL) 흐름이 아닌 경우
             Long conflictRequestId = null;
             boolean isAddDuplicate = false;
+
+            java.util.List<MessageAiResult> validatedAnalyses = new java.util.ArrayList<>();
             for (MessageAiResult analysis : analyses) {
-                if (analysis.targetRequestId() != null) {
-                    conflictRequestId = analysis.targetRequestId();
+                Long validTargetRequestId = analysis.targetRequestId();
+                
+                // [AN-380] ADD, REPLACE 로직은 아이템이 똑같을 때만 적용되어야 함.
+                // AI가 완전 다른 아이템(수건 vs 물)에 대해 targetRequestId를 설정한 경우 무시.
+                if (validTargetRequestId != null) {
+                    boolean isCancel = "CANCEL_REQUEST".equals(analysis.action()) || "CANCEL_ALL_REQUESTS".equals(analysis.action());
+                    if (!isCancel) {
+                        java.util.Map<String, Object> existingReq = activeRequestPort.findRequestById(validTargetRequestId);
+                        if (existingReq != null) {
+                            String existingSummary = existingReq.get("summary") != null ? existingReq.get("summary").toString() : "";
+                            String newSummary = analysis.summary() != null ? analysis.summary() : "";
+                            
+                            // 텍스트 기반 단순 동일성 검증
+                            boolean seemsSameRequest = newSummary.isEmpty() 
+                                    || existingSummary.contains(newSummary) 
+                                    || newSummary.contains(existingSummary);
+                            
+                            if (!seemsSameRequest) {
+                                log.info("[Message] targetRequestId={} ignored due to item mismatch (existing: '{}', new: '{}')", validTargetRequestId, existingSummary, newSummary);
+                                validTargetRequestId = null; // 무효화
+                            }
+                        }
+                    }
                 }
-                if ("ADD_DUPLICATE".equals(analysis.actionType())) {
+                
+                // 검증된 targetRequestId로 새 객체 생성 (record 이므로)
+                MessageAiResult validatedAnalysis = java.util.Objects.equals(validTargetRequestId, analysis.targetRequestId()) ? analysis :
+                        new MessageAiResult(
+                                analysis.guestReply(), analysis.summary(), analysis.domainCode(), analysis.priority(),
+                                analysis.entities(), analysis.confidence(), analysis.action(), analysis.actionType(),
+                                analysis.aiLogMeta(), analysis.targetKeyword(), validTargetRequestId, analysis.clarificationOptions(),
+                                analysis.reasoning()
+                        );
+                        
+                validatedAnalyses.add(validatedAnalysis);
+                
+                if (validatedAnalysis.targetRequestId() != null) {
+                    conflictRequestId = validatedAnalysis.targetRequestId();
+                }
+                if ("ADD_DUPLICATE".equals(validatedAnalysis.actionType())) {
                     isAddDuplicate = true;
                 }
             }
+            analyses = validatedAnalyses;
 
             if (conflictRequestId != null && !isAddDuplicate) {
                 java.util.Map<String, Object> existingReq = activeRequestPort.findRequestById(conflictRequestId);
@@ -302,12 +341,38 @@ public class SendMessageService implements SendMessageUseCase {
                                 .findFirst()
                                 .orElse(null);
 
+                        // [AN-380] 고객의 원문이 짧은 확인 응답(≤3자: 네/응/OK 등)인지 판별
+                        // 짧은 확인 → 기존 요청 수락, 긴 메시지(물 1개 등) → 신규 주문 가능성
+                        boolean isShortConfirmation = content != null && content.trim().length() <= 3;
+
                         if (pendingRequest != null) {
-                            Long pendingRequestId = ((Number) pendingRequest.get("id")).longValue();
-                            log.info("[Message] 기존 수락 대기 중인 요청 발견, 자동 수락 처리 진행 — ID: {}, room: {}", pendingRequestId, roomNo);
-                            confirmRequestUseCase.confirmRequest(pendingRequestId, roomNo);
-                            continue; // 새 요청 중복 생성 방지
+                            // [AN-380] 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
+                            // 다른 아이템의 신규 주문(수건 vs 물)이면 auto-confirm 하지 않고 새 요청 생성
+                            String existingSummary = pendingRequest.get("summary") != null
+                                    ? pendingRequest.get("summary").toString() : "";
+                            String newSummary = analysis.summary() != null ? analysis.summary() : "";
+
+                            boolean seemsSameRequest = isShortConfirmation
+                                    || newSummary.isEmpty()
+                                    || existingSummary.contains(newSummary)
+                                    || newSummary.contains(existingSummary);
+
+                            if (seemsSameRequest) {
+                                Long pendingRequestId = ((Number) pendingRequest.get("id")).longValue();
+                                log.info("[Message] 기존 수락 대기 중인 요청 발견, 자동 수락 처리 진행 — ID: {}, room: {}", pendingRequestId, roomNo);
+                                confirmRequestUseCase.confirmRequest(pendingRequestId, roomNo);
+                                continue; // 새 요청 중복 생성 방지
+                            }
+                            log.info("[Message] 동일 도메인이지만 다른 아이템 → auto-confirm 스킵, 신규 요청 생성 — existing: '{}', new: '{}'",
+                                    existingSummary, newSummary);
+                            // fall through → RequestDetectedEvent 발행 (신규 아이템 요청 생성)
+                        } else if (isShortConfirmation) {
+                            // [AN-380] 짧은 확인 메시지이지만 auto-confirm 대상 없음
+                            // (트랜잭션 타이밍 이슈 방어 — 중복 생성 방지)
+                            log.info("[Message] isFinalized=true, 짧은 확인 메시지이지만 auto-confirm 대상 없음 → 신규 생성 스킵 — domain: {}, room: {}", domain, roomNo);
+                            continue;
                         }
+                        // 나머지: 새 아이템이 포함된 신규 주문 → fall through → RequestDetectedEvent 발행
                     }
 
                     boolean escalated = analysis.confidence() < 0.7;
