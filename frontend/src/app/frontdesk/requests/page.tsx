@@ -115,8 +115,8 @@ export default function FrontDeskPage() {
         setLastMessageTimes(prev => ({ ...prev, [String(roomNo)]: Date.now() }));
       }
 
-      // 고객/AI 메시지인 경우 레드닷 + 마지막 메시지 갱신
-      if ((type === 'GUEST_MESSAGE' || type === 'AI_RESPONSE') && roomNo) {
+      // 고객 메시지 또는 새로운 요청 생성인 경우 레드닷 갱신
+      if ((type === 'GUEST_MESSAGE' || type === 'NEW_REQUEST') && roomNo) {
         if (type === 'GUEST_MESSAGE' && payload.content) {
           setLastGuestMessages(prev => ({ ...prev, [String(roomNo)]: String(payload.content) }));
         }
@@ -125,9 +125,9 @@ export default function FrontDeskPage() {
         if (activeChatRoomRef.current?.roomNumber === String(roomNo)) return;
         
         const relatedRequests = activeListRef.current.filter(r => String(r.roomNo) === String(roomNo));
-        const hasInProgress = relatedRequests.some(r => r.status === 'IN_PROGRESS' || r.status === 'ASSIGNED');
+        const hasActive = relatedRequests.some(r => r.status === 'IN_PROGRESS' || r.status === 'ASSIGNED' || r.status === 'PENDING' || r.status === 'ESCALATED');
         
-        if (hasInProgress) {
+        if (hasActive || type === 'NEW_REQUEST') {
           setNewMessageCounts(prev => ({
             ...prev,
             [String(roomNo)]: (prev[String(roomNo)] || 0) + 1

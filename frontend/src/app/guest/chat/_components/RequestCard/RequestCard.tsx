@@ -229,6 +229,11 @@ export default function RequestCard({
     
     const intent = entities?.intent as string | undefined;
     
+    // 강제 예외 처리: intent가 ESCALATION인 경우 (프론트 데스크 등)
+    if (intent === 'ESCALATION') {
+      return t.cardUI?.message?.escalationRequest || '프론트 데스크 직원 연결';
+    }
+    
     // Fallback: intent 기반 번역 매핑 (요약문이 빈 문자열일 때만 사용)
     if (!summary && domainCode !== 'HK' && domainCode !== 'FACILITY') {
       if (intent && (t.intents as any)?.[intent]) {
