@@ -90,7 +90,7 @@ export default function AiServerStatusIndicator() {
         aria-label="AI 연결 확인"
         title="AI 연결 확인"
       >
-        <RotateCw size={14} className={checking ? styles.spinning : ''} strokeWidth={2.5} />
+        <RotateCw size={12} className={checking ? styles.spinning : ''} strokeWidth={2.5} />
       </button>
     </div>
   );
