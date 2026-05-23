@@ -20,11 +20,11 @@
 }
 
 .dotHealthy {
-  background-color: #22c55e;
+  background-color: var(--color-success);
 }
 
 .dotUnhealthy {
-  background-color: var(--color-error, #EF4444);
+  background-color: var(--color-error);
 }
 
 .label {
