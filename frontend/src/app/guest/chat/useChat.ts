@@ -181,8 +181,8 @@ export function useChat() {
               },
               _ts: new Date(r.updatedAt || r.createdAt).getTime(),
             });
-          } else if (r.status !== 'CANCELLED') {
-            // 진행 중인 요청은 RequestCard로 표시
+          } else {
+            // 진행 중이거나 취소된 요청은 RequestCard로 표시
             cards.push({
               id: `request-${r.id}`,
               variant: 'received',
@@ -198,11 +198,12 @@ export function useChat() {
                 graceRemaining: 0,
                 priority: r.priority || 'NORMAL',
                 createdAt: r.createdAt,
+                cancelReason: r.cancelReason,
+                cancelledAt: r.status === 'CANCELLED' ? (r.updatedAt || r.createdAt) : undefined,
               },
               _ts: new Date(r.createdAt).getTime(),
             });
           }
-          // CANCELLED → 복원하지 않음
           return cards;
         });
 
@@ -423,11 +424,16 @@ export function useChat() {
               }];
             }
 
+            // 기존 카드 중 텍스트(content)가 있는 카드의 텍스트 보존 (AI 응답 텍스트 증발 방지)
+            const existingWithContent = [...prev].reverse().find(m => (m.meta?.requestId === payload.requestId || m.id === `request-${payload.requestId}`) && m.content);
+            const preservedContent = existingWithContent ? existingWithContent.content : '';
+
             // 같은 도메인 내 상태 변경: 기존 카드 교체
             const filtered = prev.filter(m => m.meta?.requestId !== payload.requestId && m.id !== `request-${payload.requestId}`);
 
             return [...filtered, {
               ...requestMsg,
+              content: preservedContent,
               id: `request-${payload.requestId}-${Date.now()}`,
               meta: {
                 ...requestMsg.meta,

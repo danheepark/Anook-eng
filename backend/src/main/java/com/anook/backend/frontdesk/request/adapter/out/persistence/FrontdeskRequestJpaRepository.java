@@ -33,12 +33,14 @@ public interface FrontdeskRequestJpaRepository extends JpaRepository<FrontdeskRe
     @Query("SELECT r FROM FrontdeskRequest r WHERE " +
            "(:status IS NULL OR r.status = :status) AND " +
            "(:departmentId IS NULL OR r.departmentId = :departmentId) AND " +
-           "(:priority IS NULL OR r.priority = :priority) " +
+           "(:priority IS NULL OR r.priority = :priority) AND " +
+           "(:roomNo IS NULL OR r.roomNo = :roomNo) " +
            "ORDER BY r.createdAt DESC")
     List<FrontdeskRequestJpaEntity> findAllWithFilters(
             @Param("status") String status,
             @Param("departmentId") String departmentId,
-            @Param("priority") String priority
+            @Param("priority") String priority,
+            @Param("roomNo") String roomNo
     );
 
     // === 통계 쿼리 ===

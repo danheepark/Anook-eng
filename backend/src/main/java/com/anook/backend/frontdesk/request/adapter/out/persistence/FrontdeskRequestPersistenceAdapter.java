@@ -22,11 +22,12 @@ public class FrontdeskRequestPersistenceAdapter implements FrontdeskRequestQuery
     private final FrontdeskRequestJpaRepository jpaRepository;
 
     @Override
-    public List<FrontdeskRequest> findAll(String status, String departmentId, String priority, List<String> exclude, String sort) {
+    public List<FrontdeskRequest> findAll(String status, String departmentId, String priority, List<String> exclude, String roomNo, String sort) {
         List<FrontdeskRequestJpaEntity> entities = jpaRepository.findAllWithFilters(
                 (status != null && !status.isBlank()) ? status.toUpperCase() : null,
                 (departmentId != null && !departmentId.isBlank()) ? departmentId.toUpperCase() : null,
-                (priority != null && !priority.isBlank()) ? priority.toUpperCase() : null
+                (priority != null && !priority.isBlank()) ? priority.toUpperCase() : null,
+                roomNo
         );
 
         java.util.stream.Stream<FrontdeskRequestJpaEntity> stream = entities.stream();

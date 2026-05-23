@@ -49,8 +49,8 @@ public class ManageFrontdeskRequestService implements ManageFrontdeskRequestUseC
     private final GenerateReceiptUseCase generateReceiptUseCase;
 
     @Override
-    public List<FrontdeskRequestListResult> getAllRequests(String status, String departmentId, String priority, List<String> exclude, String sort) {
-        List<FrontdeskRequest> requests = frontdeskRequestQueryPort.findAll(status, departmentId, priority, exclude, sort);
+    public List<FrontdeskRequestListResult> getAllRequests(String status, String departmentId, String priority, List<String> exclude, String roomNo, String sort) {
+        List<FrontdeskRequest> requests = frontdeskRequestQueryPort.findAll(status, departmentId, priority, exclude, roomNo, sort);
 
         // 부서명/직원명 조회용 Map 구성
         Map<String, String> deptNameMap = buildDeptNameMap();
@@ -347,7 +347,7 @@ public class ManageFrontdeskRequestService implements ManageFrontdeskRequestUseC
 
         // 전체 데이터 조회하여 실제 통계 계산
         List<com.anook.backend.frontdesk.request.domain.model.FrontdeskRequest> allRequests = 
-                frontdeskRequestQueryPort.findAll(null, null, null, null, null);
+                frontdeskRequestQueryPort.findAll(null, null, null, null, null, null);
 
         // 4. 최다 요청 항목 동적 추출 (AI 엔티티 기반)
         Map<String, Long> itemCounts = new java.util.HashMap<>();

@@ -18,7 +18,7 @@ public interface ManageFrontdeskRequestUseCase {
      * 전체 요청 목록 조회 (필터링 + 정렬)
      */
     List<FrontdeskRequestListResult> getAllRequests(String status, String departmentId, String priority,
-            List<String> exclude, String sort);
+            List<String> exclude, String roomNo, String sort);
 
     /**
      * 단건 요청 상세 조회

@@ -657,8 +657,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     # "모든 요청 취소" 시 대부분의 route가 CANCEL인데 EMERGENCY만 FRONT_ESCALATION으로
     # 분류되는 경우, EMERGENCY도 CANCEL로 강제 오버라이드 (새 긴급 티켓 생성 방지)
     # ──────────────────────────────────────────────
-    text_lower_check = request.text.lower()
-    is_cancel_intent = any(word in text_lower_check for word in ["전부", "모두", "모든", "다 취소", "전체", "all", "everything", "취소"])
+    is_cancel_intent = any(getattr(r, 'cancel_scope', None) == "ALL" for r in router_results if r.route_type == "CANCEL")
     cancel_routes = [r for r in router_results if r.route_type == "CANCEL"]
     emergency_escalation_routes = [r for r in router_results if r.route_type == "FRONT_ESCALATION" and r.domain == "EMERGENCY"]
 
@@ -788,7 +787,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 guest_reply = getattr(primary, 'clarification_question', None) or _get_static_reply("CLARIFICATION", request.language)
                 response = {
                     "guest_reply": guest_reply,
-                    "summary": "취소 요청 대상 불분명" if "취소" in guest_reply else "추가 확인 필요",
+                    "summary": getattr(primary, 'summary', None) or "추가 확인 필요",
                     "domain_code": None,
                     "priority": "NORMAL",
                     "entities": {},
@@ -809,30 +808,9 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             last_agent_domain = None
             recent_ai_msgs = [m for m in request.chat_history[-6:] if m.get("role") == "ai"]
             if recent_ai_msgs and "?" in recent_ai_msgs[-1].get("content", ""):
-                # 최근 AI 질문 직전의 TASK 도메인을 찾기 위해 에이전트 등록된 도메인 추정
-                # chat_history에 domain 정보가 없으므로, 에이전트 등록 여부로 확인 가능한
-                # 도메인을 router_engine의 이전 히스토리 기반으로 추론합니다.
-                # → 가장 실용적인 방법: 현재 라우터에게 전체 맥락으로 재질의
-                for domain_key in DOMAIN_AGENTS:
-                    # 도메인 키워드가 최근 AI 질문에 포함된 경우 해당 에이전트 재호출
-                    # (예: "오렌지 주스", "수건", "에어컨" 등)
-                    pass
-                # 실용적 접근: 직전에 에이전트가 물어본 맥락이 있으면 가장 최근 TASK 도메인으로 재위임
-                # chat_history를 역순으로 탐색해 마지막 TASK 처리 도메인 흔적을 찾습니다.
-                # 현재 chat_history에 domain 태그가 없으므로, 도메인별 키워드 사전으로 추론합니다.
-                DOMAIN_KEYWORDS = {
-                    "FB": ["주문", "룸서비스", "메뉴", "음식", "음료", "콜라", "주스", "커피", "맥주", "와인", "스테이크", "샐러드"],
-                    "HK": ["수건", "타월", "베개", "이불", "침대", "어메니티", "칫솔", "샴푸", "비누", "슬리퍼"],
-                    "FACILITY": ["에어컨", "TV", "와이파이", "냉장고", "전기", "수도", "변기", "샤워", "조명", "고장"],
-                    "CONCIERGE": ["택시", "맡기", "짐", "레스토랑", "예약", "투어", "관광", "공항", "모닝콜"],
-                }
-                recent_context = " ".join(
-                    m.get("content", "") for m in request.chat_history[-8:]
-                )
-                for domain_key, keywords in DOMAIN_KEYWORDS.items():
-                    if domain_key in DOMAIN_AGENTS and any(kw in recent_context for kw in keywords):
-                        last_agent_domain = domain_key
-                        break
+                # 활성 요청(active_requests)에서 도메인을 추출하여 에이전트 재위임
+                if getattr(request, 'active_requests', []):
+                    last_agent_domain = request.active_requests[0].get("department_id")
 
             if last_agent_domain:
                 try:

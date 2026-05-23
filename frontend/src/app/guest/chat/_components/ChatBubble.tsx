@@ -20,8 +20,8 @@ export default function ChatBubble({ variant, bubbleStyle, isFallback, imageUrl,
     
     let text = children;
     if (variant === 'received') {
-      // Add line breaks after Korean sentence endings (., ?, !)
-      text = text.replace(/([가-힣][.?!])\s+/g, '$1\n');
+      // Add line breaks after Korean sentence endings (., ?, !), keeping trailing emojis on the same line
+      text = text.replace(/([가-힣][.?!](?:\s*[\p{Extended_Pictographic}]+)*)\s+(?![\p{Extended_Pictographic}])/gu, '$1\n');
     }
     
     return text.split('\n').map((line, i, arr) => (

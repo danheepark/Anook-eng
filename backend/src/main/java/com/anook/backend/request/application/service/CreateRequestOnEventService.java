@@ -227,12 +227,11 @@ public class CreateRequestOnEventService {
 
         // [AN-344] FB/CONCIERGE는 AI가 이미 확인 질문을 했으므로 Grace Period 타이머 대신
         // 고객의 명시적 확인(진행 버튼)을 기다림 → graceRemaining = -1 (무한 대기)
-        // 단, HK/FACILITY의 ADD_DUPLICATE인 경우는 AI 버튼을 누르는 흐름상 즉시 접수되나,
-        // FB/CONCIERGE는 추가 상세 필드를 수집하고 최종 확인을 다시 거쳐야 하므로 명시적 확인(진행)이 항상 필요합니다.
+        // HK/FACILITY도 중복 추가(ADD_DUPLICATE)나 추가 요금 결제 시 일반 요청과 동일하게 10초 대기(Grace Period) 적용.
         boolean isFbOrConcierge = savedRequest.getDomainCode() == DomainCode.FB
                 || savedRequest.getDomainCode() == DomainCode.CONCIERGE;
         boolean requiresExplicitConfirm = isFbOrConcierge;
-        boolean skipGrace = isUrgent || isFrontEscalation || (isAddDuplicate && !isFbOrConcierge);
+        boolean skipGrace = isUrgent || isFrontEscalation;
 
         String deptCode = savedRequest.getDomainCode() != null ? savedRequest.getDomainCode().name() : "UNKNOWN";
         int graceRemaining;

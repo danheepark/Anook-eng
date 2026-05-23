@@ -216,17 +216,17 @@ JSON Output:
     "request_id": "auto",
     "room_no": "from input",
     "domain": "FB",
-    "summary": "아이스 아메리카노 1개 주문 확인중",
+    "summary": "제로콜라 5개 주문 확인중",
     "priority": "NORMAL",
     "status": "PENDING",
     "confidence": 0.95,
     "entities": {
         "intent": "ROOM_SERVICE",
-        "menu_items": [{"name": "아메리카노", "quantity": 1, "selected_option": "ICE"}],
+        "menu_items": [{"name": "제로콜라", "quantity": 5, "selected_option": "제로"}],
         "allergen_warning": ""
     },
     "needs_clarification": true,
-    "clarification_question": "아이스 아메리카노 1개(5,000원)입니다. 이대로 주문을 접수해 드릴까요?",
+    "clarification_question": "제로콜라 5개(20,000원)입니다. 이대로 주문을 접수해 드릴까요?",
     "missing_fields": []
 }
 
@@ -237,14 +237,14 @@ JSON Output:
     "request_id": "auto",
     "room_no": "from input",
     "domain": "FB",
-    "summary": "클래식 치즈버거 1개 주문",
+    "summary": "제로콜라 5개 주문",
     "priority": "NORMAL",
     "status": "PENDING",
     "confidence": 0.95,
     "entities": {
         "intent": "ROOM_SERVICE",
-        "menu_items": [{"name": "클래식 치즈버거", "quantity": 1}],
-        "allergen_warning": "밀, 유제품"
+        "menu_items": [{"name": "제로콜라", "quantity": 5, "selected_option": "제로"}],
+        "allergen_warning": ""
     },
     "needs_clarification": false,
     "clarification_question": "",

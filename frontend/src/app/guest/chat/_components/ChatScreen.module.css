@@ -3,17 +3,12 @@
   flex-direction: column;
   width: 100%;
   max-width: 480px;
-  /* Mobile standard max width */
   height: 100dvh;
-  /* Use dvh for mobile browser URL bar compatibility */
-  background-color: transparent;
+  background: #fff;
   margin: 0 auto;
-
   position: relative;
   isolation: isolate;
-  /* Force stacking context for backdrop-filter */
   overflow: hidden;
-  /* Prevent parent-level scrolling and layout shifting */
 }
 
 .header {
@@ -35,7 +30,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: var(--space-24);
+  padding: calc(var(--space-24) + 54px) var(--space-24) var(--space-24);
   gap: var(--space-16);
   overflow-y: auto;
   background-color: transparent;
@@ -55,6 +50,7 @@
   flex-direction: column;
   z-index: 9999;
   cursor: pointer;
+  padding-top: 54px;
 }
 
 .requestList {
@@ -123,7 +119,7 @@
 }
 
 .messageListWithStatusBar {
-  padding-top: calc(var(--space-24) + var(--status-bar-offset, 60px));
+  padding-top: calc(var(--space-24) + var(--status-bar-offset, 60px) + 54px);
 }
 
 .spacer {
@@ -131,8 +127,8 @@
 }
 
 .footer {
-  padding: var(--space-16);
-  padding-bottom: calc(var(--space-16) + env(safe-area-inset-bottom));
+  padding: 0 12px 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
   border-top: none;
   background-color: transparent;
   position: sticky;

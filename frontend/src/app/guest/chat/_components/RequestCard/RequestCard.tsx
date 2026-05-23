@@ -52,6 +52,7 @@ export interface RequestCardProps {
   onCancel?: () => void;
   onModify?: () => void;
   onAccept?: () => void;
+  isReadOnly?: boolean;
 }
 
 const DOMAIN_ICONS: Record<string, React.ElementType> = {
@@ -80,6 +81,7 @@ export default function RequestCard({
   onCancel,
   onModify,
   onAccept,
+  isReadOnly = false,
 }: RequestCardProps) {
   const { chatLanguage } = useUiStore();
   const [targetLang, setTargetLang] = useState<string>(chatLanguage);
@@ -221,8 +223,8 @@ export default function RequestCard({
     
     const intent = entities?.intent as string | undefined;
     
-    // Fallback: intent 기반 번역 매핑
-    if (domainCode !== 'HK' && domainCode !== 'FACILITY') {
+    // Fallback: intent 기반 번역 매핑 (요약문이 빈 문자열일 때만 사용)
+    if (!summary && domainCode !== 'HK' && domainCode !== 'FACILITY') {
       if (intent && (t.intents as any)?.[intent]) {
         return (t.intents as any)[intent];
       }
@@ -268,8 +270,8 @@ export default function RequestCard({
 
   // graceRemaining === -1: 정적 버튼 (타이머 없이 항시 표시)
   // graceRemaining > 0: 타이머 카운트다운 중 버튼 표시
-  const isStaticConfirm = graceRemaining === -1 && !isUrgent && !isCancelled;
-  const showButtons = isStaticConfirm || (!isUrgent && !isCancelled && timeLeft > 0);
+  const isStaticConfirm = graceRemaining === -1 && !isUrgent && !isCancelled && !isReadOnly;
+  const showButtons = !isReadOnly && (isStaticConfirm || (!isUrgent && !isCancelled && timeLeft > 0));
 
   // Render entities description
   const renderDetails = () => {
@@ -453,10 +455,12 @@ export default function RequestCard({
       </div>
 
       {/* Buttons — full width below cardLayout */}
-      <div className={`${styles.buttonGroup} ${!showButtons ? styles.hiddenButtons : ''}`}>
-        <GlassButton variant="cancel" onClick={onCancel} fullWidth>{t.cardUI?.button?.cancel || '취소하기'}</GlassButton>
-        <GlassButton variant="primary" domainCode={domainCode} onClick={onAccept} fullWidth>{t.cardUI?.button?.accept || '바로등록'}</GlassButton>
-      </div>
+      {!isReadOnly && (
+        <div className={`${styles.buttonGroup} ${!showButtons ? styles.hiddenButtons : ''}`}>
+          <GlassButton variant="cancel" onClick={onCancel} fullWidth>{t.cardUI?.button?.cancel || '취소하기'}</GlassButton>
+          <GlassButton variant="primary" domainCode={domainCode} onClick={onAccept} fullWidth>{t.cardUI?.button?.accept || '바로등록'}</GlassButton>
+        </div>
+      )}
     </div>
   );
 }
