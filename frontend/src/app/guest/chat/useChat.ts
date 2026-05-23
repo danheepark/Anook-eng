@@ -424,11 +424,16 @@ export function useChat() {
               }];
             }
 
+            // 기존 카드 중 텍스트(content)가 있는 카드의 텍스트 보존 (AI 응답 텍스트 증발 방지)
+            const existingWithContent = [...prev].reverse().find(m => (m.meta?.requestId === payload.requestId || m.id === `request-${payload.requestId}`) && m.content);
+            const preservedContent = existingWithContent ? existingWithContent.content : '';
+
             // 같은 도메인 내 상태 변경: 기존 카드 교체
             const filtered = prev.filter(m => m.meta?.requestId !== payload.requestId && m.id !== `request-${payload.requestId}`);
 
             return [...filtered, {
               ...requestMsg,
+              content: preservedContent,
               id: `request-${payload.requestId}-${Date.now()}`,
               meta: {
                 ...requestMsg.meta,
