@@ -18,7 +18,7 @@ export interface ChatInputProps {
   onFocus?: () => void;
 }
 
-export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isStaff, onFocus }: ChatInputProps) {
+export default function ChatInput({ placeholder, onSend, isTyping, onStop, onUserTyping, isStaff, onFocus }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -264,7 +264,7 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
         <textarea
           ref={textareaRef}
           className={styles.input} 
-          placeholder={isRecording ? l.listening : l.placeholder} 
+          placeholder={isRecording ? l.listening : (placeholder || l.placeholder)} 
           value={value} 
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
