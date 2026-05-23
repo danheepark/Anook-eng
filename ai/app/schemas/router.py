@@ -16,6 +16,10 @@ class RouterOutputSchema(BaseModel):
         default=None, 
         description="담당 부서 코드 (HK, FB, FACILITY, CONCIERGE, FRONT, COMMON, EMERGENCY). DEPARTMENT, INFO, CANCEL 등에서 지정."
     )
+    cancel_scope: Optional[str] = Field(
+        default=None,
+        description="CANCEL 시 취소 범위. 전체 취소면 'ALL', 특정 아이템 취소면 'SPECIFIC'. CANCEL 이외의 라우팅에서는 null."
+    )
     confidence: float = Field(
         description="도메인 및 라우트 분류 확신도 (0.0 ~ 1.0)"
     )
