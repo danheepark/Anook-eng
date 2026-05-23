@@ -68,7 +68,19 @@ export default function StaffFormModal({
     }
   };
 
-  const filteredRoles = departmentId
+  const selectedDept = departments.find(d => d.id === departmentId);
+  const isFrontDesk = selectedDept?.id === 'FRONT' || selectedDept?.name === '프론트데스크';
+  const frontAdminRole = roles.find(r => r.name === '관리자' && r.departmentId === departmentId);
+
+  useEffect(() => {
+    if (isFrontDesk && frontAdminRole) {
+      setRoleId(String(frontAdminRole.id));
+    }
+  }, [isFrontDesk, frontAdminRole]);
+
+  const filteredRoles = isFrontDesk && frontAdminRole
+    ? [frontAdminRole]
+    : departmentId
     ? roles.filter(r => r.departmentId === departmentId)
     : roles;
 
@@ -77,7 +89,7 @@ export default function StaffFormModal({
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="md" onClose={onClose} title={initialData ? '직원 정보 수정' : '새 직원 추가'}>
+      <ModalCard size="md" onClose={onClose} title={initialData ? '직원 정보 수정' : '새 직원 추가'} overflowVisible={true}>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)', marginBottom: 'var(--space-32)' }}>
           <InputField
@@ -102,6 +114,7 @@ export default function StaffFormModal({
             options={roleOptions}
             value={roleId}
             onChange={setRoleId}
+            disabled={isFrontDesk}
           />
         </div>
 
