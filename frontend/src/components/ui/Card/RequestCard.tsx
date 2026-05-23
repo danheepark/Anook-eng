@@ -103,7 +103,7 @@ export default function RequestCard({
           {status === 'PENDING' && !isEmergency && (
             <Tag variant="red">NEW</Tag>
           )}
-          {(status === 'IN_PROGRESS' || status === 'PENDING' || status === 'ESCALATED') && hasNewMessage && (
+          {(status === 'IN_PROGRESS' || status === 'ASSIGNED') && hasNewMessage && (
             <div className={styles.messageBadge}>
               {newMessageCount && newMessageCount > 0 ? (newMessageCount > 99 ? '99+' : newMessageCount) : ''}
             </div>
