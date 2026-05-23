@@ -207,9 +207,15 @@ export default function RequestCard({
   if (isTranslating) {
     displaySummary = t.cardUI?.message?.translating || 'Translating...';
   } else {
-    displaySummary = baseSummary.includes('[직원 인수인계]') || baseSummary.includes('[프론트 연결]') || baseSummary.includes('미학습 정보') || isEscalatedChat
-      ? (t.cardUI?.message?.escalationRequest || 'Front desk staff connection request')
-      : baseSummary;
+    // 내부 관리용 말머리([프론트 연결] 등)만 제거하고 AI가 작성한 실제 summary를 표시합니다.
+    let cleaned = baseSummary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '');
+    
+    // 단, 요약문이 비어있거나 '미학습 정보'처럼 고객에게 노출하기 부적절한 경우에만 기본 안내 문구 사용
+    if (!cleaned || cleaned.includes('미학습 정보')) {
+      displaySummary = t.cardUI?.message?.escalationRequest || 'Front desk staff connection request';
+    } else {
+      displaySummary = cleaned;
+    }
   }
   
   const getFixedTitle = () => {

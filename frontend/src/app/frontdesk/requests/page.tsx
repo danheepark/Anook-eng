@@ -64,8 +64,8 @@ export default function FrontDeskPage() {
   const [approveTarget, setApproveTarget] = useState<number | null>(null);
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
 
-  // 새 메시지 알림 (레드닷) 상태
-  const [newMessageRoomNos, setNewMessageRoomNos] = useState<Set<string>>(new Set());
+  // 새로 온 메시지 개수 추적 (roomNo -> count)
+  const [newMessageCounts, setNewMessageCounts] = useState<Record<string, number>>({});
   const { subscribe } = useSSE();
   const activeChatRoomRef = useRef(activeChatRoom);
   useEffect(() => { activeChatRoomRef.current = activeChatRoom; }, [activeChatRoom]);
@@ -128,11 +128,10 @@ export default function FrontDeskPage() {
         const hasInProgress = relatedRequests.some(r => r.status === 'IN_PROGRESS' || r.status === 'ASSIGNED');
         
         if (hasInProgress) {
-          setNewMessageRoomNos(prev => {
-            const next = new Set(prev);
-            next.add(String(roomNo));
-            return next;
-          });
+          setNewMessageCounts(prev => ({
+            ...prev,
+            [String(roomNo)]: (prev[String(roomNo)] || 0) + 1
+          }));
         }
       }
     });
@@ -214,7 +213,7 @@ export default function FrontDeskPage() {
     }
   };
 
-  const getGroupedRooms = () => {
+  const groupedRooms = React.useMemo(() => {
     const activeList = [...pending, ...inProgress];
     const completedList = completed;
     const targetList = activeTab === 'active' ? activeList : completedList;
@@ -276,8 +275,7 @@ export default function FrontDeskPage() {
     }
 
     return groupedRooms;
-  };
-  const groupedRooms = getGroupedRooms();
+  }, [activeTab, pending, inProgress, completed, lastMessageTimes, roomSearchValue]);
 
   useEffect(() => {
     // RAG 등록 플로우 진행 중에는 자동 카드 선택을 건너뜀 (모달이 닫힌 후 onClose에서 처리)
@@ -299,7 +297,7 @@ export default function FrontDeskPage() {
     } else if (activeChatRoom) {
       setActiveChatRoom(null);
     }
-  }, [activeTab, pending, inProgress, completed, activeChatRoom, isRagFlowActive]);
+  }, [groupedRooms, activeChatRoom, isRagFlowActive]);
 
 
   const handleCardClick = (requestId: number) => {
@@ -419,10 +417,10 @@ export default function FrontDeskPage() {
                   setActiveChatRoom({ roomNumber: room.roomNo, requestIds: room.allIds, representativeId: room.representativeId, status: room.repStatus, summary: room.summaryText, initialMessage: room.rawText || room.summaryText });
                   setDetailTarget(null);
                   setMobileView('chat');
-                  // 레드닷 해제
-                  setNewMessageRoomNos(prev => {
-                    const next = new Set(prev);
-                    next.delete(room.roomNo);
+                  // 레드닷(배지) 초기화
+                  setNewMessageCounts(prev => {
+                    const next = { ...prev };
+                    delete next[room.roomNo];
                     return next;
                   });
                 }}
@@ -430,7 +428,8 @@ export default function FrontDeskPage() {
                 requestId={room.representativeId}
                 status={room.repStatus}
                 onStatusChange={handleStatusChange as any}
-                hasNewMessage={newMessageRoomNos.has(room.roomNo)}
+                hasNewMessage={!!newMessageCounts[room.roomNo]}
+                newMessageCount={newMessageCounts[room.roomNo]}
                 isEmergency={room.highestPriority === 'EMERGENCY'}
               />
             ))}

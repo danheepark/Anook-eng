@@ -23,6 +23,7 @@ export interface RequestCardProps {
   reverseActions?: boolean;
   isSelected?: boolean;
   hasNewMessage?: boolean;
+  newMessageCount?: number;
   isEmergency?: boolean;
 }
 
@@ -46,6 +47,7 @@ export default function RequestCard({
   reverseActions,
   isSelected = false,
   hasNewMessage = false,
+  newMessageCount,
   isEmergency = false
 }: RequestCardProps) {
   const isWarning = variant === 'warning';
@@ -102,7 +104,9 @@ export default function RequestCard({
             <Tag variant="red">NEW</Tag>
           )}
           {status === 'IN_PROGRESS' && hasNewMessage && (
-            <div className={styles.redDot}></div>
+            <div className={styles.messageBadge}>
+              {newMessageCount && newMessageCount > 0 ? (newMessageCount > 99 ? '99+' : newMessageCount) : ''}
+            </div>
           )}
         </div>
       </div>

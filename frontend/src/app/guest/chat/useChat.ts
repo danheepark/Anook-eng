@@ -44,6 +44,9 @@ export function useChat() {
   const cancelEventsBatch = useRef<Set<'SUCCESS' | 'PENDING' | 'STAFF_SUCCESS' | 'GUEST_CANCEL_APPROVED'>>(new Set());
   const cancelBatchTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // 현재 투숙객 세션의 requestId 목록을 관리 (이전 투숙객의 잔여 이벤트 무시용)
+  const knownRequestIds = useRef<Set<number>>(new Set());
+
   // [AN-358] FRONT 상담 완료 배치 처리 (프론트 연결 요청 N건 → 상담 완료 카드 1개)
   const frontCompletedBatch = useRef<{ requestId: number; summary: string; domainCode: string } | null>(null);
   const frontCompletedTimer = useRef<NodeJS.Timeout | null>(null);
@@ -229,6 +232,9 @@ export function useChat() {
         if (active.length > 0) {
           setActiveRequests(active);
         }
+
+        // 현재 세션의 모든 requestId를 knownRequestIds에 등록
+        reqData.forEach((r: any) => knownRequestIds.current.add(r.id));
       } catch (error) {
         console.error('Error loading chat and requests:', error);
       }
@@ -329,6 +335,14 @@ export function useChat() {
           }];
         });
       } else if (['NEW_REQUEST', 'STATUS_CHANGED', 'CANCEL_APPROVED', 'CANCEL_REJECTED', 'CANCEL_REQUEST_RECEIVED'].includes(payload.type)) {
+        // 🔥 BUG FIX: 이전 투숙객의 잔여 요청 상태 변경 이벤트 차단
+        if (payload.type !== 'NEW_REQUEST' && !knownRequestIds.current.has(payload.requestId)) {
+          return;
+        }
+        if (payload.type === 'NEW_REQUEST') {
+          knownRequestIds.current.add(payload.requestId);
+        }
+
         const progressMap: Record<string, number> = {
           'CREATED': 5, 'PENDING': 10, 'ESCALATED': 10, 'ASSIGNED': 50, 'IN_PROGRESS': 50, 'COMPLETED': 100, 'CANCELLED': 0
         };
@@ -617,6 +631,8 @@ export function useChat() {
           }, 800);
         }
       } else if (payload.type === 'GRACE_EXPIRED') {
+        if (!knownRequestIds.current.has(payload.requestId)) return;
+
         // Hide the buttons on the specific card by forcing graceRemaining to 0
         setMessages(prev => {
           const existingIdx = prev.findIndex(m => m.id === `request-${payload.requestId}` || m.meta?.requestId === payload.requestId);

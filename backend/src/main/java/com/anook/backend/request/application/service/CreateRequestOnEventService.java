@@ -222,7 +222,9 @@ public class CreateRequestOnEventService {
 
         // [AN-252] URGENT 판별: EMERGENCY이거나 FRONT(에스컬레이션) 도메인은 Grace Period 생략
         boolean isUrgent = savedRequest.getPriority() == Priority.EMERGENCY;
-        boolean isFrontEscalation = savedRequest.getDomainCode() == DomainCode.FRONT;
+        boolean isFrontEscalation = savedRequest.getDomainCode() == DomainCode.FRONT 
+                && savedRequest.getEntities() != null 
+                && "COMPLAINT".equals(savedRequest.getEntities().get("intent"));
         boolean isAddDuplicate = "ADD_DUPLICATE".equals(event.getActionType());
 
         // [AN-344] FB/CONCIERGE는 AI가 이미 확인 질문을 했으므로 Grace Period 타이머 대신

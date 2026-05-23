@@ -853,11 +853,13 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     active_requests=getattr(request, 'active_requests', [])
                 )
                 # FRONT 에이전트가 ESCALATION(직원 연결)을 결정한 경우 domain_code를 살려서 티켓 생성
+                # 단, 선택지(clarification_options)가 있다면 아직 묻고 있는 단계이므로 티켓 생성 보류
                 is_escalation = agent_result.get("entities", {}).get("intent") == "ESCALATION"
+                has_options = len(agent_result.get("clarification_options", [])) > 0
                 response = {
                     "guest_reply": agent_result.get("guest_reply", _get_static_reply("CLARIFICATION", request.language)),
                     "summary": agent_result.get("summary", "추가 확인 필요"),
-                    "domain_code": agent_result.get("domain_code") if is_escalation else None,
+                    "domain_code": agent_result.get("domain_code") if (is_escalation and not has_options) else None,
                     "priority": agent_result.get("priority", "NORMAL"),
                     "entities": agent_result.get("entities", {}),
                     "confidence": agent_result.get("confidence", primary.confidence),
@@ -1125,11 +1127,15 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                             images=request.images,
                             system_language=request.language
                         )
+                        # 네/아니오를 묻고 있는 단계라면 티켓 생성을 보류함
+                        is_escalation_fallback = agent_result.get("entities", {}).get("intent") == "ESCALATION"
+                        has_options_fallback = len(agent_result.get("clarification_options", [])) > 0
+                        
                         # 에이전트 결과를 통째로 response 객체로 만듦
                         response = {
                             "guest_reply": agent_result.get("guest_reply", _get_static_reply("INFO_NOT_FOUND", request.language)),
                             "summary": agent_result.get("summary", "정보 문의"),
-                            "domain_code": agent_result.get("domain_code"),
+                            "domain_code": agent_result.get("domain_code") if not (is_escalation_fallback and has_options_fallback) else None,
                             "priority": agent_result.get("priority", "NORMAL"),
                             "entities": agent_result.get("entities", {}),
                             "confidence": agent_result.get("confidence", primary.confidence),
@@ -1349,14 +1355,18 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 summary_val = "[프론트 연결] 고객 불만"
             else:
                 reply_key = escalation_key
-                summary_val = "[프론트 연결] 고객 직접 요청"
+                base_summary = getattr(primary, 'summary', None)
+                if base_summary and base_summary not in ["프론트 데스크 직원 연결", "고객 직접 요청", "고객 직접 문의"]:
+                    summary_val = f"[프론트 연결] {base_summary}"
+                else:
+                    summary_val = "[프론트 연결] 고객 직접 문의"
             
             response = {
                 "guest_reply": _get_static_reply(reply_key, request.language),
                 "summary": summary_val,
                 "domain_code": "EMERGENCY" if is_emergency else "FRONT",
                 "priority": "EMERGENCY" if is_emergency else getattr(primary, 'priority', 'NORMAL'),
-                "entities": {"intent": "EMERGENCY" if is_emergency else "ESCALATION"},
+                "entities": {"intent": "EMERGENCY" if is_emergency else ("COMPLAINT" if is_complaint else "ESCALATION")},
                 "confidence": 0.0,
                 "reasoning": getattr(primary, 'reasoning', '알 수 없음')
             }
