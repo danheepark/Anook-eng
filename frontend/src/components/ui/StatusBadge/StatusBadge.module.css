@@ -4,8 +4,8 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 2px var(--space-4);
-  border-radius: var(--radius-sm);
+  padding: 3px var(--space-8);
+  border-radius: 9999px;
   /* 4px */
   font: var(--text-caption-medium);
   /* 12px */
@@ -15,32 +15,20 @@
 
 .red {
   background-color: var(--color-tag-background-red);
-  /* #FEF2F2 */
-  border: 1px solid var(--color-tag-text-red);
-  /* #991B1B */
   color: var(--color-tag-text-red);
 }
 
 .purple {
   background-color: var(--color-tag-background-violet);
-  /* #F5F3FF */
-  border: 1px solid var(--color-tag-text-violet);
-  /* #5B21B6 */
   color: var(--color-tag-text-violet);
 }
 
 .green {
   background-color: var(--color-tag-background-green);
-  /* #F0FDF4 */
-  border: 1px solid var(--color-tag-text-green);
-  /* #166534 */
   color: var(--color-tag-text-green);
 }
 
 .gray {
   background-color: var(--color-tag-background-gray);
-  /* var(--color-surface) */
-  border: 1px solid var(--color-tag-text-gray);
-  /* var(--color-gray-700) */
   color: var(--color-tag-text-gray);
 }
