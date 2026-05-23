@@ -43,7 +43,7 @@
   background: transparent;
   cursor: pointer;
   padding: 2px;
-  color: var(--color-gray-300);
+  color: var(--color-gray-400);
   transition: color 0.15s ease;
 }
 
