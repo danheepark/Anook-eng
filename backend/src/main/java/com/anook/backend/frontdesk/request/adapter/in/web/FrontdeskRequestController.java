@@ -39,8 +39,9 @@ public class FrontdeskRequestController {
             @RequestParam(required = false) String dept,
             @RequestParam(required = false) String priority,
             @RequestParam(required = false) List<String> exclude,
+            @RequestParam(required = false) String roomNo,
             @RequestParam(required = false, defaultValue = "created_at_desc") String sort) {
-        return ResponseEntity.ok(manageFrontdeskRequestUseCase.getAllRequests(status, dept, priority, exclude, sort));
+        return ResponseEntity.ok(manageFrontdeskRequestUseCase.getAllRequests(status, dept, priority, exclude, roomNo, sort));
     }
 
     /**

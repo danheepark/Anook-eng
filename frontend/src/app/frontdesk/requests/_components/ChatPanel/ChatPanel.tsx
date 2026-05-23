@@ -12,11 +12,15 @@ import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
 import FeedbackCard from '@/app/guest/chat/_components/FeedbackCard';
+import GuestRequestCard from '@/app/guest/chat/_components/RequestCard/RequestCard';
+
 export interface ChatMessage {
   id: number | string;
   variant: 'sent' | 'received';
   senderType?: string;
   content: string;
+  type?: 'REQUEST_CARD';
+  meta?: any;
 }
 
 export interface ChatPanelProps {
@@ -137,16 +141,28 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     const fetchMessages = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/frontdesk/messages/rooms/${roomNumber}/messages`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const [msgRes, reqRes] = await Promise.all([
+          fetch(`/api/frontdesk/messages/rooms/${roomNumber}/messages`),
+          fetch(`/api/frontdesk/requests?roomNo=${roomNumber}`)
+        ]);
+        if (!msgRes.ok) throw new Error(`HTTP ${msgRes.status}`);
+        
+        const data = await msgRes.json();
+        const reqData = reqRes.ok ? await reqRes.json() : [];
 
-        const mapped: ChatMessage[] = data.map((msg: any) => {
+        const progressMap: Record<string, number> = {
+          PENDING: 10,
+          ASSIGNED: 30,
+          IN_PROGRESS: 50,
+          COMPLETED: 100,
+          CANCELLED: 100,
+        };
+
+        const chatMessages = data.map((msg: any) => {
           let displayContent = msg.content;
           if (msg.senderType === 'AI') {
             displayContent = translateContent(msg.content);
           } else if (msg.senderType === 'GUEST' && msg.translatedContent) {
-            // 고객 메시지가 외국어인 경우, 직원 언어로 번역된 내용 표시
             displayContent = msg.translatedContent;
           }
           return {
@@ -154,17 +170,48 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
             variant: msg.senderType === 'GUEST' ? 'received' as const : 'sent' as const,
             senderType: msg.senderType,
             content: displayContent,
+            _ts: new Date(msg.createdAt).getTime(),
           };
         });
 
+        const requestCards = reqData.flatMap((r: any) => {
+          const cards: any[] = [];
+          cards.push({
+            id: `req-${r.id}-start`,
+            type: 'REQUEST_CARD',
+            variant: 'received',
+            senderType: 'SYSTEM',
+            content: '',
+            meta: {
+              requestId: r.id,
+              domainCode: r.departmentId || 'UNKNOWN',
+              summary: r.summary,
+              status: r.status,
+              entities: r.entities,
+              progress: progressMap[r.status] || 0,
+              graceRemaining: 0,
+              priority: r.priority || 'NORMAL',
+              createdAt: r.createdAt,
+              cancelReason: r.cancelReason,
+              cancelledAt: r.status === 'CANCELLED' ? (r.updatedAt || r.createdAt) : undefined,
+            },
+            _ts: new Date(r.createdAt).getTime(),
+          });
+          return cards;
+        });
+
+        const merged = [...chatMessages, ...requestCards]
+          .sort((a, b) => a._ts - b._ts)
+          .map(({ _ts, ...msg }) => msg as ChatMessage);
+
         // 데이터가 없으면 데모용 더미 데이터 삽입
-        if (mapped.length === 0 && initialMessage) {
+        if (merged.length === 0 && initialMessage) {
           setMessages([
             { id: 'dummy-1', variant: 'received', senderType: 'GUEST', content: initialMessage },
             { id: 'dummy-2', variant: 'sent', senderType: 'AI', content: '요청이 접수되었습니다. 프론트데스크 직원이 곧 확인 후 안내해 드리겠습니다.' },
           ]);
         } else {
-          setMessages(mapped);
+          setMessages(merged);
         }
 
         if (autoComplete) {
@@ -482,6 +529,16 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                       systemContent={cleanContent}
                       systemSubtitle={t.frontdeskPage?.chatHistory?.systemMessageNote}
                     />
+                  </div>
+                );
+              }
+
+              if (msg.type === 'REQUEST_CARD' && msg.meta) {
+                return (
+                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '4px 0' }}>
+                    <div style={{ maxWidth: '85%' }}>
+                      <GuestRequestCard {...msg.meta} isReadOnly />
+                    </div>
                   </div>
                 );
               }

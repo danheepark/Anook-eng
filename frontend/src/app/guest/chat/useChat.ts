@@ -181,8 +181,8 @@ export function useChat() {
               },
               _ts: new Date(r.updatedAt || r.createdAt).getTime(),
             });
-          } else if (r.status !== 'CANCELLED') {
-            // 진행 중인 요청은 RequestCard로 표시
+          } else {
+            // 진행 중이거나 취소된 요청은 RequestCard로 표시
             cards.push({
               id: `request-${r.id}`,
               variant: 'received',
@@ -198,11 +198,12 @@ export function useChat() {
                 graceRemaining: 0,
                 priority: r.priority || 'NORMAL',
                 createdAt: r.createdAt,
+                cancelReason: r.cancelReason,
+                cancelledAt: r.status === 'CANCELLED' ? (r.updatedAt || r.createdAt) : undefined,
               },
               _ts: new Date(r.createdAt).getTime(),
             });
           }
-          // CANCELLED → 복원하지 않음
           return cards;
         });
 

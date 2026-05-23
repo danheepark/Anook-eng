@@ -18,7 +18,7 @@ public interface FrontdeskRequestQueryPort {
     /**
      * 전체 요청 목록 조회 (필터링 + 정렬)
      */
-    List<FrontdeskRequest> findAll(String status, String departmentId, String priority, List<String> exclude, String sort);
+    List<FrontdeskRequest> findAll(String status, String departmentId, String priority, List<String> exclude, String roomNo, String sort);
 
     /**
      * 단건 조회
