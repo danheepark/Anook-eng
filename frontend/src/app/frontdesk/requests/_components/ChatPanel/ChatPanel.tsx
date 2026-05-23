@@ -616,7 +616,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
         {!isReadOnly && status !== 'PENDING' && (
           <div className={styles.footer} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
-              <ChatInput isStaff placeholder="메시지를 입력하세요..." onSend={handleSend} />
+              <ChatInput isStaff placeholder="고객에게 답변을 입력하세요..." onSend={handleSend} />
             </div>
           </div>
         )}

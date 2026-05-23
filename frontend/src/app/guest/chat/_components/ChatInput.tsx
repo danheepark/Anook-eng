@@ -18,7 +18,7 @@ export interface ChatInputProps {
   onFocus?: () => void;
 }
 
-export default function ChatInput({ placeholder, onSend, isTyping, onStop, onUserTyping, isStaff, onFocus }: ChatInputProps) {
+export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isStaff, onFocus, placeholder }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
