@@ -1,29 +1,20 @@
-.indicator {
+.container {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 10px 4px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--color-gray-200);
-  background-color: var(--color-white);
-  height: 32px;
+  gap: 6px;
   box-sizing: border-box;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.indicatorHealthy {
-  border-color: color-mix(in srgb, #22c55e 35%, var(--color-gray-200));
-  background-color: color-mix(in srgb, #22c55e 5%, var(--color-white));
-}
-
-.indicatorUnhealthy {
-  border-color: var(--color-error, #EF4444);
-  background-color: color-mix(in srgb, var(--color-error, #EF4444) 8%, var(--color-white));
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -52,18 +43,11 @@
 }
 
 .label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.4px;
   font-variant-numeric: tabular-nums;
-}
-
-.labelHealthy {
-  color: #16a34a;
-}
-
-.labelUnhealthy {
-  color: var(--color-error, #EF4444);
+  line-height: 1;
 }
 
 .checkButton {
@@ -78,7 +62,6 @@
   border-radius: 50%;
   width: 22px;
   height: 22px;
-  margin-left: 2px;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
@@ -108,8 +91,5 @@
 @media (max-width: 768px) {
   .label {
     display: none;
-  }
-  .indicator {
-    padding: 4px 6px 4px 10px;
   }
 }

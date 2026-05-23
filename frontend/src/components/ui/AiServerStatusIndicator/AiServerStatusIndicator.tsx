@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { RotateCw } from 'lucide-react';
 import { useSSE } from '@/app/useSSE';
+import Tag from '@/components/ui/StatusBadge/StatusBadge';
 import styles from './AiServerStatusIndicator.module.css';
 
 type AiServerStatus = 'HEALTHY' | 'UNHEALTHY';
@@ -68,14 +69,19 @@ export default function AiServerStatusIndicator() {
 
   return (
     <div
-      className={`${styles.indicator} ${isHealthy ? styles.indicatorHealthy : styles.indicatorUnhealthy}`}
+      className={styles.container}
       role="status"
       aria-live="polite"
     >
-      <span className={`${styles.dot} ${isHealthy ? styles.dotHealthy : styles.dotUnhealthy}`} />
-      <span className={`${styles.label} ${isHealthy ? styles.labelHealthy : styles.labelUnhealthy}`}>
-        {label}
-      </span>
+      <Tag
+        variant={isHealthy ? 'green' : 'red'}
+        className={styles.statusTag}
+      >
+        <span className={`${styles.dot} ${isHealthy ? styles.dotHealthy : styles.dotUnhealthy}`} />
+        <span className={styles.label}>
+          {label}
+        </span>
+      </Tag>
       <button
         type="button"
         className={styles.checkButton}
