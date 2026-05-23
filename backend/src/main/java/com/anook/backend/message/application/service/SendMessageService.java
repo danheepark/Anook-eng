@@ -396,23 +396,49 @@ public class SendMessageService implements SendMessageUseCase {
                                 .findFirst()
                                 .orElse(null);
 
-                        // [AN-380] 고객의 원문이 단순 수락/확인 응답인지 판별 (다국어 임시 지원)
+                        // 고객의 원문이 단순 수락/확인 응답인지 판별 (다국어 임시 지원)
                         // 한국어, 영어, 일본어, 중국어의 대표적인 수락/긍정 단어 포함
                         boolean isShortConfirmation = content != null && content.trim().toLowerCase()
-                                .matches("^(네|응|어|예|ㅇㅇ|ok|okay|yes|yep|y|확인|진행|진행해|진행해줘|부탁해|알겠어|좋아|맞아|확인했습니다|수락|승인|sure|agree|confirm|はい|ええ|そうだ|お願い|お願いします|確認|是的|对|好|好的|没问题|是|确认|同意)$");
+                                .matches(
+                                        "^(네|응|어|예|ㅇㅇ|ok|okay|yes|yep|y|확인|진행|진행해|진행해줘|부탁해|알겠어|좋아|맞아|확인했습니다|수락|승인|sure|agree|confirm|はい|ええ|そうだ|お願い|お願いします|確認|是的|对|好|好的|没问题|是|确认|同意)$");
 
                         if (pendingRequest != null) {
-                            // [AN-380] 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
+                            // 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
                             // 다른 아이템의 신규 주문(수건 vs 물)이면 auto-confirm 하지 않고 새 요청 생성
                             String existingSummary = pendingRequest.get("summary") != null
                                     ? pendingRequest.get("summary").toString()
                                     : "";
                             String newSummary = analysis.summary() != null ? analysis.summary() : "";
 
-                            boolean seemsSameRequest = isShortConfirmation
-                                    || newSummary.isEmpty()
+                            boolean seemsSameRequest = newSummary.isEmpty()
                                     || existingSummary.contains(newSummary)
                                     || newSummary.contains(existingSummary);
+
+                            if (!seemsSameRequest) {
+                                java.util.List<String> coreKeywords = java.util.Arrays.asList(
+                                        "택시", "taxi", "タクシー", "出租车",
+                                        "수건", "타올", "towel", "タオル", "毛巾",
+                                        "물", "생수", "water", "水",
+                                        "짐", "luggage", "荷物", "行李",
+                                        "보관", "storage", "保管", "寄存",
+                                        "모닝콜", "wake up call", "モーニングコール", "叫醒服务",
+                                        "배달", "delivery", "配達", "送货",
+                                        "식당", "restaurant", "レストラン", "餐厅",
+                                        "예약", "reservation", "予約", "预订",
+                                        "가운", "robe", "ガウン", "浴衣",
+                                        "이불", "blanket", "布団", "被子",
+                                        "베개", "pillow", "枕", "枕头",
+                                        "슬리퍼", "slipper", "スリッパ", "拖鞋");
+                                String lowerExisting = existingSummary.toLowerCase();
+                                String lowerNew = newSummary.toLowerCase();
+                                for (String kw : coreKeywords) {
+                                    if (lowerExisting.contains(kw) && lowerNew.contains(kw)) {
+                                        seemsSameRequest = true;
+                                        break;
+                                    }
+                                }
+                            }
+
 
                             if (seemsSameRequest) {
                                 Long pendingRequestId = ((Number) pendingRequest.get("id")).longValue();
@@ -426,7 +452,8 @@ public class SendMessageService implements SendMessageUseCase {
                                     existingSummary, newSummary);
                             // fall through → RequestDetectedEvent 발행 (신규 아이템 요청 생성)
                         }
-                        // 나머지: 새 아이템이 포함된 신규 주문이거나 auto-confirm 대상이 없으면 → fall through → RequestDetectedEvent 발행
+                        // 나머지: 새 아이템이 포함된 신규 주문이거나 auto-confirm 대상이 없으면 → fall through →
+                        // RequestDetectedEvent 발행
                     }
 
                     boolean escalated = analysis.confidence() < 0.7;

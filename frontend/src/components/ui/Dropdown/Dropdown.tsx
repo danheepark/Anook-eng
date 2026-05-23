@@ -22,6 +22,7 @@ export interface DropdownProps {
   /** 값이 선택되었을 때 발생할 콜백 함수 */
   onChange?: (val: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function Dropdown({
@@ -30,7 +31,8 @@ export default function Dropdown({
   options,
   value,
   onChange,
-  className = ''
+  className = '',
+  disabled = false
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -70,12 +72,13 @@ export default function Dropdown({
 
       {/* 2. 트리거 박스 (클릭 시 열림) */}
       <div 
-        className={styles.trigger} 
+        className={`${styles.trigger} ${disabled ? styles.triggerDisabled : ''}`} 
         onMouseDown={(e) => {
           e.stopPropagation();
-          setIsOpen(!isOpen);
+          if (!disabled) setIsOpen(!isOpen);
         }}
         onClick={(e) => e.stopPropagation()}
+        style={disabled ? { cursor: 'not-allowed', opacity: 0.6 } : undefined}
       >
         {selectedOption ? (
           <span className={styles.textSelected}>{selectedOption.label}</span>
