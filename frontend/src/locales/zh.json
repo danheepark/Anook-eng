@@ -8,7 +8,8 @@
     "inProgress": "进行中",
     "completed": "已完成",
     "escalated": "已上报",
-    "transferred": "已转交"
+    "transferred": "已转交",
+    "cancelled": "已取消"
   },
   "priority": {
     "low": "低",
@@ -337,6 +338,60 @@
         "time": "时间"
       },
       "empty": "该工作时段内未发生任何请求。"
+    },
+    "staffManagement": {
+      "title": "员工管理",
+      "tabs": {
+        "staff": "员工管理",
+        "role": "角色管理"
+      },
+      "staffTab": {
+        "addStaff": "+ 添加员工",
+        "editStaff": "修改员工信息",
+        "newStaff": "添加新员工",
+        "name": "姓名",
+        "dept": "部门",
+        "role": "角色",
+        "pin": "PIN",
+        "edit": "修改",
+        "delete": "删除",
+        "empty": "暂无已注册员工。",
+        "deleteTitle": "删除员工",
+        "deleteConfirm": "确定要删除员工 '{{name}}' 吗？此操作无法撤销。",
+        "nameInputLabel": "员工姓名",
+        "namePlaceholder": "请输入姓名",
+        "saveSuccess": "员工已注册。",
+        "editSuccess": "员工信息已修改。",
+        "deleteSuccess": "员工已删除。",
+        "nameRequired": "请输入员工姓名。",
+        "roleRequired": "请选择角色。",
+        "deptRequired": "请选择部门。"
+      },
+      "roleTab": {
+        "addRole": "+ 添加角色",
+        "editRole": "修改角色",
+        "newRole": "添加新角色",
+        "dept": "部门",
+        "roleName": "角色名称",
+        "edit": "修改",
+        "delete": "删除",
+        "empty": "暂无已注册角色。",
+        "deleteTitle": "删除角色",
+        "deleteConfirm": "确定要删除角色 '{{name}}' 吗？此操作无法撤销。",
+        "rolePlaceholder": "请输入角色名称",
+        "saveSuccess": "角色已添加。",
+        "editSuccess": "角色已修改。",
+        "deleteSuccess": "角色已删除。",
+        "deptRequired": "请选择部门。",
+        "roleRequired": "请输入角色名称。"
+      },
+      "common": {
+        "cancel": "取消",
+        "save": "保存",
+        "saving": "保存中...",
+        "loading": "加载中...",
+        "saveFailed": "保存失败。"
+      }
     }
   },
   "guestChat": {

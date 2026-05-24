@@ -8,7 +8,8 @@
     "inProgress": "처리 중",
     "completed": "완료",
     "escalated": "이관됨",
-    "transferred": "전달됨"
+    "transferred": "전달됨",
+    "cancelled": "취소됨"
   },
   "priority": {
     "low": "낮음",
@@ -338,6 +339,60 @@
         "time": "시간"
       },
       "empty": "해당 근무 시간에 발생한 요청이 없습니다."
+    },
+    "staffManagement": {
+      "title": "직원 관리",
+      "tabs": {
+        "staff": "직원 관리",
+        "role": "역할 관리"
+      },
+      "staffTab": {
+        "addStaff": "+ 직원 추가",
+        "editStaff": "직원 정보 수정",
+        "newStaff": "새 직원 추가",
+        "name": "이름",
+        "dept": "부서",
+        "role": "역할",
+        "pin": "PIN",
+        "edit": "수정",
+        "delete": "삭제",
+        "empty": "등록된 직원이 없습니다.",
+        "deleteTitle": "직원 삭제",
+        "deleteConfirm": "'{{name}}' 직원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "nameInputLabel": "직원 이름",
+        "namePlaceholder": "이름을 입력하세요",
+        "saveSuccess": "직원이 등록되었습니다.",
+        "editSuccess": "직원 정보가 수정되었습니다.",
+        "deleteSuccess": "직원이 삭제되었습니다.",
+        "nameRequired": "직원 이름을 입력해주세요.",
+        "roleRequired": "역할을 선택해주세요.",
+        "deptRequired": "부서를 선택해주세요."
+      },
+      "roleTab": {
+        "addRole": "+ 역할 추가",
+        "editRole": "역할 수정",
+        "newRole": "새 역할 추가",
+        "dept": "부서",
+        "roleName": "역할명",
+        "edit": "수정",
+        "delete": "삭제",
+        "empty": "등록된 역할이 없습니다.",
+        "deleteTitle": "역할 삭제",
+        "deleteConfirm": "'{{name}}' 역할을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "rolePlaceholder": "역할명을 입력하세요",
+        "saveSuccess": "역할이 추가되었습니다.",
+        "editSuccess": "역할이 수정되었습니다.",
+        "deleteSuccess": "역할이 삭제되었습니다.",
+        "deptRequired": "부서를 선택해주세요.",
+        "roleRequired": "역할명을 입력해주세요."
+      },
+      "common": {
+        "cancel": "취소",
+        "save": "저장",
+        "saving": "저장 중...",
+        "loading": "로딩 중...",
+        "saveFailed": "저장에 실패했습니다."
+      }
     }
   },
   "guestChat": {

@@ -8,7 +8,8 @@
     "inProgress": "In Progress",
     "completed": "Completed",
     "escalated": "Escalated",
-    "transferred": "Transferred"
+    "transferred": "Transferred",
+    "cancelled": "Cancelled"
   },
   "priority": {
     "low": "Low",
@@ -337,6 +338,60 @@
         "time": "Time"
       },
       "empty": "No requests found for this shift."
+    },
+    "staffManagement": {
+      "title": "Staff Management",
+      "tabs": {
+        "staff": "Staff Management",
+        "role": "Role Management"
+      },
+      "staffTab": {
+        "addStaff": "+ Add Staff",
+        "editStaff": "Edit Staff Info",
+        "newStaff": "Add New Staff",
+        "name": "Name",
+        "dept": "Department",
+        "role": "Role",
+        "pin": "PIN",
+        "edit": "Edit",
+        "delete": "Delete",
+        "empty": "No registered staff.",
+        "deleteTitle": "Delete Staff",
+        "deleteConfirm": "Are you sure you want to delete staff '{{name}}'? This action cannot be undone.",
+        "nameInputLabel": "Staff Name",
+        "namePlaceholder": "Enter name",
+        "saveSuccess": "Staff has been registered.",
+        "editSuccess": "Staff information has been updated.",
+        "deleteSuccess": "Staff has been deleted.",
+        "nameRequired": "Please enter the staff name.",
+        "roleRequired": "Please select a role.",
+        "deptRequired": "Please select a department."
+      },
+      "roleTab": {
+        "addRole": "+ Add Role",
+        "editRole": "Edit Role",
+        "newRole": "Add New Role",
+        "dept": "Department",
+        "roleName": "Role Name",
+        "edit": "Edit",
+        "delete": "Delete",
+        "empty": "No registered roles.",
+        "deleteTitle": "Delete Role",
+        "deleteConfirm": "Are you sure you want to delete role '{{name}}'? This action cannot be undone.",
+        "rolePlaceholder": "Enter role name",
+        "saveSuccess": "Role has been added.",
+        "editSuccess": "Role has been updated.",
+        "deleteSuccess": "Role has been deleted.",
+        "deptRequired": "Please select a department.",
+        "roleRequired": "Please enter a role name."
+      },
+      "common": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "loading": "Loading...",
+        "saveFailed": "Failed to save."
+      }
     }
   },
   "guestChat": {

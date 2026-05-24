@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import Button from '@/components/ui/Button/Button';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
+import { useTranslation } from '@/app/useTranslation';
 import { useRoleManagement, Role } from './useRoleManagement';
 import { useDepartmentManagement } from '../Department/useDepartmentManagement';
 import RoleFormModal from '../RoleFormModal/RoleFormModal';
@@ -11,6 +12,7 @@ import EditIcon from '@/components/icons/EditIcon';
 import DeleteIcon from '@/components/icons/DeleteIcon';
 
 export default function RoleTab() {
+  const { t } = useTranslation();
   const { roles, loading: rolesLoading, error, fetchRoles, createRole, updateRole, deleteRole } = useRoleManagement();
   const { departments, loading: deptsLoading, fetchDepartments } = useDepartmentManagement();
   const { showToast } = useUiStore();
@@ -77,10 +79,10 @@ export default function RoleTab() {
   const handleSaveRole = async (data: { departmentId: string; name: string }) => {
     if (editingRole) {
       await updateRole(editingRole.id, data);
-      showToast('역할이 수정되었습니다.', 'success');
+      showToast(t.frontdeskPage.staffManagement.roleTab.editSuccess, 'success');
     } else {
       await createRole(data);
-      showToast('역할이 추가되었습니다.', 'success');
+      showToast(t.frontdeskPage.staffManagement.roleTab.saveSuccess, 'success');
     }
   };
 
@@ -88,7 +90,7 @@ export default function RoleTab() {
     if (roleToDelete) {
       try {
         await deleteRole(roleToDelete.id);
-        showToast('역할이 삭제되었습니다.', 'success');
+        showToast(t.frontdeskPage.staffManagement.roleTab.deleteSuccess, 'success');
       } catch (err) {
         // 에러는 useRoleManagement에서 처리됨
       }
@@ -133,19 +135,19 @@ export default function RoleTab() {
           />
         </div>
         <Button variant="primary" onClick={handleAddClick}>
-          + 역할 추가
+          {t.frontdeskPage.staffManagement.roleTab.addRole}
         </Button>
       </div>
 
       {rolesLoading && roles.length === 0 ? (
         <div style={{ padding: 'var(--space-24)', textAlign: 'center', color: 'var(--color-gray-500)' }}>
-          로딩 중...
+          {t.frontdeskPage.staffManagement.common.loading}
         </div>
       ) : (
         <Table columns="1fr 1fr 100px">
           <TableHeader>
-            <TableCell>부서</TableCell>
-            <TableCell>역할명</TableCell>
+            <TableCell>{t.frontdeskPage.staffManagement.roleTab.dept}</TableCell>
+            <TableCell>{t.frontdeskPage.staffManagement.roleTab.roleName}</TableCell>
             <TableCell></TableCell>
           </TableHeader>
           {filteredRoles.length > 0 ? (
@@ -166,10 +168,10 @@ export default function RoleTab() {
 
               return (
               <TableRow key={role.id} id={`role-row-${role.id}`} style={isActiveMatch ? { border: '2px solid var(--color-brand-500)', boxShadow: '0 0 0 4px var(--color-brand-100)' } : {}}>
-                <TableCell label="부서">
+                <TableCell label={t.frontdeskPage.staffManagement.roleTab.dept}>
                   {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(deptName)} /> : deptName}
                 </TableCell>
-                <TableCell label="역할명">
+                <TableCell label={t.frontdeskPage.staffManagement.roleTab.roleName}>
                   {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(role.name)} /> : role.name}
                 </TableCell>
                 <TableCell>
@@ -177,14 +179,14 @@ export default function RoleTab() {
                     <button 
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-gray-500)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
                       onClick={() => handleEditClick(role)}
-                      title="수정"
+                      title={t.frontdeskPage.staffManagement.roleTab.edit}
                     >
                       <EditIcon width={20} height={20} />
                     </button>
                     <button 
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-gray-500)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
                       onClick={() => handleDeleteClick(role)}
-                      title="삭제"
+                      title={t.frontdeskPage.staffManagement.roleTab.delete}
                     >
                       <DeleteIcon width={20} height={20} />
                     </button>
@@ -197,7 +199,7 @@ export default function RoleTab() {
             <TableRow>
               <TableCell>
                 <div style={{ textAlign: 'center', color: 'var(--color-gray-500)', padding: 'var(--space-24)' }}>
-                  등록된 역할이 없습니다.
+                  {t.frontdeskPage.staffManagement.roleTab.empty}
                 </div>
               </TableCell>
               <TableCell></TableCell>
@@ -219,10 +221,10 @@ export default function RoleTab() {
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="역할 삭제"
-        subtitle={`'${roleToDelete?.name}' 역할을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`}
-        confirmText="삭제"
-        cancelText="취소"
+        title={t.frontdeskPage.staffManagement.roleTab.deleteTitle}
+        subtitle={t.frontdeskPage.staffManagement.roleTab.deleteConfirm.replace('{{name}}', roleToDelete?.name || '')}
+        confirmText={t.frontdeskPage.staffManagement.roleTab.delete}
+        cancelText={t.frontdeskPage.staffManagement.common.cancel}
       />
     </div>
   );

@@ -3,6 +3,7 @@ import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button/Button';
 import InputField from '@/components/ui/Inputfield/InputField';
 import Dropdown from '@/components/ui/Dropdown/Dropdown';
+import { useTranslation } from '@/app/useTranslation';
 import { Staff } from '../StaffTab/useStaffManagement';
 import { Role } from '../RoleTab/useRoleManagement';
 import { Department } from '../Department/useDepartmentManagement';
@@ -25,6 +26,7 @@ export default function StaffFormModal({
   roles,
   departments
 }: StaffFormModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [roleId, setRoleId] = useState('');
   const [departmentId, setDepartmentId] = useState('');
@@ -41,15 +43,15 @@ export default function StaffFormModal({
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      showToast('직원 이름을 입력해주세요.', 'error');
+      showToast(t.frontdeskPage.staffManagement.staffTab.nameRequired, 'error');
       return;
     }
     if (!roleId) {
-      showToast('역할을 선택해주세요.', 'error');
+      showToast(t.frontdeskPage.staffManagement.staffTab.roleRequired, 'error');
       return;
     }
     if (!departmentId) {
-      showToast('부서를 선택해주세요.', 'error');
+      showToast(t.frontdeskPage.staffManagement.staffTab.deptRequired, 'error');
       return;
     }
 
@@ -62,7 +64,7 @@ export default function StaffFormModal({
       });
       onClose();
     } catch (err: any) {
-      showToast(err.message || '저장에 실패했습니다.', 'error');
+      showToast(err.message || t.frontdeskPage.staffManagement.common.saveFailed, 'error');
     } finally {
       setLoading(false);
     }
@@ -89,18 +91,18 @@ export default function StaffFormModal({
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="md" onClose={onClose} title={initialData ? '직원 정보 수정' : '새 직원 추가'} overflowVisible={true}>
+      <ModalCard size="md" onClose={onClose} title={initialData ? t.frontdeskPage.staffManagement.staffTab.editStaff : t.frontdeskPage.staffManagement.staffTab.newStaff} overflowVisible={true}>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)', marginBottom: 'var(--space-32)' }}>
           <InputField
-            label="직원 이름"
-            placeholder="이름을 입력하세요"
+            label={t.frontdeskPage.staffManagement.staffTab.nameInputLabel}
+            placeholder={t.frontdeskPage.staffManagement.staffTab.namePlaceholder}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
 
           <Dropdown
-            label="부서"
+            label={t.frontdeskPage.staffManagement.staffTab.dept}
             options={deptOptions}
             value={departmentId}
             onChange={(val) => {
@@ -110,7 +112,7 @@ export default function StaffFormModal({
           />
 
           <Dropdown
-            label="역할"
+            label={t.frontdeskPage.staffManagement.staffTab.role}
             options={roleOptions}
             value={roleId}
             onChange={setRoleId}
@@ -120,10 +122,10 @@ export default function StaffFormModal({
 
         <div style={{ display: 'flex', gap: 'var(--space-12)' }}>
           <Button variant="secondary" onClick={onClose} fullWidth>
-            취소
+            {t.frontdeskPage.staffManagement.common.cancel}
           </Button>
           <Button variant="primary" onClick={handleSubmit} fullWidth disabled={loading}>
-            {loading ? '저장 중...' : '저장'}
+            {loading ? t.frontdeskPage.staffManagement.common.saving : t.frontdeskPage.staffManagement.common.save}
           </Button>
         </div>
       </ModalCard>

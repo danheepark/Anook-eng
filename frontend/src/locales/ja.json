@@ -8,7 +8,8 @@
     "inProgress": "進行中",
     "completed": "完了",
     "escalated": "エスカレーション済み",
-    "transferred": "転送済み"
+    "transferred": "転送済み",
+    "cancelled": "キャンセル済"
   },
   "priority": {
     "low": "低",
@@ -337,6 +338,60 @@
         "time": "時間"
       },
       "empty": "該当する勤務時間に発生したリクエストはありません。"
+    },
+    "staffManagement": {
+      "title": "スタッフ管理",
+      "tabs": {
+        "staff": "スタッフ管理",
+        "role": "役割管理"
+      },
+      "staffTab": {
+        "addStaff": "+ スタッフ追加",
+        "editStaff": "スタッフ情報修正",
+        "newStaff": "新規スタッフ追加",
+        "name": "名前",
+        "dept": "部署",
+        "role": "役割",
+        "pin": "PIN",
+        "edit": "修正",
+        "delete": "削除",
+        "empty": "登録されたスタッフがいません。",
+        "deleteTitle": "スタッフ削除",
+        "deleteConfirm": "スタッフ「{{name}}」を削除しますか？この操作は取り消せません。",
+        "nameInputLabel": "スタッフ名",
+        "namePlaceholder": "名前を入力してください",
+        "saveSuccess": "スタッフが登録されました。",
+        "editSuccess": "スタッフ情報が修正されました。",
+        "deleteSuccess": "スタッフが削除されました。",
+        "nameRequired": "スタッフ名を入力してください。",
+        "roleRequired": "役割を選択してください。",
+        "deptRequired": "部署を選択してください。"
+      },
+      "roleTab": {
+        "addRole": "+ 役割追加",
+        "editRole": "役割修正",
+        "newRole": "新規役割追加",
+        "dept": "部署",
+        "roleName": "役割名",
+        "edit": "修正",
+        "delete": "削除",
+        "empty": "登録された役割がありません。",
+        "deleteTitle": "役割削除",
+        "deleteConfirm": "役割「{{name}}」を削除しますか？この操作は取り消せません。",
+        "rolePlaceholder": "役割名を入力してください",
+        "saveSuccess": "役割が追加されました。",
+        "editSuccess": "役割が修正されました。",
+        "deleteSuccess": "役割が削除されました。",
+        "deptRequired": "部署を選択してください。",
+        "roleRequired": "役割名を入力してください。"
+      },
+      "common": {
+        "cancel": "キャンセル",
+        "save": "保存",
+        "saving": "保存中...",
+        "loading": "読み込み中...",
+        "saveFailed": "保存に失敗しました。"
+      }
     }
   },
   "guestChat": {
