@@ -231,7 +231,7 @@ public class SendMessageService implements SendMessageUseCase {
                                         "가운", "robe", "ガウン", "浴衣",
                                         "이불", "blanket", "布団", "被子",
                                         "베개", "pillow", "枕", "枕头",
-                                        "슬리퍼", "slipper", "スリッパ", "拖鞋");
+                                        "슬리퍼", "slipper", "スリッパ", "拖鞋", "꽃", "flower", "꽃배달", "장미", "rose", "장미꽃");
                                 String lowerExisting = existingSummary.toLowerCase();
                                 String lowerNew = newSummary.toLowerCase();
                                 for (String kw : coreKeywords) {
@@ -428,7 +428,7 @@ public class SendMessageService implements SendMessageUseCase {
                                         "가운", "robe", "ガウン", "浴衣",
                                         "이불", "blanket", "布団", "被子",
                                         "베개", "pillow", "枕", "枕头",
-                                        "슬리퍼", "slipper", "スリッパ", "拖鞋");
+                                        "슬리퍼", "slipper", "スリッパ", "拖鞋", "꽃", "flower", "꽃배달", "장미", "rose", "장미꽃");
                                 String lowerExisting = existingSummary.toLowerCase();
                                 String lowerNew = newSummary.toLowerCase();
                                 for (String kw : coreKeywords) {
