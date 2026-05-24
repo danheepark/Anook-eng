@@ -118,10 +118,12 @@ export default function DashboardPage() {
   const { t } = useTranslation();
 
   const deptData = stats
-    ? Object.entries(stats.byDepartment).map(([k, v]) => ({ 
-        label: t.frontdeskPage.dashboard.departments[k as keyof typeof t.frontdeskPage.dashboard.departments] || k, 
-        value: v 
-      }))
+    ? Object.entries(stats.byDepartment)
+        .filter(([k]) => k.toUpperCase() !== 'EMERGENCY')
+        .map(([k, v]) => ({ 
+          label: t.frontdeskPage.dashboard.departments[k as keyof typeof t.frontdeskPage.dashboard.departments] || k, 
+          value: v 
+        }))
     : [];
 
   const frequentRequestsList = stats && stats.frequentRequests
