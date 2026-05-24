@@ -6,10 +6,7 @@ import InputField from '@/components/ui/Inputfield/InputField';
 import KnowledgeLibraryTab from './_components/KnowledgeLibraryTab/KnowledgeLibraryTab';
 import KnowledgeReviewTab from './_components/KnowledgeReviewTab/KnowledgeReviewTab';
 import { useTranslation } from '@/app/useTranslation';
-import RagUploadModal from './_components/RagUploadModal';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
-import ArrowUpIcon from '@/components/icons/ArrowUpIcon';
-import ArrowDownIcon from '@/components/icons/ArrowDownIcon';
 import styles from './page.module.css';
 
 export default function KnowledgeManagementPage() {
