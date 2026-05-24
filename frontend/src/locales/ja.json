@@ -8,7 +8,8 @@
     "inProgress": "進行中",
     "completed": "完了",
     "escalated": "エスカレーション済み",
-    "transferred": "転送済み"
+    "transferred": "転送済み",
+    "cancelled": "キャンセル済"
   },
   "priority": {
     "low": "低",
@@ -24,7 +25,8 @@
     "loading": "読み込み中...",
     "error": "エラーが発生しました",
     "retry": "再試行",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "searchPlaceholder": "検索語を入力してください..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +63,10 @@
       },
       "charts": {
         "avgResTime": "平均解決時間",
-        "frequentReqs": "最も頻繁なリクエスト"
+        "frequentReqs": "最も頻繁なリクエスト",
+        "others": "その他",
+        "avgResTimeSub": "平均解決時間（分）",
+        "frequentReqsSub": "最も頻繁なリクエスト割合 (%)"
       },
       "summaries": {
         "totalToday": "本日の総リクエスト数",
@@ -74,7 +79,8 @@
         "FB": "料飲",
         "FACILITY": "施設",
         "CONCIERGE": "コンシェルジュ",
-        "FRONT": "緊急"
+        "FRONT": "フロント",
+        "EMERGENCY": "緊急対応"
       }
     },
     "taskBoard": {
@@ -181,7 +187,7 @@
     "chatHistory": {
       "title": "チャット履歴",
       "emptyMessage": "メッセージはありません",
-      "systemCompleted": "以前の相談および処理がすべて完了しました。",
+      "systemCompleted": "相談と処理がすべて完了しました。",
       "systemMessageNote": "(※ ゲストには表示されないフロント業務用のシステムメッセージです)",
       "roomConversation": "{{room}}号室の会話",
       "roomChatRecord": "{{room}}号室のチャット記録",
@@ -268,6 +274,124 @@
         "countSuffix": "点",
         "option": "オプション",
         "none": "なし"
+      },
+      "manualAssign": "手動割り当て",
+      "approveEscalation": "エスカレーション承認",
+      "rejectEscalation": "エスカレーション却下",
+      "rejectCancel": "キャンセル却下",
+      "approveCancel": "キャンセル承認",
+      "forceCancelRequest": "強制キャンセル",
+      "aiAnalysisView": "AI分析結果を見る",
+      "aiDetails": "詳細情報"
+    },
+    "aiRouting": {
+      "avgLatency": "平均応答速度",
+      "accumulatedTokens": "累積消費トークン",
+      "routingSuccessRate": "AIルーティング成功率",
+      "fallbackText": "フォールバック",
+      "customerSatisfaction": "顧客満足度",
+      "caseCount": "件",
+      "ratingPanelTitle": "AI処理リクエスト評価詳細",
+      "ratingEmpty": "登録されたAIフィードバックはありません。",
+      "detailedAccessLogs": "詳細アクセスログ",
+      "noLogs": "ログが見つかりません。",
+      "requestPreviewEmpty": "リクエスト内容なし",
+      "tableColumns": {
+        "time": "時間",
+        "requestPreview": "リクエストプレビュー",
+        "totalTokens": "合計トークン",
+        "latency": "遅延時間",
+        "viewDetails": "詳細表示"
+      }
+    },
+    "handover": {
+      "title": "引き継ぎ文書",
+      "shift": {
+        "DAY": "昼勤 (07:00 - 15:00)",
+        "EVENING": "夜勤 (15:00 - 23:00)",
+        "NIGHT": "深夜勤 (23:00 - 07:00)",
+        "label": {
+          "DAY": "昼勤",
+          "EVENING": "夜勤",
+          "NIGHT": "深夜勤"
+        }
+      },
+      "downloadButton": "📥 エクセルダウンロード",
+      "downloading": "ダウンロード中...",
+      "filterOptions": {
+        "ALL": "全ステータス",
+        "PENDING": "保留中",
+        "IN_PROGRESS": "進行中",
+        "DONE": "処理完了"
+      },
+      "loading": "データを読み込み中...",
+      "briefing": {
+        "shiftTime": "勤務時間",
+        "manager": "担当者名",
+        "resolutionStatus": "処理状況",
+        "createdAt": "作成日時"
+      },
+      "tableColumns": {
+        "room": "客室",
+        "status": "状態",
+        "category": "カテゴリ",
+        "summary": "件名/内容要約",
+        "time": "時間"
+      },
+      "empty": "該当する勤務時間に発生したリクエストはありません。"
+    },
+    "staffManagement": {
+      "title": "スタッフ管理",
+      "tabs": {
+        "staff": "スタッフ管理",
+        "role": "役割管理"
+      },
+      "staffTab": {
+        "addStaff": "+ スタッフ追加",
+        "editStaff": "スタッフ情報修正",
+        "newStaff": "新規スタッフ追加",
+        "name": "名前",
+        "dept": "部署",
+        "role": "役割",
+        "pin": "PIN",
+        "edit": "修正",
+        "delete": "削除",
+        "empty": "登録されたスタッフがいません。",
+        "deleteTitle": "スタッフ削除",
+        "deleteConfirm": "スタッフ「{{name}}」を削除しますか？この操作は取り消せません。",
+        "nameInputLabel": "スタッフ名",
+        "namePlaceholder": "名前を入力してください",
+        "saveSuccess": "スタッフが登録されました。",
+        "editSuccess": "スタッフ情報が修正されました。",
+        "deleteSuccess": "スタッフが削除されました。",
+        "nameRequired": "スタッフ名を入力してください。",
+        "roleRequired": "役割を選択してください。",
+        "deptRequired": "部署を選択してください。"
+      },
+      "roleTab": {
+        "addRole": "+ 役割追加",
+        "editRole": "役割修正",
+        "newRole": "新規役割追加",
+        "dept": "部署",
+        "roleName": "役割名",
+        "edit": "修正",
+        "delete": "削除",
+        "empty": "登録された役割がありません。",
+        "deleteTitle": "役割削除",
+        "deleteConfirm": "役割「{{name}}」を削除しますか？この操作は取り消せません。",
+        "rolePlaceholder": "役割名を入力してください",
+        "saveSuccess": "役割が追加されました。",
+        "editSuccess": "役割が修正されました。",
+        "deleteSuccess": "役割が削除されました。",
+        "deptRequired": "部署を選択してください。",
+        "roleRequired": "役割名を入力してください。"
+      },
+      "common": {
+        "cancel": "キャンセル",
+        "save": "保存",
+        "saving": "保存中...",
+        "loading": "読み込み中...",
+        "saveFailed": "保存に失敗しました。"
       }
     }
   },
@@ -476,7 +600,7 @@
   },
   "aiReplies": {
     "forwardFb": "かしこまりました！料飲チームにご注文内容を迅速にお伝えいたします。🍽️",
-    "forwardHk": "かしこまりました！ハウスキーピングチームにご要望内容を迅速にお伝えいたします。🧹",
+    "forwardHk": "かしこまりました！ハウスキーピングチームにご要望内容を迅速にお伝えいたします。",
     "forwardFacility": "ご不便をおかけして大変申し訳ございません。🥲 施設管理チームにお伝えし、できる限り迅速に対応させていただきます！🛠️",
     "forwardConcierge": "かしこまりました！コンシェルジュチームにご要望をお伝えいたします。🛎️",
     "forwardFront": "ただいまフロントデスクに直接お繋ぎし、サポートさせていただきます。",
@@ -486,7 +610,7 @@
     "piiGuard": "お客様の大切な個人情報を保護するため、チャットでの機密情報の入力はお断りしております。🔒 詳細な確認が必要な場合は、客室内の電話からフロントデスク（内線0番）までご連絡いただければ、安全に対応させていただきます。😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedTitle": "相談と処理がすべて完了しました。",
     "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
     "requestCompleted": "요청 완료",
     "consultationCompleted": "상담이 완료되었습니다",
@@ -499,5 +623,27 @@
       "4": "좋았어요",
       "5": "최고예요!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "相談完了",
+    "startConsultation": "相談を開始する",
+    "startEmergency": "緊急対応を開始",
+    "autoReplyStaffChecked": "フロントデスクのスタッフがメッセージを確認しました。すぐにご案内いたします。",
+    "autoReplyEmergency": "緊急対応チームが派遣されました。安全な場所でお待ちください。",
+    "backToList": "リストに戻る",
+    "viewRequestDetail": "リクエスト詳細を見る",
+    "loadingMessages": "メッセージを読み込み中...",
+    "noMessages": "この部屋のチャット履歴はありません。",
+    "registerAiKnowledge": "AI知識を登録",
+    "replyPlaceholder": "ゲストへの返信を入力...",
+    "registerAiKnowledgeTitle": "AI知識の登録",
+    "registerAiKnowledgeDesc": "この相談内容をAI知識として登録しますか？<br />登録すると、今後同様の質問にAIが自動的に回答します。",
+    "registerNow": "今すぐ登録",
+    "registerLater": "後で登録",
+    "doNotRegister": "登録しない",
+    "dummyGuest": "リクエスト内容がありません。",
+    "dummyAi": "リクエストを受け付けました。フロントデスクのスタッフがまもなくご案内いたします。",
+    "inProgressTab": "進行中",
+    "completedTab": "相談完了"
   }
 }

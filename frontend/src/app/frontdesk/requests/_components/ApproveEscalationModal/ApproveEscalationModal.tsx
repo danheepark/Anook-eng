@@ -75,10 +75,10 @@ export default function ApproveEscalationModal({
 
 
         <div className={styles.buttonGroup}>
-          <Button variant="secondary" style={{ flex: 1 }} onClick={onClose} disabled={loading}>
+          <Button variant="secondary" onClick={onClose} disabled={loading}>
             아니오
           </Button>
-          <Button variant="primary" style={{ flex: 1 }} onClick={handleApprove} disabled={loading}>
+          <Button variant="primary" onClick={handleApprove} disabled={loading}>
             승인하기
           </Button>
         </div>

@@ -145,7 +145,7 @@ export function useChat() {
             id: msg.id.toString(),
             variant: msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const,
             content: displayContent,
-            type: 'TEXT' as const,
+            type: msg.senderType === 'STAFF' ? 'FALLBACK' : 'TEXT',
             _ts: new Date(msg.createdAt).getTime(),
           };
         });
@@ -295,18 +295,40 @@ export function useChat() {
           // 취소 관련 AI 응답은 backend (analyze.py)에서 전송한 content를 그대로 사용합니다.
           let content = payload.content;
 
-
           // AI 특수 코드 매핑 (다국어 언어팩 연동, AI 할루시네이션 대비 includes 사용)
           content = translateContent(content);
 
-          const newAiMsg: ChatMessage = {
-            id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
-            variant: 'received',
-            content,
-            type: payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : (payload.uiType || 'TEXT'),
-            meta: { ...(payload.meta || {}), options: payload.options },
-          };
-          return [...filtered, newAiMsg];
+          const msgType = payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : (payload.uiType || 'TEXT');
+          const msgsToAppend: ChatMessage[] = [];
+
+          if (msgType === 'REQUEST_CARD') {
+            if (content && content.trim() !== '') {
+              msgsToAppend.push({
+                id: payload.messageId ? `${payload.messageId}-text` : `text-${Date.now()}`,
+                variant: 'received',
+                content,
+                type: 'TEXT',
+                meta: { ...(payload.meta || {}), options: undefined },
+              });
+            }
+            msgsToAppend.push({
+              id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
+              variant: 'received',
+              content: '', // Extract content to TEXT message
+              type: 'REQUEST_CARD',
+              meta: { ...(payload.meta || {}), options: payload.options },
+            });
+          } else {
+            msgsToAppend.push({
+              id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
+              variant: 'received',
+              content,
+              type: msgType,
+              meta: { ...(payload.meta || {}), options: payload.options },
+            });
+          }
+          
+          return [...filtered, ...msgsToAppend];
         });
       } else if (payload.type === 'STAFF_TYPING') {
         // 직원이 메시지 작성 중 → 타이핑 인디케이터 표시

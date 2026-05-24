@@ -118,14 +118,19 @@ export default function DashboardPage() {
   const { t } = useTranslation();
 
   const deptData = stats
-    ? Object.entries(stats.byDepartment).map(([k, v]) => ({ 
-        label: t.frontdeskPage.dashboard.departments[k as keyof typeof t.frontdeskPage.dashboard.departments] || k, 
-        value: v 
-      }))
+    ? Object.entries(stats.byDepartment)
+        .filter(([k]) => k.toUpperCase() !== 'EMERGENCY')
+        .map(([k, v]) => ({ 
+          label: t.frontdeskPage.dashboard.departments[k as keyof typeof t.frontdeskPage.dashboard.departments] || k, 
+          value: v 
+        }))
     : [];
 
   const frequentRequestsList = stats && stats.frequentRequests
-    ? Object.entries(stats.frequentRequests).map(([k, v]) => ({ label: k, value: v }))
+    ? Object.entries(stats.frequentRequests).map(([k, v]) => {
+        const translatedLabel = k === '기타' ? (t.frontdeskPage.dashboard.charts.others || '기타') : k;
+        return { label: translatedLabel, value: v };
+      })
     : [];
   
   const totalFrequentCount = frequentRequestsList.reduce((acc, curr) => acc + curr.value, 0);
@@ -186,13 +191,13 @@ export default function DashboardPage() {
 
       {/* Main Content Section (Charts) */}
       <div className={styles.chartsGrid}>
-        <ChartCard title={t.frontdeskPage.dashboard.charts.avgResTime} subtitle="AVERAGE RESOLUTION TIME (MINUTES)">
+        <ChartCard title={t.frontdeskPage.dashboard.charts.avgResTime} subtitle={t.frontdeskPage.dashboard.charts.avgResTimeSub}>
            <div className={styles.chartPlaceholder}>
               {loading ? t.common.loading : error ? error : <BarChart data={deptData} />}
            </div>
         </ChartCard>
         
-        <ChartCard title={t.frontdeskPage.dashboard.charts.frequentReqs} subtitle="MOST FREQUENT REQUESTS (%)">
+        <ChartCard title={t.frontdeskPage.dashboard.charts.frequentReqs} subtitle={t.frontdeskPage.dashboard.charts.frequentReqsSub}>
            <div className={styles.chartPlaceholder}>
               {loading ? t.common.loading : error ? error : (
                 <DonutChart data={frequentRequestsData} colors={DONUT_COLORS} />

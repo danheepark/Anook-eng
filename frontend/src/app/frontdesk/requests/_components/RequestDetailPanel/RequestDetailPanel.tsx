@@ -15,6 +15,7 @@ import RejectCancellationModal from '../RejectCancellationModal/RejectCancellati
 import useApproveEscalation from '../ApproveEscalationModal/useApproveEscalation';
 import useRequestDetail from '../RequestDetailModal/useRequestDetail';
 import ManualAssignModal from '../ManualAssignModal/ManualAssignModal';
+import { useTranslation } from '@/app/useTranslation';
 
 interface Department {
   id: string;
@@ -72,12 +73,12 @@ const ENTITY_LABELS: Record<string, string> = {
 };
 
 /** 직원에게 보여줄 필요 없는 내부 키 (섹션 표시 판단 + 순회에서 모두 제외) */
-const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning']);
+const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'fallback_message']);
 
 /** 배열 타입 특수 렌더러가 필요한 키 (key-value 순회에서만 스킵, 섹션 표시 판단에서는 포함) */
 const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
 
-function renderEntities(entities: Record<string, any>): React.ReactNode {
+function renderEntities(entities: Record<string, any>, language: string): React.ReactNode {
   const rendered: React.ReactNode[] = [];
 
   // 0) 정규화: item+count 플랫 키 → items 배열로 통일 (AI 응답 형식 불일치 보정)
@@ -90,9 +91,9 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
   // 1) 배열 타입 특수 렌더링
   if (entities.items?.length > 0) {
     rendered.push(
-      <div key="items" style={{ marginBottom: '12px' }}>
-        <strong>물품 요청:</strong>
-        <ul style={{ margin: '4px 0 0 20px', padding: 0 }}>
+      <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+        <span className={styles.label}>물품 요청</span>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
           {entities.items.map((it: any, idx: number) => (
             <li key={idx}>{it.item} - {it.count}개</li>
           ))}
@@ -102,9 +103,9 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
   }
   if (entities.tasks?.length > 0) {
     rendered.push(
-      <div key="tasks" style={{ marginBottom: '12px' }}>
-        <strong>작업 요청:</strong>
-        <ul style={{ margin: '4px 0 0 20px', padding: 0 }}>
+      <div key="tasks" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+        <span className={styles.label}>작업 요청</span>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
           {entities.tasks.map((task: string, idx: number) => (
             <li key={idx}>{task}</li>
           ))}
@@ -114,9 +115,9 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
   }
   if (entities.menu_items?.length > 0) {
     rendered.push(
-      <div key="menu_items" style={{ marginBottom: '12px' }}>
-        <strong>주문 메뉴:</strong>
-        <ul style={{ margin: '4px 0 0 20px', padding: 0 }}>
+      <div key="menu_items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+        <span className={styles.label}>주문 메뉴</span>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
           {entities.menu_items.map((mi: any, idx: number) => (
             <li key={idx}>
               {mi.name} - {mi.quantity}개
@@ -137,19 +138,30 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
 
     const label = ENTITY_LABELS[key] || key; // 매핑 없으면 영어 키 그대로 표시 (폴백)
 
+    if (key === 'details') {
+      rendered.push(
+        <div key={key} className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+          <span className={styles.label}>{language === 'ko' ? '상세 내용' : 'details'}</span>
+          <p className={styles.rawText}>{value}</p>
+        </div>
+      );
+      continue;
+    }
+
     // boolean true인 경우 라벨만 표시 (예: is_contactless -> "비대면 배달")
     if (value === true) {
       rendered.push(
-        <div key={key} style={{ marginBottom: '8px' }}>
-          <strong>{label}</strong>
+        <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
+          <span className={styles.label}>{label}</span>
         </div>
       );
       continue;
     }
 
     rendered.push(
-      <div key={key} style={{ marginBottom: '8px' }}>
-        <strong>{label}:</strong> {value}
+      <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
+        <span className={styles.label}>{label}</span>
+        <span className={styles.value}>{value}</span>
       </div>
     );
   }
@@ -174,6 +186,7 @@ export default function RequestDetailPanel({
   const [showManualAssign, setShowManualAssign] = useState(false);
   const [isAiSectionOpen, setIsAiSectionOpen] = useState(false);
   const showToast = useUiStore((s) => s.showToast);
+  const { t, language } = useTranslation();
 
   useEffect(() => {
     if (requestId) {
@@ -197,7 +210,20 @@ export default function RequestDetailPanel({
 
   if (!detail) return null;
 
-  const statusInfo = STATUS_MAP[detail.status] ?? { text: detail.status, variant: 'gray' as const };
+  const getTranslatedStatus = (status: string, defaultText: string) => {
+    if (!t.status) return defaultText;
+    if (status === 'PENDING') return t.status.pending || defaultText;
+    if (status === 'ASSIGNED') return t.status.assigned || defaultText;
+    if (status === 'IN_PROGRESS') return t.status.inProgress || defaultText;
+    if (status === 'COMPLETED') return t.status.completed || defaultText;
+    if (status === 'CANCELLED') return t.status.cancelled || defaultText;
+    if (status === 'ESCALATED') return t.status.escalated || defaultText;
+    return defaultText;
+  };
+
+  const statusInfo = STATUS_MAP[detail.status] 
+    ? { text: getTranslatedStatus(detail.status, STATUS_MAP[detail.status].text), variant: STATUS_MAP[detail.status].variant } 
+    : { text: detail.status, variant: 'gray' as const };
 
   const hasChanges =
     editPriority !== detail.priority ||
@@ -280,7 +306,7 @@ export default function RequestDetailPanel({
               <ChevronLeft size={22} />
             </button>
           )}
-          <h2 className={styles.title}>요청 상세</h2>
+          <h2 className={styles.title}>{t.frontdeskPage?.requestDetailModal?.title || '요청 상세'}</h2>
         </div>
         <div className={styles.headerRight}>
           <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
@@ -290,19 +316,19 @@ export default function RequestDetailPanel({
       <div className={styles.detailContent}>
         {/* 기본 정보 */}
         <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>기본 정보</h3>
+        <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.basicInfo || '기본 정보'}</h3>
         <div className={styles.grid}>
           <div className={styles.gridItem}>
-            <span className={styles.label}>객실</span>
+            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.roomNo || '객실'}</span>
             <span className={styles.value}>{detail.roomNo}</span>
           </div>
 
           <div className={styles.gridItem}>
-            <span className={styles.label}>생성 시간</span>
+            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.createdAt || '생성 시간'}</span>
             <span className={styles.value}>{formatDateTime(detail.createdAt)}</span>
           </div>
           <div className={styles.gridItem}>
-            <span className={styles.label}>최종 수정</span>
+            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.updatedAt || '최종 수정'}</span>
             <span className={styles.value}>{formatDateTime(detail.updatedAt)}</span>
           </div>
         </div>
@@ -310,46 +336,18 @@ export default function RequestDetailPanel({
 
       {/* 요약 + 원문 */}
       <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>요청 내용</h3>
+        <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.requestContent || '요청 내용'}</h3>
         <div className={styles.contentBlock}>
-          <span className={styles.label}>요약</span>
+          <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.summary || '요약'}</span>
           <p className={styles.contentText}>{detail.summary}</p>
         </div>
-        {(() => {
-          if (!detail.rawText) return null;
-          const transferParts = detail.rawText.split('\n|||TRANSFER_REASON|||');
-          const mainText = transferParts[0] || '';
-          const transferReason = transferParts.length > 1 ? transferParts.slice(1).join('\n').trim() : '';
 
-          const detailParts = mainText.split('[주문 상세]');
-          const orderDetail = detailParts.length > 1 ? detailParts.slice(1).join('').trim() : '';
-
-          // entities가 있으면 [주문/요청 상세] 숨김 처리 (AI 결과와 중복 표시 방지)
-          const hasValidEntities = detail.entities && Object.keys(detail.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k)).length > 0;
-
-          return (
-            <>
-              {orderDetail && !hasValidEntities && (
-                <div className={styles.contentBlock}>
-                  <span className={styles.label}>주문/요청 상세</span>
-                  <p className={styles.orderDetail}>{orderDetail}</p>
-                </div>
-              )}
-              {transferReason && (
-                <div className={styles.contentBlock}>
-                  <span className={styles.label}>부서 이관 사유</span>
-                  <p className={styles.transferReason}>{transferReason}</p>
-                </div>
-              )}
-            </>
-          );
-        })()}
       </div>
 
       {/* 첨부 사진 */}
       {detail.imageUrl && (
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>첨부 사진</h3>
+          <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.photo || '첨부 사진'}</h3>
           <div className={styles.contentBlock} style={{ textAlign: 'center' }}>
             <img src={detail.imageUrl} alt="첨부 사진" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', objectFit: 'contain' }} />
           </div>
@@ -363,7 +361,7 @@ export default function RequestDetailPanel({
             className={styles.collapsibleHeader}
             onClick={() => setIsAiSectionOpen(!isAiSectionOpen)}
           >
-            <h3 className={styles.collapsibleTitle}>AI 분석 결과 보기</h3>
+            <h3 className={styles.collapsibleTitle}>{t.frontdeskPage?.requestDetailModal?.aiAnalysisView || 'AI 분석 결과 보기'}</h3>
             {isAiSectionOpen ? <ArrowUpIcon width={20} height={20} color="var(--color-gray-500)" /> : <ArrowDownIcon width={20} height={20} color="var(--color-gray-500)" />}
           </div>
 
@@ -381,16 +379,24 @@ export default function RequestDetailPanel({
 
                 return (
                   <div className={styles.entityList}>
-                    {renderEntities(detail.entities)}
+                     {renderEntities(detail.entities, language)}
                   </div>
                 );
               })()}
-              {detail.reasoning && (
-                <div className={styles.contentBlock}>
-                  <span className={styles.label}>판단 근거</span>
-                  <p className={styles.rawText}>{detail.reasoning}</p>
-                </div>
-              )}
+              {detail.reasoning && (() => {
+                const cleanedReasoning = detail.reasoning
+                  .split('\n')
+                  .filter(line => !line.toLowerCase().includes('confidence:'))
+                  .join('\n')
+                  .trim();
+                if (!cleanedReasoning) return null;
+                return (
+                  <div className={styles.contentBlock}>
+                    <span className={styles.label}>판단 근거</span>
+                    <p className={styles.rawText}>{cleanedReasoning}</p>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -400,32 +406,32 @@ export default function RequestDetailPanel({
         <div className={styles.footerRight}>
           {!showManualAssign && detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' && (
             <Button variant="primary" onClick={() => setShowManualAssign(true)}>
-              수동 배정
+              {t.frontdeskPage?.requestDetailModal?.manualAssign || '수동 배정'}
             </Button>
           )}
           {detail.status === 'ESCALATED' ? (
             <Button variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
-              에스컬레이션 승인
+              {t.frontdeskPage?.requestDetailModal?.approveEscalation || '에스컬레이션 승인'}
             </Button>
           ) : null}
         </div>
 
         {detail.status === 'ESCALATED' ? (
           <Button variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-            에스컬레이션 반려
+            {t.frontdeskPage?.requestDetailModal?.rejectEscalation || '에스컬레이션 반려'}
           </Button>
         ) : detail.cancelRequested ? (
           <>
             <Button variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-              취소 반려
+              {t.frontdeskPage?.requestDetailModal?.rejectCancel || '취소 반려'}
             </Button>
             <Button variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
-              취소 승인
+              {t.frontdeskPage?.requestDetailModal?.approveCancel || '취소 승인'}
             </Button>
           </>
         ) : detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' ? (
           <Button variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
-            강제 요청 취소
+            {t.frontdeskPage?.requestDetailModal?.forceCancelRequest || '강제 요청 취소'}
           </Button>
         ) : null}
       </div>

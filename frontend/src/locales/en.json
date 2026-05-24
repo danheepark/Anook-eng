@@ -8,7 +8,8 @@
     "inProgress": "In Progress",
     "completed": "Completed",
     "escalated": "Escalated",
-    "transferred": "Transferred"
+    "transferred": "Transferred",
+    "cancelled": "Cancelled"
   },
   "priority": {
     "low": "Low",
@@ -24,7 +25,8 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "retry": "Retry",
-    "logout": "Log out"
+    "logout": "Log out",
+    "searchPlaceholder": "Enter search term..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +63,10 @@
       },
       "charts": {
         "avgResTime": "Average Resolution Time",
-        "frequentReqs": "Most Frequent Requests"
+        "frequentReqs": "Most Frequent Requests",
+        "others": "Others",
+        "avgResTimeSub": "AVERAGE RESOLUTION TIME (MINUTES)",
+        "frequentReqsSub": "MOST FREQUENT REQUESTS (%)"
       },
       "summaries": {
         "totalToday": "Total Requests Today",
@@ -74,7 +79,8 @@
         "FB": "F&B",
         "FACILITY": "Facility",
         "CONCIERGE": "Concierge",
-        "FRONT": "Emergency"
+        "FRONT": "Front Desk",
+        "EMERGENCY": "Emergency"
       }
     },
     "taskBoard": {
@@ -181,7 +187,7 @@
     "chatHistory": {
       "title": "Chat History",
       "emptyMessage": "No messages",
-      "systemCompleted": "The previous consultation and processing have been completed.",
+      "systemCompleted": "Consultation and processing have been fully completed.",
       "systemMessageNote": "(※ This is a system-only message for front desk operations, not visible to guests)",
       "roomConversation": "Room {{room}} Conversation",
       "roomChatRecord": "Room {{room}} Chat Record",
@@ -268,6 +274,124 @@
         "countSuffix": " item(s)",
         "option": "Option",
         "none": "None"
+      },
+      "manualAssign": "Manual Assign",
+      "approveEscalation": "Approve Escalation",
+      "rejectEscalation": "Reject Escalation",
+      "rejectCancel": "Reject Cancel",
+      "approveCancel": "Approve Cancel",
+      "forceCancelRequest": "Force Cancel Request",
+      "aiAnalysisView": "View AI Analysis Result",
+      "aiDetails": "Details"
+    },
+    "aiRouting": {
+      "avgLatency": "Avg. Response Time",
+      "accumulatedTokens": "Accumulated Tokens",
+      "routingSuccessRate": "AI Routing Success Rate",
+      "fallbackText": "Fallback",
+      "customerSatisfaction": "Customer Satisfaction",
+      "caseCount": " case(s)",
+      "ratingPanelTitle": "AI Request Rating Details",
+      "ratingEmpty": "No AI feedback registered.",
+      "detailedAccessLogs": "Detailed Access Logs",
+      "noLogs": "No logs found.",
+      "requestPreviewEmpty": "No request content",
+      "tableColumns": {
+        "time": "Time",
+        "requestPreview": "Request Preview",
+        "totalTokens": "Total Tokens",
+        "latency": "Latency",
+        "viewDetails": "View Details"
+      }
+    },
+    "handover": {
+      "title": "Handover Document",
+      "shift": {
+        "DAY": "Day (07:00 - 15:00)",
+        "EVENING": "Evening (15:00 - 23:00)",
+        "NIGHT": "Night (23:00 - 07:00)",
+        "label": {
+          "DAY": "Day",
+          "EVENING": "Evening",
+          "NIGHT": "Night"
+        }
+      },
+      "downloadButton": "📥 Excel Download",
+      "downloading": "Downloading...",
+      "filterOptions": {
+        "ALL": "All Status",
+        "PENDING": "Pending",
+        "IN_PROGRESS": "In Progress",
+        "DONE": "Completed"
+      },
+      "loading": "Loading data...",
+      "briefing": {
+        "shiftTime": "Shift Time",
+        "manager": "Manager Name",
+        "resolutionStatus": "Resolution Status",
+        "createdAt": "Created Time"
+      },
+      "tableColumns": {
+        "room": "Room",
+        "status": "Status",
+        "category": "Category",
+        "summary": "Summary / Details",
+        "time": "Time"
+      },
+      "empty": "No requests found for this shift."
+    },
+    "staffManagement": {
+      "title": "Staff Management",
+      "tabs": {
+        "staff": "Staff Management",
+        "role": "Role Management"
+      },
+      "staffTab": {
+        "addStaff": "+ Add Staff",
+        "editStaff": "Edit Staff Info",
+        "newStaff": "Add New Staff",
+        "name": "Name",
+        "dept": "Department",
+        "role": "Role",
+        "pin": "PIN",
+        "edit": "Edit",
+        "delete": "Delete",
+        "empty": "No registered staff.",
+        "deleteTitle": "Delete Staff",
+        "deleteConfirm": "Are you sure you want to delete staff '{{name}}'? This action cannot be undone.",
+        "nameInputLabel": "Staff Name",
+        "namePlaceholder": "Enter name",
+        "saveSuccess": "Staff has been registered.",
+        "editSuccess": "Staff information has been updated.",
+        "deleteSuccess": "Staff has been deleted.",
+        "nameRequired": "Please enter the staff name.",
+        "roleRequired": "Please select a role.",
+        "deptRequired": "Please select a department."
+      },
+      "roleTab": {
+        "addRole": "+ Add Role",
+        "editRole": "Edit Role",
+        "newRole": "Add New Role",
+        "dept": "Department",
+        "roleName": "Role Name",
+        "edit": "Edit",
+        "delete": "Delete",
+        "empty": "No registered roles.",
+        "deleteTitle": "Delete Role",
+        "deleteConfirm": "Are you sure you want to delete role '{{name}}'? This action cannot be undone.",
+        "rolePlaceholder": "Enter role name",
+        "saveSuccess": "Role has been added.",
+        "editSuccess": "Role has been updated.",
+        "deleteSuccess": "Role has been deleted.",
+        "deptRequired": "Please select a department.",
+        "roleRequired": "Please enter a role name."
+      },
+      "common": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "loading": "Loading...",
+        "saveFailed": "Failed to save."
       }
     }
   },
@@ -472,7 +596,7 @@
   },
   "aiReplies": {
     "forwardFb": "Sure! I will forward your order to the F&B team right away! 🍽️",
-    "forwardHk": "Got it! I will forward your request to the Housekeeping team right away. 🧹",
+    "forwardHk": "Got it! I will forward your request to the Housekeeping team right away. ",
     "forwardFacility": "We sincerely apologize for the inconvenience. 🥲 We will forward this to the Facility team to handle it as quickly as possible! 🛠️",
     "forwardConcierge": "Got it! I will forward your request to the Concierge team right away. 🛎️",
     "forwardFront": "We will connect you directly to the front desk right now to assist you further.",
@@ -482,7 +606,7 @@
     "piiGuard": "To protect your valuable personal information, we do not accept sensitive details via chat. 🔒 For detailed inquiries, please contact the front desk (extension 0) using your in-room phone for safe assistance. 😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "Previous consultation and processing have been fully completed.",
+    "systemCompletedTitle": "Consultation and processing have been fully completed.",
     "systemCompletedSubtitle": "(※ This is an internal front desk message not visible to guests)",
     "requestCompleted": "Request Completed",
     "consultationCompleted": "Consultation completed",
@@ -495,5 +619,27 @@
       "4": "Good",
       "5": "Excellent!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "Complete Consultation",
+    "startConsultation": "Start Consultation",
+    "startEmergency": "Start Emergency Response",
+    "autoReplyStaffChecked": "The front desk staff has checked your message. We will assist you shortly.",
+    "autoReplyEmergency": "An emergency response team has been dispatched. Please stay in a safe place.",
+    "backToList": "Back to list",
+    "viewRequestDetail": "View request details",
+    "loadingMessages": "Loading messages...",
+    "noMessages": "No chat history for this room.",
+    "registerAiKnowledge": "Register AI Knowledge",
+    "replyPlaceholder": "Enter reply to guest...",
+    "registerAiKnowledgeTitle": "Register AI Knowledge",
+    "registerAiKnowledgeDesc": "Do you want to register this consultation as AI knowledge?<br />The AI will automatically answer similar questions in the future.",
+    "registerNow": "Register Now",
+    "registerLater": "Remind Me Later",
+    "doNotRegister": "Do Not Register",
+    "dummyGuest": "No request details.",
+    "dummyAi": "Your request has been received. The front desk staff will assist you shortly.",
+    "inProgressTab": "In Progress",
+    "completedTab": "Completed"
   }
 }

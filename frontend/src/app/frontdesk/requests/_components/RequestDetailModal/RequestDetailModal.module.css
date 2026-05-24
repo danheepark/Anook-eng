@@ -39,10 +39,8 @@
 }
 
 .sectionTitle {
-  font: var(--text-label-bold);
-  color: var(--color-gray-500);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font: var(--text-h3-bold);
+  color: var(--color-gray-900);
   margin: 0;
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-gray-100);
@@ -133,11 +131,10 @@
 .entityList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-12);
-  background: var(--color-gray-50);
-  padding: var(--space-16);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-gray-200);
+  gap: var(--space-8);
+  padding: var(--space-8) 0;
+  font: var(--text-body-medium);
+  color: var(--color-gray-800);
 }
 
 .entityItem {

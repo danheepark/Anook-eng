@@ -159,12 +159,12 @@ public class Request {
     }
 
     public void transferDepartment(DomainCode newDomainCode, String reason) {
+        String oldDeptId = this.domainCode != null ? this.domainCode.name() : "UNKNOWN";
         this.domainCode = newDomainCode;
         this.assignedStaffId = null;
         this.status = RequestStatus.ESCALATED;
-        if (reason != null && !reason.isBlank()) {
-            this.rawText = this.rawText + "\n|||TRANSFER_REASON|||" + reason;
-        }
+        String formattedReason = (reason != null && !reason.isBlank()) ? reason : "";
+        this.rawText = this.rawText + "\n|||TRANSFER_REASON|||[" + oldDeptId + "] " + formattedReason;
         this.updatedAt = LocalDateTime.now();
     }
 

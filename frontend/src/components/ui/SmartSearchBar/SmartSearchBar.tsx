@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ArrowUpIcon, ArrowDownIcon, SearchIcon, CancelIcon } from '@/components/icons';
+import { useTranslation } from '@/app/useTranslation';
 import styles from './SmartSearchBar.module.css';
 
 export interface SmartSearchBarProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -30,6 +31,7 @@ export default function SmartSearchBar({
   ...props
 }: SmartSearchBarProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,7 +57,7 @@ export default function SmartSearchBar({
             ref={inputRef}
             className={styles.inputElement} 
             disabled={disabled}
-            placeholder={props.placeholder || '검색어를 입력하세요...'}
+            placeholder={props.placeholder || t.common?.searchPlaceholder || '검색어를 입력하세요...'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             {...props}

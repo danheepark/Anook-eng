@@ -279,7 +279,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={handleClose}>
-      <ModalCard size="md" overflowVisible={true} onClose={handleClose}>
+      <ModalCard size="md" overflowVisible={false} onClose={handleClose}>
 
         {/* ── 대화 내역 뷰 ── */}
         {view === 'chatHistory' ? (

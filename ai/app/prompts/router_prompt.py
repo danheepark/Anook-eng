@@ -32,6 +32,7 @@ Classify the input into one of the following categories:
      - priority="URGENT": For safety/emergency situations (fire, injury, fighting), severe operational failures/delays (e.g., "물이 새요", "1시간째 안와요"), aggressive/threatening complaints, or noise complaints (e.g., "옆방이 시끄러워요").
      - priority="NORMAL": For all other front escalations, including: simple staff connection requests ("직원 연결해주세요"), general info escalation, billing inquiries, or room change requests.
      - DEFAULT to "NORMAL" unless there is a clear, immediate safety risk, severe operational failure, or active complaint.
+   - **COMPLAINT RULE**: If the user expresses strong dissatisfaction, anger, or explicit complaints (e.g., "짜증나", "빡치게", "최악이야"), you MUST set `entities: {"intent": "COMPLAINT"}`.
 
 4. **VOC** (Voice of Customer / Passive Feedback):
    - Simple praise, feedback, or complaints that DO NOT require immediate operational intervention (e.g., "침구가 아주 편안했어요", "어제 직원분 친절했어요", "조식 커피가 조금 썼어요").
@@ -76,13 +77,13 @@ Assign ONE of the following codes ONLY if route_type is DEPARTMENT, FRONT_ESCALA
 
 | Code       | Department    | Responsibilities (Examples) |
 |------------|---------------|-----------------------------|
-| HK         | Housekeeping  | Towels, amenities (including free water/생수), cleaning, beddings, minibar |
-| FB         | Food & Bev    | Room service (paid drinks/food), breakfast, restaurant reservation |
-| FACILITY   | Facility Mgt  | Broken AC/TV/lights, equipment repair, plumbing, electrical issues |
-| CONCIERGE  | Concierge     | Tourist/restaurant recommendations, taxi, luggage, external reservations |
-| FRONT      | Front Office  | Complaints, room change, billing, neighbor noise, check-in/out |
-| COMMON     | Common Info   | Wi-Fi password, general hotel policy, simple Q&A |
-| EMERGENCY  | Emergency     | Real emergencies (fire, fighting, injury) |
+| HK         | Housekeeping  | Towels, amenities (water/생수), cleaning, beddings, minibar, baby crib(아기 침대), laundry, special cleaning(토사물/오염), replace hairdryer/kettle/batteries |
+| FB         | Food & Bev    | Room service (paid drinks/food), breakfast, restaurant, ice(얼음), baby chair/utensils, wine glasses/opener/corkage, vegan/allergy |
+| FACILITY   | Facility Mgt  | Broken AC/TV/lights, equipment repair, plumbing (leak/clog), electrical, window/door/furniture issues, broken fridge |
+| CONCIERGE  | Concierge     | Tourist/restaurant recommendations, taxi, external reservations |
+| FRONT      | Front Office  | Complaints, room change, billing, neighbor noise(층간소음), check-in/out, Wi-Fi password, luggage storage(짐 보관), receipt |
+| COMMON     | Common Info   | General hotel policy, simple Q&A |
+| EMERGENCY  | Emergency     | Real emergencies (fire, fighting, injury/need medicine/fever, drunk guests, security threats, vomit in hallway) |
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ STEP 3: Determine Action Type (ADD or REPLACE)

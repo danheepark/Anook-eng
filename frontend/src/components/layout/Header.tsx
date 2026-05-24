@@ -9,6 +9,7 @@ import HeaderNotification from './HeaderNotification/HeaderNotification';
 import StaffNotification from './StaffNotification/StaffNotification';
 import Button from '@/components/ui/Button/Button';
 import AiServerStatusIndicator from '@/components/ui/AiServerStatusIndicator/AiServerStatusIndicator';
+import { useTranslation } from '@/app/useTranslation';
 
 interface HeaderProps {
   className?: string;
@@ -17,6 +18,7 @@ interface HeaderProps {
 
 export default function Header({ className = '', role = 'frontdesk' }: HeaderProps) {
   const { toggleSidebar, openModal } = useUiStore();
+  const { t } = useTranslation();
 
   return (
     <header className={`${styles.header} ${className}`.trim()}>
@@ -31,7 +33,7 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
         {role === 'frontdesk' && (
           <>
             <Button variant="primary" onClick={() => openModal('createRequest')} style={{ padding: '6px 12px', fontSize: '13px' }}>
-              + 요청 생성
+              {t.frontdeskPage.frontDesk.createRequest}
             </Button>
             <Suspense fallback={<div style={{ width: 24, height: 24 }}></div>}>
               <HeaderNotification />

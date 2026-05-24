@@ -39,7 +39,7 @@
 }
 
 .title {
-  font: var(--text-h3-bold) !important;
+  font: var(--text-h2-bold) !important;
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
@@ -229,7 +229,8 @@
   position: sticky;
   bottom: 0;
   background-color: var(--color-white);
-  padding-bottom: var(--space-24); /* 화면 바닥과의 최소 여백 */
+  padding-bottom: var(--space-24);
+  /* 화면 바닥과의 최소 여백 */
   z-index: 10;
 }
 

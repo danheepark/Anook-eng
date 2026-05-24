@@ -473,6 +473,7 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                 response["guest_reply"] = generated_reply
                 response["summary"] = "안내 및 거절 (입력 오류 누적)"
                 response["domain_code"] = None
+                response["action_type"] = "NONE"
                 response["priority"] = "NORMAL"
                 response["entities"] = {}
                 response["confidence"] = 0.0
@@ -1336,28 +1337,27 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
         if primary.route_type == "FRONT_ESCALATION":
             is_emergency = (primary.domain == "EMERGENCY")
             
-            # 불만(Complaint) 여부 파악 (키워드 기반 휴리스틱)
-            is_complaint = False
-            if not is_emergency:
-                text_lower = request.text.lower()
-                summary_lower = (primary.summary or "").lower()
-                reasoning_lower = (primary.reasoning or "").lower()
-                complaint_keywords = ["불만", "컴플레인", "불편", "짜증", "최악", "환불", "태도", "실화", "이따구", "장난하", "엉망", "화가", "기분"]
-                is_complaint = any(kw in text_lower or kw in summary_lower or kw in reasoning_lower for kw in complaint_keywords)
+            # 불만(Complaint) 여부 파악 (라우터가 추출한 entities.intent 속성 사용)
+            is_complaint = (getattr(primary, 'entities', {}) or {}).get("intent") == "COMPLAINT"
                 
             escalation_key = "ESCALATION_INFO" if "INFO_ESCALATION" in (primary.reasoning or "") else "ESCALATION"
             
             if is_emergency:
                 reply_key = "EMERGENCY_REPLY"
-                summary_val = "[프론트 연결] 긴급 구조 요청"
             elif is_complaint:
                 reply_key = "COMPLAINT"
-                summary_val = "[프론트 연결] 고객 불만"
             else:
                 reply_key = escalation_key
-                base_summary = getattr(primary, 'summary', None)
-                if base_summary and base_summary not in ["프론트 데스크 직원 연결", "고객 직접 요청", "고객 직접 문의"]:
-                    summary_val = f"[프론트 연결] {base_summary}"
+            
+            # Request card title (summary)는 라우터가 분석한 상세 내용을 최대한 보존합니다.
+            base_summary = getattr(primary, 'summary', None)
+            if base_summary and base_summary not in ["프론트 데스크 직원 연결", "고객 직접 요청", "고객 직접 문의"]:
+                summary_val = f"[프론트 연결] {base_summary}"
+            else:
+                if is_emergency:
+                    summary_val = "[프론트 연결] 긴급 구조 요청"
+                elif is_complaint:
+                    summary_val = "[프론트 연결] 고객 불만"
                 else:
                     summary_val = "[프론트 연결] 고객 직접 문의"
             

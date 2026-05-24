@@ -56,12 +56,12 @@ const renderHighlightedText = (text: string, search: string, isActiveMatch: bool
   const parts = text.split(new RegExp(`(${search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')})`, 'gi'));
   return (
     <>
-      {parts.map((part, i) => 
+      {parts.map((part, i) =>
         part.toLowerCase() === search.toLowerCase() ? (
-          <span 
-            key={i} 
-            style={{ 
-              backgroundColor: isActiveMatch ? '#ffd54f' : 'rgba(255, 230, 0, 0.3)', 
+          <span
+            key={i}
+            style={{
+              backgroundColor: isActiveMatch ? '#ffd54f' : 'rgba(255, 230, 0, 0.3)',
               fontWeight: isActiveMatch ? 'bold' : 'normal',
               borderRadius: '2px',
               padding: '0 2px',
@@ -126,11 +126,11 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
   // AI 특수 코드 매핑 함수 (다국어 언어팩 연동)
   const translateContent = (content: string) => {
     if (!content) return content;
-    if (content.includes('[FORWARD_FB]')) return t.aiReplies?.forwardFb || content;
-    if (content.includes('[FORWARD_HK]')) return t.aiReplies?.forwardHk || content;
-    if (content.includes('[FORWARD_FACILITY]')) return t.aiReplies?.forwardFacility || content;
-    if (content.includes('[FORWARD_FRONT]')) return t.aiReplies?.forwardFront || content;
-    if (content.includes('[INFO_NOT_FOUND]')) return t.aiReplies?.infoNotFound || content;
+    if (content.includes('[FORWARD_FB]')) return '네, 식음료 팀으로 주문 내용을 바로 전달해 드릴게요! 🍽️';
+    if (content.includes('[FORWARD_HK]')) return '네, 알겠습니다! 하우스키핑 팀으로 요청 내용을 신속하게 전달해 드릴게요.';
+    if (content.includes('[FORWARD_FACILITY]')) return '불편을 드려 죄송합니다. 🥲 시설 관리 팀으로 내용을 전달하여 최대한 빠르게 조치해 드릴게요! 🛠️';
+    if (content.includes('[FORWARD_FRONT]')) return '지금 바로 프론트 데스크 직원에게 연결하여 도움을 드리겠습니다.';
+    if (content.includes('[INFO_NOT_FOUND]')) return '그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏';
     return content;
   };
 
@@ -146,7 +146,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
           fetch(`/api/frontdesk/requests?roomNo=${roomNumber}`)
         ]);
         if (!msgRes.ok) throw new Error(`HTTP ${msgRes.status}`);
-        
+
         const data = await msgRes.json();
         const reqData = reqRes.ok ? await reqRes.json() : [];
 
@@ -304,12 +304,11 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
     // 2. 백엔드로 전송
     try {
-      const res = await fetch(`/api/staff/messages`, {
+      const res = await fetch(`/api/frontdesk/messages/rooms/${roomNumber}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          content: text,
-          roomNo: roomNumber
+        body: JSON.stringify({
+          content: text
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -340,7 +339,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
   // 그냥 닫기 (상담 완료 아님)
   const handleClose = () => {
-    if(onClose) onClose();
+    if (onClose) onClose();
   };
 
   const handleRagConfirm = () => {
@@ -395,10 +394,10 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
   const extractInitialContent = () => {
     const chunks: ChatMessage[][] = [];
     let currentChunk: ChatMessage[] = [];
-    
+
     for (const msg of messages) {
       const content = msg.content || '';
-      if (content.includes('이전 상담 및 처리가 모두 완료되었습니다') || content.includes('[SYSTEM]')) {
+      if (content.includes(t.frontdeskPage?.chatHistory?.systemCompleted || '이전 상담 및 처리가 모두 완료되었습니다') || content.includes('상담 및 처리가 모두 완료되었습니다') || content.includes('[SYSTEM]')) {
         if (currentChunk.length > 0) {
           chunks.push([...currentChunk]);
           currentChunk = [];
@@ -407,17 +406,17 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
         currentChunk.push(msg);
       }
     }
-    
+
     if (currentChunk.length > 0) {
       chunks.push(currentChunk);
     }
-    
+
     const latestChunk = chunks.length > 0 ? chunks[chunks.length - 1] : [];
-    
+
     const guestMessages = latestChunk
       .filter(m => m.senderType === 'GUEST')
       .map(m => m.content);
-      
+
     const staffMessages = latestChunk
       .filter(m => m.senderType === 'STAFF')
       .map(m => m.content);
@@ -436,7 +435,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
         <div className={styles.header}>
           <div className={styles.headerInfo}>
             {onMobileBack && (
-              <button className={styles.mobileBackBtn} onClick={onMobileBack} aria-label="목록으로 가기">
+              <button className={styles.mobileBackBtn} onClick={onMobileBack} aria-label={t.chatPanel?.backToList || "목록으로 가기"}>
                 <ChevronLeft size={22} />
               </button>
             )}
@@ -456,17 +455,17 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 onNext={() => setCurrentMatch(p => Math.min(matchIndices.length - 1, p + 1))}
               />
             )}
-            
+
             {headerRightContent ? headerRightContent : (
               (status === 'IN_PROGRESS' || status === 'ASSIGNED') && (
                 <Button size="medium" variant="primary" onClick={handleCompleteConsultation}>
-                  상담 완료
+                  {t.chatPanel?.consultationComplete || '상담 완료'}
                 </Button>
               )
             )}
 
             {onMobileMore && (
-              <button className={styles.mobileMoreBtn} onClick={onMobileMore} aria-label="요청 상세 보기">
+              <button className={styles.mobileMoreBtn} onClick={onMobileMore} aria-label={t.chatPanel?.viewRequestDetail || "요청 상세 보기"}>
                 <MoreVertical size={22} />
               </button>
             )}
@@ -475,13 +474,13 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
         <div className={styles.messageList} ref={messageListRef}>
           {loading ? (
-            <div className={styles.emptyState}>대화 내역을 불러오는 중...</div>
+            <div className={styles.emptyState}>{t.chatPanel?.loadingMessages || '대화 내역을 불러오는 중...'}</div>
           ) : messages.length === 0 ? (
-            <div className={styles.emptyState}>이 객실의 대화 내역이 없습니다.</div>
+            <div className={styles.emptyState}>{t.chatPanel?.noMessages || '이 객실의 대화 내역이 없습니다.'}</div>
           ) : (
             messages.map((msg, idx) => {
               const isSystemMsg = msg.senderType === 'SYSTEM' || msg.content.includes('[SYSTEM]');
-              
+
               // 연속된 동일 [SYSTEM] 메시지는 첫 번째만 렌더링 (N건 동시 완료 → 카드 1개)
               // 대화 사이에 끼인 [SYSTEM]은 이전 메시지가 시스템이 아니므로 정상 표시
               if (isSystemMsg && idx > 0) {
@@ -492,14 +491,24 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 }
               }
 
+              if (msg.type === 'REQUEST_CARD' && msg.meta) {
+                return (
+                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', margin: '4px 0' }}>
+                    <div className={styles.requestCardWrapper}>
+                      <GuestRequestCard {...msg.meta} isReadOnly />
+                    </div>
+                  </div>
+                );
+              }
+
               if (isSystemMsg) {
                 let cleanContent = msg.content.replace(/^\[SYSTEM\]\s*/, '');
-                if (cleanContent === '이전 상담 및 처리가 모두 완료되었습니다.') {
+                if (cleanContent === '상담 및 처리가 모두 완료되었습니다.') {
                   cleanContent = t.frontdeskPage?.chatHistory?.systemCompleted || cleanContent;
                 }
                 return (
                   <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%' }}>
-                    <FeedbackCard 
+                    <FeedbackCard
                       isSystemMessage
                       systemContent={cleanContent}
                       systemSubtitle={t.frontdeskPage?.chatHistory?.systemMessageNote}
@@ -508,38 +517,28 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 );
               }
 
-              if (msg.type === 'REQUEST_CARD' && msg.meta) {
-                return (
-                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '4px 0' }}>
-                    <div style={{ maxWidth: '85%' }}>
-                      <GuestRequestCard {...msg.meta} isReadOnly />
-                    </div>
-                  </div>
-                );
-              }
-
-              const isAutoMsg = msg.content.includes('프론트 데스크 직원이 메시지를 확인했습니다') || 
+              const isAutoMsg = msg.content.includes('프론트 데스크 직원이 메시지를 확인했습니다') ||
                                 msg.content.includes('긴급 대응팀이 배정되었습니다');
-              
+
               // 관리자 패널 기준:
               // - GUEST → 왼쪽(received) + surface color 스타일(sent)
               // - AI → 오른쪽(sent) + AI 텍스트 스타일(received)
               // - STAFF → 오른쪽(sent) + fallback 스타일
-              const isManualStaffMsg = msg.senderType === 'STAFF' && !isAutoMsg;
+              const isManualStaffMsg = msg.senderType === 'STAFF';
 
               // 위치(variant)와 버블 스타일(bubbleStyle)을 독립적으로 지정
               const bubbleStyle = msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const;
-              
+
               const isTargetMatch = !!(internalSearch && matchIndices.length > 0 && matchIndices[currentMatch] === idx);
 
               return (
                 <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ 
-                    transition: 'all 0.3s', 
-                    padding: '4px', 
-                    borderRadius: '16px', 
+                  <div style={{
+                    transition: 'all 0.3s',
+                    padding: '4px',
+                    borderRadius: '16px',
                   }}>
-                    <ChatBubble 
+                    <ChatBubble
                       variant={msg.variant}
                       bubbleStyle={bubbleStyle}
                       isFallback={isManualStaffMsg}
@@ -555,7 +554,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
         {!isReadOnly && status === 'PENDING' && (
           <div className={styles.footer} style={{ justifyContent: 'center' }}>
-            <Button 
+            <Button
               variant={isEmergency ? 'danger' : 'primary'}
               size="large"
               fullWidth
@@ -568,22 +567,22 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                     await handleSend('프론트 데스크 직원이 메시지를 확인했습니다. 곧 안내 드리겠습니다.');
                   }
                 }
-              }} 
+              }}
             >
-              {isEmergency ? '긴급 대응 시작' : '상담 시작하기'}
+              {isEmergency ? t.chatPanel?.startEmergency || '긴급 대응 시작' : t.chatPanel?.startConsultation || '상담 시작하기'}
             </Button>
           </div>
         )}
 
         {status === 'COMPLETED' && showRagButton && (
           <div className={styles.footer} style={{ justifyContent: 'center' }}>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               size="large"
               fullWidth
-              onClick={onRagRegister} 
+              onClick={onRagRegister}
             >
-              AI 지식 등록
+              {t.chatPanel?.registerAiKnowledge || 'AI 지식 등록'}
             </Button>
           </div>
         )}
@@ -591,7 +590,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
         {!isReadOnly && status !== 'PENDING' && (
           <div className={styles.footer} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
-              <ChatInput isStaff placeholder="고객에게 답변을 입력하세요..." onSend={handleSend} />
+              <ChatInput isStaff placeholder={t.chatPanel?.replyPlaceholder || '고객에게 답변을 입력하세요...'} onSend={handleSend} />
             </div>
           </div>
         )}
@@ -620,19 +619,16 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
               <CancelIcon width={20} height={20} color="var(--color-gray-400)" />
             </button>
             <div style={{ textAlign: 'center', padding: '8px 0' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>AI 지식 등록</h2>
-              <p style={{ fontSize: '14px', color: 'var(--color-gray-500)', lineHeight: '1.5' }}>
-                이 상담 내용을 AI 지식 데이터로 등록하시겠습니까?<br />
-                등록하면 AI가 동일한 질문에 자동으로 답변할 수 있습니다.
-              </p>
+              <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{t.chatPanel?.registerAiKnowledgeTitle || 'AI 지식 등록'}</h2>
+              <p style={{ fontSize: '14px', color: 'var(--color-gray-500)', lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: t.chatPanel?.registerAiKnowledgeDesc || '이 상담 내용을 AI 지식 데이터로 등록하시겠습니까?<br />등록하면 AI가 동일한 질문에 자동으로 답변할 수 있습니다.' }} />
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
             <Button variant="primary" onClick={handleRagConfirm} style={{ width: '100%' }}>
-              지금 등록하기
+              {t.chatPanel?.registerNow || '지금 등록하기'}
             </Button>
             <Button variant="secondary" onClick={handleRagLater} style={{ width: '100%' }}>
-              나중에 하기
+              {t.chatPanel?.registerLater || '나중에 하기'}
             </Button>
             <button
               onClick={handleRagSkip}
@@ -645,7 +641,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 padding: '4px 0',
               }}
             >
-              등록하지 않기
+              {t.chatPanel?.doNotRegister || '등록하지 않기'}
             </button>
           </div>
         </ModalCard>

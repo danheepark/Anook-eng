@@ -20,6 +20,7 @@ const deptVariantMap: Record<string, "gray" | "red" | "purple" | "green"> = {
 };
 
 export default function StaffTab() {
+  const { t } = useTranslation();
   const { staffList, loading: staffLoading, error: staffError, fetchStaffList, createStaff, updateStaff, deleteStaff } = useStaffManagement();
   const { roles, loading: rolesLoading, fetchRoles } = useRoleManagement();
   const { departments, loading: deptsLoading, fetchDepartments } = useDepartmentManagement();
@@ -89,10 +90,10 @@ export default function StaffTab() {
   const handleSaveStaff = async (data: { name: string; roleId: number; departmentId: string }) => {
     if (editingStaff) {
       await updateStaff(editingStaff.id, data);
-      showToast('직원 정보가 수정되었습니다.', 'success');
+      showToast(t.frontdeskPage.staffManagement.staffTab.editSuccess, 'success');
     } else {
       await createStaff(data);
-      showToast('직원이 등록되었습니다.', 'success');
+      showToast(t.frontdeskPage.staffManagement.staffTab.saveSuccess, 'success');
     }
   };
 
@@ -100,7 +101,7 @@ export default function StaffTab() {
     if (staffToDelete) {
       try {
         await deleteStaff(staffToDelete.id);
-        showToast('직원이 삭제되었습니다.', 'success');
+        showToast(t.frontdeskPage.staffManagement.staffTab.deleteSuccess, 'success');
       } catch (err) {}
     }
     setIsConfirmModalOpen(false);
@@ -153,21 +154,21 @@ export default function StaffTab() {
           />
         </div>
         <Button variant="primary" onClick={handleAddClick}>
-          + 직원 추가
+          {t.frontdeskPage.staffManagement.staffTab.addStaff}
         </Button>
       </div>
 
       {isLoading && staffList.length === 0 ? (
         <div style={{ padding: 'var(--space-24)', textAlign: 'center', color: 'var(--color-gray-500)' }}>
-          로딩 중...
+          {t.frontdeskPage.staffManagement.common.loading}
         </div>
       ) : (
         <Table columns="2fr 2fr 2fr 2fr 150px">
           <TableHeader>
-            <TableCell>이름</TableCell>
-            <TableCell>부서</TableCell>
-            <TableCell>역할</TableCell>
-            <TableCell>PIN</TableCell>
+            <TableCell>{t.frontdeskPage.staffManagement.staffTab.name}</TableCell>
+            <TableCell>{t.frontdeskPage.staffManagement.staffTab.dept}</TableCell>
+            <TableCell>{t.frontdeskPage.staffManagement.staffTab.role}</TableCell>
+            <TableCell>{t.frontdeskPage.staffManagement.staffTab.pin}</TableCell>
             <TableCell></TableCell>
           </TableHeader>
           {filteredStaff.length > 0 ? (
@@ -187,18 +188,18 @@ export default function StaffTab() {
 
               return (
               <TableRow key={staff.id} id={`staff-row-${staff.id}`} style={isActiveMatch ? { border: '2px solid var(--color-brand-500)', boxShadow: '0 0 0 4px var(--color-brand-100)' } : {}}>
-                <TableCell label="이름">
+                <TableCell label={t.frontdeskPage.staffManagement.staffTab.name}>
                   <span style={{ font: 'var(--text-body-medium)' }}>
                     {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(staff.name)} /> : staff.name}
                   </span>
                 </TableCell>
-                <TableCell label="부서">
+                <TableCell label={t.frontdeskPage.staffManagement.staffTab.dept}>
                   {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(getDeptName(staff.departmentId))} /> : getDeptName(staff.departmentId)}
                 </TableCell>
-                <TableCell label="역할">
+                <TableCell label={t.frontdeskPage.staffManagement.staffTab.role}>
                   {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(getRoleName(staff.roleId))} /> : getRoleName(staff.roleId)}
                 </TableCell>
-                <TableCell label="PIN">
+                <TableCell label={t.frontdeskPage.staffManagement.staffTab.pin}>
                   <code style={{ background: 'var(--color-gray-50)', padding: 'var(--space-4) var(--space-8)', borderRadius: 'var(--radius-sm)', font: 'var(--font-mono)' }}>
                   <span dangerouslySetInnerHTML={getHighlighted(staff.pin)} />
                   </code>
@@ -208,14 +209,14 @@ export default function StaffTab() {
                     <button 
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-gray-500)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
                       onClick={() => handleEditClick(staff)}
-                      title="수정"
+                      title={t.frontdeskPage.staffManagement.staffTab.edit}
                     >
                       <EditIcon width={20} height={20} />
                     </button>
                     <button 
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-gray-500)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
                       onClick={() => handleDeleteClick(staff)}
-                      title="삭제"
+                      title={t.frontdeskPage.staffManagement.staffTab.delete}
                     >
                       <DeleteIcon width={20} height={20} />
                     </button>
@@ -228,7 +229,7 @@ export default function StaffTab() {
             <TableRow>
               <TableCell>
                 <div style={{ textAlign: 'center', color: 'var(--color-gray-500)', padding: 'var(--space-24)' }}>
-                  등록된 직원이 없습니다.
+                  {t.frontdeskPage.staffManagement.staffTab.empty}
                 </div>
               </TableCell>
               <TableCell></TableCell>
@@ -253,10 +254,10 @@ export default function StaffTab() {
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="직원 삭제"
-        subtitle={`'${staffToDelete?.name}' 직원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`}
-        confirmText="삭제"
-        cancelText="취소"
+        title={t.frontdeskPage.staffManagement.staffTab.deleteTitle}
+        subtitle={t.frontdeskPage.staffManagement.staffTab.deleteConfirm.replace('{{name}}', staffToDelete?.name || '')}
+        confirmText={t.frontdeskPage.staffManagement.staffTab.delete}
+        cancelText={t.frontdeskPage.staffManagement.common.cancel}
       />
     </div>
   );

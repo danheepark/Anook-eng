@@ -12,7 +12,7 @@ import { useTranslation } from '@/app/useTranslation';
 import useAiLogs, { AiLogDetail } from './useAiLogs';
 
 export default function AiRoutingPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [searchValue, setSearchValue] = useState('');
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<AiLogDetail | null>(null);
@@ -122,13 +122,13 @@ export default function AiRoutingPage() {
   };
 
   const extractSummaryFromResponse = (rawResponse: string) => {
-    if (!rawResponse) return '요청 내용 없음';
+    if (!rawResponse) return t.frontdeskPage?.aiRouting?.requestPreviewEmpty || '요청 내용 없음';
     try {
       const data = JSON.parse(rawResponse);
       if (Array.isArray(data) && data.length > 0) {
-        return data[0].summary || '요청 내용 없음';
+        return data[0].summary || t.frontdeskPage?.aiRouting?.requestPreviewEmpty || '요청 내용 없음';
       } else if (data && typeof data === 'object') {
-        return data.summary || '요청 내용 없음';
+        return data.summary || t.frontdeskPage?.aiRouting?.requestPreviewEmpty || '요청 내용 없음';
       }
     } catch (e) {
       const match = rawResponse.match(/"summary"\s*:\s*"([^"]+)"/);
@@ -136,7 +136,7 @@ export default function AiRoutingPage() {
         return match[1];
       }
     }
-    return '요청 내용 없음';
+    return t.frontdeskPage?.aiRouting?.requestPreviewEmpty || '요청 내용 없음';
   };
 
   const formatDate = (dateString: string) => {
@@ -200,25 +200,25 @@ export default function AiRoutingPage() {
       {/* Summary Cards */}
       <div className={styles.summaryGrid}>
         <SummaryCard 
-          title="평균 응답 속도" 
+          title={t.frontdeskPage?.aiRouting?.avgLatency || "평균 응답 속도"} 
           value={summary ? `Avg. ${summary.averageLatencyMs.toLocaleString()}ms` : "Avg. 0ms"} 
           changeValue="●" 
           changeType="positive" 
         />
         <SummaryCard 
-          title="누적 소모 토큰" 
+          title={t.frontdeskPage?.aiRouting?.accumulatedTokens || "누적 소모 토큰"} 
           value={summary ? `Total ${summary.totalTokens.toLocaleString()} Tokens` : "Total 0 Tokens"} 
         />
         <SummaryCard 
-          title="AI 라우팅 성공률" 
+          title={t.frontdeskPage?.aiRouting?.routingSuccessRate || "AI 라우팅 성공률"} 
           value={summary ? `${summary.routingSuccessRate}%` : "0%"} 
-          changeValue={summary ? `Fallback\n${summary.fallbackRate}%` : "Fallback\n0%"} 
+          changeValue={summary ? `${t.frontdeskPage?.aiRouting?.fallbackText || 'Fallback'}\n${summary.fallbackRate}%` : `${t.frontdeskPage?.aiRouting?.fallbackText || 'Fallback'}\n0%`} 
           changeType="neutral" 
         />
         <SummaryCard 
-          title="고객 만족도" 
+          title={t.frontdeskPage?.aiRouting?.customerSatisfaction || "고객 만족도"} 
           value={ratingsData.totalCount > 0 ? `${ratingsData.averageRating}/5` : "—"} 
-          changeValue={ratingsData.totalCount > 0 ? `${ratingsData.totalCount}건` : undefined} 
+          changeValue={ratingsData.totalCount > 0 ? `${ratingsData.totalCount}${t.frontdeskPage?.aiRouting?.caseCount || '건'}` : undefined} 
           changeType={ratingsData.averageRating >= 4 ? 'positive' : ratingsData.averageRating >= 3 ? 'neutral' : 'negative'} 
           onClick={() => setIsRatingExpanded(!isRatingExpanded)}
         />
@@ -228,11 +228,11 @@ export default function AiRoutingPage() {
       {isRatingExpanded && (
         <div className={styles.ratingPanel}>
           <div className={styles.ratingPanelHeader}>
-            <h3 className={styles.ratingPanelTitle}>AI 처리 요청 별점 상세</h3>
+            <h3 className={styles.ratingPanelTitle}>{t.frontdeskPage?.aiRouting?.ratingPanelTitle || "AI 처리 요청 별점 상세"}</h3>
             <button className={styles.ratingCloseBtn} onClick={() => setIsRatingExpanded(false)}>✕</button>
           </div>
           {ratingsData.ratings.length === 0 ? (
-            <div className={styles.ratingEmpty}>등록된 AI 피드백이 없습니다.</div>
+            <div className={styles.ratingEmpty}>{t.frontdeskPage?.aiRouting?.ratingEmpty || "등록된 AI 피드백이 없습니다."}</div>
           ) : (
             <div className={styles.ratingList}>
               {ratingsData.ratings.map((item) => (
@@ -242,10 +242,10 @@ export default function AiRoutingPage() {
                     <span className={styles.ratingDept}>{item.departmentId}</span>
                   </div>
                   <div className={styles.ratingItemCenter}>
-                    {item.summary || '요청 내용 없음'}
+                    {item.summary || t.frontdeskPage?.aiRouting?.requestPreviewEmpty || '요청 내용 없음'}
                   </div>
                   <div className={styles.ratingItemRight}>
-                    <span className={styles.ratingRoom}>{item.roomNo}호</span>
+                    <span className={styles.ratingRoom}>{language === 'ko' ? `${item.roomNo}호` : `NO.${item.roomNo}`}</span>
                     <span className={styles.ratingDate}>{formatDate(item.createdAt)}</span>
                   </div>
                 </div>
@@ -258,20 +258,20 @@ export default function AiRoutingPage() {
       {/* Table Section */}
       <div className={styles.tableSection}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>세부 접속 로그</h2>
+          <h2 className={styles.sectionTitle}>{t.frontdeskPage?.aiRouting?.detailedAccessLogs || "세부 접속 로그"}</h2>
         </div>
         
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>Loading...</div>
+          <div style={{ textAlign: 'center', padding: '40px' }}>{t.common?.loading || "Loading..."}</div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'red' }}>{error}</div>
         ) : (
           <Table columns="1.5fr 4fr 1fr 1.5fr 1fr">
             <TableHeader>
-              <TableCell>시간</TableCell>
-              <TableCell>요청 미리보기</TableCell>
-              <TableCell>총 토큰</TableCell>
-              <TableCell>지연시간</TableCell>
+              <TableCell>{t.frontdeskPage?.aiRouting?.tableColumns?.time || "시간"}</TableCell>
+              <TableCell>{t.frontdeskPage?.aiRouting?.tableColumns?.requestPreview || "요청 미리보기"}</TableCell>
+              <TableCell>{t.frontdeskPage?.aiRouting?.tableColumns?.totalTokens || "총 토큰"}</TableCell>
+              <TableCell>{t.frontdeskPage?.aiRouting?.tableColumns?.latency || "지연시간"}</TableCell>
               <TableCell></TableCell>
             </TableHeader>
             
@@ -288,16 +288,16 @@ export default function AiRoutingPage() {
                   transition: 'all 0.3s ease' 
                 }}
               >
-                <TableCell label="시간">
+                <TableCell label={t.frontdeskPage?.aiRouting?.tableColumns?.time || "시간"}>
                   {renderHighlightedText(formatDate(log.createdAt), searchValue, activeMatchId === log.id)}
                 </TableCell>
-                <TableCell label="요청 미리보기" className={styles.autoWrapCell}>
+                <TableCell label={t.frontdeskPage?.aiRouting?.tableColumns?.requestPreview || "요청 미리보기"} className={styles.autoWrapCell}>
                   {renderHighlightedText(extractSummaryFromResponse(log.rawResponse), searchValue, activeMatchId === log.id)}
                 </TableCell>
-                <TableCell label="총 토큰">
+                <TableCell label={t.frontdeskPage?.aiRouting?.tableColumns?.totalTokens || "총 토큰"}>
                   <b>{renderHighlightedText(log.totalTokens.toLocaleString(), searchValue, activeMatchId === log.id)}</b>
                 </TableCell>
-                <TableCell label="지연시간">
+                <TableCell label={t.frontdeskPage?.aiRouting?.tableColumns?.latency || "지연시간"}>
                   {log.latencyMs >= 3000 ? (
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                       <b style={{ color: 'var(--color-tag-text-red)' }}>
@@ -319,14 +319,14 @@ export default function AiRoutingPage() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Button variant="secondary" onClick={() => handleOpenModal(log)}>상세 보기</Button>
+                  <Button variant="secondary" onClick={() => handleOpenModal(log)}>{t.frontdeskPage?.aiRouting?.tableColumns?.viewDetails || "상세 보기"}</Button>
                 </TableCell>
               </TableRow>
             ))}
             
             {filteredLogs.length === 0 && (
               <TableRow>
-                <TableCell>No logs found.</TableCell>
+                <TableCell>{t.frontdeskPage?.aiRouting?.noLogs || "No logs found."}</TableCell>
               </TableRow>
             )}
           </Table>

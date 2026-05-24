@@ -220,11 +220,8 @@ public class CreateRequestOnEventService {
             }
         }
 
-        // [AN-252] URGENT 판별: EMERGENCY이거나 FRONT(에스컬레이션) 도메인은 Grace Period 생략
-        boolean isUrgent = savedRequest.getPriority() == Priority.EMERGENCY;
-        boolean isFrontEscalation = savedRequest.getDomainCode() == DomainCode.FRONT 
-                && savedRequest.getEntities() != null 
-                && "COMPLAINT".equals(savedRequest.getEntities().get("intent"));
+        // [AN-252] EMERGENCY 도메인은 Grace Period 생략 (인명피해, 화재 등 긴급 상황)
+        boolean isEmergency = savedRequest.getPriority() == Priority.EMERGENCY;
         boolean isAddDuplicate = "ADD_DUPLICATE".equals(event.getActionType());
 
         // [AN-344] FB/CONCIERGE는 AI가 이미 확인 질문을 했으므로 Grace Period 타이머 대신
@@ -233,7 +230,7 @@ public class CreateRequestOnEventService {
         boolean isFbOrConcierge = savedRequest.getDomainCode() == DomainCode.FB
                 || savedRequest.getDomainCode() == DomainCode.CONCIERGE;
         boolean requiresExplicitConfirm = isFbOrConcierge;
-        boolean skipGrace = isUrgent || isFrontEscalation;
+        boolean skipGrace = isEmergency;
 
         String deptCode = savedRequest.getDomainCode() != null ? savedRequest.getDomainCode().name() : "UNKNOWN";
         int graceRemaining;
@@ -266,7 +263,7 @@ public class CreateRequestOnEventService {
                 savedRequest.confirmGrace();
                 savedRequest = requestRepositoryPort.save(savedRequest);
             }
-            log.info("[GracePeriod] 즉시 발송 (urgent={}, front={}) — id: {}", isUrgent, isFrontEscalation,
+            log.info("[GracePeriod] 즉시 발송 (emergency={}) — id: {}", isEmergency,
                     savedRequest.getId());
             if (savedRequest.getDomainCode() != null) {
                 dispatchPort.dispatchToDepartment(deptCode, payload);

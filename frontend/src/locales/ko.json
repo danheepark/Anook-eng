@@ -8,7 +8,8 @@
     "inProgress": "처리 중",
     "completed": "완료",
     "escalated": "이관됨",
-    "transferred": "전달됨"
+    "transferred": "전달됨",
+    "cancelled": "취소됨"
   },
   "priority": {
     "low": "낮음",
@@ -24,7 +25,8 @@
     "loading": "로딩 중...",
     "error": "오류가 발생했습니다",
     "retry": "다시 시도",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "searchPlaceholder": "검색어를 입력하세요..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +63,10 @@
       },
       "charts": {
         "avgResTime": "부서별 평균 처리 시간",
-        "frequentReqs": "최다 요청 항목"
+        "frequentReqs": "최다 요청 항목",
+        "others": "기타",
+        "avgResTimeSub": "평균 해결 시간 (분)",
+        "frequentReqsSub": "가장 빈번한 요청 비율 (%)"
       },
       "summaries": {
         "totalToday": "오늘 총 요청",
@@ -74,7 +79,8 @@
         "FB": "식음료",
         "FACILITY": "시설",
         "CONCIERGE": "컨시어지",
-        "FRONT": "긴급 대응"
+        "FRONT": "프론트",
+        "EMERGENCY": "긴급 대응"
       }
     },
     "taskBoard": {
@@ -182,7 +188,7 @@
     "chatHistory": {
       "title": "채팅 히스토리",
       "emptyMessage": "메시지 없음",
-      "systemCompleted": "이전 상담 및 처리가 모두 완료되었습니다.",
+      "systemCompleted": "상담 및 처리가 모두 완료되었습니다.",
       "systemMessageNote": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
       "roomConversation": "{{room}}호 대화",
       "roomChatRecord": "{{room}}호 채팅 기록",
@@ -269,6 +275,124 @@
         "countSuffix": "개",
         "option": "옵션",
         "none": "없음"
+      },
+      "manualAssign": "수동 배정",
+      "approveEscalation": "에스컬레이션 승인",
+      "rejectEscalation": "에스컬레이션 반려",
+      "rejectCancel": "취소 반려",
+      "approveCancel": "취소 승인",
+      "forceCancelRequest": "강제 요청 취소",
+      "aiAnalysisView": "AI 분석 결과 보기",
+      "aiDetails": "상세 정보"
+    },
+    "aiRouting": {
+      "avgLatency": "평균 응답 속도",
+      "accumulatedTokens": "누적 소모 토큰",
+      "routingSuccessRate": "AI 라우팅 성공률",
+      "fallbackText": "Fallback",
+      "customerSatisfaction": "고객 만족도",
+      "caseCount": "건",
+      "ratingPanelTitle": "AI 처리 요청 별점 상세",
+      "ratingEmpty": "등록된 AI 피드백이 없습니다.",
+      "detailedAccessLogs": "세부 접속 로그",
+      "noLogs": "로그를 찾을 수 없습니다.",
+      "requestPreviewEmpty": "요청 내용 없음",
+      "tableColumns": {
+        "time": "시간",
+        "requestPreview": "요청 미리보기",
+        "totalTokens": "총 토큰",
+        "latency": "지연시간",
+        "viewDetails": "상세 보기"
+      }
+    },
+    "handover": {
+      "title": "인수인계 문서",
+      "shift": {
+        "DAY": "주간 (07:00 - 15:00)",
+        "EVENING": "야간 (15:00 - 23:00)",
+        "NIGHT": "심야 (23:00 - 07:00)",
+        "label": {
+          "DAY": "주간",
+          "EVENING": "야간",
+          "NIGHT": "심야"
+        }
+      },
+      "downloadButton": "📥 엑셀 다운로드",
+      "downloading": "다운로드 중...",
+      "filterOptions": {
+        "ALL": "전체 상태",
+        "PENDING": "대기중",
+        "IN_PROGRESS": "진행중",
+        "DONE": "처리 완료"
+      },
+      "loading": "데이터를 불러오는 중입니다...",
+      "briefing": {
+        "shiftTime": "근무시간",
+        "manager": "담당자명",
+        "resolutionStatus": "처리 현황",
+        "createdAt": "작성 일시"
+      },
+      "tableColumns": {
+        "room": "객실",
+        "status": "상태",
+        "category": "카테고리",
+        "summary": "제목/내용 요약",
+        "time": "시간"
+      },
+      "empty": "해당 근무 시간에 발생한 요청이 없습니다."
+    },
+    "staffManagement": {
+      "title": "직원 관리",
+      "tabs": {
+        "staff": "직원 관리",
+        "role": "역할 관리"
+      },
+      "staffTab": {
+        "addStaff": "+ 직원 추가",
+        "editStaff": "직원 정보 수정",
+        "newStaff": "새 직원 추가",
+        "name": "이름",
+        "dept": "부서",
+        "role": "역할",
+        "pin": "PIN",
+        "edit": "수정",
+        "delete": "삭제",
+        "empty": "등록된 직원이 없습니다.",
+        "deleteTitle": "직원 삭제",
+        "deleteConfirm": "'{{name}}' 직원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "nameInputLabel": "직원 이름",
+        "namePlaceholder": "이름을 입력하세요",
+        "saveSuccess": "직원이 등록되었습니다.",
+        "editSuccess": "직원 정보가 수정되었습니다.",
+        "deleteSuccess": "직원이 삭제되었습니다.",
+        "nameRequired": "직원 이름을 입력해주세요.",
+        "roleRequired": "역할을 선택해주세요.",
+        "deptRequired": "부서를 선택해주세요."
+      },
+      "roleTab": {
+        "addRole": "+ 역할 추가",
+        "editRole": "역할 수정",
+        "newRole": "새 역할 추가",
+        "dept": "부서",
+        "roleName": "역할명",
+        "edit": "수정",
+        "delete": "삭제",
+        "empty": "등록된 역할이 없습니다.",
+        "deleteTitle": "역할 삭제",
+        "deleteConfirm": "'{{name}}' 역할을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "rolePlaceholder": "역할명을 입력하세요",
+        "saveSuccess": "역할이 추가되었습니다.",
+        "editSuccess": "역할이 수정되었습니다.",
+        "deleteSuccess": "역할이 삭제되었습니다.",
+        "deptRequired": "부서를 선택해주세요.",
+        "roleRequired": "역할명을 입력해주세요."
+      },
+      "common": {
+        "cancel": "취소",
+        "save": "저장",
+        "saving": "저장 중...",
+        "loading": "로딩 중...",
+        "saveFailed": "저장에 실패했습니다."
       }
     }
   },
@@ -482,7 +606,7 @@
     "piiGuard": "고객님의 소중한 개인정보 보호를 위해 채팅으로는 민감한 정보를 입력받지 않고 있습니다. 🔒 상세 확인이 필요하신 경우, 객실 내 전화기를 통해 프론트 데스크(내선 0번)로 연락해 주시면 안전하게 도와드리겠습니다. 😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedTitle": "상담 및 처리가 모두 완료되었습니다.",
     "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
     "requestCompleted": "요청 완료",
     "consultationCompleted": "상담이 완료되었습니다",
@@ -495,5 +619,27 @@
       "4": "좋았어요",
       "5": "최고예요!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "상담 완료",
+    "startConsultation": "상담 시작하기",
+    "startEmergency": "긴급 대응 시작",
+    "autoReplyStaffChecked": "프론트 데스크 직원이 메시지를 확인했습니다. 곧 안내 드리겠습니다.",
+    "autoReplyEmergency": "긴급 대응팀이 배정되었습니다. 신속히 조치하겠습니다. 안전한 곳에서 대기해 주시기 바랍니다.",
+    "backToList": "목록으로 가기",
+    "viewRequestDetail": "요청 상세 보기",
+    "loadingMessages": "대화 내역을 불러오는 중...",
+    "noMessages": "이 객실의 대화 내역이 없습니다.",
+    "registerAiKnowledge": "AI 지식 등록",
+    "replyPlaceholder": "고객에게 답변을 입력하세요...",
+    "registerAiKnowledgeTitle": "AI 지식 등록",
+    "registerAiKnowledgeDesc": "이 상담 내용을 AI 지식 데이터로 등록하시겠습니까?<br />등록하면 AI가 동일한 질문에 자동으로 답변할 수 있습니다.",
+    "registerNow": "지금 등록하기",
+    "registerLater": "나중에 하기",
+    "doNotRegister": "등록하지 않기",
+    "dummyGuest": "요청 내용이 없습니다.",
+    "dummyAi": "요청이 접수되었습니다. 프론트데스크 직원이 곧 확인 후 안내해 드리겠습니다.",
+    "inProgressTab": "진행 중",
+    "completedTab": "상담 완료"
   }
 }

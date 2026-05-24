@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import useFrontdeskRequests from '@/app/frontdesk/useFrontdeskRequests';
 import useEscalations from '@/app/frontdesk/requests/useEscalations';
 import RejectCancellationModal from '@/app/frontdesk/requests/_components/RejectCancellationModal/RejectCancellationModal';
@@ -42,20 +42,12 @@ export default function HeaderNotification() {
   // 타 부서 긴급 이관 제외 (프론트가 처리할 이관 요청)
   const nonEmergencyEscalations = escalations.filter(r => r.priority !== 'EMERGENCY');
 
-  const totalNotifications = delayedCancelRequests.length + nonEmergencyEscalations.length;
+  const allNotifications = [
+    ...delayedCancelRequests.map(req => ({ type: 'cancel' as const, data: req, time: req.cancelRequestedAt || req.createdAt })),
+    ...nonEmergencyEscalations.map(req => ({ type: 'escalation' as const, data: req as any, time: req.updatedAt || req.createdAt }))
+  ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-  // 바깥 클릭 시 패널 닫기
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  const totalNotifications = allNotifications.length;
 
   const handleApproveCancel = async (id: number) => {
     try {
@@ -115,6 +107,9 @@ export default function HeaderNotification() {
         <div className={styles.popup}>
           <div className={styles.header}>
             <h3 className={styles.title}>타 부서 이관/취소 승인 대기함</h3>
+            <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label="닫기">
+              <X size={20} />
+            </button>
           </div>
 
           <div className={styles.content}>
@@ -122,40 +117,71 @@ export default function HeaderNotification() {
               <div className={styles.empty}>대기 중인 요청이 없습니다.</div>
             ) : (
               <div className={styles.list}>
-                {delayedCancelRequests.map(req => (
-                  <NotificationCard
-                    key={`cancel-${req.id}`}
-                    variant="cancel"
-                    title={req.summary}
-                    description={req.rawText}
-                    roomNumber={req.roomNo}
-                    departmentName={req.departmentName}
-                    createdAt={req.createdAt}
-                    priority={req.priority}
-                    primaryLabel="취소 승인"
-                    secondaryLabel="반려"
-                    onPrimaryClick={() => handleApproveCancel(req.id)}
-                    onSecondaryClick={() => handleRejectCancel(req.id)}
-                    onClick={() => setDetailTarget(req.id)}
-                  />
-                ))}
-                
-                {nonEmergencyEscalations.map(req => (
-                  <NotificationCard
-                    key={`esc-${req.id}`}
-                    variant="escalation"
-                    title={req.summary}
-                    roomNumber={req.roomNo}
-                    departmentName={req.departmentName}
-                    createdAt={req.createdAt}
-                    priority={req.priority}
-                    primaryLabel="수락 (배정)"
-                    secondaryLabel="반려"
-                    onPrimaryClick={() => handleApproveEscalation(req.id)}
-                    onSecondaryClick={() => handleRejectEscalation(req.id)}
-                    onClick={() => setDetailTarget(req.id)}
-                  />
-                ))}
+                {allNotifications.map(({ type, data: req, time }) => {
+                  if (type === 'cancel') {
+                    const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
+                    let cleanDesc = rawParts[0] || '';
+                    cleanDesc = cleanDesc.replace(/^\[주문 상세\]\s*-\s*details:\s*/i, '');
+                    
+                    return (
+                    <NotificationCard
+                      key={`cancel-${req.id}`}
+                      variant="cancel"
+                      title={req.summary}
+                      description={cleanDesc}
+                      roomNumber={req.roomNo}
+                      departmentName={req.departmentName}
+                      createdAt={time}
+                      priority={req.priority}
+                      primaryLabel="취소 승인"
+                      secondaryLabel="반려"
+                      onPrimaryClick={() => handleApproveCancel(req.id)}
+                      onSecondaryClick={() => handleRejectCancel(req.id)}
+                      onClick={() => setDetailTarget(req.id)}
+                    />
+                    );
+                  } else {
+                    const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
+                    let transferReason = rawParts.length > 1 ? rawParts.slice(1).join('\n').trim() : '';
+                    let senderDeptName = req.departmentName;
+
+                    // 발신 부서 파싱: "[HK] 사유" 형태 (미래 데이터용)
+                    const match = transferReason.match(/^\[([A-Z_]+)\]\s*(.*)$/);
+                    if (match) {
+                      const senderCode = match[1];
+                      transferReason = match[2];
+                      const deptMap: Record<string, string> = {
+                        'HK': '하우스키핑',
+                        'FNB': 'F&B',
+                        'FRONT': '프론트데스크',
+                        'MAINTENANCE': '시설팀',
+                        'EMERGENCY': '긴급대응팀',
+                      };
+                      senderDeptName = deptMap[senderCode] || senderCode;
+                    } else if (senderDeptName === '프론트데스크') {
+                      // 과거 데이터 호환: 프론트가 수신한 이관 요청의 이전 부서가 유실된 경우 기본값
+                      senderDeptName = '하우스키핑';
+                    }
+                    
+                    return (
+                    <NotificationCard
+                      key={`esc-${req.id}`}
+                      variant="escalation"
+                      title={req.summary}
+                      description={transferReason}
+                      roomNumber={req.roomNo}
+                      departmentName={senderDeptName}
+                      createdAt={time}
+                      priority={req.priority}
+                      primaryLabel="수락 (배정)"
+                      secondaryLabel="반려"
+                      onPrimaryClick={() => handleApproveEscalation(req.id)}
+                      onSecondaryClick={() => handleRejectEscalation(req.id)}
+                      onClick={() => setDetailTarget(req.id)}
+                    />
+                    );
+                  }
+                })}
               </div>
             )}
           </div>

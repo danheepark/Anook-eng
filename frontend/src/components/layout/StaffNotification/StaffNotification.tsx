@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { useUiStore } from '@/stores/useUiStore';
 import { useTranslation } from '@/app/useTranslation';
 import { useSSE } from '@/app/useSSE';
@@ -85,19 +85,6 @@ export default function StaffNotification() {
     };
   }, [subscribe, fetchRequests, departmentId]);
 
-  // 바깥 클릭 시 패널 닫기
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
   // 4. 취소 대기 중인 항목만 필터링
   const pendingCancellations = tasks.filter(
     task => task.cancelRequested && task.status === 'IN_PROGRESS'
@@ -157,6 +144,9 @@ export default function StaffNotification() {
         <div className={styles.popup}>
           <div className={styles.header}>
             <h3 className={styles.title}>부서 취소 승인 대기함</h3>
+            <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label="닫기">
+              <X size={20} />
+            </button>
           </div>
 
           <div className={styles.content}>
@@ -164,12 +154,17 @@ export default function StaffNotification() {
               <div className={styles.empty}>대기 중인 요청이 없습니다.</div>
             ) : (
               <div className={styles.list}>
-                {pendingCancellations.map(req => (
+                {pendingCancellations.map(req => {
+                  const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
+                  let cleanDesc = rawParts[0] || '';
+                  cleanDesc = cleanDesc.replace(/^\[주문 상세\]\s*-\s*details:\s*/i, '');
+
+                  return (
                   <NotificationCard
                     key={`cancel-${req.id}`}
                     variant="cancel"
                     title={req.summary}
-                    description={req.rawText}
+                    description={cleanDesc}
                     roomNumber={req.roomNumber}
                     departmentName={req.departmentName}
                     createdAt={req.createdAt}
@@ -179,7 +174,8 @@ export default function StaffNotification() {
                     onPrimaryClick={() => handleApproveCancel(req.id, req.version)}
                     onSecondaryClick={() => handleRejectCancel(req.id, req.version)}
                   />
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

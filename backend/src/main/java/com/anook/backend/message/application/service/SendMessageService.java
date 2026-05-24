@@ -439,7 +439,6 @@ public class SendMessageService implements SendMessageUseCase {
                                 }
                             }
 
-
                             if (seemsSameRequest) {
                                 Long pendingRequestId = ((Number) pendingRequest.get("id")).longValue();
                                 log.info("[Message] 기존 수락 대기 중인 요청 발견, 자동 수락 처리 진행 — ID: {}, room: {}",

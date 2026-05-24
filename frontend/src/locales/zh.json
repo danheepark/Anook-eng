@@ -8,7 +8,8 @@
     "inProgress": "进行中",
     "completed": "已完成",
     "escalated": "已上报",
-    "transferred": "已转交"
+    "transferred": "已转交",
+    "cancelled": "已取消"
   },
   "priority": {
     "low": "低",
@@ -24,7 +25,8 @@
     "loading": "加载中...",
     "error": "发生错误",
     "retry": "重试",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "searchPlaceholder": "请输入搜索词..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +63,10 @@
       },
       "charts": {
         "avgResTime": "平均解决时间",
-        "frequentReqs": "最常见请求"
+        "frequentReqs": "最常见请求",
+        "others": "其他",
+        "avgResTimeSub": "平均解决时间（分钟）",
+        "frequentReqsSub": "最频繁的请求比例 (%)"
       },
       "summaries": {
         "totalToday": "今日总请求",
@@ -74,7 +79,8 @@
         "FB": "餐饮",
         "FACILITY": "设施",
         "CONCIERGE": "礼宾",
-        "FRONT": "紧急情况"
+        "FRONT": "前台",
+        "EMERGENCY": "紧急响应"
       }
     },
     "taskBoard": {
@@ -181,7 +187,7 @@
     "chatHistory": {
       "title": "聊天记录",
       "emptyMessage": "无消息",
-      "systemCompleted": "先前的咨询和处理已全部完成。",
+      "systemCompleted": "咨询和处理已全部完成。",
       "systemMessageNote": "(※ 此消息为前台运营专用系统消息，住客不可见)",
       "roomConversation": "{{room}}房间对话",
       "roomChatRecord": "{{room}}房间聊天记录",
@@ -268,6 +274,124 @@
         "countSuffix": " 件",
         "option": "选项",
         "none": "无"
+      },
+      "manualAssign": "手动分配",
+      "approveEscalation": "批准升级",
+      "rejectEscalation": "拒绝升级",
+      "rejectCancel": "拒绝取消",
+      "approveCancel": "批准取消",
+      "forceCancelRequest": "强制取消请求",
+      "aiAnalysisView": "查看AI分析结果",
+      "aiDetails": "详细信息"
+    },
+    "aiRouting": {
+      "avgLatency": "平均响应时间",
+      "accumulatedTokens": "累计消耗 Token",
+      "routingSuccessRate": "AI 路由成功率",
+      "fallbackText": "降级",
+      "customerSatisfaction": "客户满意度",
+      "caseCount": "件",
+      "ratingPanelTitle": "AI 处理请求评分详情",
+      "ratingEmpty": "暂无注册的 AI 反馈。",
+      "detailedAccessLogs": "详细访问日志",
+      "noLogs": "暂无日志。",
+      "requestPreviewEmpty": "无请求内容",
+      "tableColumns": {
+        "time": "时间",
+        "requestPreview": "请求预览",
+        "totalTokens": "总 Token",
+        "latency": "延迟时间",
+        "viewDetails": "查看详情"
+      }
+    },
+    "handover": {
+      "title": "交接班文档",
+      "shift": {
+        "DAY": "白班 (07:00 - 15:00)",
+        "EVENING": "小夜班 (15:00 - 23:00)",
+        "NIGHT": "大夜班 (23:00 - 07:00)",
+        "label": {
+          "DAY": "白班",
+          "EVENING": "小夜班",
+          "NIGHT": "大夜班"
+        }
+      },
+      "downloadButton": "📥 导出 Excel",
+      "downloading": "下载中...",
+      "filterOptions": {
+        "ALL": "所有状态",
+        "PENDING": "待处理",
+        "IN_PROGRESS": "进行中",
+        "DONE": "处理完成"
+      },
+      "loading": "正在加载数据...",
+      "briefing": {
+        "shiftTime": "工作时间",
+        "manager": "交接负责人",
+        "resolutionStatus": "处理状态",
+        "createdAt": "撰写时间"
+      },
+      "tableColumns": {
+        "room": "客房",
+        "status": "状态",
+        "category": "类别",
+        "summary": "标题/内容摘要",
+        "time": "时间"
+      },
+      "empty": "该工作时段内未发生任何请求。"
+    },
+    "staffManagement": {
+      "title": "员工管理",
+      "tabs": {
+        "staff": "员工管理",
+        "role": "角色管理"
+      },
+      "staffTab": {
+        "addStaff": "+ 添加员工",
+        "editStaff": "修改员工信息",
+        "newStaff": "添加新员工",
+        "name": "姓名",
+        "dept": "部门",
+        "role": "角色",
+        "pin": "PIN",
+        "edit": "修改",
+        "delete": "删除",
+        "empty": "暂无已注册员工。",
+        "deleteTitle": "删除员工",
+        "deleteConfirm": "确定要删除员工 '{{name}}' 吗？此操作无法撤销。",
+        "nameInputLabel": "员工姓名",
+        "namePlaceholder": "请输入姓名",
+        "saveSuccess": "员工已注册。",
+        "editSuccess": "员工信息已修改。",
+        "deleteSuccess": "员工已删除。",
+        "nameRequired": "请输入员工姓名。",
+        "roleRequired": "请选择角色。",
+        "deptRequired": "请选择部门。"
+      },
+      "roleTab": {
+        "addRole": "+ 添加角色",
+        "editRole": "修改角色",
+        "newRole": "添加新角色",
+        "dept": "部门",
+        "roleName": "角色名称",
+        "edit": "修改",
+        "delete": "删除",
+        "empty": "暂无已注册角色。",
+        "deleteTitle": "删除角色",
+        "deleteConfirm": "确定要删除角色 '{{name}}' 吗？此操作无法撤销。",
+        "rolePlaceholder": "请输入角色名称",
+        "saveSuccess": "角色已添加。",
+        "editSuccess": "角色已修改。",
+        "deleteSuccess": "角色已删除。",
+        "deptRequired": "请选择部门。",
+        "roleRequired": "请输入角色名称。"
+      },
+      "common": {
+        "cancel": "取消",
+        "save": "保存",
+        "saving": "保存中...",
+        "loading": "加载中...",
+        "saveFailed": "保存失败。"
       }
     }
   },
@@ -476,7 +600,7 @@
   },
   "aiReplies": {
     "forwardFb": "好的！我们会立即将您的订单转交给餐饮团队。🍽️",
-    "forwardHk": "好的，没问题！我们会立即将您的请求转交给客房服务团队。🧹",
+    "forwardHk": "好的，没问题！我们会立即将您的请求转交给客房服务团队。",
     "forwardFacility": "给您带来不便，我们深表歉意。🥲 我们会立即将维修请求转交给设施团队，以最快速度为您处理！🛠️",
     "forwardConcierge": "好的，没问题！我们会立即将您的请求转交给礼宾团队。🛎️",
     "forwardFront": "现在立刻为您直接连接到前台，为您提供进一步的协助。",
@@ -486,7 +610,7 @@
     "piiGuard": "为了保护您宝贵的个人信息，我们不接受通过聊天提供敏感信息。🔒 如需详细查询，请使用客房内的电话联系前台（分机0），我们将为您提供安全的帮助。😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedTitle": "咨询和处理已全部完成。",
     "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
     "requestCompleted": "요청 완료",
     "consultationCompleted": "상담이 완료되었습니다",
@@ -499,5 +623,27 @@
       "4": "좋았어요",
       "5": "최고예요!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "咨询完成",
+    "startConsultation": "开始咨询",
+    "startEmergency": "开始紧急响应",
+    "autoReplyStaffChecked": "前台工作人员已确认您的留言。我们将很快为您提供帮助。",
+    "autoReplyEmergency": "紧急响应团队已被派遣。请在安全的地方等候。",
+    "backToList": "返回列表",
+    "viewRequestDetail": "查看请求详情",
+    "loadingMessages": "正在加载消息...",
+    "noMessages": "此房间没有聊天记录。",
+    "registerAiKnowledge": "注册AI知识",
+    "replyPlaceholder": "输入对客人的回复...",
+    "registerAiKnowledgeTitle": "注册AI知识",
+    "registerAiKnowledgeDesc": "您想将此咨询注册为AI知识吗？<br />注册后，AI将自动回答类似的问题。",
+    "registerNow": "立即注册",
+    "registerLater": "稍后提醒我",
+    "doNotRegister": "不注册",
+    "dummyGuest": "无请求内容。",
+    "dummyAi": "已收到您的请求。前台工作人员将很快为您提供帮助。",
+    "inProgressTab": "进行中",
+    "completedTab": "咨询完成"
   }
 }

@@ -2,6 +2,8 @@ import React from 'react';
 import styles from './RequestCard.module.css';
 import Button from '@/components/ui/Button/Button';
 import Tag from '@/components/ui/StatusBadge/StatusBadge';
+import { useTranslation } from '@/app/useTranslation';
+import { useTranslationApi } from '@/app/useTranslationApi';
 
 export interface RequestCardProps {
   roomType?: string;
@@ -55,6 +57,17 @@ export default function RequestCard({
   isActiveMatch = false
 }: RequestCardProps) {
   const isWarning = variant === 'warning';
+  const { t, language } = useTranslation();
+
+  const { translatedText: translatedTitle } = useTranslationApi(title, language);
+  const displayTitle = translatedTitle || title;
+
+  const { translatedText: translatedDesc } = useTranslationApi(
+    language !== 'ko' && description ? description : undefined,
+    language
+  );
+  const displayDesc = language !== 'ko' && translatedDesc ? translatedDesc : description;
+
   const handlePrimaryClick = () => {
     if (onPrimaryAction) {
       onPrimaryAction();
@@ -82,26 +95,26 @@ export default function RequestCard({
             <h3 className={styles.title}>
               {highlightSearch ? (
                 <span dangerouslySetInnerHTML={{
-                  __html: title.replace(
+                  __html: displayTitle.replace(
                     new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
                     '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
                   )
                 }} />
-              ) : title}
+              ) : displayTitle}
             </h3>
           </div>
           
           <div className={styles.contentBody}>
-            {description && (
+            {displayDesc && (
               <p className={styles.description}>
                 {highlightSearch ? (
                   <span dangerouslySetInnerHTML={{
-                    __html: description.replace(
+                    __html: displayDesc.replace(
                       new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
                       '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
                     )
                   }} />
-                ) : description}
+                ) : displayDesc}
               </p>
             )}
           </div>
@@ -128,7 +141,7 @@ export default function RequestCard({
 
         <div className={styles.rightSection}>
           <span className={styles.timeText}>
-            {getRelativeTime(createdAt)}
+            {getRelativeTime(createdAt, language, t.ticketUI?.time)}
           </span>
           {isEmergency && (
             <Tag variant="red">EMERGENCY</Tag>
@@ -147,7 +160,7 @@ export default function RequestCard({
   );
 }
 
-function getRelativeTime(dateString: string | Date): string {
+function getRelativeTime(dateString: string | Date, language: string = 'ko', timeTexts?: any): string {
   let parsedString = dateString;
   if (typeof dateString === 'string' && !dateString.endsWith('Z') && !dateString.includes('+')) {
     parsedString = dateString + 'Z';
@@ -171,10 +184,16 @@ function getRelativeTime(dateString: string | Date): string {
     const paddedHours = String(hours).padStart(2, '0');
     return `${year}.${month}.${day} ${paddedHours}:${minutes} ${ampm}`;
   } else if (diffHours > 0) {
-    return `${diffHours}시간 전`;
+    return timeTexts
+      ? `${diffHours}${language === 'en' ? ' ' : ''}${timeTexts.hoursAgo}`
+      : `${diffHours}시간 전`;
   } else if (diffMins > 0) {
-    return `${diffMins}분 전`;
+    return timeTexts
+      ? `${diffMins}${language === 'en' ? ' ' : ''}${timeTexts.minsAgo}`
+      : `${diffMins}분 전`;
   } else {
-    return '방금 전';
+    return timeTexts
+      ? timeTexts.justNow
+      : '방금 전';
   }
 }

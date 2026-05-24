@@ -36,14 +36,14 @@
 }
 
 .roomBadge {
-  font: var(--text-h3-bold);
+  font: var(--text-h2-bold);
   color: var(--color-gray-900);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-h2-bold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
@@ -129,4 +129,14 @@
   .headerInfo {
     gap: var(--space-8) !important;
   }
+
+  .requestCardWrapper {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}
+
+.requestCardWrapper {
+  width: 60%;
+  min-width: 300px;
 }
