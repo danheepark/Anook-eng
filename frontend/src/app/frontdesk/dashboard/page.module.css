@@ -60,6 +60,7 @@
 .barChart {
   display: flex;
   width: 100%;
+  max-width: 480px;
   height: 100%;
   gap: var(--space-8);
 }
