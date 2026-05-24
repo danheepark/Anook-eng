@@ -81,17 +81,17 @@ export default function AiServerStatusIndicator() {
         <span className={styles.label}>
           {label}
         </span>
+        <button
+          type="button"
+          className={styles.checkButton}
+          onClick={handleCheck}
+          disabled={checking}
+          aria-label="AI 연결 확인"
+          title="AI 연결 확인"
+        >
+          <RotateCw size={12} className={checking ? styles.spinning : ''} strokeWidth={2.5} />
+        </button>
       </Tag>
-      <button
-        type="button"
-        className={styles.checkButton}
-        onClick={handleCheck}
-        disabled={checking}
-        aria-label="AI 연결 확인"
-        title="AI 연결 확인"
-      >
-        <RotateCw size={12} className={checking ? styles.spinning : ''} strokeWidth={2.5} />
-      </button>
     </div>
   );
 }

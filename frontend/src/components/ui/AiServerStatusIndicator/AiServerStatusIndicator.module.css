@@ -43,16 +43,18 @@
   background: transparent;
   cursor: pointer;
   padding: 2px;
-  color: var(--color-gray-400);
-  transition: color 0.15s ease;
+  margin-left: -2px;
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
 }
 
 .checkButton:hover:not(:disabled) {
-  color: var(--color-gray-500);
+  opacity: 1;
 }
 
 .checkButton:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
