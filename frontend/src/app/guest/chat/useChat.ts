@@ -736,7 +736,9 @@ export function useChat() {
 
       const data = await response.json();
       setMessages(prev => prev.map(msg =>
-        msg.id === tempId ? { ...msg, id: data.guestMessageId.toString() } : msg
+        msg.id === tempId
+          ? { ...msg, id: data.guestMessageId.toString(), content: data.maskedContent ?? msg.content }
+          : msg
       ));
 
     } catch (error: any) {

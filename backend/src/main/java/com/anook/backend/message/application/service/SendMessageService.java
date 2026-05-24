@@ -117,7 +117,7 @@ public class SendMessageService implements SendMessageUseCase {
                     cmd.images());
         }
 
-        return new SendMessageResult(guestMsg.getId());
+        return new SendMessageResult(guestMsg.getId(), maskedContent);
     }
 
     /**

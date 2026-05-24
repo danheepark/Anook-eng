@@ -8,6 +8,8 @@ package com.anook.backend.message.application.dto.response;
  */
 public record SendMessageResult(
         /** 저장된 고객 메시지 ID */
-        Long guestMessageId
+        Long guestMessageId,
+        /** PII 마스킹 처리된 메시지 내용 (프론트엔드 즉시 반영용) */
+        String maskedContent
 ) {
 }
