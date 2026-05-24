@@ -248,7 +248,10 @@ ALTER TABLE request ADD COLUMN IF NOT EXISTS cancel_requested BOOLEAN NOT NULL D
 ALTER TABLE request ADD COLUMN IF NOT EXISTS cancel_requested_at TIMESTAMP;
 -- [2026-05-07] F&B 메뉴 선택옵션(options) 컬럼 추가 (혜연)
 ALTER TABLE pms_menu ADD COLUMN IF NOT EXISTS options VARCHAR(500);
-ALTER TABLE pms_menu ADD CONSTRAINT pms_menu_name_unique UNIQUE (name);
+DO $$ BEGIN
+    ALTER TABLE pms_menu ADD CONSTRAINT pms_menu_name_unique UNIQUE (name);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- [2026-05-13] AI 판단 근거 저장
 ALTER TABLE request ADD COLUMN IF NOT EXISTS reasoning TEXT;
