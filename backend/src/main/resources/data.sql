@@ -123,7 +123,7 @@ INSERT INTO pms_menu (name, price, price_usd, category, allergens, options, avai
     ('미니바 맥주',          8000,  6.2,  'HK_MINIBAR',    NULL, NULL, TRUE),
     ('미니바 와인',          15000, 11.5, 'HK_MINIBAR',    NULL, NULL, TRUE),
     ('미니바 스낵',          5000,  3.8,  'HK_MINIBAR',    NULL, NULL, TRUE)
-ON CONFLICT DO NOTHING;
+ON CONFLICT (name) DO NOTHING;
 
 -- [2026-05-20] 기존 메뉴 데이터에 price_usd 정보 반영 (로컬 인스턴스 마이그레이션용)
 UPDATE pms_menu SET price_usd = 11.5 WHERE name = '클래식 치즈버거' AND price_usd IS NULL;
