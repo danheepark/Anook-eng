@@ -14,16 +14,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s, transform 0.15s ease;
+  transition: background-color 0.2s;
 }
 
 .bellButton:hover {
   background-color: var(--color-gray-100);
-  transform: scale(1.05);
-}
-
-.bellButton:active {
-  transform: scale(0.95);
 }
 
 .badge {
@@ -38,7 +33,6 @@
   padding: 2px 6px;
   min-width: 16px;
   text-align: center;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
 }
 
 .popup {
@@ -46,37 +40,47 @@
   top: 100%;
   right: 0;
   margin-top: var(--space-8);
-  width: 380px;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  width: var(--modal-width-lg);
+  max-width: calc(100vw - 32px);
+  background-color: var(--color-white);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg), 0 12px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   z-index: 100;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideInDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .header {
-  padding: var(--space-16) var(--space-16) var(--space-8) var(--space-16);
+  padding: var(--space-24) var(--space-16) var(--space-8) var(--space-16);
+  position: relative;
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--space-24);
+  right: var(--space-16);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-gray-400);
+  transition: color 0.15s ease;
+  z-index: 10;
+}
+
+.closeButton:hover {
+  color: var(--color-gray-700);
 }
 
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-h2-bold);
   color: var(--color-gray-900);
   margin: 0;
 }

@@ -127,7 +127,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
   const translateContent = (content: string) => {
     if (!content) return content;
     if (content.includes('[FORWARD_FB]')) return '네, 식음료 팀으로 주문 내용을 바로 전달해 드릴게요! 🍽️';
-    if (content.includes('[FORWARD_HK]')) return '네, 알겠습니다! 하우스키핑 팀으로 요청 내용을 신속하게 전달해 드릴게요. 🧹';
+    if (content.includes('[FORWARD_HK]')) return '네, 알겠습니다! 하우스키핑 팀으로 요청 내용을 신속하게 전달해 드릴게요.';
     if (content.includes('[FORWARD_FACILITY]')) return '불편을 드려 죄송합니다. 🥲 시설 관리 팀으로 내용을 전달하여 최대한 빠르게 조치해 드릴게요! 🛠️';
     if (content.includes('[FORWARD_FRONT]')) return '지금 바로 프론트 데스크 직원에게 연결하여 도움을 드리겠습니다.';
     if (content.includes('[INFO_NOT_FOUND]')) return '그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏';
@@ -493,8 +493,8 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
               if (msg.type === 'REQUEST_CARD' && msg.meta) {
                 return (
-                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '4px 0' }}>
-                    <div style={{ maxWidth: '85%' }}>
+                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', margin: '4px 0' }}>
+                    <div className={styles.requestCardWrapper}>
                       <GuestRequestCard {...msg.meta} isReadOnly />
                     </div>
                   </div>

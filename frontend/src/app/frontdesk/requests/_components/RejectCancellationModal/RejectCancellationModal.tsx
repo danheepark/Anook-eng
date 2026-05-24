@@ -61,10 +61,10 @@ export default function RejectCancellationModal({
         </div>
 
         <div className={styles.buttonGroup}>
-          <Button variant="secondary" style={{ flex: 1 }} onClick={onClose} disabled={loading}>
+          <Button variant="secondary" onClick={onClose} disabled={loading}>
             아니오
           </Button>
-          <Button variant="danger" style={{ flex: 1 }} onClick={handleReject} disabled={loading}>
+          <Button variant="danger" onClick={handleReject} disabled={loading}>
             반려 및 전송
           </Button>
         </div>

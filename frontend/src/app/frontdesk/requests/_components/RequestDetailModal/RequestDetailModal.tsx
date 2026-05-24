@@ -85,9 +85,9 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
   // 1) 배열 타입 특수 렌더링
   if (entities.items?.length > 0) {
     rendered.push(
-      <div key="items" style={{ marginBottom: '12px' }}>
-        <strong>{labels.items}:</strong>
-        <ul style={{ margin: '4px 0 0 20px', padding: 0 }}>
+      <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+        <span className={styles.label}>{labels.items}</span>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
           {entities.items.map((it: any, idx: number) => (
             <li key={idx}>{it.item} - {it.count}{labels.countSuffix}</li>
           ))}
@@ -97,9 +97,9 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
   }
   if (entities.tasks?.length > 0) {
     rendered.push(
-      <div key="tasks" style={{ marginBottom: '12px' }}>
-        <strong>{labels.tasks}:</strong>
-        <ul style={{ margin: '4px 0 0 20px', padding: 0 }}>
+      <div key="tasks" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+        <span className={styles.label}>{labels.tasks}</span>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
           {entities.tasks.map((task: string, idx: number) => (
             <li key={idx}>{task}</li>
           ))}
@@ -109,9 +109,9 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
   }
   if (entities.menu_items?.length > 0) {
     rendered.push(
-      <div key="menu_items" style={{ marginBottom: '12px' }}>
-        <strong>{labels.menu_items}:</strong>
-        <ul style={{ margin: '4px 0 0 20px', padding: 0 }}>
+      <div key="menu_items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+        <span className={styles.label}>{labels.menu_items}</span>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
           {entities.menu_items.map((mi: any, idx: number) => (
             <li key={idx}>
               {mi.name} - {mi.quantity}{labels.countSuffix}
@@ -135,16 +135,17 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
     // boolean true인 경우 라벨만 표시 (예: is_contactless -> "비대면 배달")
     if (value === true) {
       rendered.push(
-        <div key={key} style={{ marginBottom: '8px' }}>
-          <strong>{label}</strong>
+        <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
+          <span className={styles.label}>{label}</span>
         </div>
       );
       continue;
     }
 
     rendered.push(
-      <div key={key} style={{ marginBottom: '8px' }}>
-        <strong>{label}:</strong> {value}
+      <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
+        <span className={styles.label}>{label}</span>
+        <span className={styles.value}>{value}</span>
       </div>
     );
   }
@@ -335,57 +336,16 @@ export default function RequestDetailModal({
               <span className={styles.value}>{formatDateTime(activeDetail.createdAt)}</span>
             </div>
             <div className={styles.gridItem}>
+              <span className={styles.label}>{t.frontdeskPage.requestDetailModal.summary}</span>
+              <span className={styles.value}>
+                {isTranslating ? t.common.loading : translatedSummary || activeDetail.summary}
+              </span>
+            </div>
+            <div className={styles.gridItem}>
               <span className={styles.label}>{t.frontdeskPage.requestDetailModal.updatedAt}</span>
               <span className={styles.value}>{formatDateTime(activeDetail.updatedAt)}</span>
             </div>
           </div>
-        </div>
-
-        {/* 요약 + 원문 */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>{t.frontdeskPage.requestDetailModal.requestContent}</h3>
-          <div className={styles.contentBlock}>
-            <span className={styles.label}>{t.frontdeskPage.requestDetailModal.summary}</span>
-            <p className={styles.contentText}>
-              {isTranslating ? t.common.loading : translatedSummary || activeDetail.summary}
-            </p>
-          </div>
-          {(() => {
-            if (!activeDetail.rawText) return null;
-            const transferParts = activeDetail.rawText.split('\n|||TRANSFER_REASON|||');
-            const mainText = transferParts[0] || '';
-            const transferReason = transferParts.length > 1 ? transferParts.slice(1).join('\n').trim() : '';
-
-            const detailParts = mainText.split('[주문 상세]');
-            const customerText = detailParts[0].trim();
-            const orderDetail = detailParts.length > 1 ? detailParts.slice(1).join('').trim() : '';
-
-            // entities가 있으면 [주문/요청 상세] 숨김 처리 (AI 결과와 중복 표시 방지)
-            const hasValidEntities = activeDetail.entities && Object.keys(activeDetail.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k)).length > 0;
-
-            return (
-              <>
-                {customerText && (
-                  <div className={styles.contentBlock}>
-                    <span className={styles.label}>{t.frontdeskPage.requestDetailModal.originalText}</span>
-                    <p className={styles.rawText}>{customerText}</p>
-                  </div>
-                )}
-                {orderDetail && !hasValidEntities && (
-                  <div className={styles.contentBlock}>
-                    <span className={styles.label}>{t.frontdeskPage.requestDetailModal.orderDetail}</span>
-                    <p className={styles.orderDetail}>{orderDetail}</p>
-                  </div>
-                )}
-                {transferReason && (
-                  <div className={styles.contentBlock}>
-                    <span className={styles.label}>{t.frontdeskPage.requestDetailModal.transferReason}</span>
-                    <p className={styles.transferReason}>{transferReason}</p>
-                  </div>
-                )}
-              </>
-            );
-          })()}
         </div>
 
         {/* 첨부 사진 */}
@@ -419,14 +379,20 @@ export default function RequestDetailModal({
                   </div>
                 );
               })()}
-              {activeDetail.reasoning && (
-                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-gray-200)' }}>
-                  <span className={styles.label} style={{ display: 'block', marginBottom: '4px', fontSize: '13px' }}>{t.frontdeskPage.requestDetailModal.reasoning}</span>
-                  <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-gray-700)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
-                    {activeDetail.reasoning}
-                  </p>
-                </div>
-              )}
+              {activeDetail.reasoning && (() => {
+                const cleanedReasoning = activeDetail.reasoning
+                  .split('\n')
+                  .filter(line => !line.toLowerCase().includes('confidence:'))
+                  .join('\n')
+                  .trim();
+                if (!cleanedReasoning) return null;
+                return (
+                  <div className={styles.contentBlock} style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-gray-200)' }}>
+                    <span className={styles.label}>{t.frontdeskPage.requestDetailModal.reasoning}</span>
+                    <p className={styles.rawText}>{cleanedReasoning}</p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -472,7 +438,6 @@ export default function RequestDetailModal({
           ) : <div />}
 
           <div className={styles.footerRight}>
-            <Button variant="secondary" onClick={onClose}>{t.frontdeskPage.requestDetailModal.buttons.close}</Button>
             {activeDetail.status === 'ESCALATED' ? (
               <Button variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
                 {t.frontdeskPage.requestDetailModal.buttons.approveEscalation}

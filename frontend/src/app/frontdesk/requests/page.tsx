@@ -48,7 +48,7 @@ export default function FrontDeskPage() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const pending = sortByPriority(mergedRequests.filter(r => r.status === 'PENDING' || r.status === 'ESCALATED'));
+  const pending = sortByPriority(mergedRequests.filter(r => r.status === 'PENDING'));
   const inProgress = sortByPriority(mergedRequests.filter(r => (r.status === 'ASSIGNED' || r.status === 'IN_PROGRESS') && !r.cancelRequested));
   // 모든 부서의 취소 대기 건 (프론트 데스크가 대신 처리)
   const cancelPending = allRequests.filter(r => r.cancelRequested);
@@ -239,7 +239,7 @@ export default function FrontDeskPage() {
       else if (reqs.some(r => r.priority === 'URGENT')) highestPriority = 'URGENT';
 
       let repStatus = reqs[0].status;
-      const hasPending = reqs.some(r => r.status === 'PENDING' || r.status === 'ESCALATED');
+      const hasPending = reqs.some(r => r.status === 'PENDING');
       const hasInProgress = reqs.some(r => r.status === 'IN_PROGRESS' || r.status === 'ASSIGNED');
       if (activeTab === 'active') {
         if (hasPending) repStatus = 'PENDING';

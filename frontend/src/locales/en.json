@@ -281,7 +281,8 @@
       "rejectCancel": "Reject Cancel",
       "approveCancel": "Approve Cancel",
       "forceCancelRequest": "Force Cancel Request",
-      "aiAnalysisView": "View AI Analysis Result"
+      "aiAnalysisView": "View AI Analysis Result",
+      "aiDetails": "Details"
     },
     "aiRouting": {
       "avgLatency": "Avg. Response Time",
@@ -595,7 +596,7 @@
   },
   "aiReplies": {
     "forwardFb": "Sure! I will forward your order to the F&B team right away! 🍽️",
-    "forwardHk": "Got it! I will forward your request to the Housekeeping team right away. 🧹",
+    "forwardHk": "Got it! I will forward your request to the Housekeeping team right away. ",
     "forwardFacility": "We sincerely apologize for the inconvenience. 🥲 We will forward this to the Facility team to handle it as quickly as possible! 🛠️",
     "forwardConcierge": "Got it! I will forward your request to the Concierge team right away. 🛎️",
     "forwardFront": "We will connect you directly to the front desk right now to assist you further.",

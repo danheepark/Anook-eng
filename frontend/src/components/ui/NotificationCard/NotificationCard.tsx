@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '@/components/ui/Button/Button';
+import Tag from '@/components/ui/StatusBadge/StatusBadge';
 import styles from './NotificationCard.module.css';
 
 export type NotificationVariant = 'cancel' | 'escalation';
@@ -31,17 +32,26 @@ interface NotificationCardProps {
   onClick?: () => void;
 }
 
-const VARIANT_CONFIG: Record<NotificationVariant, { label: string; className: string }> = {
-  cancel: { label: '취소 요청', className: 'tagCancel' },
-  escalation: { label: '이관 요청', className: 'tagEscalation' },
+const VARIANT_CONFIG: Record<NotificationVariant, { label: string; badgeVariant: 'red' | 'purple' | 'green' | 'gray' }> = {
+  cancel: { label: '취소 요청', badgeVariant: 'red' },
+  escalation: { label: '이관 요청', badgeVariant: 'purple' },
 };
 
-function formatTime(isoStr?: string): string {
+function formatRelativeTime(isoStr?: string): string {
   if (!isoStr) return '';
   const d = new Date(isoStr);
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}:${mm}`;
+  const now = new Date();
+  const diffInMs = now.getTime() - d.getTime();
+  const diffInMins = Math.floor(diffInMs / (1000 * 60));
+  
+  if (diffInMins < 1) return '방금 전';
+  if (diffInMins < 60) return `${diffInMins}분 전`;
+  
+  const diffInHours = Math.floor(diffInMins / 60);
+  if (diffInHours < 24) return `${diffInHours}시간 전`;
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}일 전`;
 }
 
 export default function NotificationCard({
@@ -66,20 +76,17 @@ export default function NotificationCard({
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
       onClick={onClick}
     >
-      {/* 객실 동그라미 박스 (Left) */}
-      <div className={styles.roomBox}>
-        <span className={styles.roomNumber}>{roomNumber}</span>
-      </div>
-
-      {/* 컨텐츠 섹션 (Middle) */}
+      {/* 컨텐츠 섹션 (Left & Middle) */}
       <div className={styles.contentSection}>
         <div className={styles.tagsRow}>
-          <span className={`${styles.tag} ${styles[config.className]}`}>{config.label}</span>
-          {isUrgent && <span className={styles.tagUrgent}>긴급</span>}
-          {departmentName && <span className={styles.department}>{departmentName}</span>}
+          <Tag variant={config.badgeVariant}>{config.label}</Tag>
+          {isUrgent && <Tag variant="red">긴급</Tag>}
         </div>
 
-        <h3 className={styles.title}>{title}</h3>
+        <div className={styles.titleRow}>
+          <span className={styles.roomNumber}>{roomNumber}호</span>
+          <h3 className={styles.title}>{title}</h3>
+        </div>
 
         {description && <p className={styles.description}>{description}</p>}
 
@@ -103,7 +110,11 @@ export default function NotificationCard({
 
       {/* 오른쪽 섹션 (Right - 시간 표시) */}
       <div className={styles.rightSection}>
-        {createdAt && <span className={styles.timeText}>{formatTime(createdAt)}</span>}
+        <span className={styles.timeText}>
+          {[departmentName, createdAt ? formatRelativeTime(createdAt) : null]
+            .filter(Boolean)
+            .join(' • ')}
+        </span>
       </div>
     </div>
   );

@@ -281,7 +281,8 @@
       "rejectCancel": "拒绝取消",
       "approveCancel": "批准取消",
       "forceCancelRequest": "强制取消请求",
-      "aiAnalysisView": "查看AI分析结果"
+      "aiAnalysisView": "查看AI分析结果",
+      "aiDetails": "详细信息"
     },
     "aiRouting": {
       "avgLatency": "平均响应时间",
@@ -599,7 +600,7 @@
   },
   "aiReplies": {
     "forwardFb": "好的！我们会立即将您的订单转交给餐饮团队。🍽️",
-    "forwardHk": "好的，没问题！我们会立即将您的请求转交给客房服务团队。🧹",
+    "forwardHk": "好的，没问题！我们会立即将您的请求转交给客房服务团队。",
     "forwardFacility": "给您带来不便，我们深表歉意。🥲 我们会立即将维修请求转交给设施团队，以最快速度为您处理！🛠️",
     "forwardConcierge": "好的，没问题！我们会立即将您的请求转交给礼宾团队。🛎️",
     "forwardFront": "现在立刻为您直接连接到前台，为您提供进一步的协助。",

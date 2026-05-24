@@ -18,17 +18,17 @@
 }
 
 .sizeSm {
-  width: 400px;
+  width: var(--modal-width-sm);
   max-width: calc(100vw - 32px);
 }
 
 .sizeMd {
-  width: 560px;
+  width: var(--modal-width-md);
   max-width: calc(100vw - 32px);
 }
 
 .sizeLg {
-  width: 800px;
+  width: var(--modal-width-lg);
   max-width: calc(100vw - 32px);
 }
 

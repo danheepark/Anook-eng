@@ -128,12 +128,11 @@ export default function CreateRequestModal({
         </div>
 
         <div className={styles.buttonGroup}>
-          <Button variant="secondary" style={{ flex: 1 }} onClick={handleClose}>
+          <Button variant="secondary" onClick={handleClose}>
             취소
           </Button>
           <Button
             variant="primary"
-            style={{ flex: 1 }}
             onClick={handleSubmit}
             disabled={!isValid || loading}
           >

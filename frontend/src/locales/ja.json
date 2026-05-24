@@ -281,7 +281,8 @@
       "rejectCancel": "キャンセル却下",
       "approveCancel": "キャンセル承認",
       "forceCancelRequest": "強制キャンセル",
-      "aiAnalysisView": "AI分析結果を見る"
+      "aiAnalysisView": "AI分析結果を見る",
+      "aiDetails": "詳細情報"
     },
     "aiRouting": {
       "avgLatency": "平均応答速度",
@@ -599,7 +600,7 @@
   },
   "aiReplies": {
     "forwardFb": "かしこまりました！料飲チームにご注文内容を迅速にお伝えいたします。🍽️",
-    "forwardHk": "かしこまりました！ハウスキーピングチームにご要望内容を迅速にお伝えいたします。🧹",
+    "forwardHk": "かしこまりました！ハウスキーピングチームにご要望内容を迅速にお伝えいたします。",
     "forwardFacility": "ご不便をおかけして大変申し訳ございません。🥲 施設管理チームにお伝えし、できる限り迅速に対応させていただきます！🛠️",
     "forwardConcierge": "かしこまりました！コンシェルジュチームにご要望をお伝えいたします。🛎️",
     "forwardFront": "ただいまフロントデスクに直接お繋ぎし、サポートさせていただきます。",

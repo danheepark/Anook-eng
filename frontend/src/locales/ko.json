@@ -282,7 +282,8 @@
       "rejectCancel": "취소 반려",
       "approveCancel": "취소 승인",
       "forceCancelRequest": "강제 요청 취소",
-      "aiAnalysisView": "AI 분석 결과 보기"
+      "aiAnalysisView": "AI 분석 결과 보기",
+      "aiDetails": "상세 정보"
     },
     "aiRouting": {
       "avgLatency": "평균 응답 속도",

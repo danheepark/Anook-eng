@@ -6,7 +6,7 @@
 }
 
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-h2-bold);
   color: var(--color-gray-900);
 }
 

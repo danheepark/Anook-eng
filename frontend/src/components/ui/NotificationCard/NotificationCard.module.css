@@ -1,7 +1,7 @@
 .card {
   display: flex;
   align-items: flex-start; /* 상단 정렬로 세로 찌그러짐 방지 및 정갈한 레이아웃 */
-  padding: var(--space-16);
+  padding: var(--space-24) var(--space-16) var(--space-16) var(--space-16);
   gap: var(--space-12);
   border: none;
   border-bottom: 1px solid var(--color-gray-200);
@@ -21,22 +21,16 @@
   cursor: pointer;
 }
 
-/* 객실 동그라미 박스 */
-.roomBox {
+.titleRow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: var(--color-gray-100);
-  border-radius: 50%;
-  flex-shrink: 0;
-  align-self: flex-start; /* 세로 늘어남 완전 방지 */
+  gap: 4px;
+  margin: var(--space-4) 0 var(--space-2) 0;
 }
 
 .roomNumber {
-  font: var(--text-body-bold);
-  color: var(--color-gray-800);
+  font: var(--text-h3-bold);
+  color: var(--color-primary);
 }
 
 /* 중단 컨텐츠 영역 */
@@ -44,8 +38,10 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  width: 100%;
   min-width: 0;
   gap: var(--space-2);
+  box-sizing: border-box;
 }
 
 .tagsRow {
@@ -54,32 +50,7 @@
   flex-wrap: wrap;
   gap: var(--space-6);
   line-height: 1;
-}
-
-.tag {
-  font: var(--text-caption-bold);
-  padding: 2px 6px;
-  border-radius: 4px;
-  line-height: 1.2;
-}
-
-.tagCancel {
-  color: var(--color-error);
-  background-color: var(--color-tag-background-red);
-}
-
-.tagEscalation {
-  color: var(--color-warning-dark, #92400E);
-  background-color: var(--color-tag-background-yellow, #FEF3C7);
-}
-
-.tagUrgent {
-  font: var(--text-caption-bold);
-  color: var(--color-white);
-  background-color: var(--color-error);
-  padding: 2px 6px;
-  border-radius: 4px;
-  line-height: 1.2;
+  padding-right: 110px;
 }
 
 .department {
@@ -88,9 +59,9 @@
 }
 
 .title {
-  font: var(--text-body-bold);
+  font: var(--text-h3-bold);
   color: var(--color-gray-900);
-  margin: var(--space-4) 0 var(--space-2) 0;
+  margin: 0;
   word-break: keep-all;
   overflow-wrap: break-word;
   line-height: 1.35;
@@ -118,6 +89,7 @@
 
 .actionButton {
   flex: 1;
+  width: 100%;
   height: 32px;
   font-size: 13px;
   font-weight: 600;
@@ -129,12 +101,15 @@
 
 /* 우측 시간 섹션 */
 .rightSection {
+  position: absolute;
+  top: var(--space-24);
+  right: var(--space-16);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   flex-shrink: 0;
   gap: var(--space-4);
-  padding-top: 2px;
+  height: 0;
 }
 
 .timeText {

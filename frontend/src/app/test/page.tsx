@@ -46,7 +46,7 @@ import RejectEscalationModal from '@/app/frontdesk/requests/_components/RejectEs
 import ApproveCancellationModal from '@/app/frontdesk/requests/_components/ApproveCancellationModal/ApproveCancellationModal';
 import RejectCancellationModal from '@/app/frontdesk/requests/_components/RejectCancellationModal/RejectCancellationModal';
 import RegisterTrainingModal from '@/app/frontdesk/requests/_components/RegisterTrainingModal/RegisterTrainingModal';
-import AssignModal from '@/app/frontdesk/requests/_components/AssignModal/AssignModal';
+
 import ManualAssignModal from '@/app/frontdesk/requests/_components/ManualAssignModal/ManualAssignModal';
 import RequestDetailModal from '@/app/frontdesk/requests/_components/RequestDetailModal/RequestDetailModal';
 import StaffFormModal from '@/app/frontdesk/staff-management/_components/StaffFormModal/StaffFormModal';
@@ -176,7 +176,7 @@ export default function ComponentShowcasePage() {
     'ApproveCancellationModal',
     'RejectCancellationModal',
     'RegisterTrainingModal',
-    'AssignModal',
+
     'ManualAssignModal',
     'RequestDetailModal',
     'StaffFormModal',
@@ -921,18 +921,7 @@ export default function ComponentShowcasePage() {
         requestId={1001}
       />
 
-      {/* AssignModal */}
-      <AssignModal
-        isOpen={activeModal === 'AssignModal'}
-        onClose={closeModal}
-        requestId={1001}
-        requestSummary="수건 2장 추가 요청"
-        roomNo="707"
-        onSuccess={() => {
-          closeModal();
-          showToast('수동 배정이 완료되었습니다.', 'success');
-        }}
-      />
+
 
       {/* ManualAssignModal */}
       <ManualAssignModal
