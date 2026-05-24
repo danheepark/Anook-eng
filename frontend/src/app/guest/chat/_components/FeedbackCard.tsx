@@ -94,7 +94,7 @@ export default function FeedbackCard({
             <div className={styles.content}>
               <div className={styles.summaryRow}>
                 <div className={styles.title}>
-                  {systemContent || t.feedbackCard?.systemCompletedTitle || '이전 상담 및 처리가 모두 완료되었습니다.'}
+                  {systemContent || t.feedbackCard?.systemCompletedTitle || '상담 및 처리가 모두 완료되었습니다.'}
                 </div>
               </div>
             </div>

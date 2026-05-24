@@ -24,7 +24,8 @@
     "loading": "로딩 중...",
     "error": "오류가 발생했습니다",
     "retry": "다시 시도",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "searchPlaceholder": "검색어를 입력하세요..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +62,10 @@
       },
       "charts": {
         "avgResTime": "부서별 평균 처리 시간",
-        "frequentReqs": "최다 요청 항목"
+        "frequentReqs": "최다 요청 항목",
+        "others": "기타",
+        "avgResTimeSub": "평균 해결 시간 (분)",
+        "frequentReqsSub": "가장 빈번한 요청 비율 (%)"
       },
       "summaries": {
         "totalToday": "오늘 총 요청",
@@ -74,7 +78,8 @@
         "FB": "식음료",
         "FACILITY": "시설",
         "CONCIERGE": "컨시어지",
-        "FRONT": "긴급 대응"
+        "FRONT": "긴급 대응",
+        "EMERGENCY": "긴급 대응"
       }
     },
     "taskBoard": {
@@ -182,7 +187,7 @@
     "chatHistory": {
       "title": "채팅 히스토리",
       "emptyMessage": "메시지 없음",
-      "systemCompleted": "이전 상담 및 처리가 모두 완료되었습니다.",
+      "systemCompleted": "상담 및 처리가 모두 완료되었습니다.",
       "systemMessageNote": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
       "roomConversation": "{{room}}호 대화",
       "roomChatRecord": "{{room}}호 채팅 기록",
@@ -269,7 +274,14 @@
         "countSuffix": "개",
         "option": "옵션",
         "none": "없음"
-      }
+      },
+      "manualAssign": "수동 배정",
+      "approveEscalation": "에스컬레이션 승인",
+      "rejectEscalation": "에스컬레이션 반려",
+      "rejectCancel": "취소 반려",
+      "approveCancel": "취소 승인",
+      "forceCancelRequest": "강제 요청 취소",
+      "aiAnalysisView": "AI 분석 결과 보기"
     }
   },
   "guestChat": {
@@ -482,7 +494,7 @@
     "piiGuard": "고객님의 소중한 개인정보 보호를 위해 채팅으로는 민감한 정보를 입력받지 않고 있습니다. 🔒 상세 확인이 필요하신 경우, 객실 내 전화기를 통해 프론트 데스크(내선 0번)로 연락해 주시면 안전하게 도와드리겠습니다. 😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedTitle": "상담 및 처리가 모두 완료되었습니다.",
     "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
     "requestCompleted": "요청 완료",
     "consultationCompleted": "상담이 완료되었습니다",
@@ -495,5 +507,27 @@
       "4": "좋았어요",
       "5": "최고예요!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "상담 완료",
+    "startConsultation": "상담 시작하기",
+    "startEmergency": "긴급 대응 시작",
+    "autoReplyStaffChecked": "프론트 데스크 직원이 메시지를 확인했습니다. 곧 안내 드리겠습니다.",
+    "autoReplyEmergency": "긴급 대응팀이 배정되었습니다. 신속히 조치하겠습니다. 안전한 곳에서 대기해 주시기 바랍니다.",
+    "backToList": "목록으로 가기",
+    "viewRequestDetail": "요청 상세 보기",
+    "loadingMessages": "대화 내역을 불러오는 중...",
+    "noMessages": "이 객실의 대화 내역이 없습니다.",
+    "registerAiKnowledge": "AI 지식 등록",
+    "replyPlaceholder": "고객에게 답변을 입력하세요...",
+    "registerAiKnowledgeTitle": "AI 지식 등록",
+    "registerAiKnowledgeDesc": "이 상담 내용을 AI 지식 데이터로 등록하시겠습니까?<br />등록하면 AI가 동일한 질문에 자동으로 답변할 수 있습니다.",
+    "registerNow": "지금 등록하기",
+    "registerLater": "나중에 하기",
+    "doNotRegister": "등록하지 않기",
+    "dummyGuest": "요청 내용이 없습니다.",
+    "dummyAi": "요청이 접수되었습니다. 프론트데스크 직원이 곧 확인 후 안내해 드리겠습니다.",
+    "inProgressTab": "진행 중",
+    "completedTab": "상담 완료"
   }
 }

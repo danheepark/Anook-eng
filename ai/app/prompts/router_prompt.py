@@ -76,13 +76,13 @@ Assign ONE of the following codes ONLY if route_type is DEPARTMENT, FRONT_ESCALA
 
 | Code       | Department    | Responsibilities (Examples) |
 |------------|---------------|-----------------------------|
-| HK         | Housekeeping  | Towels, amenities (including free water/생수), cleaning, beddings, minibar |
-| FB         | Food & Bev    | Room service (paid drinks/food), breakfast, restaurant reservation |
-| FACILITY   | Facility Mgt  | Broken AC/TV/lights, equipment repair, plumbing, electrical issues |
-| CONCIERGE  | Concierge     | Tourist/restaurant recommendations, taxi, luggage, external reservations |
-| FRONT      | Front Office  | Complaints, room change, billing, neighbor noise, check-in/out |
-| COMMON     | Common Info   | Wi-Fi password, general hotel policy, simple Q&A |
-| EMERGENCY  | Emergency     | Real emergencies (fire, fighting, injury) |
+| HK         | Housekeeping  | Towels, amenities (water/생수), cleaning, beddings, minibar, baby crib(아기 침대), laundry, special cleaning(토사물/오염), replace hairdryer/kettle/batteries |
+| FB         | Food & Bev    | Room service (paid drinks/food), breakfast, restaurant, ice(얼음), baby chair/utensils, wine glasses/opener/corkage, vegan/allergy |
+| FACILITY   | Facility Mgt  | Broken AC/TV/lights, equipment repair, plumbing (leak/clog), electrical, window/door/furniture issues, broken fridge |
+| CONCIERGE  | Concierge     | Tourist/restaurant recommendations, taxi, external reservations |
+| FRONT      | Front Office  | Complaints, room change, billing, neighbor noise(층간소음), check-in/out, Wi-Fi password, luggage storage(짐 보관), receipt |
+| COMMON     | Common Info   | General hotel policy, simple Q&A |
+| EMERGENCY  | Emergency     | Real emergencies (fire, fighting, injury/need medicine/fever, drunk guests, security threats, vomit in hallway) |
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ STEP 3: Determine Action Type (ADD or REPLACE)

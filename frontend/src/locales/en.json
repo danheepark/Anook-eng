@@ -24,7 +24,8 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "retry": "Retry",
-    "logout": "Log out"
+    "logout": "Log out",
+    "searchPlaceholder": "Enter search term..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +62,10 @@
       },
       "charts": {
         "avgResTime": "Average Resolution Time",
-        "frequentReqs": "Most Frequent Requests"
+        "frequentReqs": "Most Frequent Requests",
+        "others": "Others",
+        "avgResTimeSub": "AVERAGE RESOLUTION TIME (MINUTES)",
+        "frequentReqsSub": "MOST FREQUENT REQUESTS (%)"
       },
       "summaries": {
         "totalToday": "Total Requests Today",
@@ -74,7 +78,8 @@
         "FB": "F&B",
         "FACILITY": "Facility",
         "CONCIERGE": "Concierge",
-        "FRONT": "Emergency"
+        "FRONT": "Emergency",
+        "EMERGENCY": "Emergency"
       }
     },
     "taskBoard": {
@@ -181,7 +186,7 @@
     "chatHistory": {
       "title": "Chat History",
       "emptyMessage": "No messages",
-      "systemCompleted": "The previous consultation and processing have been completed.",
+      "systemCompleted": "Consultation and processing have been fully completed.",
       "systemMessageNote": "(※ This is a system-only message for front desk operations, not visible to guests)",
       "roomConversation": "Room {{room}} Conversation",
       "roomChatRecord": "Room {{room}} Chat Record",
@@ -268,7 +273,14 @@
         "countSuffix": " item(s)",
         "option": "Option",
         "none": "None"
-      }
+      },
+      "manualAssign": "Manual Assign",
+      "approveEscalation": "Approve Escalation",
+      "rejectEscalation": "Reject Escalation",
+      "rejectCancel": "Reject Cancel",
+      "approveCancel": "Approve Cancel",
+      "forceCancelRequest": "Force Cancel Request",
+      "aiAnalysisView": "View AI Analysis Result"
     }
   },
   "guestChat": {
@@ -482,7 +494,7 @@
     "piiGuard": "To protect your valuable personal information, we do not accept sensitive details via chat. 🔒 For detailed inquiries, please contact the front desk (extension 0) using your in-room phone for safe assistance. 😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "Previous consultation and processing have been fully completed.",
+    "systemCompletedTitle": "Consultation and processing have been fully completed.",
     "systemCompletedSubtitle": "(※ This is an internal front desk message not visible to guests)",
     "requestCompleted": "Request Completed",
     "consultationCompleted": "Consultation completed",
@@ -495,5 +507,27 @@
       "4": "Good",
       "5": "Excellent!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "Complete Consultation",
+    "startConsultation": "Start Consultation",
+    "startEmergency": "Start Emergency Response",
+    "autoReplyStaffChecked": "The front desk staff has checked your message. We will assist you shortly.",
+    "autoReplyEmergency": "An emergency response team has been dispatched. Please stay in a safe place.",
+    "backToList": "Back to list",
+    "viewRequestDetail": "View request details",
+    "loadingMessages": "Loading messages...",
+    "noMessages": "No chat history for this room.",
+    "registerAiKnowledge": "Register AI Knowledge",
+    "replyPlaceholder": "Enter reply to guest...",
+    "registerAiKnowledgeTitle": "Register AI Knowledge",
+    "registerAiKnowledgeDesc": "Do you want to register this consultation as AI knowledge?<br />The AI will automatically answer similar questions in the future.",
+    "registerNow": "Register Now",
+    "registerLater": "Remind Me Later",
+    "doNotRegister": "Do Not Register",
+    "dummyGuest": "No request details.",
+    "dummyAi": "Your request has been received. The front desk staff will assist you shortly.",
+    "inProgressTab": "In Progress",
+    "completedTab": "Completed"
   }
 }

@@ -24,7 +24,8 @@
     "loading": "読み込み中...",
     "error": "エラーが発生しました",
     "retry": "再試行",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "searchPlaceholder": "検索語を入力してください..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +62,10 @@
       },
       "charts": {
         "avgResTime": "平均解決時間",
-        "frequentReqs": "最も頻繁なリクエスト"
+        "frequentReqs": "最も頻繁なリクエスト",
+        "others": "その他",
+        "avgResTimeSub": "平均解決時間（分）",
+        "frequentReqsSub": "最も頻繁なリクエスト割合 (%)"
       },
       "summaries": {
         "totalToday": "本日の総リクエスト数",
@@ -74,7 +78,8 @@
         "FB": "料飲",
         "FACILITY": "施設",
         "CONCIERGE": "コンシェルジュ",
-        "FRONT": "緊急"
+        "FRONT": "緊急",
+        "EMERGENCY": "緊急対応"
       }
     },
     "taskBoard": {
@@ -181,7 +186,7 @@
     "chatHistory": {
       "title": "チャット履歴",
       "emptyMessage": "メッセージはありません",
-      "systemCompleted": "以前の相談および処理がすべて完了しました。",
+      "systemCompleted": "相談と処理がすべて完了しました。",
       "systemMessageNote": "(※ ゲストには表示されないフロント業務用のシステムメッセージです)",
       "roomConversation": "{{room}}号室の会話",
       "roomChatRecord": "{{room}}号室のチャット記録",
@@ -268,7 +273,14 @@
         "countSuffix": "点",
         "option": "オプション",
         "none": "なし"
-      }
+      },
+      "manualAssign": "手動割り当て",
+      "approveEscalation": "エスカレーション承認",
+      "rejectEscalation": "エスカレーション却下",
+      "rejectCancel": "キャンセル却下",
+      "approveCancel": "キャンセル承認",
+      "forceCancelRequest": "強制キャンセル",
+      "aiAnalysisView": "AI分析結果を見る"
     }
   },
   "guestChat": {
@@ -486,7 +498,7 @@
     "piiGuard": "お客様の大切な個人情報を保護するため、チャットでの機密情報の入力はお断りしております。🔒 詳細な確認が必要な場合は、客室内の電話からフロントデスク（内線0番）までご連絡いただければ、安全に対応させていただきます。😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedTitle": "相談と処理がすべて完了しました。",
     "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
     "requestCompleted": "요청 완료",
     "consultationCompleted": "상담이 완료되었습니다",
@@ -499,5 +511,27 @@
       "4": "좋았어요",
       "5": "최고예요!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "相談完了",
+    "startConsultation": "相談を開始する",
+    "startEmergency": "緊急対応を開始",
+    "autoReplyStaffChecked": "フロントデスクのスタッフがメッセージを確認しました。すぐにご案内いたします。",
+    "autoReplyEmergency": "緊急対応チームが派遣されました。安全な場所でお待ちください。",
+    "backToList": "リストに戻る",
+    "viewRequestDetail": "リクエスト詳細を見る",
+    "loadingMessages": "メッセージを読み込み中...",
+    "noMessages": "この部屋のチャット履歴はありません。",
+    "registerAiKnowledge": "AI知識を登録",
+    "replyPlaceholder": "ゲストへの返信を入力...",
+    "registerAiKnowledgeTitle": "AI知識の登録",
+    "registerAiKnowledgeDesc": "この相談内容をAI知識として登録しますか？<br />登録すると、今後同様の質問にAIが自動的に回答します。",
+    "registerNow": "今すぐ登録",
+    "registerLater": "後で登録",
+    "doNotRegister": "登録しない",
+    "dummyGuest": "リクエスト内容がありません。",
+    "dummyAi": "リクエストを受け付けました。フロントデスクのスタッフがまもなくご案内いたします。",
+    "inProgressTab": "進行中",
+    "completedTab": "相談完了"
   }
 }

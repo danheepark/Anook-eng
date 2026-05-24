@@ -24,7 +24,8 @@
     "loading": "加载中...",
     "error": "发生错误",
     "retry": "重试",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "searchPlaceholder": "请输入搜索词..."
   },
   "frontdeskPage": {
     "sidebar": {
@@ -61,7 +62,10 @@
       },
       "charts": {
         "avgResTime": "平均解决时间",
-        "frequentReqs": "最常见请求"
+        "frequentReqs": "最常见请求",
+        "others": "其他",
+        "avgResTimeSub": "平均解决时间（分钟）",
+        "frequentReqsSub": "最频繁的请求比例 (%)"
       },
       "summaries": {
         "totalToday": "今日总请求",
@@ -74,7 +78,8 @@
         "FB": "餐饮",
         "FACILITY": "设施",
         "CONCIERGE": "礼宾",
-        "FRONT": "紧急情况"
+        "FRONT": "紧急情况",
+        "EMERGENCY": "紧急响应"
       }
     },
     "taskBoard": {
@@ -181,7 +186,7 @@
     "chatHistory": {
       "title": "聊天记录",
       "emptyMessage": "无消息",
-      "systemCompleted": "先前的咨询和处理已全部完成。",
+      "systemCompleted": "咨询和处理已全部完成。",
       "systemMessageNote": "(※ 此消息为前台运营专用系统消息，住客不可见)",
       "roomConversation": "{{room}}房间对话",
       "roomChatRecord": "{{room}}房间聊天记录",
@@ -268,7 +273,14 @@
         "countSuffix": " 件",
         "option": "选项",
         "none": "无"
-      }
+      },
+      "manualAssign": "手动分配",
+      "approveEscalation": "批准升级",
+      "rejectEscalation": "拒绝升级",
+      "rejectCancel": "拒绝取消",
+      "approveCancel": "批准取消",
+      "forceCancelRequest": "强制取消请求",
+      "aiAnalysisView": "查看AI分析结果"
     }
   },
   "guestChat": {
@@ -486,7 +498,7 @@
     "piiGuard": "为了保护您宝贵的个人信息，我们不接受通过聊天提供敏感信息。🔒 如需详细查询，请使用客房内的电话联系前台（分机0），我们将为您提供安全的帮助。😊"
   },
   "feedbackCard": {
-    "systemCompletedTitle": "이전 상담 및 처리가 모두 완료되었습니다.",
+    "systemCompletedTitle": "咨询和处理已全部完成。",
     "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
     "requestCompleted": "요청 완료",
     "consultationCompleted": "상담이 완료되었습니다",
@@ -499,5 +511,27 @@
       "4": "좋았어요",
       "5": "최고예요!"
     }
+  },
+  "chatPanel": {
+    "consultationComplete": "咨询完成",
+    "startConsultation": "开始咨询",
+    "startEmergency": "开始紧急响应",
+    "autoReplyStaffChecked": "前台工作人员已确认您的留言。我们将很快为您提供帮助。",
+    "autoReplyEmergency": "紧急响应团队已被派遣。请在安全的地方等候。",
+    "backToList": "返回列表",
+    "viewRequestDetail": "查看请求详情",
+    "loadingMessages": "正在加载消息...",
+    "noMessages": "此房间没有聊天记录。",
+    "registerAiKnowledge": "注册AI知识",
+    "replyPlaceholder": "输入对客人的回复...",
+    "registerAiKnowledgeTitle": "注册AI知识",
+    "registerAiKnowledgeDesc": "您想将此咨询注册为AI知识吗？<br />注册后，AI将自动回答类似的问题。",
+    "registerNow": "立即注册",
+    "registerLater": "稍后提醒我",
+    "doNotRegister": "不注册",
+    "dummyGuest": "无请求内容。",
+    "dummyAi": "已收到您的请求。前台工作人员将很快为您提供帮助。",
+    "inProgressTab": "进行中",
+    "completedTab": "咨询完成"
   }
 }

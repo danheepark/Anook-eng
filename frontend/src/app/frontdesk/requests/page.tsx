@@ -218,7 +218,12 @@ export default function FrontDeskPage() {
 
   const groupedRooms = React.useMemo(() => {
     const activeList = [...pending, ...inProgress];
-    const completedList = completed;
+    const activeRoomSet = new Set(activeList.map(r => String(r.roomNo)));
+    
+    // 완료된 요청 목록 중에서, 현재 진행/대기 중인 요청이 있는 방(roomNo)은 제외합니다.
+    // 이렇게 하면 '상담 완료' 탭과 '상담 중' 탭에 동일한 방이 동시에 나타나는 것을 방지합니다.
+    const completedList = completed.filter(r => !activeRoomSet.has(String(r.roomNo)));
+    
     const targetList = activeTab === 'active' ? activeList : completedList;
 
     const roomMap = new Map<string, typeof targetList>();
@@ -381,6 +386,7 @@ export default function FrontDeskPage() {
           <div style={{ marginBottom: 'var(--space-16)' }}>
               <SmartSearchBar
                 inputWrapperStyle={{ flex: 1 }}
+                placeholder={t.frontdeskPage.chatHistory.searchPlaceholder}
                 value={roomSearchValue}
                 onChange={(val) => {
                   setRoomSearchValue(val);
@@ -414,8 +420,8 @@ export default function FrontDeskPage() {
           <div style={{ marginBottom: 'var(--space-16)' }}>
             <Tabs
               options={[
-                { label: '진행 중', value: 'active', count: new Set([...pending, ...inProgress].map(r => String(r.roomNo))).size },
-                { label: '상담 완료', value: 'completed', count: new Set(completed.map(r => String(r.roomNo))).size }
+                { label: t.chatPanel?.inProgressTab || '진행 중', value: 'active', count: new Set([...pending, ...inProgress].map(r => String(r.roomNo))).size },
+                { label: t.chatPanel?.completedTab || '상담 완료', value: 'completed', count: new Set(completed.map(r => String(r.roomNo))).size }
               ]}
               activeValue={activeTab}
               onChange={(val) => setActiveTab(val || 'active')}
@@ -435,7 +441,7 @@ export default function FrontDeskPage() {
                 <RequestCard
                   roomNumber={room.roomNo}
                   title={room.summaryText}
-                  description={lastGuestMessages[String(room.roomNo)] || room.rawText || '요청 내용이 없습니다.'}
+                  description={lastGuestMessages[String(room.roomNo)] || room.rawText || t.chatPanel?.dummyGuest || '요청 내용이 없습니다.'}
                   statusText={mapStatusText(room.repStatus)}
                   statusVariant={mapStatusVariant(room.repStatus)}
                   createdAt={room.createdAt}

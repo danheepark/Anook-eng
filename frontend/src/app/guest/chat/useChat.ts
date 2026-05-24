@@ -145,7 +145,7 @@ export function useChat() {
             id: msg.id.toString(),
             variant: msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const,
             content: displayContent,
-            type: 'TEXT' as const,
+            type: msg.senderType === 'STAFF' ? 'FALLBACK' : 'TEXT',
             _ts: new Date(msg.createdAt).getTime(),
           };
         });
