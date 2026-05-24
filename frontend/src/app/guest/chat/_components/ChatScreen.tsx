@@ -242,11 +242,11 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                           }}
                         />
                       </div>
-                      <div style={{ font: 'var(--text-h2-bold)', color: 'var(--color-gray-900)', marginBottom: 'var(--space-8)' }}>
+                      <div style={{ font: 'var(--text-h1-bold)', color: 'var(--color-gray-900)', marginBottom: 'var(--space-8)' }}>
                         {welcomeLine1}
                       </div>
                       {welcomeLine2 && (
-                        <div style={{ font: 'var(--text-body-medium)', color: 'var(--color-gray-500)', whiteSpace: 'pre-wrap' }}>
+                        <div style={{ font: 'var(--text-body-regular)', color: 'var(--color-gray-500)', whiteSpace: 'pre-wrap' }}>
                           {welcomeLine2}
                         </div>
                       )}

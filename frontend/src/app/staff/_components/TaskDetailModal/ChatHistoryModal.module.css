@@ -5,7 +5,35 @@
   max-height: 600px;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+}
 
+.backBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--color-gray-400);
+  transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backBtn:hover {
+  color: var(--color-gray-700);
+}
+
+.title {
+  font: var(--text-h2-bold);
+  color: var(--color-gray-900);
+  margin: 0;
+}
 
 .messageList {
   flex: 1;

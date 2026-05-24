@@ -225,7 +225,7 @@
       "orderDetail": "주문/요청 상세",
       "transferReason": "부서 이관 사유",
       "photo": "첨부 사진",
-      "aiAnalysis": "AI 분석 결과",
+      "aiAnalysis": "AI 분석 상세 내역",
       "confidence": "신뢰도",
       "reasoning": "판단 근거",
       "assignment": "배정 관리",
@@ -282,7 +282,7 @@
       "rejectCancel": "취소 반려",
       "approveCancel": "취소 승인",
       "forceCancelRequest": "강제 요청 취소",
-      "aiAnalysisView": "AI 분석 결과 보기",
+      "aiAnalysisView": "AI 분석 상세 내역",
       "aiDetails": "상세 정보"
     },
     "aiRouting": {

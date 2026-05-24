@@ -149,6 +149,7 @@ export default function AllRequestsPage() {
                     description={req.rawText || ''}
                     status={mapStatus(req.status)}
                     isCancelled={req.status === 'CANCELLED'}
+                    isEscalated={req.status === 'ESCALATED'}
                     cancelRequested={req.cancelRequested}
                     createdAt={req.createdAt}
                     entities={req.entities}
@@ -171,9 +172,10 @@ export default function AllRequestsPage() {
                     department={req.departmentName}
                     priority={mapPriority(req.priority)}
                     title={req.summary}
-                    description={req.assignedStaffName || ''}
+                    description={req.rawText || ''}
                     status={mapStatus(req.status)}
                     isCancelled={req.status === 'CANCELLED'}
+                    isEscalated={req.status === 'ESCALATED'}
                     cancelRequested={req.cancelRequested}
                     createdAt={req.createdAt}
                     updatedAt={req.updatedAt}
@@ -200,6 +202,7 @@ export default function AllRequestsPage() {
                     description={req.rawText || ''}
                     status={mapStatus(req.status)}
                     isCancelled={req.status === 'CANCELLED'}
+                    isEscalated={req.status === 'ESCALATED'}
                     cancelRequested={req.cancelRequested}
                     createdAt={req.createdAt}
                     entities={req.entities}

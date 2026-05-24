@@ -142,26 +142,33 @@ export default function HeaderNotification() {
                     );
                   } else {
                     const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
-                    let transferReason = rawParts.length > 1 ? rawParts.slice(1).join('\n').trim() : '';
+                    const lastTransferPart = rawParts.length > 1 ? rawParts[rawParts.length - 1].trim() : '';
+                    
                     let senderDeptName = req.departmentName;
+                    let transferReason = '';
 
-                    // 발신 부서 파싱: "[HK] 사유" 형태 (미래 데이터용)
-                    const match = transferReason.match(/^\[([A-Z_]+)\]\s*(.*)$/);
+                    // 1. 발신 부서 파싱: "[HK] 사유" 형태
+                    const match = lastTransferPart.match(/^\[([A-Z_]+)\]/);
                     if (match) {
                       const senderCode = match[1];
-                      transferReason = match[2];
                       const deptMap: Record<string, string> = {
                         'HK': '하우스키핑',
+                        'FB': 'F&B',
                         'FNB': 'F&B',
                         'FRONT': '프론트데스크',
-                        'MAINTENANCE': '시설팀',
+                        'FACILITY': '시설 관리 팀',
+                        'MAINTENANCE': '시설 관리 팀',
                         'EMERGENCY': '긴급대응팀',
+                        'CONCIERGE': '컨시어지',
                       };
                       senderDeptName = deptMap[senderCode] || senderCode;
                     } else if (senderDeptName === '프론트데스크') {
-                      // 과거 데이터 호환: 프론트가 수신한 이관 요청의 이전 부서가 유실된 경우 기본값
                       senderDeptName = '하우스키핑';
                     }
+
+                    // 2. 이관 사유 중 상세 설명만 추출: "[HK] 제목\n상세설명" -> "상세설명"
+                    const cleanPart = lastTransferPart.replace(/^\[[A-Z0-9_]+\]\s*[^\n]*/i, '').trim();
+                    transferReason = cleanPart;
                     
                     return (
                     <NotificationCard

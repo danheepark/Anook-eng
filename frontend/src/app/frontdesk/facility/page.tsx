@@ -171,7 +171,7 @@ export default function FacilityPage() {
                     department={req.departmentName}
                     priority={mapPriority(req.priority)}
                     title={req.summary}
-                    description={req.assignedStaffName || ''}
+                    description={req.rawText || ''}
                     status={mapStatus(req.status)}
                     isCancelled={req.status === 'CANCELLED'}
                     cancelRequested={req.cancelRequested}

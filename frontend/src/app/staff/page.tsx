@@ -117,7 +117,7 @@ function DashboardContent() {
           // 화면 타이틀 이름 매핑 (요청하신 정확한 명칭으로 고정)
           const nameMap: Record<string, string> = {
             'HK': '하우스키핑',
-            'FACILITY': 'Facility',
+            'FACILITY': '시설 관리',
             'FB': 'FB',
             'CONCIERGE': '컨시어지'
           };
@@ -186,8 +186,12 @@ function DashboardContent() {
     <div className={styles.container}>
       <div className={styles.headerContainer}>
         <header className={styles.header}>
-          <h1 className={styles.title}>{departmentName} 관리</h1>
-          <p className={styles.subtitle}>{departmentName} 전용 채널</p>
+          <h1 className={styles.title}>
+            {departmentName === '시설 관리' ? '시설 관리 팀' : `${departmentName} 관리`}
+          </h1>
+          <p className={styles.subtitle}>
+            {departmentName === '시설 관리' ? '시설 관리 팀 전용 채널' : `${departmentName} 전용 채널`}
+          </p>
         </header>
 
         <div className={styles.toolbar}>
@@ -270,11 +274,12 @@ function DashboardContent() {
                             department={task.departmentId}
                             priority={mapPriority(task.priority)}
                             title={task.summary}
-                            description=""
+                            description={task.rawText || ''}
                             status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
                             createdAt={task.createdAt}
                             cancelRequested={task.cancelRequested}
                             isCancelled={task.status === 'CANCELLED'}
+                            isEscalated={task.status === 'ESCALATED'}
                             onAccept={col.status === 'TODO' ? (e) => {
                               e.stopPropagation();
                               acceptTask(task.id, task.version);

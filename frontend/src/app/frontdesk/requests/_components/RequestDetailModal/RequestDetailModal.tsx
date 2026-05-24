@@ -14,8 +14,10 @@ import ApproveCancellationModal from '../ApproveCancellationModal/ApproveCancell
 import RejectCancellationModal from '../RejectCancellationModal/RejectCancellationModal';
 import useApproveEscalation from '../ApproveEscalationModal/useApproveEscalation';
 import useRequestDetail from './useRequestDetail';
+import ManualAssignModal from '../ManualAssignModal/ManualAssignModal';
 import { useTranslation } from '@/app/useTranslation';
 import { useTranslationApi } from '@/app/useTranslationApi';
+import { useRouter } from 'next/navigation';
 
 interface Department {
   id: string;
@@ -87,9 +89,9 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
     rendered.push(
       <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
         <span className={styles.label}>{labels.items}</span>
-        <ul style={{ margin: 0, paddingLeft: '20px' }}>
+        <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
           {entities.items.map((it: any, idx: number) => (
-            <li key={idx}>{it.item} - {it.count}{labels.countSuffix}</li>
+            <li key={idx}>• {it.item} - {it.count}{labels.countSuffix}</li>
           ))}
         </ul>
       </div>
@@ -99,9 +101,9 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
     rendered.push(
       <div key="tasks" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
         <span className={styles.label}>{labels.tasks}</span>
-        <ul style={{ margin: 0, paddingLeft: '20px' }}>
+        <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
           {entities.tasks.map((task: string, idx: number) => (
-            <li key={idx}>{task}</li>
+            <li key={idx}>• {task}</li>
           ))}
         </ul>
       </div>
@@ -111,10 +113,10 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
     rendered.push(
       <div key="menu_items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
         <span className={styles.label}>{labels.menu_items}</span>
-        <ul style={{ margin: 0, paddingLeft: '20px' }}>
+        <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
           {entities.menu_items.map((mi: any, idx: number) => (
             <li key={idx}>
-              {mi.name} - {mi.quantity}{labels.countSuffix}
+              • {mi.name} - {mi.quantity}{labels.countSuffix}
               {mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'None' && ` (${labels.option}: ${mi.selected_option})`}
             </li>
           ))}
@@ -162,6 +164,7 @@ export default function RequestDetailModal({
 }: RequestDetailModalProps) {
   const { approveEscalation } = useApproveEscalation();
   const { detail, fetchDetail, changePriority, changeDepartment, requestEscalation, cancelRequest, loading } = useRequestDetail();
+  const router = useRouter();
 
   // Fallback mock detail for /test page or API failure
   const activeDetail = detail || (isOpen && !loading ? {
@@ -189,6 +192,7 @@ export default function RequestDetailModal({
   const [departments, setDepartments] = useState<Department[]>([]);
   const [saving, setSaving] = useState(false);
   const [confirmType, setConfirmType] = useState<'none' | 'cancel' | 'approve' | 'reject' | 'cancelApprove' | 'cancelReject'>('none');
+  const [showManualAssign, setShowManualAssign] = useState(false);
   const showToast = useUiStore((s) => s.showToast);
 
   const { t, language } = useTranslation();
@@ -262,6 +266,29 @@ export default function RequestDetailModal({
     }
   };
 
+  const handleManualSave = async (newDeptId: string, newPriority: string, newSummary?: string, newDescription?: string) => {
+    setSaving(true);
+    let changed = false;
+
+    if (newPriority !== activeDetail.priority) {
+      const ok = await changePriority(activeDetail.id, newPriority);
+      if (ok) changed = true;
+    }
+
+    // 항상 배정/저장 API를 호출하여 태스크 티켓이 발행되도록 보장
+    if (newDeptId) {
+      const ok = await changeDepartment(activeDetail.id, newDeptId, newSummary, newDescription);
+      if (ok) changed = true;
+    }
+
+    setSaving(false);
+    if (changed) {
+      onUpdate();
+      setShowManualAssign(false);
+      onClose();
+    }
+  };
+
   const handleCancel = async () => {
     setConfirmType('none');
     setSaving(true);
@@ -307,8 +334,9 @@ export default function RequestDetailModal({
   };
 
   return (
-    <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="lg" onClose={onClose}>
+    <>
+      <ModalOverlay isOpen={isOpen && !showManualAssign} onClose={onClose}>
+        <ModalCard size="md" overflowVisible={true} onClose={onClose}>
         {/* 헤더 */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
@@ -332,14 +360,14 @@ export default function RequestDetailModal({
             </div>
 
             <div className={styles.gridItem}>
-              <span className={styles.label}>{t.frontdeskPage.requestDetailModal.createdAt}</span>
-              <span className={styles.value}>{formatDateTime(activeDetail.createdAt)}</span>
-            </div>
-            <div className={styles.gridItem}>
               <span className={styles.label}>{t.frontdeskPage.requestDetailModal.summary}</span>
               <span className={styles.value}>
                 {isTranslating ? t.common.loading : translatedSummary || activeDetail.summary}
               </span>
+            </div>
+            <div className={styles.gridItem}>
+              <span className={styles.label}>{t.frontdeskPage.requestDetailModal.createdAt}</span>
+              <span className={styles.value}>{formatDateTime(activeDetail.createdAt)}</span>
             </div>
             <div className={styles.gridItem}>
               <span className={styles.label}>{t.frontdeskPage.requestDetailModal.updatedAt}</span>
@@ -363,10 +391,6 @@ export default function RequestDetailModal({
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>{t.frontdeskPage.requestDetailModal.aiAnalysis}</h3>
             <div className={styles.aiInfo}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                <span className={styles.label}>{t.frontdeskPage.requestDetailModal.confidence}</span>
-                <span className={styles.value}>{Math.round(activeDetail.confidence * 100)}%</span>
-              </div>
               {(() => {
                 if (!activeDetail.entities) return null;
                 // 직원에게 보여줄 필요 없는 키 제외하고 렌더링할 게 있는지 확인
@@ -385,11 +409,15 @@ export default function RequestDetailModal({
                   .filter(line => !line.toLowerCase().includes('confidence:'))
                   .join('\n')
                   .trim();
-                if (!cleanedReasoning) return null;
+                const formattedConfidence = activeDetail.confidence !== null && activeDetail.confidence !== undefined
+                  ? `${Math.round(activeDetail.confidence * 100)}%`
+                  : '100%';
+                const label = language === 'en' ? 'confidence' : '신뢰도';
+                const displayReasoning = `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`;
                 return (
-                  <div className={styles.contentBlock} style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-gray-200)' }}>
+                  <div className={styles.contentBlock} style={{ marginTop: '12px' }}>
                     <span className={styles.label}>{t.frontdeskPage.requestDetailModal.reasoning}</span>
-                    <p className={styles.rawText}>{cleanedReasoning}</p>
+                    <p className={styles.rawText}>{displayReasoning}</p>
                   </div>
                 );
               })()}
@@ -397,116 +425,119 @@ export default function RequestDetailModal({
           </div>
         )}
 
-        {/* 배정 관리 */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>{t.frontdeskPage.requestDetailModal.assignment}</h3>
-          <div className={styles.editRow}>
-            <div className={styles.editField}>
-              <Dropdown
-                label={t.frontdeskPage.requestDetailModal.assignDept}
-                placeholder={t.frontdeskPage.requestDetailModal.selectDept || "부서를 선택하세요"}
-                options={departments.map(d => ({ 
-                  value: d.id, 
-                  label: t.ticketUI.department[d.id as keyof typeof t.ticketUI.department] || d.name 
-                }))}
-                value={editDeptId}
-                onChange={(val) => setEditDeptId(val)}
-              />
-            </div>
-          </div>
-        </div>
 
         {/* 하단 버튼 */}
         <div className={styles.footer}>
-          {activeDetail.status === 'ESCALATED' ? (
-            <Button variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-              {t.frontdeskPage.requestDetailModal.buttons.rejectEscalation}
-            </Button>
-          ) : activeDetail.cancelRequested ? (
+          {activeDetail.status === 'ESCALATED' && (
             <>
-              <Button variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+              <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+                {t.frontdeskPage.requestDetailModal.buttons.rejectEscalation}
+              </Button>
+              <Button className={styles.footerButton} variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
+                {t.frontdeskPage.requestDetailModal.buttons.approveEscalation}
+              </Button>
+            </>
+          )}
+
+          {activeDetail.cancelRequested && (
+            <>
+              <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
                 {t.frontdeskPage.requestDetailModal.buttons.rejectCancel}
               </Button>
-              <Button variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
+              <Button className={styles.footerButton} variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
                 {t.frontdeskPage.requestDetailModal.buttons.approveCancel}
               </Button>
             </>
-          ) : activeDetail.status !== 'COMPLETED' && activeDetail.status !== 'CANCELLED' ? (
-            <Button variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
-              {t.frontdeskPage.requestDetailModal.buttons.forceCancel}
-            </Button>
-          ) : <div />}
+          )}
 
-          <div className={styles.footerRight}>
-            {activeDetail.status === 'ESCALATED' ? (
-              <Button variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
-                {t.frontdeskPage.requestDetailModal.buttons.approveEscalation}
+          {!activeDetail.cancelRequested && activeDetail.status !== 'ESCALATED' && activeDetail.status !== 'COMPLETED' && activeDetail.status !== 'CANCELLED' && (
+            <>
+              <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
+                {t.frontdeskPage.requestDetailModal.buttons.forceCancel}
               </Button>
-            ) : hasChanges ? (
-              <Button variant="primary" onClick={handleSave} disabled={saving || loading}>
-                {saving ? t.frontdeskPage.requestDetailModal.buttons.saving : t.frontdeskPage.requestDetailModal.buttons.save}
+              <Button className={styles.footerButton} variant="primary" onClick={() => setShowManualAssign(true)}>
+                {language === 'en' ? 'Task Assignment' : '업무 배정'}
               </Button>
-            ) : null}
-          </div>
+              {hasChanges && (
+                <Button className={styles.footerButton} variant="primary" onClick={handleSave} disabled={saving || loading}>
+                  {saving ? t.frontdeskPage.requestDetailModal.buttons.saving : t.frontdeskPage.requestDetailModal.buttons.save}
+                </Button>
+              )}
+            </>
+          )}
         </div>
       </ModalCard>
-
-      <ConfirmModal
-        isOpen={confirmType === 'cancel'}
-        onClose={() => setConfirmType('none')}
-        onConfirm={handleCancel}
-        title="요청 취소"
-        subtitle="정말 요청을 취소하시겠습니까?"
-        status="danger"
-        cancelText="아니오"
-        confirmText="예, 취소합니다"
-      />
-
-      <ConfirmModal
-        isOpen={confirmType === 'approve'}
-        onClose={() => setConfirmType('none')}
-        onConfirm={handleApproveEscalation}
-        title="에스컬레이션 승인"
-        subtitle={`선택한 부서(${departments.find(d => d.id === editDeptId)?.name || '...'})로 재배정하며 승인합니다.`}
-        cancelText="아니오"
-        confirmText="승인하기"
-      />
-
-      {confirmType === 'reject' && activeDetail && (
-        <RejectEscalationModal
-          isOpen={true}
-          onClose={() => setConfirmType('none')}
-          requestId={activeDetail.id}
-          onSuccess={() => {
-            onUpdate();
-            onClose();
-          }}
-        />
-      )}
-
-      {confirmType === 'cancelApprove' && activeDetail && (
-        <ApproveCancellationModal
-          isOpen={true}
-          onClose={() => setConfirmType('none')}
-          requestId={activeDetail.id}
-          onSuccess={() => {
-            onUpdate();
-            onClose();
-          }}
-        />
-      )}
-
-      {confirmType === 'cancelReject' && activeDetail && (
-        <RejectCancellationModal
-          isOpen={true}
-          onClose={() => setConfirmType('none')}
-          requestId={activeDetail.id}
-          onSuccess={() => {
-            onUpdate();
-            onClose();
-          }}
-        />
-      )}
     </ModalOverlay>
-  );
+
+    <ConfirmModal
+      isOpen={confirmType === 'cancel'}
+      onClose={() => setConfirmType('none')}
+      onConfirm={handleCancel}
+      title="요청 취소"
+      subtitle="정말 요청을 취소하시겠습니까?"
+      status="danger"
+      cancelText="아니오"
+      confirmText="예, 취소합니다"
+    />
+
+    <ConfirmModal
+      isOpen={confirmType === 'approve'}
+      onClose={() => setConfirmType('none')}
+      onConfirm={handleApproveEscalation}
+      title="에스컬레이션 승인"
+      subtitle={`선택한 부서(${departments.find(d => d.id === editDeptId)?.name || '...'})로 재배정하며 승인합니다.`}
+      cancelText="아니오"
+      confirmText="승인하기"
+    />
+
+    {confirmType === 'reject' && activeDetail && (
+      <RejectEscalationModal
+        isOpen={true}
+        onClose={() => setConfirmType('none')}
+        requestId={activeDetail.id}
+        onSuccess={() => {
+          onUpdate();
+          onClose();
+        }}
+      />
+    )}
+
+    {confirmType === 'cancelApprove' && activeDetail && (
+      <ApproveCancellationModal
+        isOpen={true}
+        onClose={() => setConfirmType('none')}
+        requestId={activeDetail.id}
+        onSuccess={() => {
+          onUpdate();
+          onClose();
+        }}
+      />
+    )}
+
+    {confirmType === 'cancelReject' && activeDetail && (
+      <RejectCancellationModal
+        isOpen={true}
+        onClose={() => setConfirmType('none')}
+        requestId={activeDetail.id}
+        onSuccess={() => {
+          onUpdate();
+          onClose();
+        }}
+      />
+    )}
+    {activeDetail && (
+      <ManualAssignModal
+        isOpen={showManualAssign}
+        onClose={() => setShowManualAssign(false)}
+        detail={{
+          ...activeDetail,
+          description: ''
+        }}
+        departments={departments}
+        onSave={handleManualSave}
+        saving={saving}
+      />
+    )}
+  </>
+);
 }

@@ -2,12 +2,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: var(--space-16);
 }
 
 .title {
   font: var(--text-h2-bold);
   color: var(--color-gray-900);
-  margin: 0;
 }
 
 .closeButton {
@@ -15,48 +15,65 @@
   border: none;
   cursor: pointer;
   padding: var(--space-4);
-  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s;
 }
 
 .closeButton:hover {
-  background: var(--color-gray-100);
+  background-color: var(--color-gray-100);
 }
 
-.form {
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  margin-bottom: var(--space-16);
+}
+
+.previewSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.previewCardWrapper {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-gray-50);
+  pointer-events: none;
+}
+
+.formSection {
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
 }
 
-.field {
+.editField {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
-  flex: 1;
+  gap: var(--space-8);
+}
+
+.editFieldHorizontal {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .label {
   font: var(--text-caption-medium);
-  color: var(--color-gray-700);
+  color: var(--color-gray-500);
 }
 
-.required {
-  color: var(--color-error);
-}
-
-
-
-.row {
-  display: flex;
-  gap: var(--space-16);
-}
-
-.buttonGroup {
+.footer {
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-12);
+  gap: var(--space-8);
+  padding-top: var(--space-8);
 }

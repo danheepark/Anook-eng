@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
 import ChatBubble from '@/app/guest/chat/_components/ChatBubble';
+import { ArrowBackIcon } from '@/components/icons';
 import styles from './ChatHistoryModal.module.css';
 
 interface ChatHistoryMessage {
@@ -57,9 +58,15 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHi
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="md" onClose={onClose} title={`${roomNumber}호 대화 내역`}>
+      <ModalCard size="md" onClose={onClose}>
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={onClose} aria-label="뒤로">
+            <ArrowBackIcon width={18} height={18} color="currentColor" />
+          </button>
+          <h2 className={styles.title}>{roomNumber}호 대화 내역</h2>
+        </div>
+        
         <div className={styles.container}>
-
           <div className={styles.messageList} ref={listRef}>
             {loading && (
               <div className={styles.emptyState}>불러오는 중...</div>

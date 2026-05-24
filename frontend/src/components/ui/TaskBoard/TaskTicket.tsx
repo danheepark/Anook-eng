@@ -20,6 +20,7 @@ export interface TaskTicketProps {
   onAccept?: (e: React.MouseEvent) => void;
   onComplete?: (e: React.MouseEvent) => void;
   isCancelled?: boolean;
+  isEscalated?: boolean;
   entities?: {
     is_contactless?: boolean;
     target_time?: string;
@@ -72,6 +73,7 @@ export default function TaskTicket({
   onAccept,
   onComplete,
   isCancelled = false,
+  isEscalated = false,
   entities,
   highlightSearch,
   isActiveMatch = false
@@ -170,8 +172,6 @@ export default function TaskTicket({
 
   const rawEntityDetails = React.useMemo(() => {
     if (!entities) return null;
-    const lowerDept = department?.toLowerCase();
-    if (lowerDept === 'hk' || lowerDept === 'facility' || lowerDept === 'emergency' || lowerDept === 'front') return null;
 
     const l = t.ticketUI?.entityLabels || {};
     const parts: string[] = [];
@@ -238,7 +238,7 @@ export default function TaskTicket({
   );
   const entityDetails = language !== 'ko' && translatedDetails ? translatedDetails : rawEntityDetails;
 
-  const isManuallyReassigned = entities?.intent === 'ESCALATION' && deptKey !== 'front' && deptKey !== 'emergency';
+  const isManuallyReassigned = (entities?.intent === 'ESCALATION' || (description && description.includes('|||TRANSFER_REASON|||'))) && deptKey !== 'front' && deptKey !== 'emergency';
 
   const fallbackDescriptionRaw = React.useMemo(() => {
     let desc = description;
@@ -293,10 +293,8 @@ export default function TaskTicket({
 
   let displayTitle = getFixedTitle();
   
-  // '요청'과 '주문' 단어가 타이틀 끝에 있는 경우 제거 (예약은 유지)
-  displayTitle = displayTitle
-    .replace(/(?:\s*요청|\s*주문|\s*[Rr]equest|\s*[Oo]rder|\s*リクエスト|\s*依頼|\s*注文|\s*请求|\s*订单)$/, '')
-    .trim();
+  // '요청'과 '주문' 단어가 타이틀 끝에 있는 경우 제거 (예약은 유지) - 비활성화됨
+  displayTitle = displayTitle.trim();
 
   let timeDisplay = '';
   if (status === 'DONE') {
@@ -320,11 +318,45 @@ export default function TaskTicket({
 
 
 
+  const manualDesc = React.useMemo(() => {
+    if (!description) return '';
+    if (description.includes('|||TRANSFER_REASON|||')) {
+      const parts = description.split('|||TRANSFER_REASON|||');
+      const transferPart = parts[parts.length - 1].trim();
+      const cleanPart = transferPart.replace(/^\[[A-Z0-9_]+\]\s*[^\n]*/i, '').trim();
+      return cleanPart;
+    }
+    let desc = description;
+    if (desc.includes('[주문 상세]')) {
+      desc = desc.split('[주문 상세]')[0].trim();
+    }
+    const lines = desc.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length > 1) {
+      return lines[lines.length - 1];
+    }
+    return '';
+  }, [description]);
+
   let displayDescription = fallbackDescription;
-  if (status !== 'IN_PROGRESS' && entityDetails) {
-    // Override rawText with entity details for TODO/DONE
-    displayDescription = entityDetails;
+  if (entityDetails) {
+    if (manualDesc && manualDesc !== entityDetails) {
+      const cleanManualDesc = manualDesc
+        .split('\n')
+        .filter(line => !line.trim().startsWith('•') && !line.trim().startsWith('-'))
+        .join('\n')
+        .trim();
+      if (cleanManualDesc) {
+        displayDescription = `${entityDetails}\n${cleanManualDesc}`;
+      } else {
+        displayDescription = entityDetails;
+      }
+    } else {
+      displayDescription = entityDetails;
+    }
+  } else if (manualDesc) {
+    displayDescription = manualDesc;
   }
+
   
   if (language === 'en') {
     if (displayDescription === '프론트 데스크') displayDescription = 'Frontdesk';
@@ -334,7 +366,7 @@ export default function TaskTicket({
   return (
     <div 
       id={ticketId ? `ticket-${ticketId}` : undefined}
-      className={`${styles.taskTicket} ${styles[deptKey]} ${isCancelled ? styles.isCancelled : ''} ${cancelRequested ? styles.cancelPendingCard : ''}`}
+      className={`${styles.taskTicket} ${styles[deptKey]} ${(isCancelled || isEscalated) ? styles.isCancelled : ''} ${cancelRequested ? styles.cancelPendingCard : ''}`}
       style={{
         boxShadow: isActiveMatch ? '0 0 0 2px var(--color-primary-400), 0 4px 16px rgba(0, 0, 0, 0.12)' : undefined,
         transition: 'all 0.2s ease-in-out'
@@ -361,6 +393,11 @@ export default function TaskTicket({
           {isCancelled && (
             <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
               {t.ticketUI.badge.cancelled}
+            </span>
+          )}
+          {isEscalated && (
+            <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
+              {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
             </span>
           )}
           {cancelRequested && (
