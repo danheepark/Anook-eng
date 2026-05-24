@@ -231,7 +231,7 @@ public class SendMessageService implements SendMessageUseCase {
                                         "가운", "robe", "ガウン", "浴衣",
                                         "이불", "blanket", "布団", "被子",
                                         "베개", "pillow", "枕", "枕头",
-                                        "슬리퍼", "slipper", "スリッパ", "拖鞋");
+                                        "슬리퍼", "slipper", "スリッパ", "拖鞋", "꽃", "flower", "꽃배달", "장미", "rose", "장미꽃");
                                 String lowerExisting = existingSummary.toLowerCase();
                                 String lowerNew = newSummary.toLowerCase();
                                 for (String kw : coreKeywords) {
@@ -379,8 +379,17 @@ public class SendMessageService implements SendMessageUseCase {
                     // 수락 대기 중인 기존 요청이 있는 상황에서 AI가 주문을 확정(Finalize)한 경우,
                     // 새로운 요청을 추가로 발행하는 대신 기존 요청을 수락(Confirm) 처리합니다.
                     String domain = analysis.domainCode();
-                    boolean isFinalized = analysis.guestReply() != null &&
-                            analysis.guestReply().contains("[FORWARD_" + domain + "]");
+                    // [안전 장치] 고객 원문이 짧은 긍정 응답("네", "응" 등)이고 동일 도메인의 CREATED(확인 대기 중) 요청이 있는 경우,
+                    // LLM의 [FORWARD_...] 응답 누락 여부와 무관하게 수락 확정으로 처리하여 중복 생성 방어
+                    boolean isShortConfirmation = content != null && content.trim().toLowerCase()
+                            .matches("^(네|응|어|예|ㅇㅇ|ok|okay|yes|yep|y|확인|진행|진행해|진행해줘|부탁해|알겠어|좋아|맞아|확인했습니다|수락|승인|sure|agree|confirm|はい|ええ|そうだ|お願い|お願いします|確認|是的|对|好|好的|没문제|是|确认|동의)$".replace("문제", "문제"));
+                    
+                    boolean hasPendingCreatedRequest = activeRequests.stream()
+                            .anyMatch(req -> "CREATED".equals(req.get("status")) && domain.equals(req.get("department_id")));
+
+                    boolean isFinalized = (analysis.guestReply() != null &&
+                            analysis.guestReply().contains("[FORWARD_" + domain + "]"))
+                            || (isShortConfirmation && hasPendingCreatedRequest);
 
                     // If the user explicitly confirmed a NEW duplicate request, skip auto-confirm.
                     // For REPLACE requests, we can auto-confirm the pending replacement request
@@ -398,10 +407,7 @@ public class SendMessageService implements SendMessageUseCase {
 
                         // 고객의 원문이 단순 수락/확인 응답인지 판별 (다국어 임시 지원)
                         // 한국어, 영어, 일본어, 중국어의 대표적인 수락/긍정 단어 포함
-                        boolean isShortConfirmation = content != null && content.trim().toLowerCase()
-                                .matches(
-                                        "^(네|응|어|예|ㅇㅇ|ok|okay|yes|yep|y|확인|진행|진행해|진행해줘|부탁해|알겠어|좋아|맞아|확인했습니다|수락|승인|sure|agree|confirm|はい|ええ|そうだ|お願い|お願いします|確認|是的|对|好|好的|没问题|是|确认|同意)$");
-
+                        // isShortConfirmation is already declared above
                         if (pendingRequest != null) {
                             // 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
                             // 다른 아이템의 신규 주문(수건 vs 물)이면 auto-confirm 하지 않고 새 요청 생성
@@ -428,7 +434,7 @@ public class SendMessageService implements SendMessageUseCase {
                                         "가운", "robe", "ガウン", "浴衣",
                                         "이불", "blanket", "布団", "被子",
                                         "베개", "pillow", "枕", "枕头",
-                                        "슬리퍼", "slipper", "スリッパ", "拖鞋");
+                                        "슬리퍼", "slipper", "スリッパ", "拖鞋", "꽃", "flower", "꽃배달", "장미", "rose", "장미꽃");
                                 String lowerExisting = existingSummary.toLowerCase();
                                 String lowerNew = newSummary.toLowerCase();
                                 for (String kw : coreKeywords) {
