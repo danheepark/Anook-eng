@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import Tabs from '@/components/ui/Tab/Tabs';
 import TaskColumn from '@/components/ui/TaskBoard/TaskColumn';
 import TaskTicket from '@/components/ui/TaskBoard/TaskTicket';
-import InputField from '@/components/ui/Inputfield/InputField';
+import { MoreIcon } from '@/components/icons';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import TaskDetailModal from './_components/TaskDetailModal/TaskDetailModal';
 import { useTasks, StaffTask } from './useTasks';
 import BoardSkeleton from './_components/BoardSkeleton/BoardSkeleton';
@@ -90,7 +91,7 @@ function DashboardContent() {
   const { tasks, loading, error, acceptTask, completeTask, transferTask, approveCancellation, rejectCancellation } = useTasks(view === 'my' ? 'my' : 'dept');
 
   // 필터 및 모달 상태 관리
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchValue, setSearchValue] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [selectedTask, setSelectedTask] = useState<StaffTask | null>(null);
   const [activeTab, setActiveTab] = useState<'TODO' | 'IN_PROGRESS' | 'DONE'>('TODO');
@@ -130,14 +131,14 @@ function DashboardContent() {
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
       if (priorityFilter !== 'ALL' && task.priority !== priorityFilter) return false;
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+      if (searchValue) {
+        const query = searchValue.toLowerCase();
         return task.roomNumber.toString().includes(query) ||
           task.summary.toLowerCase().includes(query);
       }
       return true;
     });
-  }, [tasks, searchQuery, priorityFilter]);
+  }, [tasks, searchValue, priorityFilter]);
 
   const boardData = useMemo(() => {
     const sortByCancelRequested = (taskList: typeof filteredTasks) => {
@@ -173,14 +174,14 @@ function DashboardContent() {
         </header>
 
         <div className={styles.toolbar}>
-          <div className={styles.searchBox}>
-            <InputField
-              variant="search"
-              placeholder="객실번호 또는 내용 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <div className={styles.searchBarContainer}>
+          <SmartSearchBar
+            inputWrapperStyle={{ flex: 1 }}
+            placeholder="직원 이름, 부서, 직급 검색..."
+            value={searchValue}
+            onChange={(val) => setSearchValue(val)}
+          />
+        </div>
         </div>
       </div>
 

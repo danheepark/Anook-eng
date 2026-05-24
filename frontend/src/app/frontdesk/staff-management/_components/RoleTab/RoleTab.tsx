@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import Button from '@/components/ui/Button/Button';
-import InputField from '@/components/ui/Inputfield/InputField';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import { useRoleManagement, Role } from './useRoleManagement';
 import { useDepartmentManagement } from '../Department/useDepartmentManagement';
 import RoleFormModal from '../RoleFormModal/RoleFormModal';
@@ -78,12 +78,12 @@ export default function RoleTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ width: '300px' }}>
-          <InputField
-            variant="search"
-            placeholder="역할명 검색..."
+        <div style={{ width: '320px' }}>
+          <SmartSearchBar
+            inputWrapperStyle={{ flex: 1 }}
+            placeholder="직급, 권한 이름 등 검색..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(val) => setSearchTerm(val)}
           />
         </div>
         <Button variant="primary" onClick={handleAddClick}>

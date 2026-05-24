@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import Button from '@/components/ui/Button/Button';
-import InputField from '@/components/ui/Inputfield/InputField';
+import { useTranslation } from '@/app/useTranslation';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import { useStaffManagement, Staff } from './useStaffManagement';
 import { useRoleManagement } from '../RoleTab/useRoleManagement';
@@ -95,12 +96,12 @@ export default function StaffTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ width: '300px' }}>
-          <InputField
-            variant="search"
-            placeholder="직원 이름 검색..."
+        <div style={{ width: '320px' }}>
+          <SmartSearchBar
+            inputWrapperStyle={{ flex: 1 }}
+            placeholder="직원 이름, 사번 등 검색..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(val) => setSearchTerm(val)}
           />
         </div>
         <Button variant="primary" onClick={handleAddClick}>

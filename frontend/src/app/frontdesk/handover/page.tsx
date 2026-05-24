@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import InputField from '@/components/ui/Inputfield/InputField';
 import { HandoverRecord } from '@/components/ui/HandoverRecord';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useHandover } from './useHandover';
@@ -102,12 +102,14 @@ export default function HandoverPage() {
           </div>
         </div>
         <div className={styles.searchBarRow}>
-          <InputField 
-            variant="search" 
-            placeholder={t.frontdeskPage.taskBoard.searchPlaceholder} 
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
+          <div style={{ flex: 1 }}>
+            <SmartSearchBar
+              inputWrapperStyle={{ flex: 1 }}
+              placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}
+              value={searchValue}
+              onChange={(val) => setSearchValue(val)}
+            />
+          </div>
           <FilterButton
             filterOptions={[
               { value: 'ALL', label: '전체 상태' },

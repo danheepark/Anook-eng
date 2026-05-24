@@ -11,8 +11,6 @@ export interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElem
   error?: string;
   /** 화면 밀림(Layout Shift) 방지를 위해 하단에 빈 20px 영역을 항상 확보할지 여부 */
   reserveError?: boolean;
-  /** 일반적인 입력창(default)인지, 검색창(search)인지 결정 */
-  variant?: 'default' | 'search';
   /** X 아이콘을 누를 때 추가로 호출할 콜백 */
   onClear?: () => void;
   /** textarea 렌더링 여부 */
@@ -25,7 +23,6 @@ export default function InputField({
   label,
   error,
   reserveError = false,
-  variant = 'default',
   disabled,
   className = '',
   onClear,
@@ -76,36 +73,7 @@ export default function InputField({
     }
   };
 
-  // 1. Search Bar 렌더링
-  if (variant === 'search') {
-    return (
-      <div className={`${styles.searchContainer} ${className}`.trim()}>
-        <div className={styles.searchIconWrapper}>
-          <SearchIcon width={18} height={18} />
-        </div>
-        <input 
-          ref={inputRef}
-          className={styles.inputElement} 
-          disabled={disabled}
-          placeholder={props.placeholder || '검색어를 입력하세요'}
-          {...props}
-          onChange={handleChange}
-        />
-        {hasContent && !disabled && (
-          <button 
-            type="button" 
-            className={styles.clearButton} 
-            onClick={handleClear}
-            aria-label="Clear search"
-          >
-            <CancelIcon width={16} height={16} />
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  // 2. Default Input Field 렌더링
+  // Default Input Field 렌더링
   const isError = !!error;
   
   const containerClasses = [
