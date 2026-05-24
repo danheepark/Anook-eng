@@ -544,8 +544,6 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                       variant={msg.variant}
                       bubbleStyle={bubbleStyle}
                       isFallback={isManualStaffMsg}
-                      highlightSearch={internalSearch}
-                      isActiveMatch={isTargetMatch}
                     >
                       {renderHighlightedText(msg.content, internalSearch, isTargetMatch)}
                     </ChatBubble>
