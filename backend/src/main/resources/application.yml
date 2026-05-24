@@ -8,6 +8,7 @@ spring:
   sql:
     init:
       mode: always                # schema.sql, data.sql 항상 실행
+      continue-on-error: true     # 이미 존재하는 제약/인덱스 등 idempotent 에러 무시 (PostgreSQL DO $$ 블록 파싱 한계 우회)
 
   data:
     redis:
