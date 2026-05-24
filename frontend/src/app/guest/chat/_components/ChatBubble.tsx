@@ -9,9 +9,11 @@ export interface ChatBubbleProps {
   imageUrl?: string;
   children: React.ReactNode;
   animate?: boolean;
+  highlightSearch?: string;
+  isActiveMatch?: boolean;
 }
 
-export default function ChatBubble({ variant, bubbleStyle, isFallback, imageUrl, children }: ChatBubbleProps) {
+export default function ChatBubble({ variant, bubbleStyle, isFallback, imageUrl, children, highlightSearch, isActiveMatch }: ChatBubbleProps) {
   const styleClass = bubbleStyle || variant;
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
@@ -26,7 +28,14 @@ export default function ChatBubble({ variant, bubbleStyle, isFallback, imageUrl,
     
     return text.split('\n').map((line, i, arr) => (
       <React.Fragment key={i}>
-        {line}
+        {highlightSearch ? (
+          <span dangerouslySetInnerHTML={{
+            __html: line.replace(
+              new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+              '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
+            )
+          }} />
+        ) : line}
         {i < arr.length - 1 && <br />}
       </React.Fragment>
     ));
@@ -56,7 +65,7 @@ export default function ChatBubble({ variant, bubbleStyle, isFallback, imageUrl,
                 <img src="/moon_avatar.png" alt="Anook AI" />
               </div>
             )}
-            <div className={`${styles.bubble} ${styles[styleClass]} ${isFallback ? styles.fallback : ''}`}>
+            <div className={`${styles.bubble} ${styles[styleClass]} ${isFallback ? styles.fallback : ''} ${isActiveMatch ? styles.activeMatch : ''}`}>
               {renderContent()}
             </div>
           </div>
@@ -69,7 +78,7 @@ export default function ChatBubble({ variant, bubbleStyle, isFallback, imageUrl,
             )}
             {renderImage()}
             {(typeof children === 'string' && children.trim()) || typeof children !== 'string' ? (
-              <div className={`${styles.bubble} ${styles[styleClass]} ${isFallback ? styles.fallback : ''}`}>
+              <div className={`${styles.bubble} ${styles[styleClass]} ${isFallback ? styles.fallback : ''} ${isActiveMatch ? styles.activeMatch : ''}`}>
                 {renderContent()}
               </div>
             ) : null}

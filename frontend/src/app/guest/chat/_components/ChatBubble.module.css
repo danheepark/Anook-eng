@@ -216,3 +216,7 @@
     opacity: 1;
   }
 }
+.activeMatch {
+  border: 2px solid var(--color-brand-500);
+  box-shadow: 0 0 0 4px var(--color-brand-100);
+}
