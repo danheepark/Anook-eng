@@ -282,6 +282,26 @@
       "approveCancel": "취소 승인",
       "forceCancelRequest": "강제 요청 취소",
       "aiAnalysisView": "AI 분석 결과 보기"
+    },
+    "aiRouting": {
+      "avgLatency": "평균 응답 속도",
+      "accumulatedTokens": "누적 소모 토큰",
+      "routingSuccessRate": "AI 라우팅 성공률",
+      "fallbackText": "Fallback",
+      "customerSatisfaction": "고객 만족도",
+      "caseCount": "건",
+      "ratingPanelTitle": "AI 처리 요청 별점 상세",
+      "ratingEmpty": "등록된 AI 피드백이 없습니다.",
+      "detailedAccessLogs": "세부 접속 로그",
+      "noLogs": "로그를 찾을 수 없습니다.",
+      "requestPreviewEmpty": "요청 내용 없음",
+      "tableColumns": {
+        "time": "시간",
+        "requestPreview": "요청 미리보기",
+        "totalTokens": "총 토큰",
+        "latency": "지연시간",
+        "viewDetails": "상세 보기"
+      }
     }
   },
   "guestChat": {

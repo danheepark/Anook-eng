@@ -281,6 +281,26 @@
       "approveCancel": "キャンセル承認",
       "forceCancelRequest": "強制キャンセル",
       "aiAnalysisView": "AI分析結果を見る"
+    },
+    "aiRouting": {
+      "avgLatency": "平均応答速度",
+      "accumulatedTokens": "累積消費トークン",
+      "routingSuccessRate": "AIルーティング成功率",
+      "fallbackText": "フォールバック",
+      "customerSatisfaction": "顧客満足度",
+      "caseCount": "件",
+      "ratingPanelTitle": "AI処理リクエスト評価詳細",
+      "ratingEmpty": "登録されたAIフィードバックはありません。",
+      "detailedAccessLogs": "詳細アクセスログ",
+      "noLogs": "ログが見つかりません。",
+      "requestPreviewEmpty": "リクエスト内容なし",
+      "tableColumns": {
+        "time": "時間",
+        "requestPreview": "リクエストプレビュー",
+        "totalTokens": "合計トークン",
+        "latency": "遅延時間",
+        "viewDetails": "詳細表示"
+      }
     }
   },
   "guestChat": {

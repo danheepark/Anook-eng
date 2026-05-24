@@ -281,6 +281,26 @@
       "approveCancel": "批准取消",
       "forceCancelRequest": "强制取消请求",
       "aiAnalysisView": "查看AI分析结果"
+    },
+    "aiRouting": {
+      "avgLatency": "平均响应时间",
+      "accumulatedTokens": "累计消耗 Token",
+      "routingSuccessRate": "AI 路由成功率",
+      "fallbackText": "降级",
+      "customerSatisfaction": "客户满意度",
+      "caseCount": "件",
+      "ratingPanelTitle": "AI 处理请求评分详情",
+      "ratingEmpty": "暂无注册的 AI 反馈。",
+      "detailedAccessLogs": "详细访问日志",
+      "noLogs": "暂无日志。",
+      "requestPreviewEmpty": "无请求内容",
+      "tableColumns": {
+        "time": "时间",
+        "requestPreview": "请求预览",
+        "totalTokens": "总 Token",
+        "latency": "延迟时间",
+        "viewDetails": "查看详情"
+      }
     }
   },
   "guestChat": {

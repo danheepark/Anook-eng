@@ -281,6 +281,26 @@
       "approveCancel": "Approve Cancel",
       "forceCancelRequest": "Force Cancel Request",
       "aiAnalysisView": "View AI Analysis Result"
+    },
+    "aiRouting": {
+      "avgLatency": "Avg. Response Time",
+      "accumulatedTokens": "Accumulated Tokens",
+      "routingSuccessRate": "AI Routing Success Rate",
+      "fallbackText": "Fallback",
+      "customerSatisfaction": "Customer Satisfaction",
+      "caseCount": " case(s)",
+      "ratingPanelTitle": "AI Request Rating Details",
+      "ratingEmpty": "No AI feedback registered.",
+      "detailedAccessLogs": "Detailed Access Logs",
+      "noLogs": "No logs found.",
+      "requestPreviewEmpty": "No request content",
+      "tableColumns": {
+        "time": "Time",
+        "requestPreview": "Request Preview",
+        "totalTokens": "Total Tokens",
+        "latency": "Latency",
+        "viewDetails": "View Details"
+      }
     }
   },
   "guestChat": {
