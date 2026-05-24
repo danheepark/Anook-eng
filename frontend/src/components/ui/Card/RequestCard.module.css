@@ -195,3 +195,33 @@
   border: 2px solid var(--color-brand-500);
   box-shadow: 0 0 0 4px var(--color-brand-100);
 }
+
+.isCancelled {
+  opacity: 0.7;
+}
+
+.isCancelled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.isEscalated {
+  opacity: 0.7;
+}
+
+.isEscalated::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}

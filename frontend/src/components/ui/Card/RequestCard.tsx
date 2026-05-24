@@ -76,7 +76,7 @@ export default function RequestCard({
 
   return (
     <>
-      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${isActiveMatch ? styles.requestCardActiveMatch : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
+      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${isActiveMatch ? styles.requestCardActiveMatch : ''} ${status === 'CANCELLED' ? styles.isCancelled : ''} ${status === 'ESCALATED' ? styles.isEscalated : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
         <div className={styles.roomBox}>
           <span className={styles.roomNumber}>
             {highlightSearch ? (
@@ -148,6 +148,14 @@ export default function RequestCard({
           )}
           {status === 'PENDING' && !isEmergency && (
             <Tag variant="red">NEW</Tag>
+          )}
+          {status === 'CANCELLED' && (
+            <Tag variant="gray">{t.status?.cancelled || '취소됨'}</Tag>
+          )}
+          {status === 'ESCALATED' && (
+            <Tag variant="gray">
+              {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
+            </Tag>
           )}
           {(status === 'IN_PROGRESS' || status === 'ASSIGNED') && hasNewMessage && (
             <div className={styles.messageBadge}>

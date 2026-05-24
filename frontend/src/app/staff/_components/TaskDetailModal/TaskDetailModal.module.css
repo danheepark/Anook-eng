@@ -13,14 +13,14 @@
   gap: var(--space-8);
 }
 
-.headerTop {
+.headerTitleRow {
   display: flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-4);
 }
 
 .roomBadge {
-  font: var(--text-h3-bold);
+  font: var(--text-h2-bold);
   color: var(--color-gray-900);
 }
 
@@ -35,8 +35,6 @@
   flex-direction: column;
   gap: var(--space-16);
   padding: var(--space-16) 0;
-  border-top: 1px solid var(--color-gray-200);
-  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .infoRow {
@@ -57,14 +55,16 @@
 
 .descriptionSection {
   margin-top: var(--space-16);
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--color-gray-200);
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-12);
 }
 
 .descriptionTitle {
-  font: var(--text-body-bold);
-  color: var(--color-gray-700);
+  font: var(--text-h3-bold);
+  color: var(--color-gray-900);
   margin: 0;
 }
 
@@ -259,3 +259,47 @@
   color: var(--color-gray-400);
   font: var(--text-caption-medium);
 }
+
+.chatHistoryIconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-600);
+  transition: all 0.15s ease;
+}
+
+.chatHistoryIconButton:hover {
+  background: var(--color-gray-100);
+  color: var(--color-primary);
+}
+
+.label {
+  font: var(--text-body-medium);
+  color: var(--color-gray-500);
+  display: block;
+}
+
+.value {
+  font: var(--text-body-medium);
+  color: var(--color-gray-900);
+}
+
+.entityList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font: var(--text-body-medium);
+  color: var(--color-gray-900);
+}
+
+.contentBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+

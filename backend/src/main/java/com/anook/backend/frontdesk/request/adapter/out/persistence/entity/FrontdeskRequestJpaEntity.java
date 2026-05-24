@@ -115,9 +115,7 @@ public class FrontdeskRequestJpaEntity {
 
     public void updateSummary(String summary, String rawText) {
         this.summary = summary;
-        if (rawText != null && !rawText.isBlank()) {
-            this.rawText = (this.rawText != null ? this.rawText + "\n" : "") + rawText;
-        }
+        this.rawText = rawText;
         this.updatedAt = LocalDateTime.now();
     }
 

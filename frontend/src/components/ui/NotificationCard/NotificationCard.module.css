@@ -1,6 +1,7 @@
 .card {
   display: flex;
-  align-items: flex-start; /* 상단 정렬로 세로 찌그러짐 방지 및 정갈한 레이아웃 */
+  align-items: flex-start;
+  /* 상단 정렬로 세로 찌그러짐 방지 및 정갈한 레이아웃 */
   padding: var(--space-24) var(--space-16) var(--space-16) var(--space-16);
   gap: var(--space-12);
   border: none;

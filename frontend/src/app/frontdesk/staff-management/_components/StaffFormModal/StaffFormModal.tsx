@@ -87,7 +87,9 @@ export default function StaffFormModal({
     : roles;
 
   const roleOptions = filteredRoles.map(r => ({ label: r.name, value: String(r.id) }));
-  const deptOptions = departments.map(d => ({ label: d.name, value: d.id }));
+  const deptOptions = departments
+    .filter(d => d.id !== 'EMERGENCY' && d.name !== '긴급대응')
+    .map(d => ({ label: d.name, value: d.id }));
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>

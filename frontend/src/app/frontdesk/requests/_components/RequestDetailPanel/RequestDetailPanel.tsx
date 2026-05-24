@@ -238,8 +238,8 @@ export default function RequestDetailPanel({
       if (ok) changed = true;
     }
 
-    if (newDeptId !== detail.departmentId) {
-      // summary/description도 같은 요청에서 함께 업데이트 (한 트랜잭션)
+    // 항상 배정/저장 API를 호출하여 태스크 티켓이 발행되도록 보장
+    if (newDeptId) {
       const ok = await changeDepartment(detail.id, newDeptId, newSummary, newDescription);
       if (ok) changed = true;
     }
@@ -361,16 +361,12 @@ export default function RequestDetailPanel({
             className={styles.collapsibleHeader}
             onClick={() => setIsAiSectionOpen(!isAiSectionOpen)}
           >
-            <h3 className={styles.collapsibleTitle}>{t.frontdeskPage?.requestDetailModal?.aiAnalysisView || 'AI 분석 결과 보기'}</h3>
+            <h3 className={styles.collapsibleTitle}>{t.frontdeskPage?.requestDetailModal?.aiAnalysisView || 'AI 분석 상세 내역'}</h3>
             {isAiSectionOpen ? <ArrowUpIcon width={20} height={20} color="var(--color-gray-500)" /> : <ArrowDownIcon width={20} height={20} color="var(--color-gray-500)" />}
           </div>
 
           {isAiSectionOpen && (
             <div className={styles.aiInfo} style={{ marginTop: 'var(--space-8)' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                <span className={styles.label}>신뢰도</span>
-                <span className={styles.value}>{Math.round(detail.confidence * 100)}%</span>
-              </div>
               {(() => {
                 if (!detail.entities) return null;
                 // 직원에게 보여줄 필요 없는 키 제외하고 렌더링할 게 있는지 확인
@@ -389,11 +385,15 @@ export default function RequestDetailPanel({
                   .filter(line => !line.toLowerCase().includes('confidence:'))
                   .join('\n')
                   .trim();
-                if (!cleanedReasoning) return null;
+                const formattedConfidence = detail.confidence !== null && detail.confidence !== undefined
+                  ? `${Math.round(detail.confidence * 100)}%`
+                  : '100%';
+                const label = language === 'en' ? 'confidence' : '신뢰도';
+                const displayReasoning = `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`;
                 return (
                   <div className={styles.contentBlock}>
                     <span className={styles.label}>판단 근거</span>
-                    <p className={styles.rawText}>{cleanedReasoning}</p>
+                    <p className={styles.rawText}>{displayReasoning}</p>
                   </div>
                 );
               })()}
@@ -497,7 +497,10 @@ export default function RequestDetailPanel({
         <ManualAssignModal
           isOpen={showManualAssign}
           onClose={() => setShowManualAssign(false)}
-          detail={detail}
+          detail={{
+            ...detail,
+            description: ''
+          }}
           departments={departments}
           onSave={handleSave}
           saving={saving}

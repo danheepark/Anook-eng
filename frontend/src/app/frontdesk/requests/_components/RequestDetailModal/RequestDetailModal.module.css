@@ -47,24 +47,25 @@
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-12);
 }
 
 .gridItem {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) 0;
 }
 
 .label {
-  font: var(--text-caption-medium);
+  font: var(--text-body-medium);
   color: var(--color-gray-500);
 }
 
 .value {
-  font: var(--text-body-medium);
+  font: var(--text-body-bold);
   color: var(--color-gray-900);
 }
 
@@ -82,12 +83,10 @@
 
 .rawText {
   font: var(--text-body-medium);
-  color: var(--color-gray-700);
-  background: var(--color-gray-50);
-  padding: var(--space-12) var(--space-16);
-  border-radius: var(--radius-md);
+  color: var(--color-gray-900);
   margin: 0;
   white-space: pre-wrap;
+  text-align: left;
 }
 
 .orderDetail {
@@ -132,9 +131,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  padding: var(--space-8) 0;
+  padding: 0;
   font: var(--text-body-medium);
-  color: var(--color-gray-800);
+  color: var(--color-gray-900);
 }
 
 .entityItem {
@@ -191,8 +190,9 @@
 
 .footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: var(--space-12);
 }
 
 .footerRight {
@@ -216,3 +216,9 @@
   color: var(--color-gray-700);
   margin-right: var(--space-4);
 }
+
+.footerButton {
+  min-width: 120px;
+  justify-content: center;
+}
+

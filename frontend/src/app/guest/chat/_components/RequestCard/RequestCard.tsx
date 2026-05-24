@@ -249,10 +249,8 @@ export default function RequestCard({
 
   let finalTitle = getFixedTitle();
   
-  // '요청'과 '주문' 단어가 타이틀 끝에 있는 경우 제거 (예약은 유지)
-  finalTitle = finalTitle
-    .replace(/(?:\s*요청|\s*주문|\s*[Rr]equest|\s*[Oo]rder|\s*リクエスト|\s*依頼|\s*注文|\s*请求|\s*订单)$/, '')
-    .trim();
+  // '요청'과 '주문' 단어가 타이틀 끝에 있는 경우 제거 (예약은 유지) - 비활성화됨
+  finalTitle = finalTitle.trim();
 
   if (isCancelled) {
     finalTitle += t.cardUI?.message?.cancelSuffix || ' 취소';

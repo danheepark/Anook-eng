@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button/Button';
 import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import InputField from '@/components/ui/Inputfield/InputField';
 import useCreateRequest from './useCreateRequest';
+import TaskTicket from '@/components/ui/TaskBoard/TaskTicket';
 
 interface Department {
   id: string;
@@ -77,45 +78,27 @@ export default function CreateRequestModal({
     <ModalOverlay isOpen={isOpen} onClose={handleClose}>
       <ModalCard size="md" overflowVisible={true} onClose={handleClose} title="요청 생성">
 
-        <div className={styles.form}>
-          {/* 객실 번호 */}
-          <div className={styles.field}>
-            <InputField
-              id="cr-room"
-              label="객실 번호 *"
-              placeholder="예: 707"
-              value={roomNo}
-              onChange={(e) => setRoomNo(e.target.value)}
-            />
+        <div className={styles.content}>
+          {/* 미리보기 카드 — 실시간 반영 */}
+          <div className={styles.previewSection}>
+            <div className={styles.previewCardWrapper}>
+              <TaskTicket
+                ticketId="NEW"
+                roomNo={roomNo || '707'}
+                department={departmentId}
+                priority="NORMAL"
+                title={summary || '생성할 업무 내용을 입력하세요'}
+                description={rawText}
+                status="TODO"
+                createdAt={new Date()}
+              />
+            </div>
           </div>
 
-          {/* 요약 */}
-          <div className={styles.field}>
-            <InputField
-              id="cr-summary"
-              label="요청 내용 *"
-              placeholder="예: 수건 2장 추가 요청"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-            />
-          </div>
-
-          {/* 상세 내용 (선택) */}
-          <div className={styles.field}>
-            <InputField
-              as="textarea"
-              id="cr-raw"
-              label="상세 내용"
-              placeholder="고객 원문 또는 상세 메모 (선택)"
-              value={rawText}
-              onChange={(e: any) => setRawText(e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          {/* 배정 부서 */}
-          <div className={styles.row}>
-            <div className={styles.field}>
+          {/* 편집 폼 */}
+          <div className={styles.formSection}>
+            {/* 배정 부서 */}
+            <div className={styles.editField}>
               <Dropdown
                 label="배정 부서 *"
                 placeholder="부서를 선택하세요"
@@ -124,10 +107,45 @@ export default function CreateRequestModal({
                 onChange={(val) => setDepartmentId(val)}
               />
             </div>
+
+            {/* 객실 번호 */}
+            <div className={styles.editField}>
+              <InputField
+                id="cr-room"
+                label="객실 번호 *"
+                placeholder="예: 707"
+                value={roomNo}
+                onChange={(e) => setRoomNo(e.target.value)}
+              />
+            </div>
+
+            {/* 요약 */}
+            <div className={styles.editField}>
+              <InputField
+                id="cr-summary"
+                label="요청 내용 *"
+                placeholder="예: 수건 2장 추가 요청"
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+              />
+            </div>
+
+            {/* 상세 내용 (선택) */}
+            <div className={styles.editField}>
+              <InputField
+                as="textarea"
+                id="cr-raw"
+                label="상세 내용"
+                placeholder="고객 원문 또는 상세 메모 (선택)"
+                value={rawText}
+                onChange={(e: any) => setRawText(e.target.value)}
+                rows={3}
+              />
+            </div>
           </div>
         </div>
 
-        <div className={styles.buttonGroup}>
+        <div className={styles.footer}>
           <Button variant="secondary" onClick={handleClose}>
             취소
           </Button>

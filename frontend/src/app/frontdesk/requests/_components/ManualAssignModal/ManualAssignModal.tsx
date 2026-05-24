@@ -21,6 +21,7 @@ interface RequestDetail {
   summary: string;
   createdAt: string;
   status: string;
+  description?: string;
 }
 
 interface ManualAssignModalProps {
@@ -35,15 +36,14 @@ interface ManualAssignModalProps {
 export default function ManualAssignModal({ isOpen, onClose, detail, departments, onSave, saving }: ManualAssignModalProps) {
 
   const [editDeptId, setEditDeptId] = useState(detail.departmentId);
-  const [editSummary, setEditSummary] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  const [editSummary, setEditSummary] = useState(detail.summary || '');
+  const [editDescription, setEditDescription] = useState(detail.description || '');
 
   useEffect(() => {
     if (isOpen) {
-
       setEditDeptId(detail.departmentId);
-      setEditSummary('');
-      setEditDescription('');
+      setEditSummary(detail.summary || '');
+      setEditDescription(detail.description || '');
     }
   }, [isOpen, detail]);
 
