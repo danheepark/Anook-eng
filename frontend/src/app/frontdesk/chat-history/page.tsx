@@ -127,7 +127,6 @@ export default function ChatHistoryPage() {
                   setRoomSearchValue(val);
                   setRoomCurrentMatch(0);
                 }}
-                placeholder="객실 번호 검색..."
                 currentMatch={roomCurrentMatch}
                 totalMatches={filteredRooms.length}
                 onPrev={() => {

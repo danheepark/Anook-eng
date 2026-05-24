@@ -551,7 +551,6 @@ export default function ComponentShowcasePage() {
                   <div style={{ marginBottom: '16px' }}>
                     <SmartSearchBar
                       inputWrapperStyle={{ width: '300px' }}
-                      placeholder="검색어 입력..."
                       value={searchValue}
                       onChange={(val) => setSearchValue(val)}
                     />

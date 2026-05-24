@@ -448,7 +448,6 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
               <SmartSearchBar
                 className={styles.chatSearchContainer}
                 inputWrapperStyle={{ width: '240px' }}
-                placeholder="대화 내용 검색..."
                 value={internalSearch}
                 onChange={(val) => setInternalSearch(val)}
                 currentMatch={currentMatch}

@@ -55,7 +55,7 @@ export default function SmartSearchBar({
             ref={inputRef}
             className={styles.inputElement} 
             disabled={disabled}
-            placeholder={props.placeholder || '검색어를 입력하세요'}
+            placeholder={props.placeholder || '검색어를 입력하세요...'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             {...props}

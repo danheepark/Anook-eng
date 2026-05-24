@@ -16,6 +16,7 @@ export default function RoleTab() {
   const { showToast } = useUiStore();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentMatch, setCurrentMatch] = useState(0);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | undefined>(undefined);
   
@@ -33,9 +34,30 @@ export default function RoleTab() {
     }
   }, [error, showToast]);
 
-  const filteredRoles = roles.filter((role) =>
-    role.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRoles = React.useMemo(() => {
+    if (!searchTerm) return roles;
+    const lower = searchTerm.toLowerCase();
+    return roles.filter((role) =>
+      role.name.toLowerCase().includes(lower) ||
+      (departments.find(d => d.id === role.departmentId)?.name || role.departmentId).toLowerCase().includes(lower)
+    );
+  }, [roles, departments, searchTerm]);
+
+  useEffect(() => {
+    if (filteredRoles.length > 0 && currentMatch >= filteredRoles.length) {
+      setCurrentMatch(filteredRoles.length - 1);
+    }
+  }, [filteredRoles, currentMatch]);
+
+  const scrollToMatch = (index: number) => {
+    const target = filteredRoles[index];
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(`role-row-${target.id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+  };
 
   const handleAddClick = () => {
     setEditingRole(undefined);
@@ -81,9 +103,33 @@ export default function RoleTab() {
         <div style={{ width: '320px' }}>
           <SmartSearchBar
             inputWrapperStyle={{ flex: 1 }}
-            placeholder="직급, 권한 이름 등 검색..."
             value={searchTerm}
-            onChange={(val) => setSearchTerm(val)}
+            onChange={(val) => {
+              setSearchTerm(val);
+              setCurrentMatch(0);
+            }}
+            currentMatch={currentMatch}
+            totalMatches={searchTerm ? filteredRoles.length : 0}
+            onPrev={() => {
+              const newIndex = Math.max(0, currentMatch - 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onNext={() => {
+              const newIndex = Math.min(filteredRoles.length - 1, currentMatch + 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filteredRoles.length > 0) {
+                  const newIndex = (currentMatch + 1) % filteredRoles.length;
+                  setCurrentMatch(newIndex);
+                  scrollToMatch(newIndex);
+                }
+              }
+            }}
           />
         </div>
         <Button variant="primary" onClick={handleAddClick}>
@@ -103,10 +149,29 @@ export default function RoleTab() {
             <TableCell></TableCell>
           </TableHeader>
           {filteredRoles.length > 0 ? (
-            filteredRoles.map((role) => (
-              <TableRow key={role.id}>
-                <TableCell label="부서">{departments.find(d => d.id === role.departmentId)?.name || role.departmentId}</TableCell>
-                <TableCell label="역할명">{role.name}</TableCell>
+            filteredRoles.map((role, idx) => {
+              const deptName = departments.find(d => d.id === role.departmentId)?.name || role.departmentId;
+              const isActiveMatch = searchTerm && idx === currentMatch;
+              const highlightStyle = 'background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;';
+              
+              const getHighlighted = (text: string) => {
+                if (!searchTerm) return { __html: text };
+                return {
+                  __html: text.replace(
+                    new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                    `<mark style="${highlightStyle}">$1</mark>`
+                  )
+                };
+              };
+
+              return (
+              <TableRow key={role.id} id={`role-row-${role.id}`} style={isActiveMatch ? { border: '2px solid var(--color-brand-500)', boxShadow: '0 0 0 4px var(--color-brand-100)' } : {}}>
+                <TableCell label="부서">
+                  {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(deptName)} /> : deptName}
+                </TableCell>
+                <TableCell label="역할명">
+                  {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(role.name)} /> : role.name}
+                </TableCell>
                 <TableCell>
                   <div style={{ display: 'flex', gap: 'var(--space-8)' }}>
                     <button 
@@ -126,7 +191,8 @@ export default function RoleTab() {
                   </div>
                 </TableCell>
               </TableRow>
-            ))
+              );
+            })
           ) : (
             <TableRow>
               <TableCell>

@@ -105,7 +105,6 @@ export default function HandoverPage() {
           <div style={{ flex: 1 }}>
             <SmartSearchBar
               inputWrapperStyle={{ flex: 1 }}
-              placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}
               value={searchValue}
               onChange={(val) => setSearchValue(val)}
             />

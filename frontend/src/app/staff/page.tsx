@@ -92,6 +92,7 @@ function DashboardContent() {
 
   // 필터 및 모달 상태 관리
   const [searchValue, setSearchValue] = useState('');
+  const [currentMatch, setCurrentMatch] = useState(0);
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [selectedTask, setSelectedTask] = useState<StaffTask | null>(null);
   const [activeTab, setActiveTab] = useState<'TODO' | 'IN_PROGRESS' | 'DONE'>('TODO');
@@ -140,6 +141,22 @@ function DashboardContent() {
     });
   }, [tasks, searchValue, priorityFilter]);
 
+  useEffect(() => {
+    if (filteredTasks.length > 0 && currentMatch >= filteredTasks.length) {
+      setCurrentMatch(filteredTasks.length - 1);
+    }
+  }, [filteredTasks, currentMatch]);
+
+  const scrollToMatch = (index: number) => {
+    const target = filteredTasks[index];
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(`ticket-${target.id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+  };
+
   const boardData = useMemo(() => {
     const sortByCancelRequested = (taskList: typeof filteredTasks) => {
       return [...taskList].sort((a, b) => {
@@ -177,9 +194,33 @@ function DashboardContent() {
           <div className={styles.searchBarContainer}>
           <SmartSearchBar
             inputWrapperStyle={{ flex: 1 }}
-            placeholder="직원 이름, 부서, 직급 검색..."
             value={searchValue}
-            onChange={(val) => setSearchValue(val)}
+            onChange={(val) => {
+              setSearchValue(val);
+              setCurrentMatch(0);
+            }}
+            currentMatch={currentMatch}
+            totalMatches={searchValue ? filteredTasks.length : 0}
+            onPrev={() => {
+              const newIndex = Math.max(0, currentMatch - 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onNext={() => {
+              const newIndex = Math.min(filteredTasks.length - 1, currentMatch + 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filteredTasks.length > 0) {
+                  const newIndex = (currentMatch + 1) % filteredTasks.length;
+                  setCurrentMatch(newIndex);
+                  scrollToMatch(newIndex);
+                }
+              }
+            }}
           />
         </div>
         </div>
@@ -243,6 +284,8 @@ function DashboardContent() {
                               completeTask(task.id, task.version);
                             } : undefined}
                             entities={task.entities}
+                            highlightSearch={searchValue}
+                            isActiveMatch={searchValue ? filteredTasks[currentMatch]?.id === task.id : false}
                           />
                         </div>
                       ))}

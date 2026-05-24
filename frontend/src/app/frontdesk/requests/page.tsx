@@ -386,7 +386,6 @@ export default function FrontDeskPage() {
                   setRoomSearchValue(val);
                   setRoomCurrentMatch(0);
                 }}
-                placeholder="검색어를 입력하세요..."
                 currentMatch={roomCurrentMatch}
                 totalMatches={roomSearchValue ? filteredGroupedRooms.length : 0}
                 onPrev={() => {
