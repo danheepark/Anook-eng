@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { HandoverRecord } from '@/components/ui/HandoverRecord';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
+import Button from '@/components/ui/Button/Button';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useHandover } from './useHandover';
@@ -92,13 +93,13 @@ export default function HandoverPage() {
               <option value="EVENING">야간 (15:00 - 23:00)</option>
               <option value="NIGHT">심야 (23:00 - 07:00)</option>
             </select>
-            <button
-              className={styles.downloadButton}
+            <Button
+              variant="secondary"
               onClick={handleExcelDownload}
               disabled={downloading || loading}
             >
               {downloading ? '다운로드 중...' : '📥 엑셀 다운로드'}
-            </button>
+            </Button>
           </div>
         </div>
         <div className={styles.searchBarRow}>

@@ -69,30 +69,6 @@
   align-items: center;
 }
 
-.downloadButton {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-primary);
-  font: var(--text-body-medium);
-  color: var(--color-primary);
-  background-color: var(--color-bg);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.downloadButton:hover:not(:disabled) {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-}
-
-.downloadButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 @media (max-width: 768px) {
   .container {
