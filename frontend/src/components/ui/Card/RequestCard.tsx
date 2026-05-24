@@ -65,7 +65,16 @@ export default function RequestCard({
     <>
       <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${isActiveMatch ? styles.requestCardActiveMatch : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
         <div className={styles.roomBox}>
-          <span className={styles.roomNumber}>{roomNumber}</span>
+          <span className={styles.roomNumber}>
+            {highlightSearch ? (
+              <span dangerouslySetInnerHTML={{
+                __html: String(roomNumber).replace(
+                  new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                  '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
+                )
+              }} />
+            ) : roomNumber}
+          </span>
         </div>
 
         <div className={styles.contentSection}>

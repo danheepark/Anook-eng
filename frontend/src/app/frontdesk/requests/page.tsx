@@ -431,20 +431,20 @@ export default function FrontDeskPage() {
         ) : (
           <div className={styles.cardGrid}>
             {groupedRooms.map(room => (
-              <RequestCard
-                key={room.roomNo}
-                roomNumber={room.roomNo}
-                title={room.summaryText}
-                description={lastGuestMessages[String(room.roomNo)] || room.rawText || '요청 내용이 없습니다.'}
-                statusText={mapStatusText(room.repStatus)}
-                statusVariant={mapStatusVariant(room.repStatus)}
-                createdAt={room.createdAt}
-                isSelected={activeChatRoom?.roomNumber === room.roomNo}
-                isActiveMatch={roomMatches[roomCurrentMatch]?.roomNo === room.roomNo}
-                highlightSearch={roomSearchValue}
-                primaryActionText={getPrimaryActionText(room)}
-                secondaryActionText={getSecondaryActionText(room)}
-                onPrimaryAction={() => {
+              <div key={room.roomNo} id={`room-card-${room.roomNo}`}>
+                <RequestCard
+                  roomNumber={room.roomNo}
+                  title={room.summaryText}
+                  description={lastGuestMessages[String(room.roomNo)] || room.rawText || '요청 내용이 없습니다.'}
+                  statusText={mapStatusText(room.repStatus)}
+                  statusVariant={mapStatusVariant(room.repStatus)}
+                  createdAt={room.createdAt}
+                  isSelected={activeChatRoom?.roomNumber === room.roomNo}
+                  isActiveMatch={roomMatches[roomCurrentMatch]?.roomNo === room.roomNo}
+                  highlightSearch={roomSearchValue}
+                  primaryActionText={getPrimaryActionText(room)}
+                  secondaryActionText={getSecondaryActionText(room)}
+                  onPrimaryAction={() => {
                   if (activeTab === 'active') {
                     if (room.repStatus === 'PENDING' || room.repStatus === 'ESCALATED') {
                       handleStatusChange(room.allIds, 'IN_PROGRESS');
@@ -481,6 +481,7 @@ export default function FrontDeskPage() {
                 newMessageCount={newMessageCounts[room.roomNo]}
                 isEmergency={room.highestPriority === 'EMERGENCY'}
               />
+              </div>
             ))}
           </div>
         )}
