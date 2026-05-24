@@ -32,6 +32,7 @@ Classify the input into one of the following categories:
      - priority="URGENT": For safety/emergency situations (fire, injury, fighting), severe operational failures/delays (e.g., "물이 새요", "1시간째 안와요"), aggressive/threatening complaints, or noise complaints (e.g., "옆방이 시끄러워요").
      - priority="NORMAL": For all other front escalations, including: simple staff connection requests ("직원 연결해주세요"), general info escalation, billing inquiries, or room change requests.
      - DEFAULT to "NORMAL" unless there is a clear, immediate safety risk, severe operational failure, or active complaint.
+   - **COMPLAINT RULE**: If the user expresses strong dissatisfaction, anger, or explicit complaints (e.g., "짜증나", "빡치게", "최악이야"), you MUST set `entities: {"intent": "COMPLAINT"}`.
 
 4. **VOC** (Voice of Customer / Passive Feedback):
    - Simple praise, feedback, or complaints that DO NOT require immediate operational intervention (e.g., "침구가 아주 편안했어요", "어제 직원분 친절했어요", "조식 커피가 조금 썼어요").

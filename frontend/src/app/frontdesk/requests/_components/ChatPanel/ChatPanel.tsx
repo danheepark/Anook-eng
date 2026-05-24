@@ -491,6 +491,16 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 }
               }
 
+              if (msg.type === 'REQUEST_CARD' && msg.meta) {
+                return (
+                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '4px 0' }}>
+                    <div style={{ maxWidth: '85%' }}>
+                      <GuestRequestCard {...msg.meta} isReadOnly />
+                    </div>
+                  </div>
+                );
+              }
+
               if (isSystemMsg) {
                 let cleanContent = msg.content.replace(/^\[SYSTEM\]\s*/, '');
                 if (cleanContent === '상담 및 처리가 모두 완료되었습니다.') {
@@ -503,16 +513,6 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                       systemContent={cleanContent}
                       systemSubtitle={t.frontdeskPage?.chatHistory?.systemMessageNote}
                     />
-                  </div>
-                );
-              }
-
-              if (msg.type === 'REQUEST_CARD' && msg.meta) {
-                return (
-                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '4px 0' }}>
-                    <div style={{ maxWidth: '85%' }}>
-                      <GuestRequestCard {...msg.meta} isReadOnly />
-                    </div>
                   </div>
                 );
               }
