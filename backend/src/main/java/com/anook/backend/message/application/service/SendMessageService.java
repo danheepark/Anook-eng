@@ -408,6 +408,7 @@ public class SendMessageService implements SendMessageUseCase {
                         // 고객의 원문이 단순 수락/확인 응답인지 판별 (다국어 임시 지원)
                         // 한국어, 영어, 일본어, 중국어의 대표적인 수락/긍정 단어 포함
                         // isShortConfirmation is already declared above
+                        if (pendingRequest != null) {
                             // 기존 CREATED/PENDING 요청과 동일 요청에 대한 확인인지 검증
                             // 다른 아이템의 신규 주문(수건 vs 물)이면 auto-confirm 하지 않고 새 요청 생성
                             String existingSummary = pendingRequest.get("summary") != null
