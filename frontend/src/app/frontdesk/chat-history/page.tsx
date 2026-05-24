@@ -7,7 +7,7 @@ import useChatHistory from './useChatHistory';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
-import InputField from '@/components/ui/Inputfield/InputField';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import PopoverMenu from '@/components/ui/PopoverMenu/PopoverMenu';
 import { MoreIcon } from '@/components/icons';
 
@@ -77,9 +77,34 @@ export default function ChatHistoryPage() {
     </div>
   );
 
-  const filteredRooms = roomSearchValue
-    ? rooms.filter(room => room.roomNo.toLowerCase().includes(roomSearchValue.toLowerCase()))
-    : rooms;
+  const [roomCurrentMatch, setRoomCurrentMatch] = useState(0);
+
+  const filteredRooms = React.useMemo(() => {
+    if (!roomSearchValue) return rooms;
+    const query = roomSearchValue.toLowerCase();
+    return rooms.filter(room => 
+      room.roomNo.toLowerCase().includes(query) ||
+      (room.lastMessage && room.lastMessage.toLowerCase().includes(query))
+    );
+  }, [rooms, roomSearchValue]);
+
+  const scrollToRoomMatch = (index: number) => {
+    const target = filteredRooms[index];
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(`room-card-${target.roomNo}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 50);
+    }
+  };
+
+  React.useEffect(() => {
+    if (filteredRooms.length > 0 && roomCurrentMatch >= filteredRooms.length) {
+      setRoomCurrentMatch(filteredRooms.length - 1);
+    }
+  }, [filteredRooms, roomCurrentMatch]);
 
   return (
     <div className={styles.container}>
@@ -95,11 +120,35 @@ export default function ChatHistoryPage() {
           <div className={styles.leftPaneContent}>
             {/* Room Search Bar */}
             <div style={{ marginBottom: 'var(--space-16)' }}>
-              <InputField
-                variant="search"
-                placeholder="객실 번호 검색..."
+              <SmartSearchBar
+                inputWrapperStyle={{ flex: 1 }}
                 value={roomSearchValue}
-                onChange={(e) => setRoomSearchValue(e.target.value)}
+                onChange={(val) => {
+                  setRoomSearchValue(val);
+                  setRoomCurrentMatch(0);
+                }}
+                currentMatch={roomCurrentMatch}
+                totalMatches={filteredRooms.length}
+                onPrev={() => {
+                  const newIndex = Math.max(0, roomCurrentMatch - 1);
+                  setRoomCurrentMatch(newIndex);
+                  scrollToRoomMatch(newIndex);
+                }}
+                onNext={() => {
+                  const newIndex = Math.min(filteredRooms.length - 1, roomCurrentMatch + 1);
+                  setRoomCurrentMatch(newIndex);
+                  scrollToRoomMatch(newIndex);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (filteredRooms.length > 0) {
+                      const newIndex = (roomCurrentMatch + 1) % filteredRooms.length;
+                      setRoomCurrentMatch(newIndex);
+                      scrollToRoomMatch(newIndex);
+                    }
+                  }
+                }}
               />
             </div>
             {/* Date picker */}
@@ -128,19 +177,22 @@ export default function ChatHistoryPage() {
             ) : (
               <div className={styles.cardGrid}>
                 {filteredRooms.map(room => (
-                  <RequestCard
-                    key={room.roomNo}
-                    roomNumber={room.roomNo}
-                    title={t.frontdeskPage.chatHistory?.roomConversation?.replace('{{room}}', room.roomNo) || `${room.roomNo}호 대화`}
-                    description={room.lastMessage || t.frontdeskPage.chatHistory?.emptyMessage || '메시지 없음'}
-                    createdAt={room.lastMessageAt || ''}
-                    isSelected={selectedRoom === room.roomNo}
-                    onCardClick={() => {
-                      selectRoom(room.roomNo);
-                      setRoomSearchValue('');
-                      setMobileView('chat');
-                    }}
-                  />
+                  <div key={room.roomNo} id={`room-card-${room.roomNo}`}>
+                    <RequestCard
+                      roomNumber={room.roomNo}
+                      title={t.frontdeskPage.chatHistory?.roomConversation?.replace('{{room}}', room.roomNo) || `${room.roomNo}호 대화`}
+                      description={room.lastMessage || t.frontdeskPage.chatHistory?.emptyMessage || '메시지 없음'}
+                      createdAt={room.lastMessageAt || ''}
+                      isSelected={selectedRoom === room.roomNo}
+                      isActiveMatch={roomSearchValue ? filteredRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
+                      highlightSearch={roomSearchValue}
+                      onCardClick={() => {
+                        selectRoom(room.roomNo);
+                        setRoomSearchValue('');
+                        setMobileView('chat');
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
             )}

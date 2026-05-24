@@ -7,6 +7,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import { ConfirmModal, ModalOverlay, ModalCard, LogDataModal } from '@/components/ui/Modal';
 import * as Icons from '@/components/icons';
 import Button from '@/components/ui/Button/Button';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import InputField from '@/components/ui/Inputfield/InputField';
 import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import Tabs from '@/components/ui/Tab/Tabs';
@@ -89,6 +90,7 @@ export default function ComponentShowcasePage() {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [chatScreenStatus, setChatScreenStatus] = useState<'normal' | 'emergency' | 'escalated' | 'progress'>('normal');
   const [requestCardKey, setRequestCardKey] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
 
   const sampleRooms = [
     { id: '1001', roomNumber: '1001', statusText: '보관됨' },
@@ -345,7 +347,6 @@ export default function ComponentShowcasePage() {
                   <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-8)' }}>InputField</h4>
                   <ComponentLabel path="components/ui/InputField/InputField.tsx" />
                   <InputField label="기본 입력" placeholder="텍스트를 입력하세요" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-                  <InputField variant="search" placeholder="검색어를 입력하세요..." />
                   <InputField label="에러 상태" error="올바르지 않은 값입니다." value="Error test" readOnly />
                 </div>
                 <div style={{ flex: 1, minWidth: '200px' }}>
@@ -547,6 +548,13 @@ export default function ComponentShowcasePage() {
                 <div style={{ flex: 1, minWidth: '300px' }}>
                   <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Request Status Bar (게스트용 진행상황)</h4>
                   <ComponentLabel path="app/guest/chat/_components/RequestStatusBar/RequestStatusBar.tsx" />
+                  <div style={{ marginBottom: '16px' }}>
+                    <SmartSearchBar
+                      inputWrapperStyle={{ width: '300px' }}
+                      value={searchValue}
+                      onChange={(val) => setSearchValue(val)}
+                    />
+                  </div>
                   <div style={{ width: '100%' }}>
                     <RequestStatusBar 
                       requestId={1}

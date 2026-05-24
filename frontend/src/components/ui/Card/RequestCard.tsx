@@ -23,7 +23,10 @@ export interface RequestCardProps {
   reverseActions?: boolean;
   isSelected?: boolean;
   hasNewMessage?: boolean;
+  newMessageCount?: number;
   isEmergency?: boolean;
+  highlightSearch?: string;
+  isActiveMatch?: boolean;
 }
 
 export default function RequestCard({
@@ -46,7 +49,10 @@ export default function RequestCard({
   reverseActions,
   isSelected = false,
   hasNewMessage = false,
-  isEmergency = false
+  newMessageCount,
+  isEmergency = false,
+  highlightSearch = '',
+  isActiveMatch = false
 }: RequestCardProps) {
   const isWarning = variant === 'warning';
   const handlePrimaryClick = () => {
@@ -57,18 +63,47 @@ export default function RequestCard({
 
   return (
     <>
-      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
+      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${isActiveMatch ? styles.requestCardActiveMatch : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
         <div className={styles.roomBox}>
-          <span className={styles.roomNumber}>{roomNumber}</span>
+          <span className={styles.roomNumber}>
+            {highlightSearch ? (
+              <span dangerouslySetInnerHTML={{
+                __html: String(roomNumber).replace(
+                  new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                  '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
+                )
+              }} />
+            ) : roomNumber}
+          </span>
         </div>
 
         <div className={styles.contentSection}>
           <div className={styles.contentHeader}>
-            <h3 className={styles.title}>{title}</h3>
+            <h3 className={styles.title}>
+              {highlightSearch ? (
+                <span dangerouslySetInnerHTML={{
+                  __html: title.replace(
+                    new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                    '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
+                  )
+                }} />
+              ) : title}
+            </h3>
           </div>
           
           <div className={styles.contentBody}>
-            {description && <p className={styles.description}>{description}</p>}
+            {description && (
+              <p className={styles.description}>
+                {highlightSearch ? (
+                  <span dangerouslySetInnerHTML={{
+                    __html: description.replace(
+                      new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                      '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
+                    )
+                  }} />
+                ) : description}
+              </p>
+            )}
           </div>
 
           {(primaryActionText || secondaryActionText) && (
@@ -101,8 +136,10 @@ export default function RequestCard({
           {status === 'PENDING' && !isEmergency && (
             <Tag variant="red">NEW</Tag>
           )}
-          {status === 'IN_PROGRESS' && hasNewMessage && (
-            <div className={styles.redDot}></div>
+          {(status === 'IN_PROGRESS' || status === 'ASSIGNED') && hasNewMessage && (
+            <div className={styles.messageBadge}>
+              {newMessageCount && newMessageCount > 0 ? (newMessageCount > 99 ? '99+' : newMessageCount) : ''}
+            </div>
           )}
         </div>
       </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import Button from '@/components/ui/Button/Button';
-import InputField from '@/components/ui/Inputfield/InputField';
+import { useTranslation } from '@/app/useTranslation';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import { useStaffManagement, Staff } from './useStaffManagement';
 import { useRoleManagement } from '../RoleTab/useRoleManagement';
@@ -26,6 +27,7 @@ export default function StaffTab() {
   const { showToast } = useUiStore();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentMatch, setCurrentMatch] = useState(0);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | undefined>(undefined);
   
@@ -42,9 +44,32 @@ export default function StaffTab() {
     if (staffError) showToast(staffError, 'error');
   }, [staffError, showToast]);
 
-  const filteredStaff = staffList.filter((staff) =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStaff = React.useMemo(() => {
+    if (!searchTerm) return staffList;
+    const lower = searchTerm.toLowerCase();
+    return staffList.filter((staff) =>
+      staff.name.toLowerCase().includes(lower) ||
+      (staff.pin && String(staff.pin).includes(lower)) ||
+      getDeptName(staff.departmentId).toLowerCase().includes(lower) ||
+      getRoleName(staff.roleId).toLowerCase().includes(lower)
+    );
+  }, [staffList, departments, roles, searchTerm]);
+
+  useEffect(() => {
+    if (filteredStaff.length > 0 && currentMatch >= filteredStaff.length) {
+      setCurrentMatch(filteredStaff.length - 1);
+    }
+  }, [filteredStaff, currentMatch]);
+
+  const scrollToMatch = (index: number) => {
+    const target = filteredStaff[index];
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(`staff-row-${target.id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+  };
 
   const handleAddClick = () => {
     setEditingStaff(undefined);
@@ -95,12 +120,36 @@ export default function StaffTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ width: '300px' }}>
-          <InputField
-            variant="search"
-            placeholder="직원 이름 검색..."
+        <div style={{ width: '320px' }}>
+          <SmartSearchBar
+            inputWrapperStyle={{ flex: 1 }}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(val) => {
+              setSearchTerm(val);
+              setCurrentMatch(0);
+            }}
+            currentMatch={currentMatch}
+            totalMatches={searchTerm ? filteredStaff.length : 0}
+            onPrev={() => {
+              const newIndex = Math.max(0, currentMatch - 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onNext={() => {
+              const newIndex = Math.min(filteredStaff.length - 1, currentMatch + 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filteredStaff.length > 0) {
+                  const newIndex = (currentMatch + 1) % filteredStaff.length;
+                  setCurrentMatch(newIndex);
+                  scrollToMatch(newIndex);
+                }
+              }
+            }}
           />
         </div>
         <Button variant="primary" onClick={handleAddClick}>
@@ -122,18 +171,36 @@ export default function StaffTab() {
             <TableCell></TableCell>
           </TableHeader>
           {filteredStaff.length > 0 ? (
-            filteredStaff.map((staff) => (
-              <TableRow key={staff.id}>
+            filteredStaff.map((staff, idx) => {
+              const isActiveMatch = searchTerm && idx === currentMatch;
+              const highlightStyle = 'background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;';
+              
+              const getHighlighted = (text: string) => {
+                if (!searchTerm) return { __html: text };
+                return {
+                  __html: text.replace(
+                    new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                    `<mark style="${highlightStyle}">$1</mark>`
+                  )
+                };
+              };
+
+              return (
+              <TableRow key={staff.id} id={`staff-row-${staff.id}`} style={isActiveMatch ? { border: '2px solid var(--color-brand-500)', boxShadow: '0 0 0 4px var(--color-brand-100)' } : {}}>
                 <TableCell label="이름">
-                  <span style={{ font: 'var(--text-body-medium)' }}>{staff.name}</span>
+                  <span style={{ font: 'var(--text-body-medium)' }}>
+                    {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(staff.name)} /> : staff.name}
+                  </span>
                 </TableCell>
                 <TableCell label="부서">
-                  {getDeptName(staff.departmentId)}
+                  {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(getDeptName(staff.departmentId))} /> : getDeptName(staff.departmentId)}
                 </TableCell>
-                <TableCell label="역할">{getRoleName(staff.roleId)}</TableCell>
+                <TableCell label="역할">
+                  {searchTerm ? <span dangerouslySetInnerHTML={getHighlighted(getRoleName(staff.roleId))} /> : getRoleName(staff.roleId)}
+                </TableCell>
                 <TableCell label="PIN">
                   <code style={{ background: 'var(--color-gray-50)', padding: 'var(--space-4) var(--space-8)', borderRadius: 'var(--radius-sm)', font: 'var(--font-mono)' }}>
-                    {staff.pin}
+                  <span dangerouslySetInnerHTML={getHighlighted(staff.pin)} />
                   </code>
                 </TableCell>
                 <TableCell>
@@ -155,7 +222,8 @@ export default function StaffTab() {
                   </div>
                 </TableCell>
               </TableRow>
-            ))
+              );
+            })
           ) : (
             <TableRow>
               <TableCell>

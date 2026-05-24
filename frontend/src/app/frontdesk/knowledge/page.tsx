@@ -6,8 +6,7 @@ import InputField from '@/components/ui/Inputfield/InputField';
 import KnowledgeLibraryTab from './_components/KnowledgeLibraryTab/KnowledgeLibraryTab';
 import KnowledgeReviewTab from './_components/KnowledgeReviewTab/KnowledgeReviewTab';
 import { useTranslation } from '@/app/useTranslation';
-import ArrowUpIcon from '@/components/icons/ArrowUpIcon';
-import ArrowDownIcon from '@/components/icons/ArrowDownIcon';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import styles from './page.module.css';
 
 export default function KnowledgeManagementPage() {
@@ -75,59 +74,34 @@ export default function KnowledgeManagementPage() {
         <h1 className={styles.pageTitle}>{t.frontdeskPage.sidebar.menus.rag}</h1>
         <div className={styles.headerActions}>
           <div className={styles.searchBarWrapper}>
-            <div className={styles.searchInputContainer}>
-              <InputField 
-                variant="search" 
-                placeholder={t.frontdeskPage.rag.searchPlaceholder} 
-                value={searchValue}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (matches.length > 0) {
-                      const nextIndex = (currentMatchIndex + 1) % matches.length;
-                      setCurrentMatchIndex(nextIndex);
-                      setActiveMatchId(matches[nextIndex]);
-                    }
+            <SmartSearchBar
+              inputWrapperStyle={{ flex: 1 }}
+              value={searchValue}
+              onChange={(val) => handleSearchChange(val)}
+              placeholder={t.frontdeskPage.rag.searchPlaceholder}
+              currentMatch={currentMatchIndex}
+              totalMatches={matches.length}
+              onPrev={() => {
+                const newIndex = Math.max(0, currentMatchIndex - 1);
+                setCurrentMatchIndex(newIndex);
+                setActiveMatchId(matches[newIndex]);
+              }}
+              onNext={() => {
+                const newIndex = Math.min(matches.length - 1, currentMatchIndex + 1);
+                setCurrentMatchIndex(newIndex);
+                setActiveMatchId(matches[newIndex]);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (matches.length > 0) {
+                    const nextIndex = (currentMatchIndex + 1) % matches.length;
+                    setCurrentMatchIndex(nextIndex);
+                    setActiveMatchId(matches[nextIndex]);
                   }
-                }}
-              />
-            </div>
-            {searchValue && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--color-gray-600)', whiteSpace: 'nowrap' }}>
-                {matches.length > 0 ? (
-                  <>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <button 
-                        onClick={() => {
-                          const newIndex = Math.max(0, currentMatchIndex - 1);
-                          setCurrentMatchIndex(newIndex);
-                          setActiveMatchId(matches[newIndex]);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
-                        aria-label="Previous match"
-                      >
-                        <ArrowUpIcon width={16} height={16} color="var(--color-gray-600)" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const newIndex = Math.min(matches.length - 1, currentMatchIndex + 1);
-                          setCurrentMatchIndex(newIndex);
-                          setActiveMatchId(matches[newIndex]);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
-                        aria-label="Next match"
-                      >
-                        <ArrowDownIcon width={16} height={16} color="var(--color-gray-600)" />
-                      </button>
-                    </div>
-                    <span>{currentMatchIndex + 1} / {matches.length}</span>
-                  </>
-                ) : (
-                  <span>0 / 0</span>
-                )}
-              </div>
-            )}
+                }
+              }}
+            />
           </div>
         </div>
       </div>

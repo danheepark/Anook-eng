@@ -12,6 +12,8 @@ import ApproveEscalationModal from './_components/ApproveEscalationModal/Approve
 import RejectEscalationModal from './_components/RejectEscalationModal/RejectEscalationModal';
 import ApproveCancellationModal from './_components/ApproveCancellationModal/ApproveCancellationModal';
 import RejectCancellationModal from './_components/RejectCancellationModal/RejectCancellationModal';
+import RequestDetailModal from './_components/RequestDetailModal/RequestDetailModal';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import ChatPanel from './_components/ChatPanel/ChatPanel';
 import RequestDetailPanel from './_components/RequestDetailPanel/RequestDetailPanel';
 import RegisterTrainingModal from './_components/RegisterTrainingModal/RegisterTrainingModal';
@@ -25,6 +27,7 @@ export default function FrontDeskPage() {
   const [activeTab, setActiveTab] = useState('active');
   const [mobileView, setMobileView] = useState<'list' | 'chat' | 'detail'>('list');
   const [roomSearchValue, setRoomSearchValue] = useState('');
+  const [roomCurrentMatch, setRoomCurrentMatch] = useState(0);
   const [chatSearchValue, setChatSearchValue] = useState('');
   const { requests, loading, error, refetch } = useFrontdeskRequests('FRONT');
   // 긴급대응(EMERGENCY) 부서 요청도 프론트 데스크에서 최우선으로 표시
@@ -64,8 +67,8 @@ export default function FrontDeskPage() {
   const [approveTarget, setApproveTarget] = useState<number | null>(null);
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
 
-  // 새 메시지 알림 (레드닷) 상태
-  const [newMessageRoomNos, setNewMessageRoomNos] = useState<Set<string>>(new Set());
+  // 새로 온 메시지 개수 추적 (roomNo -> count)
+  const [newMessageCounts, setNewMessageCounts] = useState<Record<string, number>>({});
   const { subscribe } = useSSE();
   const activeChatRoomRef = useRef(activeChatRoom);
   useEffect(() => { activeChatRoomRef.current = activeChatRoom; }, [activeChatRoom]);
@@ -115,8 +118,8 @@ export default function FrontDeskPage() {
         setLastMessageTimes(prev => ({ ...prev, [String(roomNo)]: Date.now() }));
       }
 
-      // 고객/AI 메시지인 경우 레드닷 + 마지막 메시지 갱신
-      if ((type === 'GUEST_MESSAGE' || type === 'AI_RESPONSE') && roomNo) {
+      // 고객 메시지 또는 새로운 요청 생성인 경우 레드닷 갱신
+      if ((type === 'GUEST_MESSAGE' || type === 'NEW_REQUEST') && roomNo) {
         if (type === 'GUEST_MESSAGE' && payload.content) {
           setLastGuestMessages(prev => ({ ...prev, [String(roomNo)]: String(payload.content) }));
         }
@@ -125,14 +128,13 @@ export default function FrontDeskPage() {
         if (activeChatRoomRef.current?.roomNumber === String(roomNo)) return;
         
         const relatedRequests = activeListRef.current.filter(r => String(r.roomNo) === String(roomNo));
-        const hasInProgress = relatedRequests.some(r => r.status === 'IN_PROGRESS' || r.status === 'ASSIGNED');
+        const hasActive = relatedRequests.some(r => r.status === 'IN_PROGRESS' || r.status === 'ASSIGNED' || r.status === 'PENDING' || r.status === 'ESCALATED');
         
-        if (hasInProgress) {
-          setNewMessageRoomNos(prev => {
-            const next = new Set(prev);
-            next.add(String(roomNo));
-            return next;
-          });
+        if (hasActive || type === 'NEW_REQUEST') {
+          setNewMessageCounts(prev => ({
+            ...prev,
+            [String(roomNo)]: (prev[String(roomNo)] || 0) + 1
+          }));
         }
       }
     });
@@ -214,7 +216,7 @@ export default function FrontDeskPage() {
     }
   };
 
-  const getGroupedRooms = () => {
+  const groupedRooms = React.useMemo(() => {
     const activeList = [...pending, ...inProgress];
     const completedList = completed;
     const targetList = activeTab === 'active' ? activeList : completedList;
@@ -266,18 +268,37 @@ export default function FrontDeskPage() {
       return timeB - timeA;
     });
 
-    if (roomSearchValue) {
-      const query = roomSearchValue.toLowerCase();
-      return groupedRooms.filter(room => 
-        String(room.roomNo).toLowerCase().includes(query) || 
-        room.summaryText.toLowerCase().includes(query) || 
-        (room.rawText && room.rawText.toLowerCase().includes(query))
-      );
-    }
-
     return groupedRooms;
+  }, [activeTab, pending, inProgress, completed, lastMessageTimes]);
+
+  const filteredGroupedRooms = React.useMemo(() => {
+    if (!roomSearchValue) return groupedRooms;
+    const query = roomSearchValue.toLowerCase();
+    return groupedRooms.filter(room =>
+      String(room.roomNo).toLowerCase().includes(query) ||
+      room.summaryText.toLowerCase().includes(query) ||
+      (room.rawText && room.rawText.toLowerCase().includes(query)) ||
+      (lastGuestMessages[String(room.roomNo)] && lastGuestMessages[String(room.roomNo)].toLowerCase().includes(query))
+    );
+  }, [groupedRooms, roomSearchValue, lastGuestMessages]);
+
+  const scrollToRoomMatch = (index: number) => {
+    const target = filteredGroupedRooms[index];
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(`room-card-${target.roomNo}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 50);
+    }
   };
-  const groupedRooms = getGroupedRooms();
+
+  React.useEffect(() => {
+    if (filteredGroupedRooms.length > 0 && roomCurrentMatch >= filteredGroupedRooms.length) {
+      setRoomCurrentMatch(filteredGroupedRooms.length - 1);
+    }
+  }, [filteredGroupedRooms, roomCurrentMatch]);
 
   useEffect(() => {
     // RAG 등록 플로우 진행 중에는 자동 카드 선택을 건너뜀 (모달이 닫힌 후 onClose에서 처리)
@@ -299,7 +320,7 @@ export default function FrontDeskPage() {
     } else if (activeChatRoom) {
       setActiveChatRoom(null);
     }
-  }, [activeTab, pending, inProgress, completed, activeChatRoom, isRagFlowActive]);
+  }, [groupedRooms, activeChatRoom, isRagFlowActive]);
 
 
   const handleCardClick = (requestId: number) => {
@@ -358,12 +379,36 @@ export default function FrontDeskPage() {
           <div className={styles.leftPaneContent}>
             {/* Room Search Bar */}
           <div style={{ marginBottom: 'var(--space-16)' }}>
-            <InputField
-              variant="search"
-              placeholder="객실 번호 또는 요청 내용 검색..."
-              value={roomSearchValue}
-              onChange={(e) => setRoomSearchValue(e.target.value)}
-            />
+              <SmartSearchBar
+                inputWrapperStyle={{ flex: 1 }}
+                value={roomSearchValue}
+                onChange={(val) => {
+                  setRoomSearchValue(val);
+                  setRoomCurrentMatch(0);
+                }}
+                currentMatch={roomCurrentMatch}
+                totalMatches={roomSearchValue ? filteredGroupedRooms.length : 0}
+                onPrev={() => {
+                  const newIndex = Math.max(0, roomCurrentMatch - 1);
+                  setRoomCurrentMatch(newIndex);
+                  scrollToRoomMatch(newIndex);
+                }}
+                onNext={() => {
+                  const newIndex = Math.min(filteredGroupedRooms.length - 1, roomCurrentMatch + 1);
+                  setRoomCurrentMatch(newIndex);
+                  scrollToRoomMatch(newIndex);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (filteredGroupedRooms.length > 0) {
+                      const newIndex = (roomCurrentMatch + 1) % filteredGroupedRooms.length;
+                      setRoomCurrentMatch(newIndex);
+                      scrollToRoomMatch(newIndex);
+                    }
+                  }
+                }}
+              />
           </div>
           {/* Tabs inside left pane */}
           <div style={{ marginBottom: 'var(--space-16)' }}>
@@ -381,23 +426,25 @@ export default function FrontDeskPage() {
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-gray-400)' }}>{t.common.loading}</div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-gray-400)' }}>{t.common.error}: {error}</div>
-        ) : groupedRooms.length === 0 ? (
+        ) : filteredGroupedRooms.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-gray-400)' }}>{t.frontdeskPage.frontDesk.empty}</div>
         ) : (
           <div className={styles.cardGrid}>
-            {groupedRooms.map(room => (
-              <RequestCard
-                key={room.roomNo}
-                roomNumber={room.roomNo}
-                title={room.summaryText}
-                description={lastGuestMessages[String(room.roomNo)] || room.rawText || '요청 내용이 없습니다.'}
-                statusText={mapStatusText(room.repStatus)}
-                statusVariant={mapStatusVariant(room.repStatus)}
-                createdAt={room.createdAt}
-                isSelected={activeChatRoom?.roomNumber === room.roomNo}
-                primaryActionText={getPrimaryActionText(room)}
-                secondaryActionText={getSecondaryActionText(room)}
-                onPrimaryAction={() => {
+            {filteredGroupedRooms.map(room => (
+              <div key={room.roomNo} id={`room-card-${room.roomNo}`}>
+                <RequestCard
+                  roomNumber={room.roomNo}
+                  title={room.summaryText}
+                  description={lastGuestMessages[String(room.roomNo)] || room.rawText || '요청 내용이 없습니다.'}
+                  statusText={mapStatusText(room.repStatus)}
+                  statusVariant={mapStatusVariant(room.repStatus)}
+                  createdAt={room.createdAt}
+                  isSelected={activeChatRoom?.roomNumber === room.roomNo}
+                  isActiveMatch={roomSearchValue ? filteredGroupedRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
+                  highlightSearch={roomSearchValue}
+                  primaryActionText={getPrimaryActionText(room)}
+                  secondaryActionText={getSecondaryActionText(room)}
+                  onPrimaryAction={() => {
                   if (activeTab === 'active') {
                     if (room.repStatus === 'PENDING' || room.repStatus === 'ESCALATED') {
                       handleStatusChange(room.allIds, 'IN_PROGRESS');
@@ -419,10 +466,10 @@ export default function FrontDeskPage() {
                   setActiveChatRoom({ roomNumber: room.roomNo, requestIds: room.allIds, representativeId: room.representativeId, status: room.repStatus, summary: room.summaryText, initialMessage: room.rawText || room.summaryText });
                   setDetailTarget(null);
                   setMobileView('chat');
-                  // 레드닷 해제
-                  setNewMessageRoomNos(prev => {
-                    const next = new Set(prev);
-                    next.delete(room.roomNo);
+                  // 레드닷(배지) 초기화
+                  setNewMessageCounts(prev => {
+                    const next = { ...prev };
+                    delete next[room.roomNo];
                     return next;
                   });
                 }}
@@ -430,9 +477,11 @@ export default function FrontDeskPage() {
                 requestId={room.representativeId}
                 status={room.repStatus}
                 onStatusChange={handleStatusChange as any}
-                hasNewMessage={newMessageRoomNos.has(room.roomNo)}
+                hasNewMessage={!!newMessageCounts[room.roomNo]}
+                newMessageCount={newMessageCounts[room.roomNo]}
                 isEmergency={room.highestPriority === 'EMERGENCY'}
               />
+              </div>
             ))}
           </div>
         )}

@@ -1,69 +1,38 @@
-.indicator {
+.container {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 10px 4px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--color-gray-200);
-  background-color: var(--color-white);
-  height: 32px;
+  gap: 2px;
   box-sizing: border-box;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.indicatorHealthy {
-  border-color: color-mix(in srgb, #22c55e 35%, var(--color-gray-200));
-  background-color: color-mix(in srgb, #22c55e 5%, var(--color-white));
-}
-
-.indicatorUnhealthy {
-  border-color: var(--color-error, #EF4444);
-  background-color: color-mix(in srgb, var(--color-error, #EF4444) 8%, var(--color-white));
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .dotHealthy {
-  background-color: #22c55e;
-  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
-  animation: pulseGreen 2s infinite;
+  background-color: var(--color-success);
 }
 
 .dotUnhealthy {
-  background-color: var(--color-error, #EF4444);
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
-}
-
-@keyframes pulseGreen {
-  0% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
+  background-color: var(--color-error);
 }
 
 .label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.4px;
   font-variant-numeric: tabular-nums;
-}
-
-.labelHealthy {
-  color: #16a34a;
-}
-
-.labelUnhealthy {
-  color: var(--color-error, #EF4444);
+  line-height: 1;
 }
 
 .checkButton {
@@ -74,17 +43,12 @@
   background: transparent;
   cursor: pointer;
   padding: 2px;
-  color: var(--color-gray-500);
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  margin-left: 2px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  color: var(--color-gray-400);
+  transition: color 0.15s ease;
 }
 
 .checkButton:hover:not(:disabled) {
-  background-color: var(--color-gray-100);
-  color: var(--color-gray-800);
+  color: var(--color-gray-500);
 }
 
 .checkButton:disabled {
@@ -108,8 +72,5 @@
 @media (max-width: 768px) {
   .label {
     display: none;
-  }
-  .indicator {
-    padding: 4px 6px 4px 10px;
   }
 }

@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import Tabs from '@/components/ui/Tab/Tabs';
 import TaskColumn from '@/components/ui/TaskBoard/TaskColumn';
 import TaskTicket from '@/components/ui/TaskBoard/TaskTicket';
-import InputField from '@/components/ui/Inputfield/InputField';
+import { MoreIcon } from '@/components/icons';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import TaskDetailModal from './_components/TaskDetailModal/TaskDetailModal';
 import { useTasks, StaffTask } from './useTasks';
 import BoardSkeleton from './_components/BoardSkeleton/BoardSkeleton';
@@ -90,7 +91,8 @@ function DashboardContent() {
   const { tasks, loading, error, acceptTask, completeTask, transferTask, approveCancellation, rejectCancellation } = useTasks(view === 'my' ? 'my' : 'dept');
 
   // 필터 및 모달 상태 관리
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchValue, setSearchValue] = useState('');
+  const [currentMatch, setCurrentMatch] = useState(0);
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [selectedTask, setSelectedTask] = useState<StaffTask | null>(null);
   const [activeTab, setActiveTab] = useState<'TODO' | 'IN_PROGRESS' | 'DONE'>('TODO');
@@ -130,14 +132,30 @@ function DashboardContent() {
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
       if (priorityFilter !== 'ALL' && task.priority !== priorityFilter) return false;
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+      if (searchValue) {
+        const query = searchValue.toLowerCase();
         return task.roomNumber.toString().includes(query) ||
           task.summary.toLowerCase().includes(query);
       }
       return true;
     });
-  }, [tasks, searchQuery, priorityFilter]);
+  }, [tasks, searchValue, priorityFilter]);
+
+  useEffect(() => {
+    if (filteredTasks.length > 0 && currentMatch >= filteredTasks.length) {
+      setCurrentMatch(filteredTasks.length - 1);
+    }
+  }, [filteredTasks, currentMatch]);
+
+  const scrollToMatch = (index: number) => {
+    const target = filteredTasks[index];
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(`ticket-${target.id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+  };
 
   const boardData = useMemo(() => {
     const sortByCancelRequested = (taskList: typeof filteredTasks) => {
@@ -173,14 +191,38 @@ function DashboardContent() {
         </header>
 
         <div className={styles.toolbar}>
-          <div className={styles.searchBox}>
-            <InputField
-              variant="search"
-              placeholder="객실번호 또는 내용 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <div className={styles.searchBarContainer}>
+          <SmartSearchBar
+            inputWrapperStyle={{ flex: 1 }}
+            value={searchValue}
+            onChange={(val) => {
+              setSearchValue(val);
+              setCurrentMatch(0);
+            }}
+            currentMatch={currentMatch}
+            totalMatches={searchValue ? filteredTasks.length : 0}
+            onPrev={() => {
+              const newIndex = Math.max(0, currentMatch - 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onNext={() => {
+              const newIndex = Math.min(filteredTasks.length - 1, currentMatch + 1);
+              setCurrentMatch(newIndex);
+              scrollToMatch(newIndex);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filteredTasks.length > 0) {
+                  const newIndex = (currentMatch + 1) % filteredTasks.length;
+                  setCurrentMatch(newIndex);
+                  scrollToMatch(newIndex);
+                }
+              }
+            }}
+          />
+        </div>
         </div>
       </div>
 
@@ -242,6 +284,8 @@ function DashboardContent() {
                               completeTask(task.id, task.version);
                             } : undefined}
                             entities={task.entities}
+                            highlightSearch={searchValue}
+                            isActiveMatch={searchValue ? filteredTasks[currentMatch]?.id === task.id : false}
                           />
                         </div>
                       ))}

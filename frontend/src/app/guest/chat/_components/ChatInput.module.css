@@ -321,14 +321,14 @@
 
 /* Staff specific styles */
 .staffWrapper {
-  border-radius: var(--radius-md);
+  border-radius: 32px;
   border: 1px solid var(--color-gray-200);
-  background-color: transparent;
+  background-color: var(--color-gray-100);
   box-shadow: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
   min-height: 48px;
   height: auto;
-  padding: 0 4px 0 0;
+  padding: 0 8px 0 8px;
   align-items: flex-end;
 }
 
@@ -343,7 +343,8 @@
 }
 
 .staffWrapper:focus-within {
-  border-color: var(--color-primary);
+  border-color: var(--color-gray-400);
+  background-color: var(--color-gray-50);
 }
 
 .staffWrapper::before,
@@ -357,7 +358,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-md);
+  border-radius: 50%;
   border: none;
   background: transparent;
   box-shadow: none;
@@ -367,7 +368,7 @@
 }
 
 .staffIconButton:hover {
-  background-color: var(--color-gray-100);
+  background-color: rgba(0, 0, 0, 0.05);
   transform: none;
   box-shadow: none;
 }
