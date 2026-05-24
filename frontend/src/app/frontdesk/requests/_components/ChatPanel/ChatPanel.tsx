@@ -3,8 +3,8 @@ import { ChevronLeft, MoreVertical } from 'lucide-react';
 import styles from './ChatPanel.module.css';
 import ChatBubble from '@/app/guest/chat/_components/ChatBubble';
 import ChatInput from '@/app/guest/chat/_components/ChatInput';
-import { CancelIcon, ArrowUpIcon, ArrowDownIcon } from '@/components/icons';
-import InputField from '@/components/ui/Inputfield/InputField';
+import { CancelIcon } from '@/components/icons';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import { useSSE } from '@/app/useSSE';
 import { useTranslation } from '@/app/useTranslation';
 import Button from '@/components/ui/Button/Button';
@@ -445,41 +445,17 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
           </div>
           <div className={styles.headerRight} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {showSearch && (
-              <div className={styles.chatSearchContainer} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '240px' }}>
-                  <InputField
-                    variant="search"
-                    placeholder="대화 내용 검색..."
-                    value={internalSearch}
-                    onChange={(e) => setInternalSearch(e.target.value)}
-                  />
-                </div>
-                {internalSearch && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--color-gray-600)', whiteSpace: 'nowrap' }}>
-                    {matchIndices.length > 0 ? (
-                      <>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <button 
-                            onClick={() => setCurrentMatch(p => Math.max(0, p - 1))}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
-                          >
-                            <ArrowUpIcon width={16} height={16} color="var(--color-gray-600)" />
-                          </button>
-                          <button 
-                            onClick={() => setCurrentMatch(p => Math.min(matchIndices.length - 1, p + 1))}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
-                          >
-                            <ArrowDownIcon width={16} height={16} color="var(--color-gray-600)" />
-                          </button>
-                        </div>
-                        <span>{currentMatch + 1} / {matchIndices.length}</span>
-                      </>
-                    ) : (
-                      <span>0 / 0</span>
-                    )}
-                  </div>
-                )}
-              </div>
+              <SmartSearchBar
+                className={styles.chatSearchContainer}
+                inputWrapperStyle={{ width: '240px' }}
+                placeholder="대화 내용 검색..."
+                value={internalSearch}
+                onChange={(val) => setInternalSearch(val)}
+                currentMatch={currentMatch}
+                totalMatches={matchIndices.length}
+                onPrev={() => setCurrentMatch(p => Math.max(0, p - 1))}
+                onNext={() => setCurrentMatch(p => Math.min(matchIndices.length - 1, p + 1))}
+              />
             )}
             
             {headerRightContent ? headerRightContent : (

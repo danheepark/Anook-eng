@@ -6,8 +6,7 @@ import SummaryCard from '@/components/ui/Card/SummaryCard';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import Button from '@/components/ui/Button/Button';
 import LogDataModal from '@/components/ui/Modal/LogDataModal';
-import ArrowUpIcon from '@/components/icons/ArrowUpIcon';
-import ArrowDownIcon from '@/components/icons/ArrowDownIcon';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import useAiLogs, { AiLogDetail } from './useAiLogs';
@@ -166,59 +165,34 @@ export default function AiRoutingPage() {
         <h1 className={styles.title}>{t.frontdeskPage.taskBoard.titles.aiRouting}</h1>
         <div className={styles.headerActions}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
-            <div style={{ flex: 1 }}>
-              <InputField 
-                variant="search" 
-                placeholder={t.frontdeskPage.taskBoard.searchPlaceholder} 
-                value={searchValue}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (matches.length > 0) {
-                      const nextIndex = (currentMatchIndex + 1) % matches.length;
-                      setCurrentMatchIndex(nextIndex);
-                      setActiveMatchId(matches[nextIndex]);
-                    }
+            <SmartSearchBar
+              inputWrapperStyle={{ flex: 1 }}
+              value={searchValue}
+              onChange={(val) => handleSearchChange(val)}
+              placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}
+              currentMatch={currentMatchIndex}
+              totalMatches={matches.length}
+              onPrev={() => {
+                const newIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
+                setCurrentMatchIndex(newIndex);
+                setActiveMatchId(matches[newIndex]);
+              }}
+              onNext={() => {
+                const newIndex = (currentMatchIndex + 1) % matches.length;
+                setCurrentMatchIndex(newIndex);
+                setActiveMatchId(matches[newIndex]);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (matches.length > 0) {
+                    const nextIndex = (currentMatchIndex + 1) % matches.length;
+                    setCurrentMatchIndex(nextIndex);
+                    setActiveMatchId(matches[nextIndex]);
                   }
-                }}
-              />
-            </div>
-            {searchValue && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--color-gray-600)', whiteSpace: 'nowrap', background: 'var(--color-gray-50)', padding: '6px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-gray-200)' }}>
-                {matches.length > 0 ? (
-                  <>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <button 
-                        onClick={() => {
-                          const newIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
-                          setCurrentMatchIndex(newIndex);
-                          setActiveMatchId(matches[newIndex]);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
-                        aria-label="Previous match"
-                      >
-                        <ArrowUpIcon width={16} height={16} color="var(--color-gray-600)" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const newIndex = (currentMatchIndex + 1) % matches.length;
-                          setCurrentMatchIndex(newIndex);
-                          setActiveMatchId(matches[newIndex]);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
-                        aria-label="Next match"
-                      >
-                        <ArrowDownIcon width={16} height={16} color="var(--color-gray-600)" />
-                      </button>
-                    </div>
-                    <span>{currentMatchIndex + 1} / {matches.length}</span>
-                  </>
-                ) : (
-                  <span>0 / 0</span>
-                )}
-              </div>
-            )}
+                }
+              }}
+            />
           </div>
         </div>
       </div>

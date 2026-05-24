@@ -12,6 +12,8 @@ import ApproveEscalationModal from './_components/ApproveEscalationModal/Approve
 import RejectEscalationModal from './_components/RejectEscalationModal/RejectEscalationModal';
 import ApproveCancellationModal from './_components/ApproveCancellationModal/ApproveCancellationModal';
 import RejectCancellationModal from './_components/RejectCancellationModal/RejectCancellationModal';
+import RequestDetailModal from './_components/RequestDetailModal/RequestDetailModal';
+import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import ChatPanel from './_components/ChatPanel/ChatPanel';
 import RequestDetailPanel from './_components/RequestDetailPanel/RequestDetailPanel';
 import RegisterTrainingModal from './_components/RegisterTrainingModal/RegisterTrainingModal';
@@ -25,6 +27,7 @@ export default function FrontDeskPage() {
   const [activeTab, setActiveTab] = useState('active');
   const [mobileView, setMobileView] = useState<'list' | 'chat' | 'detail'>('list');
   const [roomSearchValue, setRoomSearchValue] = useState('');
+  const [roomCurrentMatch, setRoomCurrentMatch] = useState(0);
   const [chatSearchValue, setChatSearchValue] = useState('');
   const { requests, loading, error, refetch } = useFrontdeskRequests('FRONT');
   // 긴급대응(EMERGENCY) 부서 요청도 프론트 데스크에서 최우선으로 표시
@@ -265,17 +268,36 @@ export default function FrontDeskPage() {
       return timeB - timeA;
     });
 
-    if (roomSearchValue) {
-      const query = roomSearchValue.toLowerCase();
-      return groupedRooms.filter(room => 
-        String(room.roomNo).toLowerCase().includes(query) || 
-        room.summaryText.toLowerCase().includes(query) || 
-        (room.rawText && room.rawText.toLowerCase().includes(query))
-      );
-    }
-
     return groupedRooms;
-  }, [activeTab, pending, inProgress, completed, lastMessageTimes, roomSearchValue]);
+  }, [activeTab, pending, inProgress, completed, lastMessageTimes]);
+
+  const roomMatches = React.useMemo(() => {
+    if (!roomSearchValue) return [];
+    const query = roomSearchValue.toLowerCase();
+    return groupedRooms.filter(room =>
+      String(room.roomNo).toLowerCase().includes(query) ||
+      room.summaryText.toLowerCase().includes(query) ||
+      (room.rawText && room.rawText.toLowerCase().includes(query))
+    );
+  }, [groupedRooms, roomSearchValue]);
+
+  const scrollToRoomMatch = (index: number) => {
+    const target = roomMatches[index];
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(`room-card-${target.roomNo}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 50);
+    }
+  };
+
+  React.useEffect(() => {
+    if (roomMatches.length > 0 && roomCurrentMatch >= roomMatches.length) {
+      setRoomCurrentMatch(roomMatches.length - 1);
+    }
+  }, [roomMatches, roomCurrentMatch]);
 
   useEffect(() => {
     // RAG 등록 플로우 진행 중에는 자동 카드 선택을 건너뜀 (모달이 닫힌 후 onClose에서 처리)
@@ -356,12 +378,37 @@ export default function FrontDeskPage() {
           <div className={styles.leftPaneContent}>
             {/* Room Search Bar */}
           <div style={{ marginBottom: 'var(--space-16)' }}>
-            <InputField
-              variant="search"
-              placeholder="객실 번호 또는 요청 내용 검색..."
-              value={roomSearchValue}
-              onChange={(e) => setRoomSearchValue(e.target.value)}
-            />
+              <SmartSearchBar
+                inputWrapperStyle={{ flex: 1 }}
+                value={roomSearchValue}
+                onChange={(val) => {
+                  setRoomSearchValue(val);
+                  setRoomCurrentMatch(0);
+                }}
+                placeholder="검색어를 입력하세요..."
+                currentMatch={roomCurrentMatch}
+                totalMatches={roomMatches.length}
+                onPrev={() => {
+                  const newIndex = Math.max(0, roomCurrentMatch - 1);
+                  setRoomCurrentMatch(newIndex);
+                  scrollToRoomMatch(newIndex);
+                }}
+                onNext={() => {
+                  const newIndex = Math.min(roomMatches.length - 1, roomCurrentMatch + 1);
+                  setRoomCurrentMatch(newIndex);
+                  scrollToRoomMatch(newIndex);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (roomMatches.length > 0) {
+                      const newIndex = (roomCurrentMatch + 1) % roomMatches.length;
+                      setRoomCurrentMatch(newIndex);
+                      scrollToRoomMatch(newIndex);
+                    }
+                  }
+                }}
+              />
           </div>
           {/* Tabs inside left pane */}
           <div style={{ marginBottom: 'var(--space-16)' }}>
@@ -393,6 +440,8 @@ export default function FrontDeskPage() {
                 statusVariant={mapStatusVariant(room.repStatus)}
                 createdAt={room.createdAt}
                 isSelected={activeChatRoom?.roomNumber === room.roomNo}
+                isActiveMatch={roomMatches[roomCurrentMatch]?.roomNo === room.roomNo}
+                highlightSearch={roomSearchValue}
                 primaryActionText={getPrimaryActionText(room)}
                 secondaryActionText={getSecondaryActionText(room)}
                 onPrimaryAction={() => {

@@ -25,6 +25,8 @@ export interface RequestCardProps {
   hasNewMessage?: boolean;
   newMessageCount?: number;
   isEmergency?: boolean;
+  highlightSearch?: string;
+  isActiveMatch?: boolean;
 }
 
 export default function RequestCard({
@@ -48,7 +50,9 @@ export default function RequestCard({
   isSelected = false,
   hasNewMessage = false,
   newMessageCount,
-  isEmergency = false
+  isEmergency = false,
+  highlightSearch = '',
+  isActiveMatch = false
 }: RequestCardProps) {
   const isWarning = variant === 'warning';
   const handlePrimaryClick = () => {
@@ -59,18 +63,38 @@ export default function RequestCard({
 
   return (
     <>
-      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
+      <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${isActiveMatch ? styles.requestCardActiveMatch : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
         <div className={styles.roomBox}>
           <span className={styles.roomNumber}>{roomNumber}</span>
         </div>
 
         <div className={styles.contentSection}>
           <div className={styles.contentHeader}>
-            <h3 className={styles.title}>{title}</h3>
+            <h3 className={styles.title}>
+              {highlightSearch ? (
+                <span dangerouslySetInnerHTML={{
+                  __html: title.replace(
+                    new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                    '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
+                  )
+                }} />
+              ) : title}
+            </h3>
           </div>
           
           <div className={styles.contentBody}>
-            {description && <p className={styles.description}>{description}</p>}
+            {description && (
+              <p className={styles.description}>
+                {highlightSearch ? (
+                  <span dangerouslySetInnerHTML={{
+                    __html: description.replace(
+                      new RegExp(`(${highlightSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                      '<mark style="background-color: var(--color-brand-100); color: var(--color-brand-500); padding: 0 2px; border-radius: 2px;">$1</mark>'
+                    )
+                  }} />
+                ) : description}
+              </p>
+            )}
           </div>
 
           {(primaryActionText || secondaryActionText) && (
