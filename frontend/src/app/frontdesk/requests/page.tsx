@@ -271,18 +271,19 @@ export default function FrontDeskPage() {
     return groupedRooms;
   }, [activeTab, pending, inProgress, completed, lastMessageTimes]);
 
-  const roomMatches = React.useMemo(() => {
-    if (!roomSearchValue) return [];
+  const filteredGroupedRooms = React.useMemo(() => {
+    if (!roomSearchValue) return groupedRooms;
     const query = roomSearchValue.toLowerCase();
     return groupedRooms.filter(room =>
       String(room.roomNo).toLowerCase().includes(query) ||
       room.summaryText.toLowerCase().includes(query) ||
-      (room.rawText && room.rawText.toLowerCase().includes(query))
+      (room.rawText && room.rawText.toLowerCase().includes(query)) ||
+      (lastGuestMessages[String(room.roomNo)] && lastGuestMessages[String(room.roomNo)].toLowerCase().includes(query))
     );
-  }, [groupedRooms, roomSearchValue]);
+  }, [groupedRooms, roomSearchValue, lastGuestMessages]);
 
   const scrollToRoomMatch = (index: number) => {
-    const target = roomMatches[index];
+    const target = filteredGroupedRooms[index];
     if (target) {
       setTimeout(() => {
         const el = document.getElementById(`room-card-${target.roomNo}`);
@@ -294,10 +295,10 @@ export default function FrontDeskPage() {
   };
 
   React.useEffect(() => {
-    if (roomMatches.length > 0 && roomCurrentMatch >= roomMatches.length) {
-      setRoomCurrentMatch(roomMatches.length - 1);
+    if (filteredGroupedRooms.length > 0 && roomCurrentMatch >= filteredGroupedRooms.length) {
+      setRoomCurrentMatch(filteredGroupedRooms.length - 1);
     }
-  }, [roomMatches, roomCurrentMatch]);
+  }, [filteredGroupedRooms, roomCurrentMatch]);
 
   useEffect(() => {
     // RAG 등록 플로우 진행 중에는 자동 카드 선택을 건너뜀 (모달이 닫힌 후 onClose에서 처리)
@@ -387,22 +388,22 @@ export default function FrontDeskPage() {
                 }}
                 placeholder="검색어를 입력하세요..."
                 currentMatch={roomCurrentMatch}
-                totalMatches={roomMatches.length}
+                totalMatches={roomSearchValue ? filteredGroupedRooms.length : 0}
                 onPrev={() => {
                   const newIndex = Math.max(0, roomCurrentMatch - 1);
                   setRoomCurrentMatch(newIndex);
                   scrollToRoomMatch(newIndex);
                 }}
                 onNext={() => {
-                  const newIndex = Math.min(roomMatches.length - 1, roomCurrentMatch + 1);
+                  const newIndex = Math.min(filteredGroupedRooms.length - 1, roomCurrentMatch + 1);
                   setRoomCurrentMatch(newIndex);
                   scrollToRoomMatch(newIndex);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (roomMatches.length > 0) {
-                      const newIndex = (roomCurrentMatch + 1) % roomMatches.length;
+                    if (filteredGroupedRooms.length > 0) {
+                      const newIndex = (roomCurrentMatch + 1) % filteredGroupedRooms.length;
                       setRoomCurrentMatch(newIndex);
                       scrollToRoomMatch(newIndex);
                     }
@@ -426,11 +427,11 @@ export default function FrontDeskPage() {
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-gray-400)' }}>{t.common.loading}</div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-gray-400)' }}>{t.common.error}: {error}</div>
-        ) : groupedRooms.length === 0 ? (
+        ) : filteredGroupedRooms.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-gray-400)' }}>{t.frontdeskPage.frontDesk.empty}</div>
         ) : (
           <div className={styles.cardGrid}>
-            {groupedRooms.map(room => (
+            {filteredGroupedRooms.map(room => (
               <div key={room.roomNo} id={`room-card-${room.roomNo}`}>
                 <RequestCard
                   roomNumber={room.roomNo}
@@ -440,7 +441,7 @@ export default function FrontDeskPage() {
                   statusVariant={mapStatusVariant(room.repStatus)}
                   createdAt={room.createdAt}
                   isSelected={activeChatRoom?.roomNumber === room.roomNo}
-                  isActiveMatch={roomMatches[roomCurrentMatch]?.roomNo === room.roomNo}
+                  isActiveMatch={roomSearchValue ? filteredGroupedRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
                   highlightSearch={roomSearchValue}
                   primaryActionText={getPrimaryActionText(room)}
                   secondaryActionText={getSecondaryActionText(room)}

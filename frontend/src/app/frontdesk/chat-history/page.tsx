@@ -82,7 +82,10 @@ export default function ChatHistoryPage() {
   const filteredRooms = React.useMemo(() => {
     if (!roomSearchValue) return rooms;
     const query = roomSearchValue.toLowerCase();
-    return rooms.filter(room => room.roomNo.toLowerCase().includes(query));
+    return rooms.filter(room => 
+      room.roomNo.toLowerCase().includes(query) ||
+      (room.lastMessage && room.lastMessage.toLowerCase().includes(query))
+    );
   }, [rooms, roomSearchValue]);
 
   const scrollToRoomMatch = (index: number) => {
@@ -182,7 +185,7 @@ export default function ChatHistoryPage() {
                       description={room.lastMessage || t.frontdeskPage.chatHistory?.emptyMessage || '메시지 없음'}
                       createdAt={room.lastMessageAt || ''}
                       isSelected={selectedRoom === room.roomNo}
-                      isActiveMatch={filteredRooms[roomCurrentMatch]?.roomNo === room.roomNo}
+                      isActiveMatch={roomSearchValue ? filteredRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
                       highlightSearch={roomSearchValue}
                       onCardClick={() => {
                         selectRoom(room.roomNo);
