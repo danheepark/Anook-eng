@@ -807,35 +807,6 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             # 라우터가 CLARIFICATION으로 분류해도 해당 에이전트를 다시 호출하여
             # "어떤 말씀인지 모르겠다" 대신 구체적인 재질문을 생성합니다.
             last_agent_domain = None
-            recent_ai_msgs = [m for m in request.chat_history[-6:] if m.get("role") == "ai"]
-            if recent_ai_msgs and "?" in recent_ai_msgs[-1].get("content", ""):
-                last_ai_content = recent_ai_msgs[-1].get("content", "")
-                
-                # 키워드 기반 도메인 분석 (우선순위 1)
-                hk_kws = ["수건", "어메니티", "베개", "이불", "청소", "생수", "물", "비누", "칫솔", "샴푸", "휴지", "화장지", "towel", "amenity", "water", "blanket", "cleaning"]
-                facility_kws = ["에어컨", "히터", "난방", "보일러", "수압", "변기", "와이파이", "조명", "tv", "리모컨", "콘센트", "키카드", "잠김", "aircon", "heating", "wifi", "toilet", "light"]
-                fb_kws = ["룸서비스", "메뉴", "식음료", "음료", "와인잔", "오프너", "얼음", "디쉬", "room service", "wine", "ice", "opener"]
-                concierge_kws = ["맛집", "식당", "예약", "파스타", "삼겹살", "돈까스", "국수", "관광", "투어", "경복궁", "ddp", "남산", "택시", "꽃배달", "꽃", "recommend", "restaurant", "taxi", "flower", "booking"]
-                front_kws = ["체크인", "체크아웃", "프론트", "영수증", "소음", "checkin", "checkout", "receipt", "noise"]
-                emergency_kws = ["경보기", "화재", "환자", "응급", "피", "대피", "싸움", "다툼", "fire", "emergency", "hurt"]
-                
-                content_lower = last_ai_content.lower()
-                if any(kw in content_lower for kw in concierge_kws):
-                    last_agent_domain = "CONCIERGE"
-                elif any(kw in content_lower for kw in hk_kws):
-                    last_agent_domain = "HK"
-                elif any(kw in content_lower for kw in fb_kws):
-                    last_agent_domain = "FB"
-                elif any(kw in content_lower for kw in facility_kws):
-                    last_agent_domain = "FACILITY"
-                elif any(kw in content_lower for kw in front_kws):
-                    last_agent_domain = "FRONT"
-                elif any(kw in content_lower for kw in emergency_kws):
-                    last_agent_domain = "EMERGENCY"
-                
-                # 키워드가 매칭되지 않은 경우, 기존 활성 요청(active_requests) 기반 폴백 (우선순위 2)
-                if not last_agent_domain and getattr(request, 'active_requests', []):
-                    last_agent_domain = request.active_requests[0].get("department_id")
 
             if last_agent_domain:
                 try:
