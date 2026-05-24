@@ -78,7 +78,7 @@ const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'fallback_mess
 /** 배열 타입 특수 렌더러가 필요한 키 (key-value 순회에서만 스킵, 섹션 표시 판단에서는 포함) */
 const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
 
-function renderEntities(entities: Record<string, any>): React.ReactNode {
+function renderEntities(entities: Record<string, any>, language: string): React.ReactNode {
   const rendered: React.ReactNode[] = [];
 
   // 0) 정규화: item+count 플랫 키 → items 배열로 통일 (AI 응답 형식 불일치 보정)
@@ -140,8 +140,9 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
 
     if (key === 'details') {
       rendered.push(
-        <div key={key} className={styles.rawText} style={{ marginBottom: '8px' }}>
-          <span style={{ fontWeight: '500' }}>details:</span> {value}
+        <div key={key} className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+          <span className={styles.label}>{language === 'ko' ? '상세 내용' : 'details'}</span>
+          <p className={styles.rawText}>{value}</p>
         </div>
       );
       continue;
@@ -185,7 +186,7 @@ export default function RequestDetailPanel({
   const [showManualAssign, setShowManualAssign] = useState(false);
   const [isAiSectionOpen, setIsAiSectionOpen] = useState(false);
   const showToast = useUiStore((s) => s.showToast);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   useEffect(() => {
     if (requestId) {
@@ -378,7 +379,7 @@ export default function RequestDetailPanel({
 
                 return (
                   <div className={styles.entityList}>
-                    {renderEntities(detail.entities)}
+                     {renderEntities(detail.entities, language)}
                   </div>
                 );
               })()}

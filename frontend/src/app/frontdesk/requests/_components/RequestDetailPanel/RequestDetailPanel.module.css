@@ -229,7 +229,8 @@
   position: sticky;
   bottom: 0;
   background-color: var(--color-white);
-  padding-bottom: var(--space-24); /* 화면 바닥과의 최소 여백 */
+  padding-bottom: var(--space-24);
+  /* 화면 바닥과의 최소 여백 */
   z-index: 10;
 }
 
