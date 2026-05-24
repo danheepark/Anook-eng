@@ -301,6 +301,42 @@
         "latency": "Latency",
         "viewDetails": "View Details"
       }
+    },
+    "handover": {
+      "title": "Handover Document",
+      "shift": {
+        "DAY": "Day (07:00 - 15:00)",
+        "EVENING": "Evening (15:00 - 23:00)",
+        "NIGHT": "Night (23:00 - 07:00)",
+        "label": {
+          "DAY": "Day",
+          "EVENING": "Evening",
+          "NIGHT": "Night"
+        }
+      },
+      "downloadButton": "📥 Excel Download",
+      "downloading": "Downloading...",
+      "filterOptions": {
+        "ALL": "All Status",
+        "PENDING": "Pending",
+        "IN_PROGRESS": "In Progress",
+        "DONE": "Completed"
+      },
+      "loading": "Loading data...",
+      "briefing": {
+        "shiftTime": "Shift Time",
+        "manager": "Manager Name",
+        "resolutionStatus": "Resolution Status",
+        "createdAt": "Created Time"
+      },
+      "tableColumns": {
+        "room": "Room",
+        "status": "Status",
+        "category": "Category",
+        "summary": "Summary / Details",
+        "time": "Time"
+      },
+      "empty": "No requests found for this shift."
     }
   },
   "guestChat": {

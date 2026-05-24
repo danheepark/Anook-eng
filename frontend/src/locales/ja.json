@@ -301,6 +301,42 @@
         "latency": "遅延時間",
         "viewDetails": "詳細表示"
       }
+    },
+    "handover": {
+      "title": "引き継ぎ文書",
+      "shift": {
+        "DAY": "昼勤 (07:00 - 15:00)",
+        "EVENING": "夜勤 (15:00 - 23:00)",
+        "NIGHT": "深夜勤 (23:00 - 07:00)",
+        "label": {
+          "DAY": "昼勤",
+          "EVENING": "夜勤",
+          "NIGHT": "深夜勤"
+        }
+      },
+      "downloadButton": "📥 エクセルダウンロード",
+      "downloading": "ダウンロード中...",
+      "filterOptions": {
+        "ALL": "全ステータス",
+        "PENDING": "保留中",
+        "IN_PROGRESS": "進行中",
+        "DONE": "処理完了"
+      },
+      "loading": "データを読み込み中...",
+      "briefing": {
+        "shiftTime": "勤務時間",
+        "manager": "担当者名",
+        "resolutionStatus": "処理状況",
+        "createdAt": "作成日時"
+      },
+      "tableColumns": {
+        "room": "客室",
+        "status": "状態",
+        "category": "カテゴリ",
+        "summary": "件名/内容要約",
+        "time": "時間"
+      },
+      "empty": "該当する勤務時間に発生したリクエストはありません。"
     }
   },
   "guestChat": {

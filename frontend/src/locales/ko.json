@@ -302,6 +302,42 @@
         "latency": "지연시간",
         "viewDetails": "상세 보기"
       }
+    },
+    "handover": {
+      "title": "인수인계 문서",
+      "shift": {
+        "DAY": "주간 (07:00 - 15:00)",
+        "EVENING": "야간 (15:00 - 23:00)",
+        "NIGHT": "심야 (23:00 - 07:00)",
+        "label": {
+          "DAY": "주간",
+          "EVENING": "야간",
+          "NIGHT": "심야"
+        }
+      },
+      "downloadButton": "📥 엑셀 다운로드",
+      "downloading": "다운로드 중...",
+      "filterOptions": {
+        "ALL": "전체 상태",
+        "PENDING": "대기중",
+        "IN_PROGRESS": "진행중",
+        "DONE": "처리 완료"
+      },
+      "loading": "데이터를 불러오는 중입니다...",
+      "briefing": {
+        "shiftTime": "근무시간",
+        "manager": "담당자명",
+        "resolutionStatus": "처리 현황",
+        "createdAt": "작성 일시"
+      },
+      "tableColumns": {
+        "room": "객실",
+        "status": "상태",
+        "category": "카테고리",
+        "summary": "제목/내용 요약",
+        "time": "시간"
+      },
+      "empty": "해당 근무 시간에 발생한 요청이 없습니다."
     }
   },
   "guestChat": {

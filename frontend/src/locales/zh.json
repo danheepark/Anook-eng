@@ -301,6 +301,42 @@
         "latency": "延迟时间",
         "viewDetails": "查看详情"
       }
+    },
+    "handover": {
+      "title": "交接班文档",
+      "shift": {
+        "DAY": "白班 (07:00 - 15:00)",
+        "EVENING": "小夜班 (15:00 - 23:00)",
+        "NIGHT": "大夜班 (23:00 - 07:00)",
+        "label": {
+          "DAY": "白班",
+          "EVENING": "小夜班",
+          "NIGHT": "大夜班"
+        }
+      },
+      "downloadButton": "📥 导出 Excel",
+      "downloading": "下载中...",
+      "filterOptions": {
+        "ALL": "所有状态",
+        "PENDING": "待处理",
+        "IN_PROGRESS": "进行中",
+        "DONE": "处理完成"
+      },
+      "loading": "正在加载数据...",
+      "briefing": {
+        "shiftTime": "工作时间",
+        "manager": "交接负责人",
+        "resolutionStatus": "处理状态",
+        "createdAt": "撰写时间"
+      },
+      "tableColumns": {
+        "room": "客房",
+        "status": "状态",
+        "category": "类别",
+        "summary": "标题/内容摘要",
+        "time": "时间"
+      },
+      "empty": "该工作时段内未发生任何请求。"
     }
   },
   "guestChat": {

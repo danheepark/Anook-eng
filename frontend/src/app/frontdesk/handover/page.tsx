@@ -43,7 +43,11 @@ export default function HandoverPage() {
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      const shiftLabel = shiftType === 'DAY' ? '주간' : shiftType === 'EVENING' ? '야간' : '심야';
+      const shiftLabel = shiftType === 'DAY'
+        ? t.frontdeskPage?.handover?.shift?.label?.DAY || '주간'
+        : shiftType === 'EVENING'
+          ? t.frontdeskPage?.handover?.shift?.label?.EVENING || '야간'
+          : t.frontdeskPage?.handover?.shift?.label?.NIGHT || '심야';
       const a = document.createElement('a');
       a.href = url;
       a.download = `인수인계_${targetDate}_${shiftLabel}.xlsx`;
@@ -76,7 +80,7 @@ export default function HandoverPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerTop}>
-          <h1 className={styles.title}>{t.frontdeskPage.taskBoard.titles.handover}</h1>
+          <h1 className={styles.title}>{t.frontdeskPage?.handover?.title || "인수인계 문서"}</h1>
           <div className={styles.pickerActions}>
             <input
               type="date"
@@ -89,16 +93,16 @@ export default function HandoverPage() {
               value={shiftType}
               onChange={(e) => setShiftType(e.target.value)}
             >
-              <option value="DAY">주간 (07:00 - 15:00)</option>
-              <option value="EVENING">야간 (15:00 - 23:00)</option>
-              <option value="NIGHT">심야 (23:00 - 07:00)</option>
+              <option value="DAY">{t.frontdeskPage?.handover?.shift?.DAY || "주간 (07:00 - 15:00)"}</option>
+              <option value="EVENING">{t.frontdeskPage?.handover?.shift?.EVENING || "야간 (15:00 - 23:00)"}</option>
+              <option value="NIGHT">{t.frontdeskPage?.handover?.shift?.NIGHT || "심야 (23:00 - 07:00)"}</option>
             </select>
             <Button
               variant="secondary"
               onClick={handleExcelDownload}
               disabled={downloading || loading}
             >
-              {downloading ? '다운로드 중...' : '📥 엑셀 다운로드'}
+              {downloading ? (t.frontdeskPage?.handover?.downloading || '다운로드 중...') : (t.frontdeskPage?.handover?.downloadButton || '📥 엑셀 다운로드')}
             </Button>
           </div>
         </div>
@@ -112,10 +116,10 @@ export default function HandoverPage() {
           </div>
           <FilterButton
             filterOptions={[
-              { value: 'ALL', label: '전체 상태' },
-              { value: 'PENDING', label: '대기중' },
-              { value: 'IN_PROGRESS', label: '진행중' },
-              { value: 'DONE', label: '처리 완료' }
+              { value: 'ALL', label: t.frontdeskPage?.handover?.filterOptions?.ALL || '전체 상태' },
+              { value: 'PENDING', label: t.frontdeskPage?.handover?.filterOptions?.PENDING || '대기중' },
+              { value: 'IN_PROGRESS', label: t.frontdeskPage?.handover?.filterOptions?.IN_PROGRESS || '진행중' },
+              { value: 'DONE', label: t.frontdeskPage?.handover?.filterOptions?.DONE || '처리 완료' }
             ]}
             selectedFilter={statusFilter}
             onFilterSelect={setStatusFilter}
@@ -124,7 +128,7 @@ export default function HandoverPage() {
       </div>
 
       {loading ? (
-        <div style={{ padding: '40px', textAlign: 'center' }}>데이터를 불러오는 중입니다...</div>
+        <div style={{ padding: '40px', textAlign: 'center' }}>{t.frontdeskPage?.handover?.loading || "데이터를 불러오는 중입니다..."}</div>
       ) : error ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'red' }}>{error}</div>
       ) : (

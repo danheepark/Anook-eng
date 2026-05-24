@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './HandoverTable.module.css';
 import { HandoverItem } from './HandoverRecord';
+import { useTranslation } from '@/app/useTranslation';
 
 interface HandoverTableProps {
   items: HandoverItem[];
@@ -43,6 +44,7 @@ function groupAndSortItems(items: HandoverItem[]): GroupedRow[] {
 
 export default function HandoverTable({ items }: HandoverTableProps) {
   const rows = groupAndSortItems(items);
+  const { t } = useTranslation();
 
   return (
     <div className={styles.tableContainer}>
@@ -56,18 +58,18 @@ export default function HandoverTable({ items }: HandoverTableProps) {
         </colgroup>
         <thead>
           <tr>
-            <th className={styles.th}>객실</th>
-            <th className={styles.th}>상태</th>
-            <th className={styles.th}>카테고리</th>
-            <th className={styles.th}>제목/내용 요약</th>
-            <th className={styles.th}>시간</th>
+            <th className={styles.th}>{t.frontdeskPage?.handover?.tableColumns?.room || '객실'}</th>
+            <th className={styles.th}>{t.frontdeskPage?.handover?.tableColumns?.status || '상태'}</th>
+            <th className={styles.th}>{t.frontdeskPage?.handover?.tableColumns?.category || '카테고리'}</th>
+            <th className={styles.th}>{t.frontdeskPage?.handover?.tableColumns?.summary || '제목/내용 요약'}</th>
+            <th className={styles.th}>{t.frontdeskPage?.handover?.tableColumns?.time || '시간'}</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
             <tr>
               <td colSpan={5} className={styles.td} style={{ textAlign: 'center', padding: '32px' }}>
-                해당 근무 시간에 발생한 요청이 없습니다.
+                {t.frontdeskPage?.handover?.empty || '해당 근무 시간에 발생한 요청이 없습니다.'}
               </td>
             </tr>
           ) : (
