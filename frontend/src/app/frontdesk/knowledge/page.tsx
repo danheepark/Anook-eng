@@ -7,10 +7,14 @@ import KnowledgeLibraryTab from './_components/KnowledgeLibraryTab/KnowledgeLibr
 import KnowledgeReviewTab from './_components/KnowledgeReviewTab/KnowledgeReviewTab';
 import { useTranslation } from '@/app/useTranslation';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
+import { useKnowledge } from './useKnowledge';
 import styles from './page.module.css';
 
 export default function KnowledgeManagementPage() {
   const { t } = useTranslation();
+  const { data } = useKnowledge();
+  const pendingCount = data.filter(item => item.status === 'PENDING').length;
+  const approvedCount = data.filter(item => item.status === 'APPROVED').length;
   
   // 대분류 탭 (AI 학습 관리 vs RAG 데이터 관리)
   const [mainTab, setMainTab] = useState<'REVIEW' | 'LIBRARY'>('REVIEW');
@@ -53,8 +57,8 @@ export default function KnowledgeManagementPage() {
   };
 
   const MAIN_TAB_OPTIONS = [
-    { value: 'REVIEW', label: t.frontdeskPage.taskBoard.titles.aiTraining },
-    { value: 'LIBRARY', label: t.frontdeskPage.taskBoard.titles.rag }
+    { value: 'REVIEW', label: t.frontdeskPage.taskBoard.titles.aiTraining, count: pendingCount },
+    { value: 'LIBRARY', label: t.frontdeskPage.taskBoard.titles.rag, count: approvedCount }
   ];
 
   const SUB_TAB_OPTIONS = [
@@ -103,6 +107,7 @@ export default function KnowledgeManagementPage() {
               }}
             />
           </div>
+          <div id="knowledge-header-actions" />
         </div>
       </div>
 

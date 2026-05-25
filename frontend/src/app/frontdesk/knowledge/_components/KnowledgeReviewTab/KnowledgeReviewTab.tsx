@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import Button from '@/components/ui/Button/Button';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
@@ -29,7 +30,7 @@ export default function KnowledgeReviewTab({
   onMatchesChange,
   activeMatchId,
 }: KnowledgeReviewTabProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { data, loading, error, deleteEntry, refresh } = useKnowledge(
     domainCode === 'ALL' ? undefined : domainCode
   );
@@ -74,6 +75,11 @@ export default function KnowledgeReviewTab({
       }, 50);
     }
   }, [activeMatchId]);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // AI 분석 테이블 제어용 로컬 상태
   const [isAnalyzed, setIsAnalyzed] = useState(false);
@@ -195,37 +201,58 @@ export default function KnowledgeReviewTab({
 
   return (
     <div className={styles.container}>
-      {/* Header Area */}
-      <div className={styles.headerArea}>
-        <div className={styles.headerTitle}>
-          {isAnalyzed ? (
-            <>
-              <span>AI RAG 분석 결과</span>
-              <span className={styles.headerCount}>{candidates.length}건의 지식 후보</span>
-            </>
-          ) : (
-            <>
-              <span>검토 대기 중인 상담</span>
-              <span className={styles.headerCount}>{filteredItems.length}건</span>
-            </>
+      {/* Header Area (Only rendered if analyzed or portal is NOT active, to prevent empty gray border line) */}
+      {(isAnalyzed || !mounted || typeof window === 'undefined' || !document.getElementById('knowledge-header-actions')) && (
+        <div className={styles.headerArea}>
+          <div className={styles.headerTitle}>
+            {isAnalyzed && (
+              <>
+                <span>AI RAG 분석 결과</span>
+                <span className={styles.headerCount}>{candidates.length}건의 지식 후보</span>
+              </>
+            )}
+          </div>
+          {(!mounted || typeof window === 'undefined' || !document.getElementById('knowledge-header-actions')) && (
+            <div>
+              {isAnalyzed ? (
+                <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
+                  목록으로 돌아가기
+                </Button>
+              ) : (
+                <Button
+                  variant="primary"
+                  onClick={handleAnalyze}
+                  disabled={analyzing || filteredItems.length === 0}
+                >
+                  {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Organize' : '지식으로 정리')}
+                </Button>
+              )}
+            </div>
           )}
         </div>
-        <div>
-          {isAnalyzed ? (
-            <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-              목록으로 돌아가기
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              onClick={handleAnalyze}
-              disabled={analyzing || filteredItems.length === 0}
-            >
-              {analyzing ? 'AI 분석 중...' : 'RAG 분석하기'}
-            </Button>
-          )}
-        </div>
-      </div>
+      )}
+
+      {/* Render Portal in the background when active */}
+      {mounted && typeof window !== 'undefined' && document.getElementById('knowledge-header-actions') && (
+        createPortal(
+          <div>
+            {isAnalyzed ? (
+              <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
+                목록으로 돌아가기
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={handleAnalyze}
+                disabled={analyzing || filteredItems.length === 0}
+              >
+                {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Organize' : '지식으로 정리')}
+              </Button>
+            )}
+          </div>,
+          document.getElementById('knowledge-header-actions')!
+        )
+      )}
 
       {/* Main Content Area */}
       {analyzing ? (
