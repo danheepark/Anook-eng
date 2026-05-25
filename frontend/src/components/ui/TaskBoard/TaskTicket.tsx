@@ -160,8 +160,7 @@ export default function TaskTicket({
         }
         case 'RESERVATION': {
           const target = entities.target as string | undefined;
-          const time = entities.time as string | undefined;
-          if (target && time) return `${time} ${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
+          if (target && entities.time) return `${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
           if (target) return `${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
           return `예약`; // Changed from '예약 요청'
         }
@@ -230,7 +229,7 @@ export default function TaskTicket({
 
   const sourceTitle = rawDynamicTitle || title;
   const { translatedText: translatedSummary, isLoading: isTranslating } = useTranslationApi(sourceTitle, language);
-  const displaySummary = translatedSummary || sourceTitle;
+  const displaySummary = (translatedSummary || sourceTitle).replace(/^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}|\d{2}-\d{2}\s\d{2}:\d{2})\s*/, '');
 
   const { translatedText: translatedDetails } = useTranslationApi(
     language !== 'ko' && rawEntityDetails ? rawEntityDetails : undefined,

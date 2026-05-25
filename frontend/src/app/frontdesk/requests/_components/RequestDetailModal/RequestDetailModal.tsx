@@ -336,7 +336,7 @@ export default function RequestDetailModal({
   return (
     <>
       <ModalOverlay isOpen={isOpen && !showManualAssign} onClose={onClose}>
-        <ModalCard size="md" overflowVisible={true} onClose={onClose}>
+        <ModalCard size="md" overflowVisible={false} onClose={onClose}>
         {/* 헤더 */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>

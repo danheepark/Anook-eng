@@ -247,7 +247,9 @@ export default function FrontDeskPage() {
       }
 
       const sortedReqs = [...reqs].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      const latestSummary = sortedReqs[0].summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '');
+      const latestSummary = sortedReqs[0].summary
+        .replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')
+        .replace(/^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}|\d{2}-\d{2}\s\d{2}:\d{2})\s*/, '');
       const summaryText = reqs.length > 1 ? `${latestSummary} 외 ${reqs.length - 1}건` : latestSummary;
 
       return {
@@ -268,8 +270,13 @@ export default function FrontDeskPage() {
       const pwB = priorityWeight(b.highestPriority);
       if (pwA !== pwB) return pwA - pwB; // 0 for EMERGENCY, 1 for URGENT, 2 for NORMAL
 
-      const timeA = lastMessageTimes[a.roomNo] || new Date(a.createdAt).getTime();
-      const timeB = lastMessageTimes[b.roomNo] || new Date(b.createdAt).getTime();
+      const parseTime = (dateStr: string) => {
+        if (!dateStr) return 0;
+        const parsed = new Date(dateStr.replace(' ', 'T')).getTime();
+        return isNaN(parsed) ? 0 : parsed;
+      };
+      const timeA = Math.max(lastMessageTimes[a.roomNo] || 0, parseTime(a.createdAt));
+      const timeB = Math.max(lastMessageTimes[b.roomNo] || 0, parseTime(b.createdAt));
       return timeB - timeA;
     });
 
