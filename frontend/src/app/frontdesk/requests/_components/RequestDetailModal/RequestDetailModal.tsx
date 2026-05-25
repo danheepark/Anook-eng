@@ -90,9 +90,10 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
       <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
         <span className={styles.label}>{labels.items}</span>
         <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-          {entities.items.map((it: any, idx: number) => (
-            <li key={idx}>• {it.item} - {it.count}{labels.countSuffix}</li>
-          ))}
+          {entities.items.map((it: any, idx: number) => {
+            const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
+            return <li key={idx}>• {itemText} - {it.count}{labels.countSuffix}</li>;
+          })}
         </ul>
       </div>
     );

@@ -77,9 +77,10 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
       <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
         <span className={styles.label}>물품 요청</span>
         <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-          {entities.items.map((it: any, idx: number) => (
-            <li key={idx}>• {it.item} - {it.count}개</li>
-          ))}
+          {entities.items.map((it: any, idx: number) => {
+            const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
+            return <li key={idx}>• {itemText} - {it.count}개</li>;
+          })}
         </ul>
       </div>
     );

@@ -112,7 +112,8 @@ export default function TaskTicket({
         let firstLabel = '';
         if (items && items.length > 0) {
           const first = items[0];
-          firstLabel = `${first.item} ${first.count || 1}개`;
+          const firstItemText = typeof first.item === 'object' && first.item !== null ? (first.item.name || first.item.id || '') : first.item;
+          firstLabel = `${firstItemText} ${first.count || 1}개`;
         } else if (tasks && tasks.length > 0) {
           firstLabel = tasks[0];
         }
@@ -207,10 +208,12 @@ export default function TaskTicket({
         });
       } else if (Array.isArray(entities.items)) {
         entities.items.forEach((it: any) => {
-          parts.push(`- ${it.item} ${it.count ? `×${it.count}` : ''}`.trim());
+          const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
+          parts.push(`- ${itemText} ${it.count ? `×${it.count}` : ''}`.trim());
         });
       } else if (entities.item) {
-        parts.push(`- ${entities.item} ${entities.count ? `×${entities.count}` : ''}`.trim());
+        const itemText = typeof entities.item === 'object' && entities.item !== null ? (entities.item.name || entities.item.id || '') : entities.item;
+        parts.push(`- ${itemText} ${entities.count ? `×${entities.count}` : ''}`.trim());
       }
       if (Array.isArray(entities.tasks)) {
         entities.tasks.forEach((tStr: string) => parts.push(`- ${tStr}`));
