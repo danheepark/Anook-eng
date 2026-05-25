@@ -386,7 +386,9 @@ export default function RequestDetailPanel({
                   ? `${Math.round(detail.confidence * 100)}%`
                   : '100%';
                 const label = language === 'en' ? 'confidence' : '신뢰도';
-                const displayReasoning = `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`;
+                const displayReasoning = cleanedReasoning
+                  ? `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`
+                  : `• ${label}: ${formattedConfidence}`;
                 return (
                   <div className={styles.contentBlock}>
                     <span className={styles.label}>판단 근거</span>

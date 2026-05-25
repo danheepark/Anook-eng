@@ -418,7 +418,9 @@ export default function RequestDetailModal({
                   ? `${Math.round(activeDetail.confidence * 100)}%`
                   : '100%';
                 const label = language === 'en' ? 'confidence' : '신뢰도';
-                const displayReasoning = `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`;
+                const displayReasoning = cleanedReasoning
+                  ? `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`
+                  : `• ${label}: ${formattedConfidence}`;
                 return (
                   <div className={styles.contentBlock} style={{ marginTop: '12px' }}>
                     <span className={styles.label}>{t.frontdeskPage.requestDetailModal.reasoning}</span>
