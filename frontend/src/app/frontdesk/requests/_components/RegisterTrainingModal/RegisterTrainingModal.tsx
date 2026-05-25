@@ -5,6 +5,8 @@ import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button/Button';
 import { useTranslation } from '@/app/useTranslation';
 import { useExtractKnowledge } from './useExtractKnowledge';
+import Dropdown from '@/components/ui/Dropdown/Dropdown';
+import InputField from '@/components/ui/Inputfield/InputField';
 import styles from './RegisterTrainingModal.module.css';
 
 interface RegisterTrainingModalProps {
@@ -119,14 +121,13 @@ export default function RegisterTrainingModal({
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="lg" onClose={onClose}>
+      <ModalCard
+        size="md"
+        onClose={onClose}
+        title="AI RAG 지식 추출 및 등록"
+        subtitle={"상담 대화 내용에서 RAG 학습에 적합한 Q&A 지식을 AI가 분석하고 추출했습니다.\n내용을 검토 및 수정 후 등록하세요."}
+      >
         <div className={styles.container}>
-          <div className={styles.header}>
-            <h2 className={styles.title}>AI RAG 지식 추출 및 등록</h2>
-            <p className={styles.subtitle}>
-              상담 대화 내용에서 RAG 학습에 적합한 Q&A 지식을 AI가 분석하고 추출했습니다. 내용을 검토 및 수정 후 등록하세요.
-            </p>
-          </div>
 
           {extracting ? (
             <div className={styles.loadingContainer}>
@@ -143,67 +144,68 @@ export default function RegisterTrainingModal({
               상담 대화에서 추출된 Q&A 후보가 없습니다. 대화 내용에 명확한 답변이 적재되었는지 확인해주세요.
             </div>
           ) : (
-            <div className={styles.tableContainer}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th className={`${styles.th} ${styles.thCheckbox}`}>
-                      <input
-                        type="checkbox"
-                        checked={allSelected}
-                        onChange={handleSelectAll}
-                        className={styles.checkboxInput}
-                      />
-                    </th>
-                    <th className={`${styles.th} ${styles.thQuestion}`}>질문 (Question)</th>
-                    <th className={`${styles.th} ${styles.thAnswer}`}>답변 (Answer)</th>
-                    <th className={`${styles.th} ${styles.thDomain}`}>분류 부서</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {localCandidates.map((item, idx) => (
-                    <tr key={idx}>
-                      <td className={`${styles.td} ${styles.tdCheckbox}`}>
+            <div className={styles.candidatesContainer}>
+              <div className={styles.listToolbar}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={handleSelectAll}
+                    className={styles.checkboxInput}
+                  />
+                  <span className={styles.selectAllText}>
+                    전체 선택 ({localCandidates.filter(c => c.selected).length}/{localCandidates.length})
+                  </span>
+                </label>
+              </div>
+
+              <div className={styles.candidatesList}>
+                {localCandidates.map((item, idx) => (
+                  <div key={idx} className={`${styles.candidateCard} ${item.selected ? styles.selectedCard : ''}`}>
+                    <div className={styles.cardHeader}>
+                      <label className={styles.cardCheckboxLabel}>
                         <input
                           type="checkbox"
                           checked={item.selected}
                           onChange={() => handleToggle(idx)}
                           className={styles.checkboxInput}
                         />
-                      </td>
-                      <td className={styles.td}>
-                        <textarea
-                          value={item.question}
-                          onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
-                          className={styles.cellTextarea}
-                          placeholder="질문을 입력하세요..."
-                        />
-                      </td>
-                      <td className={styles.td}>
-                        <textarea
-                          value={item.answer}
-                          onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
-                          className={styles.cellTextarea}
-                          placeholder="답변을 입력하세요..."
-                        />
-                      </td>
-                      <td className={styles.td}>
-                        <select
+                        <span className={styles.candidateNumber}>지식 후보 {idx + 1}</span>
+                      </label>
+                    </div>
+
+                    <div className={styles.cardBody}>
+                      <div className={styles.domainSelectWrapper}>
+                        <span className={styles.domainLabel}>분류 부서</span>
+                        <Dropdown
+                          options={DOMAIN_OPTIONS}
                           value={item.domainCode}
-                          onChange={(e) => handleDomainChange(idx, e.target.value)}
-                          className={styles.selectInput}
-                        >
-                          {DOMAIN_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          onChange={(val) => handleDomainChange(idx, val)}
+                          className={styles.domainDropdown}
+                        />
+                      </div>
+                      <InputField
+                        as="textarea"
+                        label="질문"
+                        value={item.question}
+                        onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
+                        placeholder="질문을 입력하세요..."
+                        className={`${styles.cardInput} ${styles.questionInput}`}
+                        rows={1}
+                      />
+                      <InputField
+                        as="textarea"
+                        label="답변"
+                        value={item.answer}
+                        onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
+                        placeholder="답변을 입력하세요..."
+                        className={styles.cardInput}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

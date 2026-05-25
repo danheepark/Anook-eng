@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './Dropdown.module.css';
 import { ArrowDownIcon } from '@/components/icons';
 import PopoverMenu from '../PopoverMenu/PopoverMenu';
@@ -36,6 +37,8 @@ export default function Dropdown({
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
 
   // 현재 선택된 객체 찾기
   const selectedOption = options.find((opt) => opt.value === value);
@@ -60,6 +63,46 @@ export default function Dropdown({
     setIsOpen(false);
   };
 
+  // 스크롤 및 화면 크기 조절 시 드롭다운 팝업의 절대 위치를 실시간 재계산하여 자석처럼 붙어다니게 함
+  useEffect(() => {
+    const updatePosition = () => {
+      if (isOpen && triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect();
+        setCoords({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        });
+      }
+    };
+
+    if (isOpen) {
+      // capturing phase (true)를 사용하여 모달 내부 스크롤바 이동까지 확실하게 추적
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen]);
+
+  const toggleDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (disabled) return;
+
+    if (!isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className={`${styles.wrapper} ${className}`.trim()} ref={wrapperRef}>
       
@@ -72,11 +115,9 @@ export default function Dropdown({
 
       {/* 2. 트리거 박스 (클릭 시 열림) */}
       <div 
+        ref={triggerRef}
         className={`${styles.trigger} ${disabled ? styles.triggerDisabled : ''}`} 
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          if (!disabled) setIsOpen(!isOpen);
-        }}
+        onMouseDown={toggleDropdown}
         onClick={(e) => e.stopPropagation()}
         style={disabled ? { cursor: 'not-allowed', opacity: 0.6 } : undefined}
       >
@@ -91,16 +132,22 @@ export default function Dropdown({
         </div>
       </div>
 
-      {/* 3. 드롭다운 팝업 리스트 — PopoverMenu 재사용 */}
-      {isOpen && (
+      {/* 3. 드롭다운 팝업 리스트 — PopoverMenu 재사용 (포탈로 body에 렌더링하여 모달 밖으로 나오게 허용) */}
+      {isOpen && typeof window !== 'undefined' && createPortal(
         <PopoverMenu
           items={options}
           onSelect={handleSelect}
           onClose={() => setIsOpen(false)}
           selectedValue={value}
-          width="100%"
-          style={{ top: '100%', left: 0, marginTop: '4px' }}
-        />
+          width={coords.width}
+          style={{
+            position: 'absolute',
+            top: coords.top + 4,
+            left: coords.left,
+            zIndex: 9999,
+          }}
+        />,
+        document.body
       )}
       
     </div>

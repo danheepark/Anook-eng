@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import Button from '@/components/ui/Button/Button';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
@@ -8,6 +9,7 @@ import { useKnowledge } from '../../useKnowledge';
 import styles from './KnowledgeReviewTab.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useRagAnalysis } from './useRagAnalysis';
+import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 
 interface KnowledgeReviewTabProps {
   domainCode: string; // 'ALL' 또는 도메인 코드
@@ -29,7 +31,7 @@ export default function KnowledgeReviewTab({
   onMatchesChange,
   activeMatchId,
 }: KnowledgeReviewTabProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { data, loading, error, deleteEntry, refresh } = useKnowledge(
     domainCode === 'ALL' ? undefined : domainCode
   );
@@ -74,6 +76,11 @@ export default function KnowledgeReviewTab({
       }, 50);
     }
   }, [activeMatchId]);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // AI 분석 테이블 제어용 로컬 상태
   const [isAnalyzed, setIsAnalyzed] = useState(false);
@@ -195,37 +202,58 @@ export default function KnowledgeReviewTab({
 
   return (
     <div className={styles.container}>
-      {/* Header Area */}
-      <div className={styles.headerArea}>
-        <div className={styles.headerTitle}>
-          {isAnalyzed ? (
-            <>
-              <span>AI RAG 분석 결과</span>
-              <span className={styles.headerCount}>{candidates.length}건의 지식 후보</span>
-            </>
-          ) : (
-            <>
-              <span>검토 대기 중인 상담</span>
-              <span className={styles.headerCount}>{filteredItems.length}건</span>
-            </>
+      {/* Header Area (Only rendered if analyzed or portal is NOT active, to prevent empty gray border line) */}
+      {(isAnalyzed || !mounted || typeof window === 'undefined' || !document.getElementById('knowledge-header-actions')) && (
+        <div className={styles.headerArea}>
+          <div className={styles.headerTitle}>
+            {isAnalyzed && (
+              <>
+                <span>AI RAG 분석 결과</span>
+                <span className={styles.headerCount}>{candidates.length}건의 지식 후보</span>
+              </>
+            )}
+          </div>
+          {(!mounted || typeof window === 'undefined' || !document.getElementById('knowledge-header-actions')) && (
+            <div>
+              {isAnalyzed ? (
+                <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
+                  {language === 'en' ? 'Back' : '뒤로가기'}
+                </Button>
+              ) : (
+                <Button
+                  variant="primary"
+                  onClick={handleAnalyze}
+                  disabled={analyzing || filteredItems.length === 0}
+                >
+                  {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Organize' : '지식으로 정리')}
+                </Button>
+              )}
+            </div>
           )}
         </div>
-        <div>
-          {isAnalyzed ? (
-            <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-              목록으로 돌아가기
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              onClick={handleAnalyze}
-              disabled={analyzing || filteredItems.length === 0}
-            >
-              {analyzing ? 'AI 분석 중...' : 'RAG 분석하기'}
-            </Button>
-          )}
-        </div>
-      </div>
+      )}
+
+      {/* Render Portal in the background when active */}
+      {mounted && typeof window !== 'undefined' && document.getElementById('knowledge-header-actions') && (
+        createPortal(
+          <div>
+            {isAnalyzed ? (
+              <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
+                {language === 'en' ? 'Back' : '뒤로가기'}
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={handleAnalyze}
+                disabled={analyzing || filteredItems.length === 0}
+              >
+                {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Organize' : '지식으로 정리')}
+              </Button>
+            )}
+          </div>,
+          document.getElementById('knowledge-header-actions')!
+        )
+      )}
 
       {/* Main Content Area */}
       {analyzing ? (
@@ -241,74 +269,68 @@ export default function KnowledgeReviewTab({
       ) : isAnalyzed ? (
         // RAG 분석 결과 인라인 테이블
         <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={`${styles.th} ${styles.thCheckbox}`}>
+          <Table columns="48px 1fr 1.2fr 130px">
+            <TableHeader>
+              <TableCell className={styles.checkboxCell}>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={handleSelectAll}
+                  className={styles.checkboxInput}
+                />
+              </TableCell>
+              <TableCell>질문 (Question)</TableCell>
+              <TableCell>답변 (Answer)</TableCell>
+              <TableCell>분류 부서</TableCell>
+            </TableHeader>
+            {candidates.map((item, idx) => (
+              <TableRow key={idx}>
+                <TableCell className={styles.checkboxCell}>
                   <input
                     type="checkbox"
-                    checked={allSelected}
-                    onChange={handleSelectAll}
+                    checked={item.selected}
+                    onChange={() => handleToggle(idx)}
                     className={styles.checkboxInput}
                   />
-                </th>
-                <th className={`${styles.th} ${styles.thQuestion}`}>질문 (Question)</th>
-                <th className={`${styles.th} ${styles.thAnswer}`}>답변 (Answer)</th>
-                <th className={`${styles.th} ${styles.thDomain}`}>분류 부서</th>
-              </tr>
-            </thead>
-            <tbody>
-              {candidates.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className={styles.emptyState}>
-                    분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.
-                  </td>
-                </tr>
-              ) : (
-                candidates.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className={`${styles.td} ${styles.tdCheckbox}`}>
-                      <input
-                        type="checkbox"
-                        checked={item.selected}
-                        onChange={() => handleToggle(idx)}
-                        className={styles.checkboxInput}
-                      />
-                    </td>
-                    <td className={styles.td}>
-                      <textarea
-                        value={item.question}
-                        onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
-                        className={styles.cellTextarea}
-                        placeholder="질문을 입력하세요..."
-                      />
-                    </td>
-                    <td className={styles.td}>
-                      <textarea
-                        value={item.answer}
-                        onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
-                        className={styles.cellTextarea}
-                        placeholder="답변을 입력하세요..."
-                      />
-                    </td>
-                    <td className={styles.td}>
-                      <select
-                        value={item.domainCode}
-                        onChange={(e) => handleDomainChange(idx, e.target.value)}
-                        className={styles.selectInput}
-                      >
-                        {DOMAIN_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </TableCell>
+                <TableCell>
+                  <textarea
+                    value={item.question}
+                    onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
+                    className={styles.cellTextarea}
+                    placeholder="질문을 입력하세요..."
+                  />
+                </TableCell>
+                <TableCell>
+                  <textarea
+                    value={item.answer}
+                    onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
+                    className={styles.cellTextarea}
+                    placeholder="답변을 입력하세요..."
+                  />
+                </TableCell>
+                <TableCell>
+                  <select
+                    value={item.domainCode}
+                    onChange={(e) => handleDomainChange(idx, e.target.value)}
+                    className={styles.selectInput}
+                  >
+                    {DOMAIN_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </TableCell>
+              </TableRow>
+            ))}
+          </Table>
+
+          {candidates.length === 0 && (
+            <div className={styles.emptyState}>
+              분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.
+            </div>
+          )}
 
           {candidates.length > 0 && (
             <div className={styles.tableFooter}>

@@ -83,3 +83,7 @@
 .searchInputContainer {
   width: 240px;
 }
+
+:global(#knowledge-header-actions) button {
+  width: 110px !important;
+}

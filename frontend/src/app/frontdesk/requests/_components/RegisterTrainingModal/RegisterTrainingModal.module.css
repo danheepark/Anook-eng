@@ -1,24 +1,12 @@
+/* RegisterTrainingModal.module.css — RAG 지식 추출 모달 전용 스타일 */
 .container {
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
   color: var(--color-gray-900);
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.title {
-  font: var(--text-h2-bold);
-  color: var(--color-gray-900);
-}
-
-.subtitle {
-  font: var(--text-body-small);
-  color: var(--color-gray-500);
+  width: 100%;
+  max-width: var(--modal-width-lg);
+  box-sizing: border-box;
 }
 
 .loadingContainer {
@@ -35,8 +23,8 @@
   width: 40px;
   height: 40px;
   border: 4px solid var(--color-gray-100);
-  border-top-color: var(--color-primary);
   border-radius: 50%;
+  border-top-color: var(--color-primary);
   animation: spin 1s linear infinite;
 }
 
@@ -50,122 +38,12 @@
   padding: var(--space-12) var(--space-16);
   background-color: var(--color-red-50);
   border: 1px solid var(--color-red-100);
-  border-radius: var(--radius-medium);
+  border-radius: var(--radius-md);
   color: var(--color-red-600);
-  font: var(--text-body-small);
+  font: var(--text-body-medium);
   display: flex;
   align-items: center;
   gap: var(--space-8);
-}
-
-.tableContainer {
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-large);
-  overflow: hidden;
-  max-height: 380px;
-  overflow-y: auto;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  table-layout: fixed;
-}
-
-.th {
-  background-color: var(--color-gray-50);
-  padding: var(--space-12) var(--space-16);
-  font: var(--text-label-medium);
-  color: var(--color-gray-600);
-  border-bottom: 1px solid var(--color-gray-200);
-  font-weight: 600;
-}
-
-.thCheckbox {
-  width: 48px;
-  text-align: center;
-}
-
-.thQuestion {
-  width: 35%;
-}
-
-.thAnswer {
-  width: 45%;
-}
-
-.thDomain {
-  width: 120px;
-}
-
-.td {
-  padding: var(--space-8) var(--space-12);
-  border-bottom: 1px solid var(--color-gray-100);
-  vertical-align: middle;
-  background-color: #fff;
-}
-
-.tdCheckbox {
-  text-align: center;
-}
-
-.checkboxInput {
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-small);
-  border: 1px solid var(--color-gray-300);
-  cursor: pointer;
-  accent-color: var(--color-primary);
-}
-
-.cellTextarea {
-  width: 100%;
-  max-height: 120px;
-  padding: var(--space-8) var(--space-10);
-  border: 1px solid transparent;
-  border-radius: var(--radius-medium);
-  font: var(--text-body-small);
-  color: var(--color-gray-800);
-  resize: vertical;
-  background-color: transparent;
-  transition: border-color 0.2s, background-color 0.2s;
-  field-sizing: content;
-}
-
-.cellTextarea:hover {
-  background-color: var(--color-gray-50);
-  border-color: var(--color-gray-200);
-}
-
-.cellTextarea:focus {
-  background-color: #fff;
-  border-color: var(--color-primary);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary-light);
-}
-
-.selectInput {
-  width: 100%;
-  padding: var(--space-8) var(--space-12);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-medium);
-  font: var(--text-body-small);
-  color: var(--color-gray-800);
-  background-color: #fff;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.selectInput:hover {
-  border-color: var(--color-gray-400);
-}
-
-.selectInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 
 .emptyState {
@@ -175,6 +53,227 @@
   font: var(--text-body-medium);
 }
 
+/* ──────────────────────────────────────────────────────────
+   Candidates List & Form Card Styles (Horizontal/Vertical Grid)
+   ────────────────────────────────────────────────────────── */
+.candidatesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12) !important; /* Restore clean separation between select-all toolbar and list */
+  max-height: 480px !important; /* Restore perfect height limits of modal candidates list */
+  overflow-y: auto !important;
+  overflow-x: hidden !important; /* Prevent horizontal scrolling */
+  margin-left: -24px !important;
+  margin-right: -24px !important;
+  margin-top: -12px !important; /* Move entire container up to be closer to subtitle safely */
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  width: auto !important;
+  box-sizing: border-box;
+}
+
+/* Scrollbar Customization for Candidates Container */
+.candidatesContainer::-webkit-scrollbar {
+  width: 6px;
+}
+.candidatesContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+.candidatesContainer::-webkit-scrollbar-thumb {
+  background: var(--color-gray-200);
+  border-radius: var(--radius-full);
+}
+.candidatesContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-300);
+}
+
+/* List Toolbar (Select All option) */
+.listToolbar {
+  display: flex;
+  align-items: center;
+  padding: var(--space-8) 0 !important; /* Let parent candidatesContainer horizontal padding handle it */
+  background-color: transparent;
+  border: none;
+  margin-bottom: 0;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  user-select: none;
+}
+
+.selectAllText {
+  font: var(--text-body-medium) !important;
+  color: var(--color-gray-800);
+  font-weight: 600;
+}
+
+.checkboxInput {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-gray-300);
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+/* Candidates List Stack */
+.candidatesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0 !important; /* Eliminate gap between cards so selected gray backgrounds connect seamlessly */
+  width: 100%;
+  overflow: visible; /* To allow dropdown menus to pop out */
+}
+
+/* Premium Candidate Card component design */
+.candidateCard {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  border: none !important;
+  border-radius: 0 !important;
+  padding: var(--space-24) 0 !important;
+  gap: var(--space-16);
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+  overflow: visible; /* Crucial for dropdown rendering */
+  border-bottom: 1px solid var(--color-gray-150, var(--color-gray-200)) !important;
+}
+
+.candidateCard:last-child {
+  border-bottom: none !important;
+}
+
+.selectedCard {
+  background-color: var(--color-gray-100) !important;
+  margin-left: -24px !important;
+  margin-right: -24px !important;
+  padding: var(--space-24) var(--space-24) !important;
+}
+
+/* Card Header */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: none !important;
+  padding-bottom: var(--space-4);
+  width: 100%;
+}
+
+.cardCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  user-select: none;
+}
+
+.candidateNumber {
+  font: var(--text-h3-bold) !important;
+  color: var(--color-gray-900);
+}
+
+.domainSelectWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4) !important;
+  width: 100%;
+}
+
+.domainLabel {
+  display: flex !important;
+  align-items: center !important;
+  font: var(--text-caption-medium) !important;
+  color: var(--color-gray-500) !important;
+  font-weight: 500 !important;
+  padding: 0 var(--space-4) !important;
+  height: 18px !important;
+}
+
+.domainDropdown {
+  width: 100% !important;
+}
+
+/* Dropdown override within card */
+.domainDropdown :global(.trigger) {
+  height: 34px !important;
+  padding: 0 var(--space-12) !important;
+  font: var(--text-body-medium) !important;
+  border-color: var(--color-gray-200) !important;
+  background-color: var(--color-white) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.domainDropdown :global(.trigger:hover) {
+  border-color: var(--color-gray-400) !important;
+}
+
+.domainDropdown :global(.textSelected),
+.domainDropdown :global(.textPlaceholder) {
+  font: var(--text-body-medium) !important;
+  color: var(--color-gray-800) !important;
+}
+
+/* Card Body (Vertical Stack of Inputs) */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  width: 100%;
+}
+
+/* Premium Card Input overriding global wrappers */
+.cardInput {
+  width: 100%;
+}
+
+.cardInput :global(.inputContainer) {
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-md) !important;
+  padding: var(--space-8) var(--space-10) !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+.cardInput :global(.inputContainer:hover) {
+  background-color: var(--color-gray-50) !important;
+  border-color: var(--color-gray-200) !important;
+}
+
+.cardInput :global(.inputContainer:focus-within) {
+  background-color: var(--color-white) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(75, 85, 99, 0.08) !important;
+}
+
+.cardInput :global(.inputElement) {
+  font: var(--text-body-regular) !important;
+  color: var(--color-gray-800) !important;
+  line-height: 1.5 !important;
+}
+
+/* Override default InputField textarea min-height constraints to allow single-line look ONLY for the question field */
+.questionInput div[class*="textareaContainer"] {
+  min-height: auto !important;
+}
+
+.questionInput textarea {
+  field-sizing: content;
+  resize: none !important;
+  min-height: auto !important;
+}
+
+
+
+/* Footer & Buttons */
 .footer {
   display: flex;
   justify-content: flex-end;

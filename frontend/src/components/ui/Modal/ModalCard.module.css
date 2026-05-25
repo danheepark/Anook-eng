@@ -131,6 +131,7 @@
   color: var(--color-gray-500) !important;
   margin: 0 !important;
   line-height: 1.5 !important;
+  white-space: pre-line !important;
 }
 
 /* ──────────────────────────────────────────────────────────

@@ -73,7 +73,7 @@ const ENTITY_LABELS: Record<string, string> = {
 };
 
 /** 직원에게 보여줄 필요 없는 내부 키 (섹션 표시 판단 + 순회에서 모두 제외) */
-const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'fallback_message']);
+const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'fallback_message', 'item_requests', 'service_requests']);
 
 /** 배열 타입 특수 렌더러가 필요한 키 (key-value 순회에서만 스킵, 섹션 표시 판단에서는 포함) */
 const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
@@ -215,6 +215,10 @@ export default function RequestDetailPanel({
   if (!detail) return null;
 
   const getTranslatedStatus = (status: string, defaultText: string) => {
+    if (detail.departmentId === 'FRONT') {
+      if (status === 'PENDING') return '접수 중';
+      if (status === 'IN_PROGRESS' || status === 'ASSIGNED') return '상담 중';
+    }
     if (!t.status) return defaultText;
     if (status === 'PENDING') return t.status.pending || defaultText;
     if (status === 'ASSIGNED') return t.status.assigned || defaultText;
@@ -225,8 +229,14 @@ export default function RequestDetailPanel({
     return defaultText;
   };
 
+  let variant = STATUS_MAP[detail.status]?.variant || ('gray' as const);
+  if (detail.departmentId === 'FRONT') {
+    if (detail.status === 'PENDING') variant = 'red';
+    if (detail.status === 'IN_PROGRESS' || detail.status === 'ASSIGNED') variant = 'green';
+  }
+
   const statusInfo = STATUS_MAP[detail.status]
-    ? { text: getTranslatedStatus(detail.status, STATUS_MAP[detail.status].text), variant: STATUS_MAP[detail.status].variant }
+    ? { text: getTranslatedStatus(detail.status, STATUS_MAP[detail.status].text), variant }
     : { text: detail.status, variant: 'gray' as const };
 
   const hasChanges =
@@ -386,7 +396,9 @@ export default function RequestDetailPanel({
                   ? `${Math.round(detail.confidence * 100)}%`
                   : '100%';
                 const label = language === 'en' ? 'confidence' : '신뢰도';
-                const displayReasoning = `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`;
+                const displayReasoning = cleanedReasoning
+                  ? `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`
+                  : `• ${label}: ${formattedConfidence}`;
                 return (
                   <div className={styles.contentBlock}>
                     <span className={styles.label}>판단 근거</span>

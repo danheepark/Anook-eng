@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
 import KnowledgeModal from '@/components/ui/Knowledge/KnowledgeModal';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
@@ -19,12 +20,16 @@ interface KnowledgeLibraryTabProps {
 }
 
 export default function KnowledgeLibraryTab({ domainCode, searchValue, filterValue, onMatchesChange, activeMatchId }: KnowledgeLibraryTabProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { data, loading, error, createEntry, updateEntry, deleteEntry } = useKnowledge(domainCode === 'ALL' ? undefined : domainCode);
   const [selectedKnowledge, setSelectedKnowledge] = useState<KnowledgeEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const ALL_OPTIONS = [
     { value: 'FRONT', label: t.frontdeskPage.rag.tabs.FRONT },
@@ -75,9 +80,27 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
 
   return (
     <div className={styles.container}>
-      {/* Content Section */}
-      <div className={styles.contentSection}>
-        <div className={styles.buttonWrapper}>
+      {/* Header Area (Only rendered if portal is NOT active, to prevent empty gray border line) */}
+      {(!mounted || typeof window === 'undefined' || !document.getElementById('knowledge-header-actions')) && (
+        <div className={styles.headerArea}>
+          <div className={styles.headerTitle} />
+          <div>
+            <Button 
+              variant="primary" 
+              onClick={() => {
+                setIsCreatingNew(true);
+                setIsEditModalOpen(true);
+              }}
+            >
+              {language === 'en' ? 'Add' : '지식 추가'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Render Portal in the background when active */}
+      {mounted && typeof window !== 'undefined' && document.getElementById('knowledge-header-actions') && (
+        createPortal(
           <Button 
             variant="primary" 
             onClick={() => {
@@ -85,46 +108,47 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
               setIsEditModalOpen(true);
             }}
           >
-            {t.frontdeskPage.rag.addKnowledge}
-          </Button>
-        </div>
+            {language === 'en' ? 'Add' : '지식 추가'}
+          </Button>,
+          document.getElementById('knowledge-header-actions')!
+        )
+      )}
 
-        {loading ? (
-          <div className={styles.statusMessage}>{t.common.loading}</div>
-        ) : error ? (
-          <div className={styles.errorMessage}>{error}</div>
-        ) : (
-          <div className={styles.listContainer}>
-            {filteredData.length === 0 ? (
-              <div className={styles.emptyMessage}>{t.frontdeskPage.rag.empty}</div>
-            ) : (
-              filteredData.map((item) => (
-                <KnowledgeItem
-                  key={item.id}
-                  id={item.id}
-                  domainCode={item.domainCode}
-                  question={item.question}
-                  answer={item.answer}
-                  updatedAt={(() => {
-                    const d = new Date(item.updatedAt);
-                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                  })()}
-                  onClick={() => setSelectedKnowledge(item)}
-                  onEdit={() => {
-                    setSelectedKnowledge(item);
-                    setIsEditModalOpen(true);
-                  }}
-                  onDelete={() => {
-                    setDeleteTargetId(item.id);
-                  }}
-                  isActiveMatch={activeMatchId === item.id}
-                  highlightQuery={searchValue}
-                />
-              ))
-            )}
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div className={styles.statusMessage}>{t.common.loading}</div>
+      ) : error ? (
+        <div className={styles.errorMessage}>{error}</div>
+      ) : (
+        <div className={styles.cardList}>
+          {filteredData.length === 0 ? (
+            <div className={styles.emptyMessage}>{t.frontdeskPage.rag.empty}</div>
+          ) : (
+            filteredData.map((item) => (
+              <KnowledgeItem
+                key={item.id}
+                id={item.id}
+                domainCode={item.domainCode}
+                question={item.question}
+                answer={item.answer}
+                updatedAt={(() => {
+                  const d = new Date(item.updatedAt);
+                  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                })()}
+                onClick={() => setSelectedKnowledge(item)}
+                onEdit={() => {
+                  setSelectedKnowledge(item);
+                  setIsEditModalOpen(true);
+                }}
+                onDelete={() => {
+                  setDeleteTargetId(item.id);
+                }}
+                isActiveMatch={activeMatchId === item.id}
+                highlightQuery={searchValue}
+              />
+            ))
+          )}
+        </div>
+      )}
 
       {/* View Modal */}
       {selectedKnowledge && !isEditModalOpen && (
