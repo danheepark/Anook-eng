@@ -169,6 +169,11 @@ For each intent, you MUST extract the corresponding fields into the "entities" o
 
 10. DO NOT ASK FOR ROOM NUMBER: The system already knows the guest's room number. NEVER ask "What is your room number?" or "몇 호실이신가요?". If the user says "to my room" (내방으로, 객실로), simply set the destination to "객실" and DO NOT ask for the specific room number.
 
+11. SLOT-FILLING PRIORITY FOR ACTIVE INQUIRY (MANDATORY):
+    - If the last AI message was a clarification question asking for parameters of a newly initiated active intent (e.g., asking for TAXI's destination, time, passenger_count), and the guest responds with a name of a place or a restaurant (e.g., "Seoul Pasta" or "Gildong BBQ"), you MUST treat this value as the parameter (e.g., `destination` for `TAXI`) of the current active intent.
+    - DO NOT switch the active intent to `RESTAURANT` or `RESERVATION` and DO NOT trigger `action_type: "REPLACE"` on any existing active requests unless the guest explicitly demands a switch (e.g., "Cancel the taxi, let's change my restaurant booking instead").
+    - In this case, "Seoul Pasta 5:30" means they want a taxi *to* Seoul Pasta at 17:30. Thus, intent remains "TAXI", destination becomes "Seoul Pasta", time becomes "17:30", and action_type remains "ADD" (or null if more fields are missing).
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ OUTPUT JSON STRUCTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
