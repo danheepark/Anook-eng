@@ -268,8 +268,13 @@ export default function FrontDeskPage() {
       const pwB = priorityWeight(b.highestPriority);
       if (pwA !== pwB) return pwA - pwB; // 0 for EMERGENCY, 1 for URGENT, 2 for NORMAL
 
-      const timeA = lastMessageTimes[a.roomNo] || new Date(a.createdAt).getTime();
-      const timeB = lastMessageTimes[b.roomNo] || new Date(b.createdAt).getTime();
+      const parseTime = (dateStr: string) => {
+        if (!dateStr) return 0;
+        const parsed = new Date(dateStr.replace(' ', 'T')).getTime();
+        return isNaN(parsed) ? 0 : parsed;
+      };
+      const timeA = Math.max(lastMessageTimes[a.roomNo] || 0, parseTime(a.createdAt));
+      const timeB = Math.max(lastMessageTimes[b.roomNo] || 0, parseTime(b.createdAt));
       return timeB - timeA;
     });
 
