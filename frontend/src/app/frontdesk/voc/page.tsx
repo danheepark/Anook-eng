@@ -51,7 +51,7 @@ export default function VocPage() {
           options={FILTER_OPTIONS}
           activeValue={filter}
           onChange={(val) => setFilter((val || 'POSITIVE') as FilterType)}
-          variant="pill"
+          variant="line"
         />
       </div>
       

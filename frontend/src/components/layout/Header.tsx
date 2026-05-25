@@ -32,7 +32,7 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
       <div className={styles.right} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-16)' }}>
         {role === 'frontdesk' && (
           <>
-            <Button variant="primary" onClick={() => openModal('createRequest')} style={{ padding: '6px 12px', fontSize: '13px' }}>
+            <Button variant="secondary" onClick={() => openModal('createRequest')} style={{ padding: '6px 12px', fontSize: '13px' }}>
               {t.frontdeskPage.frontDesk.createRequest}
             </Button>
             <Suspense fallback={<div style={{ width: 24, height: 24 }}></div>}>

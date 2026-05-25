@@ -70,8 +70,8 @@ export default function KnowledgeManagementPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{t.frontdeskPage.sidebar.menus.rag}</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>{t.frontdeskPage.sidebar.menus.rag}</h1>
         <div className={styles.headerActions}>
           <div className={styles.searchBarWrapper}>
             <SmartSearchBar
