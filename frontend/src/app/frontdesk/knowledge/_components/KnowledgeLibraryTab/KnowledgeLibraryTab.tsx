@@ -79,7 +79,7 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
       <div className={styles.contentSection}>
         <div className={styles.buttonWrapper}>
           <Button 
-            variant="primary" 
+            variant="secondary" 
             onClick={() => {
               setIsCreatingNew(true);
               setIsEditModalOpen(true);
