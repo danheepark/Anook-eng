@@ -552,19 +552,25 @@ export default function FrontDeskPage() {
         </div>
 
         {/* Third Pane: Request Detail (요청 상세) */}
-        {(activeChatRoom || detailTarget !== null) && (
-          <div className={`${styles.detailPane} ${mobileView !== 'detail' ? styles.mobileHidden : ''}`}>
-            <RequestDetailPanel
-              requestId={(activeChatRoom ? activeChatRoom.representativeId : detailTarget)!}
-              onUpdate={() => refetch && refetch()}
-              onClose={() => {
-                setActiveChatRoom(null);
-                setDetailTarget(null);
-              }}
-              onMobileBack={() => setMobileView('chat')}
-            />
-          </div>
-        )}
+        {(activeChatRoom || detailTarget !== null) && (() => {
+          const targetId = (activeChatRoom ? activeChatRoom.representativeId : detailTarget)!;
+          const currentRequest = [...pending, ...inProgress, ...completed].find(r => r.id === targetId);
+          const currentStatus = currentRequest?.status || '';
+          return (
+            <div className={`${styles.detailPane} ${mobileView !== 'detail' ? styles.mobileHidden : ''}`}>
+              <RequestDetailPanel
+                key={`${targetId}-${currentStatus}`}
+                requestId={targetId}
+                onUpdate={() => refetch && refetch()}
+                onClose={() => {
+                  setActiveChatRoom(null);
+                  setDetailTarget(null);
+                }}
+                onMobileBack={() => setMobileView('chat')}
+              />
+            </div>
+          );
+        })()}
       </div>
 
       {/* 요청 생성 모달 */}
