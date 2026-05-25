@@ -172,14 +172,19 @@ export default function FrontDeskPage() {
     }
   }, [pending, inProgress]);
 
-  const mapStatusVariant = (status: string): 'red' | 'purple' | 'green' | 'gray' => {
+  const mapStatusVariant = (status: string, room?: any): 'red' | 'purple' | 'green' | 'gray' => {
     if (status === 'PENDING') return 'red';
-    if (status === 'IN_PROGRESS') return 'green';
+    if (status === 'IN_PROGRESS' || status === 'ASSIGNED') return 'green';
     if (status === 'COMPLETED' || status === 'CANCELLED' || status === 'ESCALATED') return 'gray';
     return 'gray';
   };
 
-  const mapStatusText = (status: string): string => {
+  const mapStatusText = (status: string, room?: any): string => {
+    const isFront = room?.reqs?.some((r: any) => r.departmentId === 'FRONT');
+    if (isFront) {
+      if (status === 'PENDING') return '접수 중';
+      if (status === 'IN_PROGRESS' || status === 'ASSIGNED') return '상담 중';
+    }
     if (status === 'PENDING') return t.frontdeskPage.frontDesk.status.pending;
     if (status === 'IN_PROGRESS') return t.frontdeskPage.frontDesk.status.inProgress;
     if (status === 'COMPLETED' || status === 'CANCELLED') return t.frontdeskPage.frontDesk.status.completed;
@@ -460,8 +465,8 @@ export default function FrontDeskPage() {
                   roomNumber={room.roomNo}
                   title={room.summaryText}
                   description={lastGuestMessages[String(room.roomNo)] || room.rawText || t.chatPanel?.dummyGuest || '요청 내용이 없습니다.'}
-                  statusText={mapStatusText(room.repStatus)}
-                  statusVariant={mapStatusVariant(room.repStatus)}
+                  statusText={mapStatusText(room.repStatus, room)}
+                  statusVariant={mapStatusVariant(room.repStatus, room)}
                   createdAt={room.createdAt}
                   isSelected={activeChatRoom?.roomNumber === room.roomNo}
                   isActiveMatch={roomSearchValue ? filteredGroupedRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}

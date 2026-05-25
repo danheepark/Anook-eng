@@ -215,6 +215,10 @@ export default function RequestDetailPanel({
   if (!detail) return null;
 
   const getTranslatedStatus = (status: string, defaultText: string) => {
+    if (detail.departmentId === 'FRONT') {
+      if (status === 'PENDING') return '접수 중';
+      if (status === 'IN_PROGRESS' || status === 'ASSIGNED') return '상담 중';
+    }
     if (!t.status) return defaultText;
     if (status === 'PENDING') return t.status.pending || defaultText;
     if (status === 'ASSIGNED') return t.status.assigned || defaultText;
@@ -225,8 +229,14 @@ export default function RequestDetailPanel({
     return defaultText;
   };
 
+  let variant = STATUS_MAP[detail.status]?.variant || ('gray' as const);
+  if (detail.departmentId === 'FRONT') {
+    if (detail.status === 'PENDING') variant = 'red';
+    if (detail.status === 'IN_PROGRESS' || detail.status === 'ASSIGNED') variant = 'green';
+  }
+
   const statusInfo = STATUS_MAP[detail.status]
-    ? { text: getTranslatedStatus(detail.status, STATUS_MAP[detail.status].text), variant: STATUS_MAP[detail.status].variant }
+    ? { text: getTranslatedStatus(detail.status, STATUS_MAP[detail.status].text), variant }
     : { text: detail.status, variant: 'gray' as const };
 
   const hasChanges =
