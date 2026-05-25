@@ -104,7 +104,7 @@ public class SendMessageService implements SendMessageUseCase {
         log.info("[Message] 고객 언어 갱신 — room: {}, lang: {}", cmd.roomNo(), guestLang);
 
         // 2-3. 고객 메시지를 직원 언어로 번역하여 DB 및 WebSocket으로 전달 (비동기)
-        self.translateGuestMessageForStaff(guestMsg.getId(), cmd.roomNo(), maskedContent, guestLang);
+        self.translateMessageForStaff(guestMsg.getId(), cmd.roomNo(), maskedContent, guestLang);
 
         // 3. AI 처리 — 직원이 실시간 상담 중인 방이면 AI 개입 스킵
         if (roomStatusPort.isStaffHandlingRoom(cmd.roomNo())) {
@@ -180,6 +180,9 @@ public class SendMessageService implements SendMessageUseCase {
             Message aiMsg = Message.createAiReply(roomNo, guestId, combinedReply);
             aiMsg = messagePort.save(aiMsg);
             log.info("[Message] AI 응답 저장 완료 — id: {}, reply: {}", aiMsg.getId(), combinedReply);
+
+            // AI 응답 메시지도 직원 언어(한국어)로 번역하여 DB 저장 및 웹소켓 전송 (비동기)
+            self.translateMessageForStaff(aiMsg.getId(), roomNo, combinedReply, language);
 
             // 5. WebSocket Push → 고객 채팅 화면에 AI 응답 실시간 전달
             Map<String, Object> payload = new java.util.HashMap<>(Map.of(
@@ -587,13 +590,9 @@ public class SendMessageService implements SendMessageUseCase {
                 "originalContent", command.content()));
     }
 
-    /**
-     * 고객 메시지를 직원 언어(시스템 기본: 한국어)로 번역하여 DB에 저장하고 WebSocket으로 Push.
-     * 직원 ChatPanel에서 고객 메시지를 직원 언어로 표시하기 위한 비동기 처리.
-     */
     @Async("aiTaskExecutor")
     @Transactional
-    public void translateGuestMessageForStaff(Long messageId, String roomNo, String content, String guestLang) {
+    public void translateMessageForStaff(Long messageId, String roomNo, String content, String guestLang) {
         // 시스템 기본 직원 언어는 한국어 (향후 직원별 언어 설정 지원 시 변경 가능)
         String staffLang = "ko";
 
@@ -604,7 +603,7 @@ public class SendMessageService implements SendMessageUseCase {
 
         try {
             String translatedForStaff = aiPort.translate(content, staffLang);
-            log.info("[Message] 고객→직원 번역 완료 — msgId: {}, {} → {}", messageId, content, translatedForStaff);
+            log.info("[Message] 고객/AI→직원 번역 완료 — msgId: {}, {} → {}", messageId, content, translatedForStaff);
 
             // DB에 translated_content 저장
             messagePort.findById(messageId).ifPresent(msg -> {
@@ -614,16 +613,16 @@ public class SendMessageService implements SendMessageUseCase {
 
             // WebSocket Push: 직원 ChatPanel에 번역본 전달
             dispatchPort.sendToRoom(roomNo, Map.of(
-                    "type", "GUEST_MESSAGE_TRANSLATED",
+                    "type", "MESSAGE_TRANSLATED",
                     "messageId", messageId,
                     "translatedContent", translatedForStaff));
             dispatchPort.sendToFrontdesk(Map.of(
-                    "type", "GUEST_MESSAGE_TRANSLATED",
+                    "type", "MESSAGE_TRANSLATED",
                     "roomNo", roomNo,
                     "messageId", messageId,
                     "translatedContent", translatedForStaff));
         } catch (Exception e) {
-            log.error("[Message] 고객→직원 번역 실패 — msgId: {}, error: {}", messageId, e.getMessage());
+            log.error("[Message] 고객/AI→직원 번역 실패 — msgId: {}, error: {}", messageId, e.getMessage());
         }
     }
 

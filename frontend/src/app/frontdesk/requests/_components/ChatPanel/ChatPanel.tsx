@@ -161,7 +161,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
         const chatMessages = data.map((msg: any) => {
           let displayContent = msg.content;
           if (msg.senderType === 'AI') {
-            displayContent = translateContent(msg.content);
+            displayContent = msg.translatedContent ? translateContent(msg.translatedContent) : translateContent(msg.content);
           } else if (msg.senderType === 'GUEST' && msg.translatedContent) {
             displayContent = msg.translatedContent;
           }
@@ -272,14 +272,14 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
             content,
           }];
         });
-      } else if (type === 'GUEST_MESSAGE_TRANSLATED') {
-        // 고객 메시지 번역 완료 → 기존 메시지의 content를 번역본으로 교체
+      } else if (type === 'GUEST_MESSAGE_TRANSLATED' || type === 'MESSAGE_TRANSLATED') {
+        // 고객 또는 AI 메시지 번역 완료 → 기존 메시지의 content를 번역본으로 교체
         const translatedContent = payload.translatedContent as string;
         const targetMsgId = payload.messageId as number;
         if (translatedContent && targetMsgId) {
           setMessages(prev => prev.map(m =>
-            m.id === String(targetMsgId) && m.senderType === 'GUEST'
-              ? { ...m, content: translatedContent }
+            m.id === String(targetMsgId) && (m.senderType === 'GUEST' || m.senderType === 'AI')
+              ? { ...m, content: m.senderType === 'AI' ? translateContent(translatedContent) : translatedContent }
               : m
           ));
         }
