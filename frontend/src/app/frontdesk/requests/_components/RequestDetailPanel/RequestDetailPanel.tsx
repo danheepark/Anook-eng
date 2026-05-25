@@ -5,7 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import styles from './RequestDetailPanel.module.css';
 import Button from '@/components/ui/Button/Button';
 import Dropdown from '@/components/ui/Dropdown/Dropdown';
-import { CancelIcon, ArrowDownIcon, ArrowUpIcon } from '@/components/icons';
+import { CancelIcon } from '@/components/icons';
 import { useUiStore } from '@/stores/useUiStore';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
@@ -184,7 +184,6 @@ export default function RequestDetailPanel({
   const [saving, setSaving] = useState(false);
   const [confirmType, setConfirmType] = useState<'none' | 'cancel' | 'approve' | 'reject' | 'cancelApprove' | 'cancelReject'>('none');
   const [showManualAssign, setShowManualAssign] = useState(false);
-  const [isAiSectionOpen, setIsAiSectionOpen] = useState(false);
   const showToast = useUiStore((s) => s.showToast);
   const { t, language } = useTranslation();
 
@@ -221,8 +220,8 @@ export default function RequestDetailPanel({
     return defaultText;
   };
 
-  const statusInfo = STATUS_MAP[detail.status] 
-    ? { text: getTranslatedStatus(detail.status, STATUS_MAP[detail.status].text), variant: STATUS_MAP[detail.status].variant } 
+  const statusInfo = STATUS_MAP[detail.status]
+    ? { text: getTranslatedStatus(detail.status, STATUS_MAP[detail.status].text), variant: STATUS_MAP[detail.status].variant }
     : { text: detail.status, variant: 'gray' as const };
 
   const hasChanges =
@@ -316,57 +315,50 @@ export default function RequestDetailPanel({
       <div className={styles.detailContent}>
         {/* 기본 정보 */}
         <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.basicInfo || '기본 정보'}</h3>
-        <div className={styles.grid}>
-          <div className={styles.gridItem}>
-            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.roomNo || '객실'}</span>
-            <span className={styles.value}>{detail.roomNo}</span>
-          </div>
+          <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.basicInfo || '기본 정보'}</h3>
+          <div className={styles.grid}>
+            <div className={styles.gridItem}>
+              <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.roomNo || '객실'}</span>
+              <span className={styles.value}>{detail.roomNo}</span>
+            </div>
 
-          <div className={styles.gridItem}>
-            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.createdAt || '생성 시간'}</span>
-            <span className={styles.value}>{formatDateTime(detail.createdAt)}</span>
-          </div>
-          <div className={styles.gridItem}>
-            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.updatedAt || '최종 수정'}</span>
-            <span className={styles.value}>{formatDateTime(detail.updatedAt)}</span>
+            <div className={styles.gridItem}>
+              <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.createdAt || '생성 시간'}</span>
+              <span className={styles.value}>{formatDateTime(detail.createdAt)}</span>
+            </div>
+            <div className={styles.gridItem}>
+              <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.updatedAt || '최종 수정'}</span>
+              <span className={styles.value}>{formatDateTime(detail.updatedAt)}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 요약 + 원문 */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.requestContent || '요청 내용'}</h3>
-        <div className={styles.contentBlock}>
-          <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.summary || '요약'}</span>
-          <p className={styles.contentText}>{detail.summary}</p>
-        </div>
-
-      </div>
-
-      {/* 첨부 사진 */}
-      {detail.imageUrl && (
+        {/* 요약 + 원문 */}
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.photo || '첨부 사진'}</h3>
-          <div className={styles.contentBlock} style={{ textAlign: 'center' }}>
-            <img src={detail.imageUrl} alt="첨부 사진" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', objectFit: 'contain' }} />
+          <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.requestContent || '요청 내용'}</h3>
+          <div className={styles.contentBlock}>
+            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.summary || '요약'}</span>
+            <p className={styles.contentText}>{detail.summary}</p>
           </div>
+
         </div>
-      )}
 
-      {/* AI 분석 결과 */}
-      {((detail.entities && Object.keys(detail.entities).length > 0) || detail.reasoning) && (
-        <div className={styles.section}>
-          <div
-            className={styles.collapsibleHeader}
-            onClick={() => setIsAiSectionOpen(!isAiSectionOpen)}
-          >
-            <h3 className={styles.collapsibleTitle}>{t.frontdeskPage?.requestDetailModal?.aiAnalysisView || 'AI 분석 상세 내역'}</h3>
-            {isAiSectionOpen ? <ArrowUpIcon width={20} height={20} color="var(--color-gray-500)" /> : <ArrowDownIcon width={20} height={20} color="var(--color-gray-500)" />}
+        {/* 첨부 사진 */}
+        {detail.imageUrl && (
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.photo || '첨부 사진'}</h3>
+            <div className={styles.contentBlock} style={{ textAlign: 'center' }}>
+              <img src={detail.imageUrl} alt="첨부 사진" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', objectFit: 'contain' }} />
+            </div>
           </div>
+        )}
 
-          {isAiSectionOpen && (
-            <div className={styles.aiInfo} style={{ marginTop: 'var(--space-8)' }}>
+        {/* AI 분석 결과 */}
+        {((detail.entities && Object.keys(detail.entities).length > 0) || detail.reasoning) && (
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.aiAnalysisView || 'AI 분석 상세 내역'}</h3>
+
+            <div className={styles.aiInfo}>
               {(() => {
                 if (!detail.entities) return null;
                 // 직원에게 보여줄 필요 없는 키 제외하고 렌더링할 게 있는지 확인
@@ -375,7 +367,7 @@ export default function RequestDetailPanel({
 
                 return (
                   <div className={styles.entityList}>
-                     {renderEntities(detail.entities, language)}
+                    {renderEntities(detail.entities, language)}
                   </div>
                 );
               })()}
@@ -398,114 +390,113 @@ export default function RequestDetailPanel({
                 );
               })()}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      <div className={styles.footer}>
-        <div className={styles.footerRight}>
-          {!showManualAssign && detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' && (
-            <Button variant="primary" onClick={() => setShowManualAssign(true)}>
-              {t.frontdeskPage?.requestDetailModal?.manualAssign || '수동 배정'}
-            </Button>
-          )}
+        <div className={styles.footer}>
+          <div className={styles.footerRight}>
+            {!showManualAssign && detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' && (
+              <Button variant="primary" onClick={() => setShowManualAssign(true)}>
+                {t.frontdeskPage?.requestDetailModal?.manualAssign || '수동 배정'}
+              </Button>
+            )}
+            {detail.status === 'ESCALATED' ? (
+              <Button variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
+                {t.frontdeskPage?.requestDetailModal?.approveEscalation || '에스컬레이션 승인'}
+              </Button>
+            ) : null}
+          </div>
+
           {detail.status === 'ESCALATED' ? (
-            <Button variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
-              {t.frontdeskPage?.requestDetailModal?.approveEscalation || '에스컬레이션 승인'}
+            <Button variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+              {t.frontdeskPage?.requestDetailModal?.rejectEscalation || '에스컬레이션 반려'}
+            </Button>
+          ) : detail.cancelRequested ? (
+            <>
+              <Button variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+                {t.frontdeskPage?.requestDetailModal?.rejectCancel || '취소 반려'}
+              </Button>
+              <Button variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
+                {t.frontdeskPage?.requestDetailModal?.approveCancel || '취소 승인'}
+              </Button>
+            </>
+          ) : detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' ? (
+            <Button variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
+              {t.frontdeskPage?.requestDetailModal?.forceCancelRequest || '강제 요청 취소'}
             </Button>
           ) : null}
         </div>
 
-        {detail.status === 'ESCALATED' ? (
-          <Button variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-            {t.frontdeskPage?.requestDetailModal?.rejectEscalation || '에스컬레이션 반려'}
-          </Button>
-        ) : detail.cancelRequested ? (
-          <>
-            <Button variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-              {t.frontdeskPage?.requestDetailModal?.rejectCancel || '취소 반려'}
-            </Button>
-            <Button variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
-              {t.frontdeskPage?.requestDetailModal?.approveCancel || '취소 승인'}
-            </Button>
-          </>
-        ) : detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' ? (
-          <Button variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
-            {t.frontdeskPage?.requestDetailModal?.forceCancelRequest || '강제 요청 취소'}
-          </Button>
-        ) : null}
-      </div>
-
-      <ConfirmModal
-        isOpen={confirmType === 'cancel'}
-        onClose={() => setConfirmType('none')}
-        onConfirm={handleCancel}
-        title="요청 취소"
-        subtitle="정말 요청을 취소하시겠습니까?"
-        status="danger"
-        cancelText="아니오"
-        confirmText="예, 취소합니다"
-      />
-
-      <ConfirmModal
-        isOpen={confirmType === 'approve'}
-        onClose={() => setConfirmType('none')}
-        onConfirm={handleApproveEscalation}
-        title="에스컬레이션 승인"
-        subtitle={`선택한 부서(${departments.find(d => d.id === editDeptId)?.name || '...'})로 재배정하며 승인합니다.`}
-        cancelText="아니오"
-        confirmText="승인하기"
-      />
-
-      {confirmType === 'reject' && detail && (
-        <RejectEscalationModal
-          isOpen={true}
+        <ConfirmModal
+          isOpen={confirmType === 'cancel'}
           onClose={() => setConfirmType('none')}
-          requestId={detail.id}
-          onSuccess={() => {
-            onUpdate();
-            onClose?.();
-          }}
+          onConfirm={handleCancel}
+          title="요청 취소"
+          subtitle="정말 요청을 취소하시겠습니까?"
+          status="danger"
+          cancelText="아니오"
+          confirmText="예, 취소합니다"
         />
-      )}
 
-      {confirmType === 'cancelApprove' && detail && (
-        <ApproveCancellationModal
-          isOpen={true}
+        <ConfirmModal
+          isOpen={confirmType === 'approve'}
           onClose={() => setConfirmType('none')}
-          requestId={detail.id}
-          onSuccess={() => {
-            onUpdate();
-            onClose?.();
-          }}
+          onConfirm={handleApproveEscalation}
+          title="에스컬레이션 승인"
+          subtitle={`선택한 부서(${departments.find(d => d.id === editDeptId)?.name || '...'})로 재배정하며 승인합니다.`}
+          cancelText="아니오"
+          confirmText="승인하기"
         />
-      )}
 
-      {confirmType === 'cancelReject' && detail && (
-        <RejectCancellationModal
-          isOpen={true}
-          onClose={() => setConfirmType('none')}
-          requestId={detail.id}
-          onSuccess={() => {
-            onUpdate();
-            onClose?.();
-          }}
-        />
-      )}
+        {confirmType === 'reject' && detail && (
+          <RejectEscalationModal
+            isOpen={true}
+            onClose={() => setConfirmType('none')}
+            requestId={detail.id}
+            onSuccess={() => {
+              onUpdate();
+              onClose?.();
+            }}
+          />
+        )}
 
-      {detail && (
-        <ManualAssignModal
-          isOpen={showManualAssign}
-          onClose={() => setShowManualAssign(false)}
-          detail={{
-            ...detail,
-            description: ''
-          }}
-          departments={departments}
-          onSave={handleSave}
-          saving={saving}
-        />
-      )}
+        {confirmType === 'cancelApprove' && detail && (
+          <ApproveCancellationModal
+            isOpen={true}
+            onClose={() => setConfirmType('none')}
+            requestId={detail.id}
+            onSuccess={() => {
+              onUpdate();
+              onClose?.();
+            }}
+          />
+        )}
+
+        {confirmType === 'cancelReject' && detail && (
+          <RejectCancellationModal
+            isOpen={true}
+            onClose={() => setConfirmType('none')}
+            requestId={detail.id}
+            onSuccess={() => {
+              onUpdate();
+              onClose?.();
+            }}
+          />
+        )}
+
+        {detail && (
+          <ManualAssignModal
+            isOpen={showManualAssign}
+            onClose={() => setShowManualAssign(false)}
+            detail={{
+              ...detail,
+              description: ''
+            }}
+            departments={departments}
+            onSave={handleSave}
+            saving={saving}
+          />
+        )}
       </div>
     </div>
   );
