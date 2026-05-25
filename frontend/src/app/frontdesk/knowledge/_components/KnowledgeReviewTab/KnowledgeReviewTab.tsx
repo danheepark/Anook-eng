@@ -9,6 +9,7 @@ import { useKnowledge } from '../../useKnowledge';
 import styles from './KnowledgeReviewTab.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useRagAnalysis } from './useRagAnalysis';
+import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 
 interface KnowledgeReviewTabProps {
   domainCode: string; // 'ALL' 또는 도메인 코드
@@ -268,74 +269,68 @@ export default function KnowledgeReviewTab({
       ) : isAnalyzed ? (
         // RAG 분석 결과 인라인 테이블
         <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={`${styles.th} ${styles.thCheckbox}`}>
+          <Table columns="48px 1fr 1.2fr 130px">
+            <TableHeader>
+              <TableCell style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={handleSelectAll}
+                  className={styles.checkboxInput}
+                />
+              </TableCell>
+              <TableCell>질문 (Question)</TableCell>
+              <TableCell>답변 (Answer)</TableCell>
+              <TableCell>분류 부서</TableCell>
+            </TableHeader>
+            {candidates.map((item, idx) => (
+              <TableRow key={idx}>
+                <TableCell style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <input
                     type="checkbox"
-                    checked={allSelected}
-                    onChange={handleSelectAll}
+                    checked={item.selected}
+                    onChange={() => handleToggle(idx)}
                     className={styles.checkboxInput}
                   />
-                </th>
-                <th className={`${styles.th} ${styles.thQuestion}`}>질문 (Question)</th>
-                <th className={`${styles.th} ${styles.thAnswer}`}>답변 (Answer)</th>
-                <th className={`${styles.th} ${styles.thDomain}`}>분류 부서</th>
-              </tr>
-            </thead>
-            <tbody>
-              {candidates.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className={styles.emptyState}>
-                    분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.
-                  </td>
-                </tr>
-              ) : (
-                candidates.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className={`${styles.td} ${styles.tdCheckbox}`}>
-                      <input
-                        type="checkbox"
-                        checked={item.selected}
-                        onChange={() => handleToggle(idx)}
-                        className={styles.checkboxInput}
-                      />
-                    </td>
-                    <td className={styles.td}>
-                      <textarea
-                        value={item.question}
-                        onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
-                        className={styles.cellTextarea}
-                        placeholder="질문을 입력하세요..."
-                      />
-                    </td>
-                    <td className={styles.td}>
-                      <textarea
-                        value={item.answer}
-                        onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
-                        className={styles.cellTextarea}
-                        placeholder="답변을 입력하세요..."
-                      />
-                    </td>
-                    <td className={styles.td}>
-                      <select
-                        value={item.domainCode}
-                        onChange={(e) => handleDomainChange(idx, e.target.value)}
-                        className={styles.selectInput}
-                      >
-                        {DOMAIN_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </TableCell>
+                <TableCell>
+                  <textarea
+                    value={item.question}
+                    onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
+                    className={styles.cellTextarea}
+                    placeholder="질문을 입력하세요..."
+                  />
+                </TableCell>
+                <TableCell>
+                  <textarea
+                    value={item.answer}
+                    onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
+                    className={styles.cellTextarea}
+                    placeholder="답변을 입력하세요..."
+                  />
+                </TableCell>
+                <TableCell>
+                  <select
+                    value={item.domainCode}
+                    onChange={(e) => handleDomainChange(idx, e.target.value)}
+                    className={styles.selectInput}
+                  >
+                    {DOMAIN_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </TableCell>
+              </TableRow>
+            ))}
+          </Table>
+
+          {candidates.length === 0 && (
+            <div className={styles.emptyState}>
+              분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.
+            </div>
+          )}
 
           {candidates.length > 0 && (
             <div className={styles.tableFooter}>
