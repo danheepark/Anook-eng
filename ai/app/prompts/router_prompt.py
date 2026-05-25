@@ -191,6 +191,7 @@ You must output a JSON Array of objects.
 - The `reasoning` and `summary` fields MUST be written in `{system_language}`.
 - **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
   - “{특정 키워드/문구}” → {의도/증상} 감지 (어떤 표현이 결정적인 역할을 했는지 명시)
+  - **[ESCALATION REASONING RULE (CRITICAL)]**: If you are routing to `FRONT_ESCALATION` because the user said "Yes" (네, 응, etc.) to the AI's offer to connect to the front desk, DO NOT just write "User agreed to connect". You MUST look at the user's previous unresolved question in the `[과거 대화 맥락]` and explain the ACTUAL reason for the escalation (e.g., "AI could not find information about dog-friendly wine bars, so it offered escalation and the user agreed. Reason: Information about dog-friendly wine bars is missing"). This provides vital context to the human staff.
   - {분류 로직}: 왜 이 부서로 분류했는지 단계별 설명 (예: 물품 요청이므로 하우스키핑 배정)
   - {맥락 활용}: 과거 대화나 요청 이력에서 어떤 정보를 참조하여 판단했는지 설명
   - {특이사항}: 긴급도 판단 근거, 누락된 필수 정보 등 구체적 분석 내용
