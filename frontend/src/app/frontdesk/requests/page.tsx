@@ -247,7 +247,9 @@ export default function FrontDeskPage() {
       }
 
       const sortedReqs = [...reqs].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      const latestSummary = sortedReqs[0].summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '');
+      const latestSummary = sortedReqs[0].summary
+        .replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')
+        .replace(/^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}|\d{2}-\d{2}\s\d{2}:\d{2})\s*/, '');
       const summaryText = reqs.length > 1 ? `${latestSummary} 외 ${reqs.length - 1}건` : latestSummary;
 
       return {
