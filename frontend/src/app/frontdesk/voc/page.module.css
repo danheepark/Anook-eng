@@ -1,24 +1,31 @@
-.pageContainer {
+.container {
   display: flex;
   flex-direction: column;
-  padding: var(--space-48) var(--space-32);
+  gap: var(--space-16);
   flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: var(--space-24);
+  overflow-y: auto;
 }
 
-.pageHeader {
-  margin-bottom: var(--space-24);
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-gray-900);
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
   margin-bottom: var(--space-8);
 }
 
+.title {
+  font: var(--text-h2-bold);
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
 .subtitle {
+  font: var(--text-body-medium);
   color: var(--color-gray-500);
-  font-size: 0.875rem;
+  margin: 0;
 }
 
 .errorBox {

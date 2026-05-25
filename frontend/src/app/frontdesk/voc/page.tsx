@@ -29,8 +29,8 @@ export default function VocPage() {
   }, [vocList, filter]);
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.pageHeader}>
+    <div className={styles.container}>
+      <div className={styles.header}>
         <h1 className={styles.title}>{t.frontdeskPage.voc.title}</h1>
         <p className={styles.subtitle}>
           {t.frontdeskPage.voc.subtitle}
