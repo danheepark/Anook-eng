@@ -32,9 +32,6 @@ export default function VocPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>{t.frontdeskPage.voc.title}</h1>
-        <p className={styles.subtitle}>
-          {t.frontdeskPage.voc.subtitle}
-        </p>
       </div>
 
       {error && (
