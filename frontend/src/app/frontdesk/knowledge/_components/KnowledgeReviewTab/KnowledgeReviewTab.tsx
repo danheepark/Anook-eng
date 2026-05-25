@@ -271,7 +271,7 @@ export default function KnowledgeReviewTab({
         <div className={styles.tableContainer}>
           <Table columns="48px 1fr 1.2fr 130px">
             <TableHeader>
-              <TableCell style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <TableCell className={styles.checkboxCell}>
                 <input
                   type="checkbox"
                   checked={allSelected}
@@ -285,7 +285,7 @@ export default function KnowledgeReviewTab({
             </TableHeader>
             {candidates.map((item, idx) => (
               <TableRow key={idx}>
-                <TableCell style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <TableCell className={styles.checkboxCell}>
                   <input
                     type="checkbox"
                     checked={item.selected}

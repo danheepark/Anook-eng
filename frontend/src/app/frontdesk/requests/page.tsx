@@ -73,6 +73,18 @@ export default function FrontDeskPage() {
   const activeChatRoomRef = useRef(activeChatRoom);
   useEffect(() => { activeChatRoomRef.current = activeChatRoom; }, [activeChatRoom]);
 
+  // 활성화된 채팅방의 안읽은 메시지 개수(레드닷) 자동 초기화
+  useEffect(() => {
+    if (activeChatRoom?.roomNumber) {
+      setNewMessageCounts(prev => {
+        if (!prev[activeChatRoom.roomNumber]) return prev;
+        const next = { ...prev };
+        delete next[activeChatRoom.roomNumber];
+        return next;
+      });
+    }
+  }, [activeChatRoom?.roomNumber]);
+
   // 각 방의 마지막 고객 메시지 및 마지막 메시지 시간
   const [lastGuestMessages, setLastGuestMessages] = useState<Record<string, string>>({});
   const [lastMessageTimes, setLastMessageTimes] = useState<Record<string, number>>({});

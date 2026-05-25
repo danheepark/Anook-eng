@@ -227,3 +227,10 @@
   text-overflow: clip !important;
   max-width: 100%;
 }
+
+.checkboxCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
