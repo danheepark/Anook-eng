@@ -43,18 +43,7 @@ export default function Dropdown({
   // 현재 선택된 객체 찾기
   const selectedOption = options.find((opt) => opt.value === value);
 
-  // 바깥을 클릭하면 드롭다운 닫히게 하는 기능
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+
 
   const handleSelect = (val: string) => {
     if (onChange) {
