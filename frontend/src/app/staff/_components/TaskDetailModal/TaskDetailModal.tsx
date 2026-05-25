@@ -55,7 +55,7 @@ const ENTITY_LABELS: Record<string, string> = {
 };
 
 /** 직원에게 보여줄 필요 없는 내부 키 (섹션 표시 판단 + 순회에서 모두 제외) */
-const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning']);
+const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'item_requests', 'service_requests']);
 
 /** 배열 타입 특수 렌더러가 필요한 키 (key-value 순회에서만 스킵, 섹션 표시 판단에서는 포함) */
 const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
