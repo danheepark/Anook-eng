@@ -30,7 +30,7 @@ export default function KnowledgeModal({
 }: KnowledgeModalProps) {
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="lg" onClose={onClose}>
+      <ModalCard size="md" onClose={onClose}>
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>

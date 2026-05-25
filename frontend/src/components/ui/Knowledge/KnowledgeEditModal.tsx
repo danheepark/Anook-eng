@@ -5,7 +5,6 @@ import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button/Button';
 import InputField from '@/components/ui/Inputfield/InputField';
 import Dropdown from '@/components/ui/Dropdown/Dropdown';
-import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import { ConfirmModal } from '@/components/ui/Modal';
 import { useUiStore } from '@/stores/useUiStore';
 import styles from './KnowledgeEditModal.module.css';
@@ -47,14 +46,11 @@ export default function KnowledgeEditModal({
   return (
     <>
       <ModalOverlay isOpen={isOpen} onClose={() => setIsConfirmOpen(true)}>
-        <ModalCard size="lg" onClose={() => setIsConfirmOpen(true)}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <StatusBadge variant={isRegister ? 'green' : 'gray'}>{isRegister ? '신규 등록' : '정보 수정'}</StatusBadge>
-            <h2 className={styles.title}>{isRegister ? '지식 데이터 등록' : '지식 정보 수정'}</h2>
-          </div>
-        </div>
+        <ModalCard
+          size="md"
+          onClose={() => setIsConfirmOpen(true)}
+          title={isRegister ? '지식 데이터 등록' : '지식 정보 수정'}
+        >
 
         {/* Body */}
         <div className={styles.body}>
