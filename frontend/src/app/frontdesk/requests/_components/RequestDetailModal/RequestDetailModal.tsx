@@ -75,9 +75,9 @@ const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
 function renderEntities(entities: Record<string, any>, t: any, language: string): React.ReactNode {
   const rendered: React.ReactNode[] = [];
 
-  // 0) 정규화: item+count 플랫 키 → items 배열로 통일 (AI 응답 형식 불일치 보정)
-  if (entities.item && entities.count && !entities.items?.length) {
-    entities = { ...entities, items: [{ item: entities.item, count: entities.count }] };
+  // 0) 정규화: item 키 단독 혹은 item+count 플랫 키 → items 배열로 통일 (AI 응답 형식 불일치 보정)
+  if (entities.item && !entities.items?.length) {
+    entities = { ...entities, items: [{ item: entities.item, count: entities.count || 1 }] };
     delete entities.item;
     delete entities.count;
   }
@@ -145,10 +145,14 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
       continue;
     }
 
+    const displayValue = typeof value === 'object' && value !== null
+      ? (value.name || value.id || JSON.stringify(value))
+      : String(value);
+
     rendered.push(
       <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
         <span className={styles.label}>{label}</span>
-        <span className={styles.value}>{value}</span>
+        <span className={styles.value}>{displayValue}</span>
       </div>
     );
   }
