@@ -216,7 +216,7 @@ export default function KnowledgeReviewTab({
             <div>
               {isAnalyzed ? (
                 <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-                  목록으로 돌아가기
+                  {language === 'en' ? 'Back' : '뒤로가기'}
                 </Button>
               ) : (
                 <Button
@@ -238,7 +238,7 @@ export default function KnowledgeReviewTab({
           <div>
             {isAnalyzed ? (
               <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-                목록으로 돌아가기
+                {language === 'en' ? 'Back' : '뒤로가기'}
               </Button>
             ) : (
               <Button
