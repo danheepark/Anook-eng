@@ -869,17 +869,34 @@
           
           <div class="grid-2" style="align-items: center; width: 100%;">
             <!-- Left: Description Card -->
-            <div class="glass-card highlight" style="border-color: var(--color-red);">
-              <div class="highlight-badge" style="background: rgba(255, 77, 79, 0.15); border-color: var(--color-red); color: #FFAAAA;">비정형 요청의 범람</div>
-              <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 10px; color: var(--color-white);">정형화되지 않은 실시간 요청</h3>
-              <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-body); margin-bottom: 15px; word-break: keep-all;">
-                고객들은 객실 내 비품 요구, 룸서비스 주문, 시설물 불만 사항, 단순 정보 검색 등 다양한 난이도의 비정형 요청들을 실시간으로 쏟아냅니다.
-              </p>
-              <ul style="font-size: 0.8rem; color: var(--color-text-muted); padding-left: 20px; line-height: 1.6; margin: 0;">
-                <li>다양한 국가의 언어 장벽 존재 (다국어 질의)</li>
-                <li>오탈자, 생략, 구어체 표현으로 가득한 비정형 텍스트</li>
-                <li>단순 루틴형 반복 요청부터 복잡한 예외 민원까지 혼재</li>
-              </ul>
+            <div class="glass-card highlight" style="border-color: var(--color-red); padding: 25px;">
+              <div class="highlight-badge" style="background: rgba(255, 77, 79, 0.15); border-color: var(--color-red); color: #FFAAAA; margin-bottom: 15px;">AS-IS : 비정형 요청의 범람</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                  <i class="fa-solid fa-earth-asia" style="color: var(--color-red); font-size: 1.2rem; margin-top: 2px;"></i>
+                  <div>
+                    <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">다국어 장벽</h4>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">외국인 관광객 급증으로 언어 소통 애로</p>
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                  <i class="fa-solid fa-keyboard" style="color: var(--color-red); font-size: 1.2rem; margin-top: 2px;"></i>
+                  <div>
+                    <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">비정형 자연어</h4>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">오탈자, 구어체, 모호한 표현의 요청들</p>
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                  <i class="fa-solid fa-list-check" style="color: var(--color-red); font-size: 1.2rem; margin-top: 2px;"></i>
+                  <div>
+                    <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">광범위한 카테고리</h4>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">단순 비품 요청부터 복잡한 예외 민원까지 혼재</p>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <!-- Right: Floating Customer Messages Box -->
@@ -907,7 +924,7 @@
       <section>
         <div class="slide-container">
           <div class="slide-header">01 . Background & Problem</div>
-          <h2>채널 파편화와 프론트데스크 업무 병목</h2>
+          <h2>소통 채널 파편화와 프론트데스크 병목</h2>
           
           <div class="grid-2" style="align-items: center; width: 100%;">
             <!-- Left: Hub-and-Spoke Multitasking Staff Diagram -->
@@ -915,35 +932,54 @@
               <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; align-items: center; justify-items: center; width: 100%; position: relative;">
                 <!-- Left Column Spokes -->
                 <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
-                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-phone"></i> 전화기 응대</div>
-                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-pen-clip"></i> 수기 메모 작성</div>
-                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-database"></i> PMS 조회</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-phone"></i> 객실 전화 응대</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-pen-clip"></i> 수기 메모</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-database"></i> PMS 직접 조회</div>
                 </div>
                 <!-- Center Staff Hub -->
-                <div class="hub-center-card">
-                  <i class="fa-solid fa-user-tie"></i>
-                  <h3>프론트 직원</h3>
-                  <p>실시간 병목</p>
+                <div class="hub-center-card" style="border-color: var(--color-red); box-shadow: 0 0 15px rgba(255, 77, 79, 0.2);">
+                  <i class="fa-solid fa-user-tie" style="color: var(--color-red);"></i>
+                  <h3 style="color: var(--color-white); font-size: 1rem;">프론트 직원</h3>
+                  <p style="color: var(--color-red); font-weight: bold; font-size: 0.75rem;">업무 과부하</p>
                 </div>
                 <!-- Right Column Spokes -->
                 <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
-                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-brands fa-talk"></i> 카카오톡 단체방</div>
-                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-comments"></i> 직원 메신저</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-brands fa-talk"></i> 카톡방 수동 배정</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-comments"></i> 부서 개별 무전</div>
                   <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-desktop"></i> PC 대시보드</div>
                 </div>
               </div>
             </div>
             
             <!-- Right: Explanation Card -->
-            <div class="glass-card highlight" style="border-color: var(--color-red);">
-              <div class="highlight-badge" style="background: rgba(255, 77, 79, 0.15); border-color: var(--color-red); color: #FFAAAA;">과부하 상태 (Overloaded)</div>
-              <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 10px; color: var(--color-white);">동시다발적인 멀티태스킹</h3>
-              <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-body); margin-bottom: 15px; word-break: keep-all;">
-                단 한 명의 프론트 직원이 전화벨 소리를 들으면서 수기 메모를 적고, PMS 시스템에서 예약을 조회하며, 부서별 단체 카톡방과 직원 전용 메신저, PC 대시보드를 넘나듭니다.
-              </p>
-              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-text-muted); margin: 0; word-break: keep-all;">
-                이러한 극심한 멀티태스킹은 현장 직원의 업무 피로도를 높이고, 대면 고객에 대한 직접적인 서비스 몰입을 방해하는 가장 결정적인 병목입니다.
-              </p>
+            <div class="glass-card highlight" style="border-color: var(--color-red); padding: 25px;">
+              <div class="highlight-badge" style="background: rgba(255, 77, 79, 0.15); border-color: var(--color-red); color: #FFAAAA; margin-bottom: 15px;">AS-IS : 운영의 비효율</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 18px;">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="font-size: 1.1rem; color: var(--color-red); font-weight: 700; width: 20px;">01</span>
+                  <div>
+                    <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">극심한 멀티태스킹</h4>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">대면 응대와 동시에 객실의 수많은 무선 요청 수신</p>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="font-size: 1.1rem; color: var(--color-red); font-weight: 700; width: 20px;">02</span>
+                  <div>
+                    <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">비공식 채널 (카카오톡) 의존</h4>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">단체 카톡방을 통한 주먹구구식 배정 및 확인</p>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="font-size: 1.1rem; color: var(--color-red); font-weight: 700; width: 20px;">03</span>
+                  <div>
+                    <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">누락 및 인수인계의 한계</h4>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">요청 처리 상태 추적 불가, 교대 근무 시 정보 단절</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -953,69 +989,66 @@
         </div>
       </section>
 
-      <!-- SLIDE 3: Background & Problem (As-is - Part 2) -->
+      <!-- SLIDE 4: Background & Problem (As-is - Part 2) -->
       <section>
         <div class="slide-container">
           <div class="slide-header">01 . Background & Problem</div>
-          <h2>호텔 프론트데스크 업무의 현실과 비효율</h2>
+          <h2>숫자로 보는 호텔 업무의 현실</h2>
           
           <!-- Top: Workflow Diagram -->
           <div style="width: 100%;">
-            <p style="font-size: 0.9rem; margin-bottom: 10px; color: var(--color-gold-light); font-weight: 500; text-align: left;">
-              <i class="fa-solid fa-network-wired"></i> 실제 호텔 업무 흐름 다이어그램 (As-is)
+            <p style="font-size: 0.85rem; margin-bottom: 8px; color: var(--color-red); font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: 1px;">
+              <i class="fa-solid fa-triangle-exclamation"></i> 파편화된 수동 인계 프로세스
             </p>
-            <div class="workflow-chain">
-              <div class="workflow-node">고객 요청</div>
-              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-              <div class="workflow-node highlight-red">프론트데스크</div>
-              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-              <div class="workflow-node highlight-red">부서 판단</div>
-              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-              <div class="workflow-node">하우스키핑 전달</div>
-              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-              <div class="workflow-node highlight-red">상태 확인</div>
-              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-              <div class="workflow-node">고객 응답</div>
-              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-              <div class="workflow-node highlight-gold">인수인계 기록</div>
+            <div class="workflow-chain" style="gap: 5px;">
+              <div class="workflow-node" style="font-size: 0.7rem; padding: 6px 10px;">고객 요청</div>
+              <div class="workflow-arrow" style="font-size: 0.7rem;"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-red" style="font-size: 0.7rem; padding: 6px 10px;">프론트데스크</div>
+              <div class="workflow-arrow" style="font-size: 0.7rem;"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-red" style="font-size: 0.7rem; padding: 6px 10px;">부서 판단</div>
+              <div class="workflow-arrow" style="font-size: 0.7rem;"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node" style="font-size: 0.7rem; padding: 6px 10px;">타부서 전달</div>
+              <div class="workflow-arrow" style="font-size: 0.7rem;"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-red" style="font-size: 0.7rem; padding: 6px 10px;">수동 확인</div>
+              <div class="workflow-arrow" style="font-size: 0.7rem;"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node" style="font-size: 0.7rem; padding: 6px 10px;">고객 응답</div>
+              <div class="workflow-arrow" style="font-size: 0.7rem;"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-gold" style="font-size: 0.7rem; padding: 6px 10px;">수기 인수인계</div>
             </div>
           </div>
 
           <!-- Bottom: Stat Cards -->
-          <div class="grid-3" style="margin-top: 10px;">
-            <div class="glass-card">
-              <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 5px; text-transform: uppercase;">Workload</div>
-              <div class="stat-number" style="color: var(--color-red);">50-60%</div>
-              <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-white); margin-bottom: 5px;">반복 / 규칙 기반 업무</div>
-              <div style="font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.4;">고객 단순 요청 응대, 타부서 무전 전달, 인수인계 기록 등</div>
+          <div class="grid-3" style="margin-top: 15px; gap: 15px;">
+            <div class="glass-card" style="padding: 15px 20px;">
+              <div style="font-size: 0.7rem; color: var(--color-text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Workload</div>
+              <div class="stat-number" style="color: var(--color-red); font-size: 2.2rem; margin: 5px 0;">50-60%</div>
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-white); margin-bottom: 4px;">반복적 행정 업무</div>
+              <div style="font-size: 0.7rem; color: var(--color-text-muted); line-height: 1.4;">단순 비품 응대, 정보 문의 등 루틴 업무</div>
             </div>
 
-            <div class="glass-card highlight" style="border-color: var(--color-red);">
-              <div style="font-size: 0.8rem; color: #FFAAAA; margin-bottom: 5px; text-transform: uppercase;">Average Time</div>
-              <div class="stat-number" style="color: var(--color-red);">3-5분</div>
-              <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-white); margin-bottom: 5px;">요청 1건 평균 처리 시간</div>
-              <div style="font-size: 0.75rem; color: #FFAAAA; line-height: 1.4;">프론트데스크 접수에서 타부서 배정 및 최종 상태 확인까지</div>
+            <div class="glass-card highlight" style="border-color: var(--color-red); padding: 15px 20px;">
+              <div style="font-size: 0.7rem; color: #FFAAAA; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Average Time</div>
+              <div class="stat-number" style="color: var(--color-red); font-size: 2.2rem; margin: 5px 0;">3~5분</div>
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-white); margin-bottom: 4px;">건당 소요 시간</div>
+              <div style="font-size: 0.7rem; color: #FFAAAA; line-height: 1.4;">프론트 접수부터 부서 전달 및 확인 완료까지</div>
             </div>
 
-            <div class="glass-card">
-              <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 5px; text-transform: uppercase;">Handovers</div>
-              <div class="stat-number" style="color: var(--color-red);">4-5단계</div>
-              <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-white); margin-bottom: 5px;">수동 인계 프로세스</div>
-              <div style="font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.4;">개인 메신저, 무전기, 구두 확인을 거치는 파편화된 전달</div>
+            <div class="glass-card" style="padding: 15px 20px;">
+              <div style="font-size: 0.7rem; color: var(--color-text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Process</div>
+              <div class="stat-number" style="color: var(--color-red); font-size: 2.2rem; margin: 5px 0;">4~5회</div>
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-white); margin-bottom: 4px;">수동 인계 단계</div>
+              <div style="font-size: 0.7rem; color: var(--color-text-muted); line-height: 1.4;">전화, 무전, 메신저를 거치는 파편화된 구조</div>
             </div>
           </div>
 
           <!-- Bottom Banner (Takeaway) -->
-          <div class="glass-card" style="width: 100%; margin-top: 15px; border-color: var(--color-gold); background: rgba(255, 215, 0, 0.05); text-align: center; padding: 12px 20px;">
-            <p style="font-size: 0.95rem; line-height: 1.5; color: var(--color-white); margin: 0; font-weight: 500; word-break: keep-all;">
-              호텔 프론트 업무의 핵심은: <span style="color: var(--color-gold-light); font-weight: 700;">언어 이해 | 요청 분류 | 정보 전달 | 기록 | 문서화</span>
-            </p>
-            <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-cream); margin: 3px 0 0 0; word-break: keep-all;">
-              즉, 호텔 프론트데스크 업무의 상당 부분은 대면 커뮤니케이션이 아니라 <strong style="color: var(--color-gold-light);">정보 처리 업무</strong>에 가깝습니다.
+          <div class="glass-card" style="width: 100%; margin-top: 15px; border-color: var(--color-gold); background: rgba(255, 215, 0, 0.04); text-align: center; padding: 10px 20px;">
+            <p style="font-size: 0.85rem; line-height: 1.4; color: var(--color-white); margin: 0; font-weight: 600; letter-spacing: 0.5px;">
+              프론트의 핵심: <span style="color: var(--color-gold-light);">언어 이해 | 요청 분류 | 정보 전달 | 기록</span> &nbsp;→&nbsp; <strong style="color: var(--color-gold-light);">LLM AI의 최적 무대</strong>
             </p>
           </div>
-          <div style="font-size: 0.65rem; color: var(--color-text-muted); text-align: right; width: 100%; margin-top: 8px; font-weight: 300;">
-            * 출처: HiJiffy Hotel AI Report, Leonardo Hotels F&B/HK 자체 실무 타임스터디 실사 데이터
+          <div style="font-size: 0.6rem; color: var(--color-text-muted); text-align: right; width: 100%; margin-top: 5px; font-weight: 300;">
+            * 출처: HiJiffy Hotel AI Report & 실제 호텔 관계자 인터뷰 데이터
           </div>
         </div>
         <div class="presentation-footer">
@@ -1024,59 +1057,59 @@
         </div>
       </section>
 
-      <!-- SLIDE 4: Solution Direction & Core Value (To-be) -->
+      <!-- SLIDE 5: Solution Direction & Core Value (To-be) -->
       <section>
         <div class="slide-container">
           <div class="slide-header">02 . Our Solution</div>
-          <h2>해결 방향성 및 핵심 가치 (To-be)</h2>
+          <h2>AI와 사람의 역할 재정의 (To-be)</h2>
 
-          <div class="grid-3" style="margin-top: 10px;">
-            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div class="grid-3" style="margin-top: 15px; gap: 15px;">
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
               <div>
-                <div style="font-size: 2rem; margin-bottom: 15px; color: var(--color-gold);"><i class="fa-solid fa-robot"></i></div>
-                <h3 style="font-size: 1.25rem; margin-bottom: 10px;">AI와 사람의 역할 분담</h3>
-                <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-muted);">
-                  LLM AI가 가장 뛰어난 능력을 발휘하는 영역인 <strong>언어 이해, 요청 자동 분류, 신속한 정보 전달 및 이력 기록</strong>을 도맡아 수행합니다.
+                <div style="font-size: 1.8rem; margin-bottom: 10px; color: var(--color-gold);"><i class="fa-solid fa-robot"></i></div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 6px; color: var(--color-white);">AI의 자동화</h3>
+                <p style="font-size: 0.75rem; line-height: 1.5; color: var(--color-text-muted);">
+                  언어 이해, 자동 분류, 즉각 전달, 실시간 이력 기록 등 정보 허브 역할 담당.
                 </p>
               </div>
-              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 15px; font-size: 0.8rem; color: var(--color-gold-light);">
-                반복 업무는 AI가 완전 자동화
+              <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 12px; font-size: 0.72rem; color: var(--color-gold-light); font-weight: 600;">
+                반복적 행정 업무 완전 자동화
               </div>
             </div>
 
-            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
               <div>
-                <div style="font-size: 2rem; margin-bottom: 15px; color: var(--color-gold);"><i class="fa-solid fa-clock"></i></div>
-                <h3 style="font-size: 1.25rem; margin-bottom: 10px;">소요 시간 1분 미만 단축</h3>
-                <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-muted);">
-                  고객의 카톡·웹 요청 순간부터 AI 분석을 거쳐 현장 직원의 스마트폰 알림까지 <strong>최종 배정 단계를 1분 미만</strong>으로 극대화하여 완료합니다.
+                <div style="font-size: 1.8rem; margin-bottom: 10px; color: var(--color-gold);"><i class="fa-solid fa-bolt"></i></div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 6px; color: var(--color-white);">소요 시간 1분 미만</h3>
+                <p style="font-size: 0.75rem; line-height: 1.5; color: var(--color-text-muted);">
+                  고객 요청 접수부터 부서 배정 및 직원 모바일 알림까지 실시간 즉시 완료.
                 </p>
               </div>
-              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 15px; font-size: 0.8rem; color: var(--color-gold-light);">
+              <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 12px; font-size: 0.72rem; color: var(--color-gold-light); font-weight: 600;">
                 기존 3~5분 대비 70% 이상 단축
               </div>
             </div>
 
-            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
               <div>
-                <div style="font-size: 2rem; margin-bottom: 15px; color: var(--color-gold);"><i class="fa-solid fa-heart-circle-check"></i></div>
-                <h3 style="font-size: 1.25rem; margin-bottom: 10px;">고부가가치 서비스 집중</h3>
-                <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-muted);">
-                  호텔 직원은 기계적인 분류와 전화 인계에서 해방되어, 현장에 찾아오는 고객 응대 및 오프라인 컨시어즈 등 <strong>대면 케어에 집중</strong>합니다.
+                <div style="font-size: 1.8rem; margin-bottom: 10px; color: var(--color-gold);"><i class="fa-solid fa-heart"></i></div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 6px; color: var(--color-white);">사람의 대면 집중</h3>
+                <p style="font-size: 0.75rem; line-height: 1.5; color: var(--color-text-muted);">
+                  전화/분류 등 기계적 업무에서 해방되어 고부가가치 대면 케어 서비스에 집중.
                 </p>
               </div>
-              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 15px; font-size: 0.8rem; color: var(--color-gold-light);">
-                서비스 퀄리티 및 고객 만족도 동시 향상
+              <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 12px; font-size: 0.72rem; color: var(--color-gold-light); font-weight: 600;">
+                서비스 퀄리티 및 평판 극대화
               </div>
             </div>
           </div>
 
-          <div class="glass-card" style="width: 100%; margin-top: 20px; border-color: rgba(56, 161, 105, 0.4); background: rgba(56, 161, 105, 0.05);">
-            <div style="display: flex; align-items: center; gap: 15px;">
-              <div style="font-size: 1.5rem; color: var(--color-green);"><i class="fa-solid fa-chart-line"></i></div>
-              <div style="font-size: 0.95rem; color: var(--color-white);">
-                <strong>도입 목표:</strong> 프론트데스크 전수 조사 기반, 단순 루틴형 민원(비품 보충, 정보 질의 등)의 80% 이상을 AI로 흡수 및 무중단 자동화 처리.
-              </div>
+          <div class="glass-card" style="width: 100%; margin-top: 15px; border-color: rgba(82, 196, 26, 0.4); background: rgba(82, 196, 26, 0.04); padding: 10px 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; justify-content: center;">
+              <i class="fa-solid fa-chart-line" style="color: #52C41A; font-size: 1.2rem;"></i>
+              <span style="font-size: 0.8rem; color: var(--color-white); font-weight: 500;">
+                <strong>목표:</strong> 단순 루틴형 민원의 <strong style="color: #52C41A;">80% 이상</strong>을 AI로 흡수 및 무중단 자동화 처리
+              </span>
             </div>
           </div>
         </div>
@@ -1097,8 +1130,8 @@
                 체크인(UUID-QR/JWT)부터 컨시어즈 음성 예약, 시설물 사진 분석, 오라우팅 보완, 다국어 번역 및 체크아웃 하드딜리트까지 호텔의 24시간을 담은 시연 영상을 전체화면으로 감상하세요.
               </p>
               <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
-              <button onclick="document.getElementById('videoFileInput').click()" style="background: var(--color-gold); color: var(--color-navy-deep); border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-file-video"></i> 시연 영상 파일 선택
+              <button onclick="document.getElementById('videoFileInput').click()" style="background: var(--color-gold); color: var(--color-navy-deep); border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center;">
+                시연 영상 파일 선택
               </button>
             </div>
             <div id="videoPlayerWrapper" style="width: 100%; height: 100%; display: none;">
@@ -1115,28 +1148,31 @@
           <h2>AI & 데이터 아키텍처: Search-then-Route & Hybrid RAG</h2>
           
           <div class="grid-3">
-            <div class="glass-card highlight">
+            <div class="glass-card highlight" style="padding: 20px;">
               <div class="highlight-badge">AI 라우팅 혁신</div>
-              <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">검색 후 라우팅 (Search-then-Route)</h3>
-              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
-                모호한 부서별 Prompt 분기문 하드코딩을 제거했습니다. 0.1초 만에 RAG 지식을 통합 검색해 일치 문서를 찾은 뒤, 매핑되어 있는 부서 태그를 역추적해 전달합니다. <strong>지식 추가 시 프롬프트 수정이 일절 불필요합니다.</strong>
-              </p>
+              <h3 style="font-size: 1.15rem; margin-top: 10px; margin-bottom: 12px; color: var(--color-white);">Search-then-Route</h3>
+              <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 자연어 변형이 많아 프롬프트 하드코딩 한계</div>
+                <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> RAG 선검색 후 부서 역추적 (프롬프트 수정 0, 속도 1~2초↓)</div>
+              </div>
             </div>
 
-            <div class="glass-card">
+            <div class="glass-card" style="padding: 20px;">
               <div class="highlight-badge" style="background: rgba(201,169,97,0.1); border-color: rgba(201,169,97,0.4);">메모리 최적화</div>
-              <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">Context 제한 & DB 구조화</h3>
-              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
-                비싼 대화 히스토리 전체를 LLM 컨텍스트에 싣는 대신, 최근 5개 대화만 컨텍스트 메모리로 유지합니다. 대신 과거의 주문 내역이나 주문 번호는 RDB 및 백엔드 상태 머신에서 "구조화된 카드"로 기록해 영구 추적합니다.
-              </p>
+              <h3 style="font-size: 1.15rem; margin-top: 10px; margin-bottom: 12px; color: var(--color-white);">Context 제한 & DB 구조화</h3>
+              <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 히스토리 과다로 인한 토큰 비용 및 환각(Hallucination) 방지</div>
+                <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> 5개 최근 대화만 유지, 주문 내역은 RDB 카드로 영구 관리</div>
+              </div>
             </div>
 
-            <div class="glass-card highlight">
+            <div class="glass-card highlight" style="padding: 20px;">
               <div class="highlight-badge">하이브리드 RAG</div>
-              <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">Vector DB & Graph RAG</h3>
-              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
-                단순 텍스트 매칭의 한계를 극복하기 위해 PGVector와 Neo4j Graph DB를 결합했습니다. 부서 간 통합 지식과 객실-PMS 간의 유기적 관계 데이터를 깊이 있게 추출해 답변 및 라우팅 성공률을 높였습니다.
-              </p>
+              <h3 style="font-size: 1.15rem; margin-top: 10px; margin-bottom: 12px; color: var(--color-white);">Vector DB & Graph RAG</h3>
+              <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 단순 키워드 매칭의 한계 극복 및 PMS 데이터 연계</div>
+                <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> PGVector + Neo4j Graph DB 결합으로 분류 정확도 극대화</div>
+              </div>
             </div>
           </div>
 
@@ -1178,13 +1214,14 @@
           <div class="grid-2">
             <!-- Left: Spring Boot Hexagonal Architecture -->
             <div style="display: flex; flex-direction: column; gap: 15px;">
-              <div class="glass-card highlight">
+              <div class="glass-card highlight" style="padding: 22px;">
                 <div class="highlight-badge">백엔드 Core</div>
-                <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">헥사고날 아키텍처 (Ports & Adapters)</h3>
-                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
-                  비즈니스 코어 로직(Domain/Model)을 순수 POJO로 완전히 격리했습니다. 외부 기술 요소(JPA, Spring Framework, AI API 등)에 의존하지 않도록 의존 방향 규칙을 정립하여 유지보수성을 극대화했습니다.
-                </p>
-                <div style="margin-top: 10px; font-size: 0.75rem; color: var(--color-gold-light); font-weight: 500;">
+                <h3 style="font-size: 1.15rem; margin-top: 10px; margin-bottom: 12px; color: var(--color-white);">헥사고날 아키텍처 (Ports & Adapters)</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 10px;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> DB, AI API 등 외부 기술 변경에 코어 비즈니스 로직 격리 보호</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> Pure POJO 도메인 설계, Domain → Application → Adapter 의존 규칙 정립</div>
+                </div>
+                <div style="margin-top: 12px; font-size: 0.75rem; color: var(--color-gold-light); font-weight: 500; text-align: center; background: rgba(255,255,255,0.03); padding: 6px 12px; border-radius: 6px;">
                   Controller → Port In → Service → Port Out → Persistence Adapter
                 </div>
               </div>
@@ -1192,14 +1229,15 @@
 
             <!-- Right: Next.js BFF & Security -->
             <div style="display: flex; flex-direction: column; gap: 15px;">
-              <div class="glass-card highlight" style="border-color: var(--color-gold);">
+              <div class="glass-card highlight" style="border-color: var(--color-gold); padding: 22px;">
                 <div class="highlight-badge">프론트엔드 BFF</div>
-                <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">Next.js BFF & 쿠키 세션 보안</h3>
-                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
-                  Next.js API Routes를 백엔드와 클라이언트 간의 BFF(Backend for Frontend) 레이어로 도입했습니다. 민감한 JWT 토큰을 iron-session으로 암호화하여 HttpOnly, Secure 쿠키로 구워 브라우저에는 토큰을 절대 노출하지 않습니다.
-                </p>
-                <div style="margin-top: 10px; font-size: 0.75rem; color: var(--color-gold-light); font-weight: 500;">
-                  브라우저 세션 탈취 및 XSS 공격 원천 예방
+                <h3 style="font-size: 1.15rem; margin-top: 10px; margin-bottom: 12px; color: var(--color-white);">Next.js BFF & 쿠키 세션 보안</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 10px;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 브라우저 상의 JWT 토큰 탈취(XSS) 방지 및 백엔드 직접 노출 차단</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> iron-session 암호화 쿠키 적용, 브라우저에는 JWT 토큰 원천 차단</div>
+                </div>
+                <div style="margin-top: 12px; font-size: 0.75rem; color: var(--color-gold-light); font-weight: 500; text-align: center; background: rgba(255,255,255,0.03); padding: 6px 12px; border-radius: 6px;">
+                  브라우저 세션 탈취 및 API 직접 공격 완전 예방
                 </div>
               </div>
             </div>
@@ -1227,7 +1265,6 @@
               <p>JPA Persistence Adapter</p>
             </div>
           </div>
-        </div>
         <div class="presentation-footer">
           <span>08 / 14</span>
           <span class="brand">ANOOK</span>
@@ -1243,19 +1280,20 @@
           <div class="grid-2">
             <!-- Left text -->
             <div style="display: flex; flex-direction: column; gap: 15px;">
-              <div class="glass-card">
-                <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0;"><i class="fa-solid fa-cubes"></i> UI 디자인 기반 컴포넌트 구조</h3>
-                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0;">
-                  모든 UI 요소(인풋, 버튼, 뱃지, 모달 등)를 원자(Atomic) 단위로 컴포넌트화하여 재사용성을 극대화했습니다. 
-                  모든 요소가 전역 CSS Variables 토큰을 공유하므로 실시간 테마 변경이 완벽하게 용이합니다.
-                </p>
+              <div class="glass-card highlight" style="padding: 20px;">
+                <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-cubes"></i> UI 컴포넌트 아키텍처</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 컴포넌트 파편화 방지 및 재사용성 극대화</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> Atomic 컴포넌트화 및 전역 CSS 변수로 100% 일관된 UI</div>
+                </div>
               </div>
 
-              <div class="glass-card highlight">
-                <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0;"><i class="fa-solid fa-sliders"></i> 호텔별 브랜드 컬러 및 테마 적용</h3>
-                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0;">
-                  각 호텔의 고유 브랜드 가치를 보존하기 위해, 실시간으로 채팅 UI 및 대시보드 테마(Grand Luxury Blue, Eco Forest Green 등)를 변경할 수 있는 커스텀 컴포넌트 아키텍처를 제공합니다.
-                </p>
+              <div class="glass-card highlight" style="padding: 20px;">
+                <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-sliders"></i> 브랜드 컬러 & 실시간 테마</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 호텔별 고유 브랜드 아이덴티티 보존 필요</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> 실시간 테마 변경 컴포넌트 제공 (Luxury Blue, Forest Green 등)</div>
+                </div>
               </div>
             </div>
 
@@ -1267,8 +1305,8 @@
                 </h4>
                 <span style="font-size: 0.7rem; color: var(--color-gold-light); font-weight: 500; background: rgba(212, 175, 55, 0.1); padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2);">Live Demo</span>
               </div>
-              <div style="position: relative; width: 100%; height: 100%; overflow: hidden;">
-                <img src="brand_test_page_cropped.png" alt="UI Component Showcase" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; border: none !important; box-shadow: none !important; object-fit: cover !important; display: block !important; filter: brightness(0.95);">
+              <div style="position: relative; width: 100%; height: 100%; overflow: hidden; background: #fff;">
+                <img src="UI_design.png" alt="UI Component Showcase" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; border: none !important; box-shadow: none !important; object-fit: contain !important; display: block !important;">
               </div>
             </div>
           </div>
@@ -1278,6 +1316,7 @@
           <span class="brand">ANOOK</span>
         </div>
       </section>
+
 
       <!-- SLIDE 8: Human-in-the-loop AI Learning Loop -->
       <section>
@@ -1338,22 +1377,24 @@
 
             <!-- Bottom: Explanation Cards (Horizontal Side-by-Side in Grid) -->
             <div class="grid-2" style="gap: 20px; align-items: stretch; width: 100%;">
-              <div class="glass-card highlight" style="margin: 0; padding: 20px; display: flex; flex-direction: column; justify-content: center; height: auto;">
-                <h3 style="font-size: 1.1rem; color: var(--color-gold); margin-top: 0; margin-bottom: 8px;">
-                  <i class="fa-solid fa-circle-nodes"></i> 직원의 일상 수정이 곧 AI의 자율 학습으로
+              <div class="glass-card highlight" style="margin: 0; padding: 15px; display: flex; flex-direction: column; justify-content: center; height: auto;">
+                <h3 style="font-size: 1.1rem; color: var(--color-gold); margin-top: 0; margin-bottom: 10px; text-align: left;">
+                  <i class="fa-solid fa-circle-nodes"></i> 자연스러운 보완 피드백 (Human-in-the-loop)
                 </h3>
-                <p style="font-size: 0.8rem; line-height: 1.6; color: var(--color-cream); margin-bottom: 0;">
-                  직원들이 AI가 자동 배정한 업무 부서를 수동으로 수정하거나 담당자를 정정하는 일련의 <strong>자연스러운 보완 행동 자체를 AI 모델 학습용 데이터셋으로 즉시 변환</strong>시킵니다.
-                </p>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 별도의 데이터 라벨링 공수 없이 실제 피드백 수집 필요</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> 직원의 부서 정정 행동을 AI 피드백 데이터셋으로 자동 전환</div>
+                </div>
               </div>
 
-              <div class="glass-card" style="margin: 0; padding: 20px; display: flex; flex-direction: column; justify-content: center; height: auto;">
-                <h3 style="font-size: 1.1rem; color: var(--color-gold); margin-top: 0; margin-bottom: 8px;">
-                  <i class="fa-solid fa-arrow-up-right-dots"></i> 이용 시간이 늘어날수록 강화되는 라우팅 지능
+              <div class="glass-card highlight" style="margin: 0; padding: 15px; display: flex; flex-direction: column; justify-content: center; height: auto; border-color: var(--color-gold);">
+                <h3 style="font-size: 1.1rem; color: var(--color-gold); margin-top: 0; margin-bottom: 10px; text-align: left;">
+                  <i class="fa-solid fa-arrow-up-right-dots"></i> 지속 강화되는 라우팅 지능
                 </h3>
-                <p style="font-size: 0.8rem; line-height: 1.6; color: var(--color-cream); margin-bottom: 0;">
-                  이력이 축적될수록 파이썬 AI 백서 비정형 매핑의 정확도가 스스로 상승합니다. 이는 오배정률 감소와 호텔 전체의 운영 생산성 극대화로 직결됩니다.
-                </p>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 운영 시간이 지날수록 서비스의 오배정률 감소 및 최적화 필요</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> 데이터가 누적될수록 RAG 및 분류 자동화 성공률의 자연 상승</div>
+                </div>
               </div>
             </div>
           </div>
@@ -1364,41 +1405,150 @@
         </div>
       </section>
 
-      <!-- SLIDE 9: Market Viability & ROI (Business) -->
+      <!-- SLIDE 9: Market Viability & ROI (Business) — KPI Dashboard Style -->
       <section>
-        <div class="slide-container">
+        <div class="slide-container" style="padding: 24px 40px; gap: 0;">
           <div class="slide-header">06 . Business & Market</div>
-          <h2>시장성 및 비용 효율성 (ROI)</h2>
+          <h2 style="margin-bottom: 18px;">사업성 분석 — 숫자로 보는 ROI</h2>
 
-          <div class="grid-3" style="margin-top: 15px;">
-            <div class="glass-card">
-              <div class="stat-number">65%</div>
-              <div class="stat-label">호텔 업계 인력난 심각</div>
-              <div class="stat-desc">AHLA 2025 자료 기준. 프론트데스크 직군은 전체 호텔 부서 중 구인난 2위(26%) 기록</div>
+          <!-- ① TOP: 4 KPI 카드 -->
+          <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px;">
+
+            <div style="background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
+              <div style="font-size: 0.65rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">AI 요청 1건 비용</div>
+              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">₩14</div>
+              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">Gemini Flash 기준</div>
+              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(255,215,0,0.06);"><i class="fa-solid fa-bolt"></i></div>
             </div>
 
-            <div class="glass-card highlight">
-              <div class="stat-number">70%+</div>
-              <div class="stat-label">업무 처리 속도 단축</div>
-              <div class="stat-desc">기존 3~5분 소요되던 분류 및 타부서 인계 시간이 AI 자동화를 통해 1분 미만으로 단축</div>
+            <div style="background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
+              <div style="font-size: 0.65rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">AI 월 운영비</div>
+              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">₩19만</div>
+              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">200객실 · 인건비의 9%</div>
+              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(255,215,0,0.06);"><i class="fa-solid fa-coins"></i></div>
             </div>
 
-            <div class="glass-card">
-              <div class="stat-number">1 / 10</div>
-              <div class="stat-label">AI 운영 비용 최적화</div>
-              <div class="stat-desc">무한 대화 context 로드 방지 및 슬롯필링 제한 장치로 LLM Token 비용 90% 이상 절감</div>
+            <div style="background: linear-gradient(135deg, rgba(82,196,26,0.12), rgba(82,196,26,0.04)); border: 1px solid rgba(82,196,26,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
+              <div style="font-size: 0.65rem; color: #52C41A; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">업무 시간 절감</div>
+              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">26%</div>
+              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">프론트 월 699h 절감</div>
+              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(82,196,26,0.08);"><i class="fa-solid fa-chart-line"></i></div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, rgba(82,196,26,0.12), rgba(82,196,26,0.04)); border: 1px solid rgba(82,196,26,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
+              <div style="font-size: 0.65rem; color: #52C41A; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">손익분기점</div>
+              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">22h</div>
+              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">월 22~27h 절감으로 전액 회수</div>
+              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(82,196,26,0.08);"><i class="fa-solid fa-hourglass-half"></i></div>
+            </div>
+
+          </div>
+
+          <!-- ② MIDDLE: 비용 비례 시각화 + 처리 시간 비교 + 시장 지표 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 12px; margin-bottom: 14px;">
+
+            <!-- 운영비 비교 -->
+            <div class="glass-card" style="padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
+              <div>
+                <div style="font-size: 0.78rem; color: var(--color-gold); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-scale-balanced"></i> &nbsp;운영비 비교</div>
+
+                <!-- AI cost bar -->
+                <div style="margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                    <span style="font-size: 0.68rem; color: var(--color-white); font-weight: 600;">AI 월 운영비 (Flash)</span>
+                    <span style="font-size: 0.68rem; color: var(--color-gold); font-weight: 700;">₩18.9만</span>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.08); border-radius: 4px; height: 8px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, #FFD700, #FFE866); height: 100%; width: 9%; border-radius: 4px;"></div>
+                  </div>
+                </div>
+
+                <!-- Human cost bar -->
+                <div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                    <span style="font-size: 0.68rem; color: var(--color-white); font-weight: 600;">직원 1인 인건비</span>
+                    <span style="font-size: 0.68rem; color: #FF4D4F; font-weight: 700;">₩245만~296만</span>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.08); border-radius: 4px; height: 8px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, #FF4D4F, #FF7875); height: 100%; width: 100%; border-radius: 4px;"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted); text-align: left; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 6px;">
+                인건비 대비 단 <strong>9%</strong> 수준으로 운영 가능
+              </div>
+            </div>
+
+            <!-- 처리 시간 비교 -->
+            <div class="glass-card" style="padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
+              <div>
+                <div style="font-size: 0.78rem; color: var(--color-gold); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-clock-rotate-left"></i> &nbsp;처리 시간 비교</div>
+                
+                <div style="display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 8px;">
+                  <div style="text-align: center;">
+                    <div style="font-size: 1.3rem; font-weight: 800; color: #FF4D4F; font-family: var(--font-header); line-height: 1.1;">4.4분</div>
+                    <div style="font-size: 0.6rem; color: var(--color-text-muted);">기존 수동</div>
+                  </div>
+                  <div style="color: var(--color-gold); font-size: 1.1rem; font-weight: 700;">→</div>
+                  <div style="text-align: center;">
+                    <div style="font-size: 1.3rem; font-weight: 800; color: #52C41A; font-family: var(--font-header); line-height: 1.1;">1.4분</div>
+                    <div style="font-size: 0.6rem; color: var(--color-text-muted);">AI 도입 후</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 6px;">
+                <span style="font-size: 0.65rem; color: var(--color-text-muted);">업무 대응 시간 단축</span>
+                <span style="background: rgba(82,196,26,0.15); border: 1px solid rgba(82,196,26,0.4); border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; color: #52C41A; font-weight: 700;">↓ 70%</span>
+              </div>
+            </div>
+
+            <!-- 시장 지표 -->
+            <div class="glass-card" style="padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
+              <div>
+                <div style="font-size: 0.78rem; color: var(--color-gold); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-earth-asia"></i> &nbsp;시장 지표</div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.7rem; font-weight: 800; color: #FF4D4F; background: rgba(255,77,79,0.1); border: 1px solid rgba(255,77,79,0.2); padding: 1px 4px; border-radius: 4px; min-width: 32px; text-align: center;">65%</span>
+                    <div style="font-size: 0.68rem; color: var(--color-white); line-height: 1.2;">
+                      <strong>호텔 인력 부족</strong> <span style="font-size: 0.6rem; color: var(--color-text-muted);">(프론트 직군 2위)</span>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.7rem; font-weight: 800; color: var(--color-gold); background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.2); padding: 1px 4px; border-radius: 4px; min-width: 32px; text-align: center;">476만</span>
+                    <div style="font-size: 0.68rem; color: var(--color-white); line-height: 1.2;">
+                      <strong>방한 외래객 급증</strong> <span style="font-size: 0.6rem; color: var(--color-text-muted);">(Q1 기준)</span>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.7rem; font-weight: 800; color: #FF4D4F; background: rgba(255,77,79,0.1); border: 1px solid rgba(255,77,79,0.2); padding: 1px 4px; border-radius: 4px; min-width: 32px; text-align: center;">-20%</span>
+                    <div style="font-size: 0.68rem; color: var(--color-white); line-height: 1.2;">
+                      <strong>숙박업 인력 감소</strong> <span style="font-size: 0.6rem; color: var(--color-text-muted);">(코로나 전 대비)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 0.6rem; color: var(--color-text-muted); text-align: left; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 6px;">
+                자동화 솔루션 도입 최적 타이밍
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ③ BOTTOM: 핵심 포지션 -->
+          <div style="background: linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,215,0,0.03)); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 10px 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 5px;">
+            <i class="fa-solid fa-lightbulb" style="color: var(--color-gold); font-size: 1.2rem; flex-shrink: 0;"></i>
+            <div style="text-align: left;">
+              <span style="font-size: 0.7rem; color: var(--color-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">핵심 포지션</span>
+              <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: var(--color-white); line-height: 1.4;">
+                AI는 단순 대체가 아닌 <strong>숙박업 인력 감소에 따른 공백을 메우는 보완 도구</strong> &mdash; 외래객 증가 및 인력난을 해결하는 최적의 도입 타이밍.
+              </p>
             </div>
           </div>
 
-          <div class="glass-card" style="width: 100%; margin-top: 25px;">
-            <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0; margin-bottom: 10px;">
-              <i class="fa-solid fa-coins"></i> 기대효과 계산 (Return on Investment)
-            </h3>
-            <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-cream); margin-bottom: 0;">
-              반복 행정 업무의 80%를 AI가 처리함으로써 <strong>야간 프론트 응대 인건비 부담을 획기적으로 경감</strong>합니다. 
-              또한, 외국인 응대 과정에서 발생하는 오안내와 정정 처리에 필요한 커뮤니케이션 운영 비용을 영(0)으로 수렴시킵니다.
-            </p>
-          </div>
         </div>
         <div class="presentation-footer">
           <span>11 / 14</span>
@@ -1412,40 +1562,29 @@
           <div class="slide-header">07 . Future Roadmap</div>
           <h2>향후 발전 계획</h2>
 
-          <div class="grid-3" style="margin-top: 20px; height: 70%;">
-            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="font-size: 1.8rem; color: var(--color-gold); margin-bottom: 15px;"><i class="fa-solid fa-brain"></i></div>
-                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">Few-shot 기반 자율 고도화</h3>
-                <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-text-muted);">
-                  현장에서 발생하는 프론트 직원의 '오배정 수정 이력'을 데이터셋으로 자동 변환합니다. 
-                  AI가 수정본을 퓨샷(Few-shot)으로 자동 학습하여 라우팅 지능이 운영될수록 고도화됩니다.
-                </p>
-              </div>
-              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600;">Phase 01</div>
-            </div>
-
-            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div class="grid-2" style="margin-top: 20px; height: 70%;">
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
               <div>
                 <div style="font-size: 1.8rem; color: var(--color-gold); margin-bottom: 15px;"><i class="fa-solid fa-chart-pie"></i></div>
-                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">비즈니스 인텔리전스 (BI) 리포팅</h3>
-                <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-text-muted);">
-                  어느 객실에서 어떤 소모품(칫솔, 타월)의 소비가 빈번한지 통계를 산출합니다. 
-                  이를 기반으로 비품 보충 주기를 사전에 예측하는 호텔 전용 자원 관리 인사이트를 제공합니다.
-                </p>
+                <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--color-white);">비즈니스 인텔리전스 리포트</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 빈번한 소모품 청구 및 자원 소모 흐름의 예측 어려움</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> 객실별 소비 통계 기반 비품 보충 예측 AI 대시보드 구축</div>
+                </div>
               </div>
-              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600;">Phase 02</div>
+              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600; margin-top: 15px;">Phase 01</div>
             </div>
 
-            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
               <div>
                 <div style="font-size: 1.8rem; color: var(--color-gold); margin-bottom: 15px;"><i class="fa-solid fa-network-wired"></i></div>
-                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">자율형 PMS 에이전트</h3>
-                <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-text-muted);">
-                  단순 정보 조회를 넘어 객실 배정 변경, 결제 처리, 조식 인원 추가 등 호텔 PMS 시스템의 실제 데이터 조작 및 액션까지 직접 지시하고 완결 짓는 AI Agent로 진화합니다.
-                </p>
+                <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--color-white);">자율형 PMS 에이전트</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);"><span style="color: var(--color-red); font-weight: 700;">[Why]</span> 단순 조회(Read)를 넘어 실시간 데이터 쓰기(Write) 차단</div>
+                  <div style="font-size: 0.75rem; color: var(--color-cream);"><span style="color: #52C41A; font-weight: 700;">[Result]</span> 객실 변경, 결제, 조식 추가 등 PMS 조작 자율화 완결</div>
+                </div>
               </div>
-              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600;">Phase 03</div>
+              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600; margin-top: 15px;">Phase 02</div>
             </div>
           </div>
         </div>
