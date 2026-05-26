@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anook - Hotel AI Concierge Presentation</title>
+  
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/black.min.css" id="theme">
+  
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Plyr Video Player CSS -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+  
+  <!-- Google Fonts: Playfair Display (Luxury Serif) & Inter (Clean Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Custom Luxury Theme Overrides */
+    :root {
+      --color-navy: #161616;
+      --color-navy-deep: #000000;
+      --color-gold: #FFD700; /* Vibrant warm yellow/gold */
+      --color-gold-light: #FFE866;
+      --color-cream: #FFFFFF; /* White body text */
+      --color-cream-dark: #F5F5F5;
+      --color-white: #FFFFFF;
+      --color-text-dark: #000000;
+      --color-text-body: #E2E8F0;
+      --color-text-muted: #A0AEC0;
+      --color-red: #FF4D4F;
+      --color-green: #52C41A;
+      --color-glass-bg: rgba(20, 20, 20, 0.85);
+      --color-glass-border: rgba(255, 215, 0, 0.25); /* Yellow-tinted border */
+      --font-header: 'Playfair Display', 'Noto Sans KR', serif;
+      --font-body: 'Inter', 'Noto Sans KR', sans-serif;
+    }
+
+    body {
+      background: var(--color-navy-deep);
+      color: var(--color-cream);
+      font-family: var(--font-body);
+    }
+
+    .reveal {
+      font-family: var(--font-body);
+      color: var(--color-cream);
+    }
+
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
+      font-family: var(--font-header);
+      color: var(--color-white);
+      text-transform: none;
+      word-break: keep-all;
+    }
+
+    .reveal h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      border-bottom: 2px solid var(--color-gold);
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+      display: inline-block;
+    }
+
+    /* Slides general custom styles */
+    .slide-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: flex-start;
+      align-items: flex-start;
+      text-align: left;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+
+    .slide-header {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: var(--color-gold);
+      margin-bottom: 15px;
+    }
+
+    /* Grid & Flex layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      width: 100%;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      width: 100%;
+    }
+
+    /* Glassmorphism Card Style */
+    .glass-card {
+      background: var(--color-glass-bg);
+      border: 1px solid var(--color-glass-border);
+      border-radius: 12px;
+      padding: 24px;
+      box-sizing: border-box;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+
+    .glass-card.highlight {
+      border: 2px solid var(--color-gold);
+    }
+
+    /* Slide specific styles */
+    /* Title Slide */
+    .title-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      background: radial-gradient(circle at center, var(--color-navy) 0%, var(--color-navy-deep) 100%);
+    }
+
+    .title-logo {
+      font-family: var(--font-header);
+      font-size: 1.5rem;
+      letter-spacing: 10px;
+      color: var(--color-gold);
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .title-main {
+      font-size: 3.8rem;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .title-slogan {
+      font-size: 1.4rem;
+      color: var(--color-gold-light);
+      margin-bottom: 40px;
+      font-weight: 300;
+      word-break: keep-all;
+    }
+
+    .title-divider {
+      width: 80px;
+      height: 2px;
+      background: var(--color-gold);
+      margin-bottom: 30px;
+    }
+
+    .title-team {
+      font-size: 0.95rem;
+      color: var(--color-cream);
+      letter-spacing: 1px;
+    }
+
+    .team-member {
+      display: inline-block;
+      margin: 0 10px;
+      font-weight: 500;
+    }
+
+    /* As-Is Flow Graph */
+    .flow-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255, 215, 0, 0.2);
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      background: rgba(30, 30, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 15px;
+      position: relative;
+    }
+
+    .flow-step.highlight-red {
+      border-color: var(--color-red);
+      background: rgba(229, 62, 99, 0.1);
+    }
+
+    .flow-step-icon {
+      font-size: 1.5rem;
+      margin-right: 15px;
+      color: var(--color-gold);
+      width: 30px;
+      text-align: center;
+    }
+
+    .flow-step-icon.red {
+      color: var(--color-red);
+    }
+
+    .flow-step-desc {
+      font-size: 0.95rem;
+      flex-grow: 1;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      margin: -5px 0;
+    }
+
+    /* Stat Cards */
+    .stat-number {
+      font-family: var(--font-header);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--color-white);
+      margin-bottom: 5px;
+    }
+
+    .stat-desc {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Video Demo Slide */
+    .demo-wrapper {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 25px;
+      width: 100%;
+      height: 80%;
+    }
+
+    .video-container {
+      background: #000;
+      border: 2px solid var(--color-gold);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 420px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+
+    .video-placeholder {
+      text-align: center;
+      color: var(--color-text-muted);
+      padding: 20px;
+    }
+
+    .video-placeholder i {
+      font-size: 4rem;
+      color: var(--color-gold);
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .video-placeholder i:hover {
+      transform: scale(1.1);
+    }
+
+    .timeline-container {
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 10px;
+      border-left: 2px solid rgba(255, 215, 0, 0.2);
+      padding-left: 20px;
+    }
+
+    /* Custom scrollbar for timeline */
+    .timeline-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .timeline-container::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.02);
+    }
+    .timeline-container::-webkit-scrollbar-thumb {
+      background: var(--color-gold);
+      border-radius: 3px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -27px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-navy-deep);
+      border: 2px solid var(--color-gold);
+      transition: all 0.2s ease;
+    }
+
+    .timeline-item:hover::before, .timeline-item.active::before {
+      background: var(--color-gold);
+      box-shadow: 0 0 8px var(--color-gold);
+    }
+
+    .timeline-time {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .timeline-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-white);
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+
+    /* Architecture slide graphics */
+    .arch-flow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      background: rgba(255,255,255,0.02);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin-top: 15px;
+    }
+
+    .arch-node {
+      background: var(--color-navy);
+      border: 1.5px solid var(--color-gold);
+      border-radius: 8px;
+      padding: 12px 18px;
+      text-align: center;
+      width: 18%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .arch-node h4 {
+      font-size: 0.9rem;
+      margin: 0 0 5px 0;
+      color: var(--color-gold-light);
+    }
+
+    .arch-node p {
+      font-size: 0.75rem;
+      margin: 0;
+      color: var(--color-cream);
+    }
+
+    .arch-arrow {
+      font-size: 1.5rem;
+      color: var(--color-gold);
+    }
+
+    .highlight-badge {
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid var(--color-gold);
+      color: var(--color-gold-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    /* Branding interactive demo styles */
+    .brand-demo-box {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 20px;
+      width: 100%;
+    }
+
+    .color-swatch-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .color-swatch:hover, .color-swatch.active {
+      transform: scale(1.15);
+      border-color: #fff;
+    }
+
+    .chat-preview-container {
+      background: #f7f9fc;
+      border-radius: 8px;
+      height: 180px;
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #e1e8ed;
+    }
+
+    .chat-header {
+      padding: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s;
+    }
+
+    .chat-body {
+      flex-grow: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fff;
+    }
+
+    .chat-bubble {
+      max-width: 75%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .chat-bubble.left {
+      background: #f1f3f5;
+      color: #333;
+      align-self: flex-start;
+    }
+
+    .chat-bubble.right {
+      color: white;
+      align-self: flex-end;
+      transition: background-color 0.3s;
+    }
+
+    /* Conclusion Team Grid */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .team-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .team-card h4 {
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin: 0 0 5px 0;
+    }
+
+    .team-card p {
+      font-size: 0.85rem;
+      color: var(--color-cream);
+      margin: 0;
+    }
+
+    /* Footer styling */
+    .presentation-footer {
+      position: absolute;
+      bottom: 20px;
+      left: 40px;
+      right: 40px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+    }
+
+    .presentation-footer span.brand {
+      font-weight: 700;
+      color: var(--color-gold);
+      letter-spacing: 2px;
+    }
+
+    /* Custom Plyr Theme Styles matching Anook */
+    .plyr {
+      --plyr-color-main: var(--color-gold);
+      --plyr-video-control-color: var(--color-cream);
+      --plyr-video-control-color-hover: var(--color-white);
+      --plyr-video-control-background-hover: rgba(255, 215, 0, 0.25);
+      --plyr-menu-background: var(--color-navy-deep);
+      --plyr-menu-color: var(--color-cream);
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 100% !important;
+    }
+
+    /* Slide 2: Floating Messages Animation */
+    .chaos-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      width: 100%;
+      height: 480px;
+      align-items: center;
+    }
+
+    .floating-messages-box {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .floating-bubble {
+      position: absolute;
+      background: rgba(30, 30, 30, 0.85);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 18px;
+      padding: 10px 18px;
+      color: var(--color-white);
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+      word-break: keep-all;
+      backdrop-filter: blur(4px);
+    }
+
+    .floating-bubble:nth-child(even) {
+      background: rgba(255, 215, 0, 0.1);
+      border-color: rgba(255, 215, 0, 0.5);
+    }
+
+    .floating-bubble:nth-child(3n) {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Separate positions and float animations for each bubble to prevent overlapping */
+    .bubble-1 {
+      top: 10%;
+      left: 8%;
+      animation: float-bubble-1 5s ease-in-out infinite;
+    }
+    .bubble-2 {
+      top: 14%;
+      right: 8%;
+      animation: float-bubble-2 6s ease-in-out infinite 0.5s;
+    }
+    .bubble-3 {
+      top: 32%;
+      left: 32%;
+      animation: float-bubble-3 5.5s ease-in-out infinite 1s;
+    }
+    .bubble-4 {
+      top: 48%;
+      left: 8%;
+      animation: float-bubble-4 4.8s ease-in-out infinite 0.2s;
+    }
+    .bubble-5 {
+      top: 54%;
+      right: 12%;
+      animation: float-bubble-1 5.2s ease-in-out infinite 0.8s;
+    }
+    .bubble-6 {
+      top: 72%;
+      left: 10%;
+      animation: float-bubble-2 6.2s ease-in-out infinite 0.4s;
+    }
+    .bubble-7 {
+      top: 76%;
+      left: 45%;
+      animation: float-bubble-3 5.7s ease-in-out infinite 1.2s;
+    }
+
+    @keyframes float-bubble-1 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-5px, -8px) rotate(1deg); }
+    }
+    @keyframes float-bubble-2 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(6px, -12px) rotate(-1deg); }
+    }
+    @keyframes float-bubble-3 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-8px, 6px) rotate(1.5deg); }
+    }
+    @keyframes float-bubble-4 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(5px, 10px) rotate(-1.5deg); }
+    }
+
+    /* Hub & Spoke Multi-tasking CSS */
+    .hub-center-card {
+      background: radial-gradient(circle, var(--color-navy) 0%, var(--color-navy-deep) 100%);
+      border: 3px solid var(--color-gold);
+      border-radius: 50%;
+      width: 160px;
+      height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+      animation: pulse-glow 2s infinite alternate;
+      text-align: center;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    .hub-center-card i {
+      font-size: 2.5rem;
+      color: var(--color-gold);
+      margin-bottom: 8px;
+    }
+
+    .hub-center-card h3 {
+      font-size: 1rem;
+      color: var(--color-white);
+      margin: 0 0 5px 0;
+    }
+
+    .hub-center-card p {
+      font-size: 0.75rem;
+      color: var(--color-red);
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .hub-spoke-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: rgba(255, 255, 255, 0.02) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+      font-size: 0.9rem;
+      color: var(--color-cream);
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .hub-spoke-card i {
+      font-size: 1.2rem;
+      color: var(--color-gold-light);
+      width: 25px;
+      text-align: center;
+    }
+
+    .hub-spoke-card:hover {
+      border-color: var(--color-red) !important;
+      background: rgba(229, 62, 99, 0.05) !important;
+      box-shadow: 0 5px 15px rgba(229, 62, 99, 0.1);
+      transform: scale(1.03);
+    }
+
+    @keyframes pulse-glow {
+       0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+       100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.7); }
+    }
+
+    /* Slide 3: Workflow Diagram CSS */
+    .workflow-chain {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 25px;
+      background: rgba(255,255,255,0.02);
+      padding: 15px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .workflow-node {
+      background: var(--color-navy);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--color-cream);
+      font-weight: 500;
+      flex-grow: 1;
+      max-width: 12%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      word-break: keep-all;
+    }
+
+    .workflow-node.highlight-red {
+      border-color: var(--color-red);
+      color: var(--color-white);
+      background: rgba(229, 62, 99, 0.15);
+    }
+
+    .workflow-node.highlight-gold {
+      border-color: var(--color-gold);
+      color: var(--color-white);
+      background: rgba(255, 215, 0, 0.15);
+    }
+
+    .workflow-arrow {
+      color: var(--color-gold);
+      font-size: 0.8rem;
+      margin: 0 3px;
+    }
+
+    /* Slide 8: AI Learning Loop Nodes */
+    .loop-node {
+      transition: all 0.3s ease;
+    }
+    
+    .loop-node:hover {
+      border-color: var(--color-gold) !important;
+      background: rgba(255, 215, 0, 0.05) !important;
+      transform: translateY(-2px);
+    }
+
+    /* Slide 10: Profile Grid & Cards */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .profile-card {
+      background: var(--color-glass-bg);
+      border: 1px solid var(--color-glass-border);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+      backdrop-filter: blur(4px);
+      transition: all 0.3s ease;
+    }
+
+    .profile-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+
+    .profile-avatar {
+      font-size: 1.8rem;
+      color: var(--color-gold-light);
+      margin-bottom: 8px;
+    }
+
+    .profile-name {
+      font-size: 1.05rem;
+      color: var(--color-white);
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .profile-role {
+      font-size: 0.75rem;
+      color: var(--color-gold-light);
+      font-weight: 500;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .profile-desc {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- SLIDE 1: Title -->
+      <section data-background-transition="zoom">
+        <div class="title-wrapper">
+          <div class="title-logo">ANOOK</div>
+          <h1 class="title-main">Hotel AI Concierge</h1>
+          <p class="title-slogan">“AI와 사람의 협업으로 완성하는 스마트 호텔 오퍼레이션 플랫폼”</p>
+          <div class="title-divider"></div>
+          <div class="title-team">
+            <span class="team-member">장혜은</span>
+            <span class="team-member">조영일</span>
+            <span class="team-member">박단희</span>
+            <span class="team-member">정혜연</span>
+            <span class="team-member">황서범</span>
+            <span class="team-member">강병수</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: Background & Problem (As-is - Part 1: Unstructured Guest Requests) -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">01 . Background & Problem</div>
+          <h2>하루에도 수백 건 접수되는 비정형 고객 요청들</h2>
+          
+          <div class="grid-2" style="align-items: center; width: 100%;">
+            <!-- Left: Description Card -->
+            <div class="glass-card highlight" style="border-color: var(--color-red);">
+              <div class="highlight-badge" style="background: rgba(255, 77, 79, 0.15); border-color: var(--color-red); color: #FFAAAA;">비정형 요청의 범람</div>
+              <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 10px; color: var(--color-white);">정형화되지 않은 실시간 요청</h3>
+              <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-body); margin-bottom: 15px; word-break: keep-all;">
+                고객들은 객실 내 비품 요구, 룸서비스 주문, 시설물 불만 사항, 단순 정보 검색 등 다양한 난이도의 비정형 요청들을 실시간으로 쏟아냅니다.
+              </p>
+              <ul style="font-size: 0.8rem; color: var(--color-text-muted); padding-left: 20px; line-height: 1.6; margin: 0;">
+                <li>다양한 국가의 언어 장벽 존재 (다국어 질의)</li>
+                <li>오탈자, 생략, 구어체 표현으로 가득한 비정형 텍스트</li>
+                <li>단순 루틴형 반복 요청부터 복잡한 예외 민원까지 혼재</li>
+              </ul>
+            </div>
+            
+            <!-- Right: Floating Customer Messages Box -->
+            <div class="floating-messages-box" style="height: 380px;">
+              <div style="position: absolute; width: 100%; top: 10px; text-align: center; font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                <i class="fa-solid fa-comments"></i> 실시간 비정형 요청들
+              </div>
+              <div class="floating-bubble bubble-1">“수건 좀 주세요.”</div>
+              <div class="floating-bubble bubble-2">“Can you recommend a vegan menu?”</div>
+              <div class="floating-bubble bubble-3">“룸서비스 주문할게요.”</div>
+              <div class="floating-bubble bubble-4">“에어컨이 안 나와요.”</div>
+              <div class="floating-bubble bubble-5">“택시 불러주세요.”</div>
+              <div class="floating-bubble bubble-6">“직원이 너무 불친절했어요.”</div>
+              <div class="floating-bubble bubble-7">“객실에 물이 새고 있어요.”</div>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>02 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Background & Problem (As-is - Part 2: Front Desk Bottleneck) -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">01 . Background & Problem</div>
+          <h2>채널 파편화와 프론트데스크 업무 병목</h2>
+          
+          <div class="grid-2" style="align-items: center; width: 100%;">
+            <!-- Left: Hub-and-Spoke Multitasking Staff Diagram -->
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
+              <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; align-items: center; justify-items: center; width: 100%; position: relative;">
+                <!-- Left Column Spokes -->
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-phone"></i> 전화기 응대</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-pen-clip"></i> 수기 메모 작성</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-database"></i> PMS 조회</div>
+                </div>
+                <!-- Center Staff Hub -->
+                <div class="hub-center-card">
+                  <i class="fa-solid fa-user-tie"></i>
+                  <h3>프론트 직원</h3>
+                  <p>실시간 병목</p>
+                </div>
+                <!-- Right Column Spokes -->
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-brands fa-talk"></i> 카카오톡 단체방</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-comments"></i> 직원 메신저</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-desktop"></i> PC 대시보드</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right: Explanation Card -->
+            <div class="glass-card highlight" style="border-color: var(--color-red);">
+              <div class="highlight-badge" style="background: rgba(255, 77, 79, 0.15); border-color: var(--color-red); color: #FFAAAA;">과부하 상태 (Overloaded)</div>
+              <h3 style="font-size: 1.3rem; margin-top: 0; margin-bottom: 10px; color: var(--color-white);">동시다발적인 멀티태스킹</h3>
+              <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-body); margin-bottom: 15px; word-break: keep-all;">
+                단 한 명의 프론트 직원이 전화벨 소리를 들으면서 수기 메모를 적고, PMS 시스템에서 예약을 조회하며, 부서별 단체 카톡방과 직원 전용 메신저, PC 대시보드를 넘나듭니다.
+              </p>
+              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-text-muted); margin: 0; word-break: keep-all;">
+                이러한 극심한 멀티태스킹은 현장 직원의 업무 피로도를 높이고, 대면 고객에 대한 직접적인 서비스 몰입을 방해하는 가장 결정적인 병목입니다.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>03 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Background & Problem (As-is - Part 2) -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">01 . Background & Problem</div>
+          <h2>호텔 프론트데스크 업무의 현실과 비효율</h2>
+          
+          <!-- Top: Workflow Diagram -->
+          <div style="width: 100%;">
+            <p style="font-size: 0.9rem; margin-bottom: 10px; color: var(--color-gold-light); font-weight: 500; text-align: left;">
+              <i class="fa-solid fa-network-wired"></i> 실제 호텔 업무 흐름 다이어그램 (As-is)
+            </p>
+            <div class="workflow-chain">
+              <div class="workflow-node">고객 요청</div>
+              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-red">프론트데스크</div>
+              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-red">부서 판단</div>
+              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node">하우스키핑 전달</div>
+              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-red">상태 확인</div>
+              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node">고객 응답</div>
+              <div class="workflow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <div class="workflow-node highlight-gold">인수인계 기록</div>
+            </div>
+          </div>
+
+          <!-- Bottom: Stat Cards -->
+          <div class="grid-3" style="margin-top: 10px;">
+            <div class="glass-card">
+              <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 5px; text-transform: uppercase;">Workload</div>
+              <div class="stat-number" style="color: var(--color-red);">50-60%</div>
+              <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-white); margin-bottom: 5px;">반복 / 규칙 기반 업무</div>
+              <div style="font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.4;">고객 단순 요청 응대, 타부서 무전 전달, 인수인계 기록 등</div>
+            </div>
+
+            <div class="glass-card highlight" style="border-color: var(--color-red);">
+              <div style="font-size: 0.8rem; color: #FFAAAA; margin-bottom: 5px; text-transform: uppercase;">Average Time</div>
+              <div class="stat-number" style="color: var(--color-red);">3-5분</div>
+              <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-white); margin-bottom: 5px;">요청 1건 평균 처리 시간</div>
+              <div style="font-size: 0.75rem; color: #FFAAAA; line-height: 1.4;">프론트데스크 접수에서 타부서 배정 및 최종 상태 확인까지</div>
+            </div>
+
+            <div class="glass-card">
+              <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 5px; text-transform: uppercase;">Handovers</div>
+              <div class="stat-number" style="color: var(--color-red);">4-5단계</div>
+              <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-white); margin-bottom: 5px;">수동 인계 프로세스</div>
+              <div style="font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.4;">개인 메신저, 무전기, 구두 확인을 거치는 파편화된 전달</div>
+            </div>
+          </div>
+
+          <!-- Bottom Banner (Takeaway) -->
+          <div class="glass-card" style="width: 100%; margin-top: 15px; border-color: var(--color-gold); background: rgba(255, 215, 0, 0.05); text-align: center; padding: 12px 20px;">
+            <p style="font-size: 0.95rem; line-height: 1.5; color: var(--color-white); margin: 0; font-weight: 500; word-break: keep-all;">
+              호텔 프론트 업무의 핵심은: <span style="color: var(--color-gold-light); font-weight: 700;">언어 이해 | 요청 분류 | 정보 전달 | 기록 | 문서화</span>
+            </p>
+            <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-cream); margin: 3px 0 0 0; word-break: keep-all;">
+              즉, 호텔 프론트데스크 업무의 상당 부분은 대면 커뮤니케이션이 아니라 <strong style="color: var(--color-gold-light);">정보 처리 업무</strong>에 가깝습니다.
+            </p>
+          </div>
+          <div style="font-size: 0.65rem; color: var(--color-text-muted); text-align: right; width: 100%; margin-top: 8px; font-weight: 300;">
+            * 출처: HiJiffy Hotel AI Report, Leonardo Hotels F&B/HK 자체 실무 타임스터디 실사 데이터
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>04 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Solution Direction & Core Value (To-be) -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">02 . Our Solution</div>
+          <h2>해결 방향성 및 핵심 가치 (To-be)</h2>
+
+          <div class="grid-3" style="margin-top: 10px;">
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 2rem; margin-bottom: 15px; color: var(--color-gold);"><i class="fa-solid fa-robot"></i></div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 10px;">AI와 사람의 역할 분담</h3>
+                <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-muted);">
+                  LLM AI가 가장 뛰어난 능력을 발휘하는 영역인 <strong>언어 이해, 요청 자동 분류, 신속한 정보 전달 및 이력 기록</strong>을 도맡아 수행합니다.
+                </p>
+              </div>
+              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 15px; font-size: 0.8rem; color: var(--color-gold-light);">
+                반복 업무는 AI가 완전 자동화
+              </div>
+            </div>
+
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 2rem; margin-bottom: 15px; color: var(--color-gold);"><i class="fa-solid fa-clock"></i></div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 10px;">소요 시간 1분 미만 단축</h3>
+                <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-muted);">
+                  고객의 카톡·웹 요청 순간부터 AI 분석을 거쳐 현장 직원의 스마트폰 알림까지 <strong>최종 배정 단계를 1분 미만</strong>으로 극대화하여 완료합니다.
+                </p>
+              </div>
+              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 15px; font-size: 0.8rem; color: var(--color-gold-light);">
+                기존 3~5분 대비 70% 이상 단축
+              </div>
+            </div>
+
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 2rem; margin-bottom: 15px; color: var(--color-gold);"><i class="fa-solid fa-heart-circle-check"></i></div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 10px;">고부가가치 서비스 집중</h3>
+                <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-text-muted);">
+                  호텔 직원은 기계적인 분류와 전화 인계에서 해방되어, 현장에 찾아오는 고객 응대 및 오프라인 컨시어즈 등 <strong>대면 케어에 집중</strong>합니다.
+                </p>
+              </div>
+              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 15px; font-size: 0.8rem; color: var(--color-gold-light);">
+                서비스 퀄리티 및 고객 만족도 동시 향상
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card" style="width: 100%; margin-top: 20px; border-color: rgba(56, 161, 105, 0.4); background: rgba(56, 161, 105, 0.05);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <div style="font-size: 1.5rem; color: var(--color-green);"><i class="fa-solid fa-chart-line"></i></div>
+              <div style="font-size: 0.95rem; color: var(--color-white);">
+                <strong>도입 목표:</strong> 프론트데스크 전수 조사 기반, 단순 루틴형 민원(비품 보충, 정보 질의 등)의 80% 이상을 AI로 흡수 및 무중단 자동화 처리.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>05 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: Live Demo Presentation (Full Screen Video) -->
+      <section style="padding: 0; width: 100%; height: 100%;">
+        <div class="slide-container" style="padding: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; max-width: none; max-height: none;">
+          <div class="video-container" id="videoBox" style="width: 100%; height: 100%; max-height: 100%; border: none; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #000; position: relative;">
+            <div class="video-placeholder" id="placeholderContent" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; z-index: 10; padding: 40px; box-sizing: border-box;">
+              <i class="fa-regular fa-circle-play" id="playBtn" style="font-size: 6rem; color: var(--color-gold); cursor: pointer; transition: transform 0.2s; margin-bottom: 20px;"></i>
+              <h2 style="font-size: 2.2rem; color: var(--color-white); margin-bottom: 10px; border-bottom: none; padding-bottom: 0;">통합 라이브 시연: 호텔에서의 24시간</h2>
+              <p style="font-size: 1rem; color: var(--color-text-muted); max-width: 700px; text-align: center; margin-bottom: 25px; line-height: 1.6; word-break: keep-all;">
+                체크인(UUID-QR/JWT)부터 컨시어즈 음성 예약, 시설물 사진 분석, 오라우팅 보완, 다국어 번역 및 체크아웃 하드딜리트까지 호텔의 24시간을 담은 시연 영상을 전체화면으로 감상하세요.
+              </p>
+              <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
+              <button onclick="document.getElementById('videoFileInput').click()" style="background: var(--color-gold); color: var(--color-navy-deep); border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-file-video"></i> 시연 영상 파일 선택
+              </button>
+            </div>
+            <div id="videoPlayerWrapper" style="width: 100%; height: 100%; display: none;">
+              <video id="demoVideo" playsinline style="width: 100%; height: 100%; object-fit: contain;"></video>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: AI & Data Architecture -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">04 . System Architecture</div>
+          <h2>AI & 데이터 아키텍처: Search-then-Route & Hybrid RAG</h2>
+          
+          <div class="grid-3">
+            <div class="glass-card highlight">
+              <div class="highlight-badge">AI 라우팅 혁신</div>
+              <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">검색 후 라우팅 (Search-then-Route)</h3>
+              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
+                모호한 부서별 Prompt 분기문 하드코딩을 제거했습니다. 0.1초 만에 RAG 지식을 통합 검색해 일치 문서를 찾은 뒤, 매핑되어 있는 부서 태그를 역추적해 전달합니다. <strong>지식 추가 시 프롬프트 수정이 일절 불필요합니다.</strong>
+              </p>
+            </div>
+
+            <div class="glass-card">
+              <div class="highlight-badge" style="background: rgba(201,169,97,0.1); border-color: rgba(201,169,97,0.4);">메모리 최적화</div>
+              <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">Context 제한 & DB 구조화</h3>
+              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
+                비싼 대화 히스토리 전체를 LLM 컨텍스트에 싣는 대신, 최근 5개 대화만 컨텍스트 메모리로 유지합니다. 대신 과거의 주문 내역이나 주문 번호는 RDB 및 백엔드 상태 머신에서 "구조화된 카드"로 기록해 영구 추적합니다.
+              </p>
+            </div>
+
+            <div class="glass-card highlight">
+              <div class="highlight-badge">하이브리드 RAG</div>
+              <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">Vector DB & Graph RAG</h3>
+              <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
+                단순 텍스트 매칭의 한계를 극복하기 위해 PGVector와 Neo4j Graph DB를 결합했습니다. 부서 간 통합 지식과 객실-PMS 간의 유기적 관계 데이터를 깊이 있게 추출해 답변 및 라우팅 성공률을 높였습니다.
+              </p>
+            </div>
+          </div>
+
+          <!-- Flow Chart Visual for AI Pipeline -->
+          <div class="arch-flow" style="margin-top: 25px;">
+            <div class="arch-node">
+              <h4>Guest Request</h4>
+              <p>"수건 2장만 가져다줘"</p>
+            </div>
+            <div class="arch-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="arch-node" style="background: var(--color-gold); border-color: var(--color-white);">
+              <h4 style="color: var(--color-navy-deep);">Python AI Service</h4>
+              <p style="color: var(--color-navy-deep);">Vector & Graph RAG 검색</p>
+            </div>
+            <div class="arch-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="arch-node">
+              <h4>Metadata Tagging</h4>
+              <p>부서: 하우스키핑 | 비품: 수건</p>
+            </div>
+            <div class="arch-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="arch-node">
+              <h4>Spring Boot Route</h4>
+              <p>해당 부서 자동 Task 배정</p>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>07 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: Backend & Frontend Architecture -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">04 . System Architecture</div>
+          <h2>백엔드 & 프론트엔드 아키텍처: Clean Architecture</h2>
+          
+          <div class="grid-2">
+            <!-- Left: Spring Boot Hexagonal Architecture -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div class="glass-card highlight">
+                <div class="highlight-badge">백엔드 Core</div>
+                <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">헥사고날 아키텍처 (Ports & Adapters)</h3>
+                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
+                  비즈니스 코어 로직(Domain/Model)을 순수 POJO로 완전히 격리했습니다. 외부 기술 요소(JPA, Spring Framework, AI API 등)에 의존하지 않도록 의존 방향 규칙을 정립하여 유지보수성을 극대화했습니다.
+                </p>
+                <div style="margin-top: 10px; font-size: 0.75rem; color: var(--color-gold-light); font-weight: 500;">
+                  Controller → Port In → Service → Port Out → Persistence Adapter
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Next.js BFF & Security -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div class="glass-card highlight" style="border-color: var(--color-gold);">
+                <div class="highlight-badge">프론트엔드 BFF</div>
+                <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 8px;">Next.js BFF & 쿠키 세션 보안</h3>
+                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0; word-break: keep-all;">
+                  Next.js API Routes를 백엔드와 클라이언트 간의 BFF(Backend for Frontend) 레이어로 도입했습니다. 민감한 JWT 토큰을 iron-session으로 암호화하여 HttpOnly, Secure 쿠키로 구워 브라우저에는 토큰을 절대 노출하지 않습니다.
+                </p>
+                <div style="margin-top: 10px; font-size: 0.75rem; color: var(--color-gold-light); font-weight: 500;">
+                  브라우저 세션 탈취 및 XSS 공격 원천 예방
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flow Chart Visual for Backend Architecture -->
+          <div class="arch-flow" style="margin-top: 25px;">
+            <div class="arch-node">
+              <h4>Guest / Staff Web</h4>
+              <p>Next.js Client (React)</p>
+            </div>
+            <div class="arch-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="arch-node" style="background: var(--color-gold); border-color: var(--color-white);">
+              <h4 style="color: var(--color-navy-deep);">Next.js BFF Layer</h4>
+              <p style="color: var(--color-navy-deep);">iron-session 복호화 & Proxy</p>
+            </div>
+            <div class="arch-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="arch-node">
+              <h4>Spring Boot API</h4>
+              <p>Hexagonal Core (POJO)</p>
+            </div>
+            <div class="arch-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="arch-node">
+              <h4>Persistence / DB</h4>
+              <p>JPA Persistence Adapter</p>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>08 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: UI/UX & White-labeling Customization Demo -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">05 . Extensibility</div>
+          <h2>디자인 시스템 및 호텔별 커스터마이징</h2>
+          
+          <div class="grid-2">
+            <!-- Left text -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div class="glass-card">
+                <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0;"><i class="fa-solid fa-cubes"></i> UI 디자인 기반 컴포넌트 구조</h3>
+                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0;">
+                  모든 UI 요소(인풋, 버튼, 뱃지, 모달 등)를 원자(Atomic) 단위로 컴포넌트화하여 재사용성을 극대화했습니다. 
+                  모든 요소가 전역 CSS Variables 토큰을 공유하므로 실시간 테마 변경이 완벽하게 용이합니다.
+                </p>
+              </div>
+
+              <div class="glass-card highlight">
+                <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0;"><i class="fa-solid fa-sliders"></i> 호텔별 브랜드 컬러 및 테마 적용</h3>
+                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--color-cream); margin-bottom: 0;">
+                  각 호텔의 고유 브랜드 가치를 보존하기 위해, 실시간으로 채팅 UI 및 대시보드 테마(Grand Luxury Blue, Eco Forest Green 등)를 변경할 수 있는 커스텀 컴포넌트 아키텍처를 제공합니다.
+                </p>
+              </div>
+            </div>
+
+            <!-- Right UI Component Showcase Image -->
+            <div style="display: grid; grid-template-rows: auto 1fr; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 100%; height: 100%; box-sizing: border-box; overflow: hidden;">
+              <div style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
+                <h4 style="font-size: 0.9rem; color: var(--color-white); margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-cubes" style="color: var(--color-gold);"></i> UI 컴포넌트 쇼케이스 (아늑 테스트 페이지)
+                </h4>
+                <span style="font-size: 0.7rem; color: var(--color-gold-light); font-weight: 500; background: rgba(212, 175, 55, 0.1); padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2);">Live Demo</span>
+              </div>
+              <div style="position: relative; width: 100%; height: 100%; overflow: hidden;">
+                <img src="brand_test_page_cropped.png" alt="UI Component Showcase" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; border: none !important; box-shadow: none !important; object-fit: cover !important; display: block !important; filter: brightness(0.95);">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>09 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: Human-in-the-loop AI Learning Loop -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">05 . Extensibility</div>
+          <h2>Human-in-the-loop 기반 AI 학습 구조</h2>
+          
+          <div style="display: flex; flex-direction: column; gap: 25px; width: 100%; margin-top: 10px;">
+            <!-- Top: Dynamic Circular Learning Loop (Horizontal Full Width) -->
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+              <p style="font-size: 0.95rem; margin-top: 0; margin-bottom: 15px; color: var(--color-gold-light); font-weight: 600; text-align: center; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-rotate"></i> 지속 선순환 피드백 루프 (AI Feedback Loop)
+              </p>
+              
+              <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 900px; margin: 0 auto;">
+                <!-- Row 1: Left to Right -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                  <div class="loop-node glass-card" style="flex: 1; padding: 15px; text-align: center; border-color: rgba(255, 215, 0, 0.2); background: rgba(255,255,255,0.03);">
+                    <i class="fa-solid fa-mobile-screen-button" style="color: var(--color-gold); font-size: 1.3rem;"></i>
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 8px; color: var(--color-white);">1. 서비스 이용</div>
+                  </div>
+                  <div style="color: var(--color-gold); font-size: 1.2rem;"><i class="fa-solid fa-chevron-right"></i></div>
+                  <div class="loop-node glass-card" style="flex: 1; padding: 15px; text-align: center; border-color: rgba(255, 215, 0, 0.2); background: rgba(255,255,255,0.03);">
+                    <i class="fa-solid fa-comment-medical" style="color: var(--color-gold); font-size: 1.3rem;"></i>
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 8px; color: var(--color-white);">2. 직원 피드백</div>
+                  </div>
+                  <div style="color: var(--color-gold); font-size: 1.2rem;"><i class="fa-solid fa-chevron-right"></i></div>
+                  <div class="loop-node glass-card" style="flex: 1; padding: 15px; text-align: center; border-color: rgba(255, 215, 0, 0.2); background: rgba(255,255,255,0.03);">
+                    <i class="fa-solid fa-database" style="color: var(--color-gold); font-size: 1.3rem;"></i>
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 8px; color: var(--color-white);">3. AI 데이터 축적</div>
+                  </div>
+                </div>
+                
+                <!-- Down Arrow on the right -->
+                <div style="display: flex; justify-content: flex-end; padding-right: 16%; color: var(--color-gold); margin: -4px 0; font-size: 1.1rem;">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                
+                <!-- Row 2: Right to Left -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                  <div class="loop-node glass-card" style="flex: 1; padding: 15px; text-align: center; border-color: rgba(255, 215, 0, 0.2); background: rgba(255,255,255,0.03);">
+                    <i class="fa-solid fa-chart-line" style="color: var(--color-gold); font-size: 1.3rem;"></i>
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 8px; color: var(--color-white);">6. 운영 효율 증가</div>
+                  </div>
+                  <div style="color: var(--color-gold); font-size: 1.2rem;"><i class="fa-solid fa-chevron-left"></i></div>
+                  <div class="loop-node glass-card" style="flex: 1; padding: 15px; text-align: center; border-color: rgba(255, 215, 0, 0.2); background: rgba(255,255,255,0.03);">
+                    <i class="fa-solid fa-circle-minus" style="color: var(--color-gold); font-size: 1.3rem;"></i>
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 8px; color: var(--color-white);">5. 오배정 감소</div>
+                  </div>
+                  <div style="color: var(--color-gold); font-size: 1.2rem;"><i class="fa-solid fa-chevron-left"></i></div>
+                  <div class="loop-node glass-card" style="flex: 1; padding: 15px; text-align: center; border-color: rgba(255, 215, 0, 0.2); background: rgba(255,255,255,0.03);">
+                    <i class="fa-solid fa-bullseye" style="color: var(--color-gold); font-size: 1.3rem;"></i>
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-top: 8px; color: var(--color-white);">4. 라우팅 정확도 향상</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom: Explanation Cards (Horizontal Side-by-Side in Grid) -->
+            <div class="grid-2" style="gap: 20px; align-items: stretch; width: 100%;">
+              <div class="glass-card highlight" style="margin: 0; padding: 20px; display: flex; flex-direction: column; justify-content: center; height: auto;">
+                <h3 style="font-size: 1.1rem; color: var(--color-gold); margin-top: 0; margin-bottom: 8px;">
+                  <i class="fa-solid fa-circle-nodes"></i> 직원의 일상 수정이 곧 AI의 자율 학습으로
+                </h3>
+                <p style="font-size: 0.8rem; line-height: 1.6; color: var(--color-cream); margin-bottom: 0;">
+                  직원들이 AI가 자동 배정한 업무 부서를 수동으로 수정하거나 담당자를 정정하는 일련의 <strong>자연스러운 보완 행동 자체를 AI 모델 학습용 데이터셋으로 즉시 변환</strong>시킵니다.
+                </p>
+              </div>
+
+              <div class="glass-card" style="margin: 0; padding: 20px; display: flex; flex-direction: column; justify-content: center; height: auto;">
+                <h3 style="font-size: 1.1rem; color: var(--color-gold); margin-top: 0; margin-bottom: 8px;">
+                  <i class="fa-solid fa-arrow-up-right-dots"></i> 이용 시간이 늘어날수록 강화되는 라우팅 지능
+                </h3>
+                <p style="font-size: 0.8rem; line-height: 1.6; color: var(--color-cream); margin-bottom: 0;">
+                  이력이 축적될수록 파이썬 AI 백서 비정형 매핑의 정확도가 스스로 상승합니다. 이는 오배정률 감소와 호텔 전체의 운영 생산성 극대화로 직결됩니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>10 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: Market Viability & ROI (Business) -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">06 . Business & Market</div>
+          <h2>시장성 및 비용 효율성 (ROI)</h2>
+
+          <div class="grid-3" style="margin-top: 15px;">
+            <div class="glass-card">
+              <div class="stat-number">65%</div>
+              <div class="stat-label">호텔 업계 인력난 심각</div>
+              <div class="stat-desc">AHLA 2025 자료 기준. 프론트데스크 직군은 전체 호텔 부서 중 구인난 2위(26%) 기록</div>
+            </div>
+
+            <div class="glass-card highlight">
+              <div class="stat-number">70%+</div>
+              <div class="stat-label">업무 처리 속도 단축</div>
+              <div class="stat-desc">기존 3~5분 소요되던 분류 및 타부서 인계 시간이 AI 자동화를 통해 1분 미만으로 단축</div>
+            </div>
+
+            <div class="glass-card">
+              <div class="stat-number">1 / 10</div>
+              <div class="stat-label">AI 운영 비용 최적화</div>
+              <div class="stat-desc">무한 대화 context 로드 방지 및 슬롯필링 제한 장치로 LLM Token 비용 90% 이상 절감</div>
+            </div>
+          </div>
+
+          <div class="glass-card" style="width: 100%; margin-top: 25px;">
+            <h3 style="font-size: 1.15rem; color: var(--color-gold); margin-top: 0; margin-bottom: 10px;">
+              <i class="fa-solid fa-coins"></i> 기대효과 계산 (Return on Investment)
+            </h3>
+            <p style="font-size: 0.85rem; line-height: 1.6; color: var(--color-cream); margin-bottom: 0;">
+              반복 행정 업무의 80%를 AI가 처리함으로써 <strong>야간 프론트 응대 인건비 부담을 획기적으로 경감</strong>합니다. 
+              또한, 외국인 응대 과정에서 발생하는 오안내와 정정 처리에 필요한 커뮤니케이션 운영 비용을 영(0)으로 수렴시킵니다.
+            </p>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>11 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 10: Future Roadmap -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">07 . Future Roadmap</div>
+          <h2>향후 발전 계획</h2>
+
+          <div class="grid-3" style="margin-top: 20px; height: 70%;">
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 1.8rem; color: var(--color-gold); margin-bottom: 15px;"><i class="fa-solid fa-brain"></i></div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">Few-shot 기반 자율 고도화</h3>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-text-muted);">
+                  현장에서 발생하는 프론트 직원의 '오배정 수정 이력'을 데이터셋으로 자동 변환합니다. 
+                  AI가 수정본을 퓨샷(Few-shot)으로 자동 학습하여 라우팅 지능이 운영될수록 고도화됩니다.
+                </p>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600;">Phase 01</div>
+            </div>
+
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 1.8rem; color: var(--color-gold); margin-bottom: 15px;"><i class="fa-solid fa-chart-pie"></i></div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">비즈니스 인텔리전스 (BI) 리포팅</h3>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-text-muted);">
+                  어느 객실에서 어떤 소모품(칫솔, 타월)의 소비가 빈번한지 통계를 산출합니다. 
+                  이를 기반으로 비품 보충 주기를 사전에 예측하는 호텔 전용 자원 관리 인사이트를 제공합니다.
+                </p>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600;">Phase 02</div>
+            </div>
+
+            <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 1.8rem; color: var(--color-gold); margin-bottom: 15px;"><i class="fa-solid fa-network-wired"></i></div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 10px;">자율형 PMS 에이전트</h3>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: var(--color-text-muted);">
+                  단순 정보 조회를 넘어 객실 배정 변경, 결제 처리, 조식 인원 추가 등 호텔 PMS 시스템의 실제 데이터 조작 및 액션까지 직접 지시하고 완결 짓는 AI Agent로 진화합니다.
+                </p>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-gold-light); font-weight: 600;">Phase 03</div>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>12 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 11: Team Members -->
+      <section>
+        <div class="slide-container" style="padding: 30px 40px;">
+          <div class="slide-header">08 . Team Members</div>
+          <h2>Anook 개발 팀원 소개</h2>
+
+          <style>
+            .member-grid {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 14px;
+              width: 100%;
+              margin-top: 8px;
+            }
+            .member-card {
+              background: var(--color-glass-bg);
+              border: 1px solid var(--color-glass-border);
+              border-radius: 10px;
+              padding: 14px 16px;
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+            }
+            .member-top {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              border-bottom: 1px solid rgba(255,215,0,0.15);
+              padding-bottom: 8px;
+              margin-bottom: 4px;
+            }
+            .member-icon {
+              font-size: 1.3rem;
+              color: var(--color-gold);
+              width: 22px;
+              text-align: center;
+            }
+            .member-name {
+              font-size: 1rem;
+              font-weight: 700;
+              color: var(--color-white);
+            }
+            .member-role {
+              font-size: 0.7rem;
+              color: var(--color-gold-light);
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .member-list {
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            }
+            .member-list li {
+              font-size: 0.75rem;
+              color: var(--color-text-body);
+              line-height: 1.4;
+              padding-left: 10px;
+              position: relative;
+            }
+            .member-list li::before {
+              content: '›';
+              position: absolute;
+              left: 0;
+              color: var(--color-gold);
+              font-weight: 700;
+            }
+          </style>
+
+          <div class="member-grid">
+
+            <!-- 장혜은 -->
+            <div class="member-card">
+              <div class="member-top">
+                <i class="fa-solid fa-server member-icon"></i>
+                <div>
+                  <div class="member-name">장혜은</div>
+                  <div class="member-role">PM · Infra · AI</div>
+                </div>
+              </div>
+              <ul class="member-list">
+                <li>AWS 배포 및 HTTPS/SSL 인증서 적용</li>
+                <li>Nginx BFF 라우팅 최적화 및 Docker Compose 병렬 배포</li>
+                <li>컨시어지 AI 에이전트 개발 (RAG·슬롯필링·추천 엔진)</li>
+                <li>통합 빌링 연동 및 영수증 자동 생성</li>
+                <li>무료 제공 서비스 과금 규칙 구현</li>
+              </ul>
+            </div>
+
+            <!-- 조영일 -->
+            <div class="member-card">
+              <div class="member-top">
+                <i class="fa-solid fa-robot member-icon"></i>
+                <div>
+                  <div class="member-name">조영일</div>
+                  <div class="member-role">AI Engineer · Backend</div>
+                </div>
+              </div>
+              <ul class="member-list">
+                <li>Search-then-Route 아키텍처 설계 및 구현</li>
+                <li>상담 완료 내역 RAG 적재 플로우 및 다중 의도 합성</li>
+                <li>F&B/컨시어지 중복 업무 방지 로직 (AI + 백엔드)</li>
+                <li>인수인계 백엔드 구조 설계 및 필터 구현</li>
+                <li>AI 시그니처 안정화 및 action_type 유실 해결</li>
+              </ul>
+            </div>
+
+            <!-- 박단희 -->
+            <div class="member-card">
+              <div class="member-top">
+                <i class="fa-solid fa-display member-icon"></i>
+                <div>
+                  <div class="member-name">박단희 <span style="font-size: 0.7rem; color: var(--color-gold); background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.4); border-radius: 4px; padding: 1px 6px; vertical-align: middle; font-weight: 600; letter-spacing: 1px;">팀장</span></div>
+                  <div class="member-role">Frontend Engineer</div>
+                </div>
+              </div>
+              <ul class="member-list">
+                <li>프론트엔드 UI/UX 전반 구현 (컴포넌트 시스템 설계)</li>
+                <li>SmartSearchBar 개발 및 전 페이지 적용</li>
+                <li>한·영·일·중 4개 언어 국제화(i18n) 완성</li>
+                <li>실시간 양방향 번역 흐름 구현</li>
+                <li>취소/중복 방지 UX, 알림 패널 구현</li>
+              </ul>
+            </div>
+
+            <!-- 정혜연 -->
+            <div class="member-card">
+              <div class="member-top">
+                <i class="fa-solid fa-plug member-icon"></i>
+                <div>
+                  <div class="member-name">정혜연</div>
+                  <div class="member-role">Backend · PMS Integration</div>
+                </div>
+              </div>
+              <ul class="member-list">
+                <li>호텔 PMS 연동 API 및 결제 파이프라인 개발</li>
+                <li>F&B 메뉴 필수 옵션 JSON 구조화 및 슬롯필링 고도화</li>
+                <li>전 부서 다국어 엔티티 통일 (HK·FB·컨시어지)</li>
+                <li>직원 ChatPanel 상담완료 중복 방지 구현</li>
+                <li>주문 수정·취소 프롬프트 안정화</li>
+              </ul>
+            </div>
+
+            <!-- 황서범 -->
+            <div class="member-card">
+              <div class="member-top">
+                <i class="fa-solid fa-brain member-icon"></i>
+                <div>
+                  <div class="member-name">황서범</div>
+                  <div class="member-role">AI · Backend · Infra</div>
+                </div>
+              </div>
+              <ul class="member-list">
+                <li>일정 조율 및 고객 인터뷰 주도</li>
+                <li>Vector DB(PGVector) 및 Graph DB(Neo4j) 도입</li>
+                <li>RAG 파이프라인 최적화 및 벡터 DB 중복 지식 정리</li>
+                <li>AI 서버 실시간 연결 상태 모니터링 구현</li>
+                <li>인수인계 엑셀 다운로드 구현 (Apache POI · 객실별 그룹화)</li>
+              </ul>
+            </div>
+
+            <!-- 강병수 -->
+            <div class="member-card">
+              <div class="member-top">
+                <i class="fa-solid fa-table-columns member-icon"></i>
+                <div>
+                  <div class="member-name">강병수</div>
+                  <div class="member-role">Frontend · Handover</div>
+                </div>
+              </div>
+              <ul class="member-list">
+                <li>인수인계 페이지 UI 구조 설계 및 개발 (AN-374)</li>
+                <li>인수인계 데이터 노출 기준 및 상태 필터 구현</li>
+                <li>처리 현황 집계 로직 개선 (처리/전체 표기)</li>
+                <li>담당자 정보 표시 및 관리자 권한 처리</li>
+                <li>인수인계 요약 테이블 레이아웃 개선</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>13 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 12: Q&A / Outro -->
+      <section>
+        <div class="slide-container" style="align-items: center; justify-content: center; text-align: center; height: 100vh;">
+          <div class="title-logo">ANOOK</div>
+          <h2 style="border: none; padding: 0; margin-bottom: 10px; font-size: 3.5rem;">Q & A</h2>
+          <p style="color: var(--color-gold-light); font-size: 1.3rem; font-weight: 300;">경청해 주셔서 감사합니다.</p>
+          <div class="title-divider" style="margin: 25px auto;"></div>
+        </div>
+        <div class="presentation-footer">
+          <span>14 / 14</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal.js & Custom Logic -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+  <!-- Plyr Video Player Script -->
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <script>
+    // Initialize Reveal.js
+    Reveal.initialize({
+      hash: true,
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+      width: 1100,
+      height: 700,
+      margin: 0.1,
+      minScale: 0.2,
+      maxScale: 2.0,
+      transition: 'slide' // none/fade/slide/convex/concave/zoom
+    });
+
+    // Handle branding customizer demo interactiveness
+    const colorSwatches = document.querySelectorAll('.color-swatch');
+    const previewHeader = document.getElementById('previewHeader');
+    const previewBubble = document.getElementById('previewBubble');
+
+    colorSwatches.forEach(swatch => {
+      swatch.addEventListener('click', function() {
+        // Remove active state
+        colorSwatches.forEach(s => s.classList.remove('active'));
+        // Add active to clicked
+        this.classList.add('active');
+        
+        const selectedColor = this.getAttribute('data-color');
+        const themeName = this.getAttribute('data-name');
+        
+        // Update header & right bubble color dynamically
+        previewHeader.style.backgroundColor = selectedColor;
+        previewBubble.style.backgroundColor = selectedColor;
+        previewHeader.querySelector('span').textContent = themeName + ' 테마';
+      });
+    });
+
+    // Handle video upload and Plyr controls integration
+    const videoFileInput = document.getElementById('videoFileInput');
+    const demoVideo = document.getElementById('demoVideo');
+    const placeholderContent = document.getElementById('placeholderContent');
+    const videoPlayerWrapper = document.getElementById('videoPlayerWrapper');
+
+    // Attempt to load a default video in the directory automatically (e.g. demo.mp4)
+    demoVideo.src = "demo.mp4";
+
+    // Initialize Plyr Video Player
+    const player = new Plyr('#demoVideo', {
+      controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+      hideControls: true,
+      clickToPlay: true
+    });
+
+    demoVideo.addEventListener('loadedmetadata', function() {
+      // If default video is loaded, hide placeholder and show player wrapper
+      if (!videoFileInput.files.length) {
+        placeholderContent.style.display = 'none';
+        videoPlayerWrapper.style.display = 'block';
+      }
+    });
+
+    demoVideo.addEventListener('error', function() {
+      // If default video is missing/fails, clear src, hide player wrapper and show placeholder
+      if (demoVideo.src && !demoVideo.src.startsWith('blob:')) {
+        videoPlayerWrapper.style.display = 'none';
+        placeholderContent.style.display = 'flex';
+      }
+    });
+
+    // Trigger video selection on clicking play button symbol
+    document.getElementById('playBtn').addEventListener('click', () => {
+      videoFileInput.click();
+    });
+
+    videoFileInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        
+        // Load the uploaded local video source into Plyr
+        player.source = {
+          type: 'video',
+          sources: [
+            {
+              src: fileURL,
+              type: file.type || 'video/mp4'
+            }
+          ]
+        };
+        
+        placeholderContent.style.display = 'none';
+        videoPlayerWrapper.style.display = 'block';
+        player.play();
+      }
+    });
+
+    // Toggle play/pause using Spacebar, preventing Reveal.js slide transition
+    window.addEventListener('keydown', function(event) {
+      if (event.key === ' ' || event.code === 'Space') {
+        const currentSlide = Reveal.getCurrentSlide();
+        // If we are on the video slide and the video is currently displayed
+        if (currentSlide && currentSlide.contains(videoPlayerWrapper) && videoPlayerWrapper.style.display !== 'none') {
+          event.preventDefault();
+          event.stopPropagation();
+          player.togglePlay();
+        }
+      }
+    }, true); // Use capture phase to intercept the event before Reveal.js handles it
+  </script>
+</body>
+</html>
