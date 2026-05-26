@@ -11,6 +11,7 @@ interface ChatHistoryMessage {
   id: number | string;
   senderType: string;
   content: string;
+  translatedContent?: string;
   createdAt?: string;
 }
 
@@ -81,6 +82,11 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHi
               const isGuest = msg.senderType === 'GUEST';
               const isStaff = msg.senderType === 'STAFF';
               const variant = isGuest ? 'sent' : 'received';
+              
+              let displayContent = msg.content;
+              if (msg.translatedContent && (msg.senderType === 'GUEST' || msg.senderType === 'AI')) {
+                displayContent = msg.translatedContent;
+              }
 
               return (
                 <ChatBubble
@@ -88,7 +94,7 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHi
                   variant={variant}
                   isFallback={isStaff}
                 >
-                  {msg.content}
+                  {displayContent}
                 </ChatBubble>
               );
             })}

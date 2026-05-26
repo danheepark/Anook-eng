@@ -224,13 +224,19 @@ public class CreateRequestOnEventService {
         boolean isEmergency = savedRequest.getPriority() == Priority.EMERGENCY;
         boolean isAddDuplicate = "ADD_DUPLICATE".equals(event.getActionType());
 
+        // [AN-381] 고객이 AI의 프론트 연결 제안에 "네"라고 응답한 경우 이미 더블체크가 완료된 것이므로 10초 대기(Grace Period) 생략
+        boolean isEscalationConfirmed = savedRequest.getDomainCode() == DomainCode.FRONT
+                && event.getRawText() != null
+                && (event.getRawText().trim().equals("네") || event.getRawText().trim().equals("예")
+                || event.getRawText().trim().equalsIgnoreCase("yes") || event.getRawText().trim().equals("응"));
+
         // [AN-344] FB/CONCIERGE는 AI가 이미 확인 질문을 했으므로 Grace Period 타이머 대신
         // 고객의 명시적 확인(진행 버튼)을 기다림 → graceRemaining = -1 (무한 대기)
         // HK/FACILITY도 중복 추가(ADD_DUPLICATE)나 추가 요금 결제 시 일반 요청과 동일하게 10초 대기(Grace Period) 적용.
         boolean isFbOrConcierge = savedRequest.getDomainCode() == DomainCode.FB
                 || savedRequest.getDomainCode() == DomainCode.CONCIERGE;
         boolean requiresExplicitConfirm = isFbOrConcierge;
-        boolean skipGrace = isEmergency;
+        boolean skipGrace = isEmergency || isEscalationConfirmed;
 
         String deptCode = savedRequest.getDomainCode() != null ? savedRequest.getDomainCode().name() : "UNKNOWN";
         int graceRemaining;
