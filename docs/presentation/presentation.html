@@ -899,23 +899,78 @@
               </div>
             </div>
             
-            <!-- Right: Floating Customer Messages Box -->
-            <div class="floating-messages-box" style="height: 380px;">
-              <div style="position: absolute; width: 100%; top: 10px; text-align: center; font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">
-                <i class="fa-solid fa-comments"></i> 실시간 비정형 요청들
+            <!-- Right: Front Desk Task Time Allocation Graph -->
+            <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between; height: 380px;">
+              <div>
+                <div style="font-size: 0.8rem; color: var(--color-gold); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-chart-pie"></i> &nbsp;프론트 업무 시간 배분 현황</div>
+                
+                <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 15px; margin-bottom: 10px;">
+                  <!-- Donut Chart -->
+                  <div style="position: relative; width: 170px; height: 170px; border-radius: 50%; background: conic-gradient(
+                    #90A4AE 0% 28%,
+                    #52C41A 28% 50%,
+                    #73D13D 50% 61%,
+                    #B0BEC5 61% 65%,
+                    #95DE64 65% 66%,
+                    #B7EB8F 66% 67%,
+                    rgba(255, 255, 255, 0.08) 67% 100%
+                  ); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+                    <!-- Inner cutout -->
+                    <div style="width: 110px; height: 110px; border-radius: 50%; background: #141414; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);">
+                      <span style="font-size: 0.55rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">AI Target</span>
+                      <span style="font-size: 1.5rem; font-weight: 800; color: #52C41A; line-height: 1.1; margin-top: 2px;">35%</span>
+                    </div>
+                  </div>
+
+                  <!-- Legend -->
+                  <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 0; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem;">
+                      <div style="width: 10px; height: 10px; border-radius: 2px; background: #90A4AE; flex-shrink: 0;"></div>
+                      <span style="color: var(--color-white); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">체크인/체크아웃 (28%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 600;">
+                      <div style="width: 10px; height: 10px; border-radius: 2px; background: #52C41A; flex-shrink: 0;"></div>
+                      <span style="color: #85E852; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">고객관계/커뮤니케이션 (22%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 600;">
+                      <div style="width: 10px; height: 10px; border-radius: 2px; background: #73D13D; flex-shrink: 0;"></div>
+                      <span style="color: #85E852; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">전화 응대 (11%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem;">
+                      <div style="width: 10px; height: 10px; border-radius: 2px; background: #B0BEC5; flex-shrink: 0;"></div>
+                      <span style="color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">행정 업무 (4%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 600;">
+                      <div style="width: 10px; height: 10px; border-radius: 2px; background: #95DE64; flex-shrink: 0;"></div>
+                      <span style="color: #85E852; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">부서간 협업 (1%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 600;">
+                      <div style="width: 10px; height: 10px; border-radius: 2px; background: #B7EB8F; flex-shrink: 0;"></div>
+                      <span style="color: #85E852; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">교통편 주선 (1%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem;">
+                      <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(255, 255, 255, 0.15); flex-shrink: 0;"></div>
+                      <span style="color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">기타 / 대기 등 (33%)</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="floating-bubble bubble-1">“수건 좀 주세요.”</div>
-              <div class="floating-bubble bubble-2">“Can you recommend a vegan menu?”</div>
-              <div class="floating-bubble bubble-3">“룸서비스 주문할게요.”</div>
-              <div class="floating-bubble bubble-4">“에어컨이 안 나와요.”</div>
-              <div class="floating-bubble bubble-5">“택시 불러주세요.”</div>
-              <div class="floating-bubble bubble-6">“직원이 너무 불친절했어요.”</div>
-              <div class="floating-bubble bubble-7">“객실에 물이 새고 있어요.”</div>
+
+              <!-- AI Target Summary Text -->
+              <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 6px;">
+                <div style="font-size: 0.72rem; color: var(--color-white); line-height: 1.4; display: flex; align-items: center; gap: 8px;">
+                  <span style="background: rgba(82,196,26,0.15); border: 1px solid rgba(82,196,26,0.4); border-radius: 4px; padding: 2px 6px; font-size: 0.68rem; color: #52C41A; font-weight: 700; white-space: nowrap;">AI 직격 타겟: 34~37%</span>
+                  <span>단순 문의 · 전화 응대 · 부서 전달을 AI가 자동 해결</span>
+                </div>
+                <div style="font-size: 0.65rem; color: var(--color-text-muted); line-height: 1.3; margin-top: 4px; text-align: left;">
+                  ※ 체크인/체크아웃, 결제, 객실 배정의 최종 판단은 여전히 사람의 영역
+                </div>
+              </div>
             </div>
           </div>
         </div>
         <div class="presentation-footer">
-          <span>02 / 14</span>
+          <span>02 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -944,8 +999,8 @@
                 </div>
                 <!-- Right Column Spokes -->
                 <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
-                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-brands fa-talk"></i> 카톡방 수동 배정</div>
-                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-comments"></i> 부서 개별 무전</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-comments"></i> 카톡방 수동 배정</div>
+                  <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-network-wired"></i> 부서 개별 무전</div>
                   <div class="glass-card hub-spoke-card" style="padding: 10px 14px; font-size: 0.8rem;"><i class="fa-solid fa-desktop"></i> PC 대시보드</div>
                 </div>
               </div>
@@ -984,7 +1039,95 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>03 / 14</span>
+          <span>03 / 16</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 3-B: Background & Problem (As-is - Part 3: Labor Shortage) -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">01 . Background & Problem</div>
+          <h2>관광 수요 회복과 만성적인 인력 부족</h2>
+          
+          <div class="grid-2" style="align-items: center; width: 100%;">
+            <!-- Left: Stat Card showing Surging Demand -->
+            <div class="glass-card highlight" style="border-color: var(--color-gold); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-height: 380px;">
+              <div>
+                <div class="highlight-badge" style="background: rgba(255, 215, 0, 0.15); border-color: var(--color-gold); color: var(--color-gold-light); margin-bottom: 12px;">시장 수요 : 역대 최대 외래객</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fa-solid fa-plane-arrival" style="color: var(--color-gold); font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div>
+                      <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">2025년 외래객 1,870만 명 전망</h4>
+                      <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">문화체육관광부 발표 기준 역대 최대 규모 돌파 전망</p>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fa-solid fa-chart-line" style="color: var(--color-gold); font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div>
+                      <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">2026년 1분기 476만 명 돌파</h4>
+                      <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">1분기 기준 역대 최대 기록, 외국어 대응 수요 폭발</p>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fa-solid fa-building-circle-check" style="color: var(--color-gold); font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div>
+                      <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">관광 및 숙박 수요의 지속 상승</h4>
+                      <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">신규 공급 정체 속 기존 호텔의 객실 가동률 극대화 (JLL)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="font-size: 0.7rem; color: var(--color-text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 10px;">
+                * 데이터 출처: 문화체육관광부 보도자료 및 JLL 서울 호텔 시장 보고서
+              </div>
+            </div>
+            
+            <!-- Right: Stat Card showing Labor Shortage -->
+            <div class="glass-card highlight" style="border-color: var(--color-red); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-height: 380px;">
+              <div>
+                <div class="highlight-badge" style="background: rgba(255, 77, 79, 0.15); border-color: var(--color-red); color: #FFAAAA; margin-bottom: 12px;">공급 현황 : 만성적 운영 인력 부족</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fa-solid fa-users-slash" style="color: var(--color-red); font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div>
+                      <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">숙박업 종사자 수 20% 감소</h4>
+                      <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">고용노동부 통계 기준 코로나19 이전 대비 대폭 감소</p>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: var(--color-red); font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div>
+                      <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">호텔 65%가 "인력 부족" 보고</h4>
+                      <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">AHLA 2025 조사: 하우스키핑에 이어 프론트데스크 부족이 2위</p>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fa-solid fa-comments-dollar" style="color: var(--color-red); font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div>
+                      <h4 style="font-size: 0.95rem; color: var(--color-white); margin: 0 0 4px 0;">실제 호텔 현장의 목소리</h4>
+                      <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">"수요는 폭발적으로 늘었지만, 프론트 직원을 구하기가 매우 어렵다" (현장 인터뷰)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="font-size: 0.7rem; color: var(--color-text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 10px;">
+                * 핵심 문제: <strong>수요 회복 속도를 따라가지 못하는 운영 인력 공급</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>04 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1052,7 +1195,7 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>04 / 14</span>
+          <span>05 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1114,7 +1257,7 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>05 / 14</span>
+          <span>06 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1200,7 +1343,7 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>07 / 14</span>
+          <span>08 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1266,7 +1409,7 @@
             </div>
           </div>
         <div class="presentation-footer">
-          <span>08 / 14</span>
+          <span>09 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1312,7 +1455,7 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>09 / 14</span>
+          <span>10 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1400,158 +1543,166 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>10 / 14</span>
+          <span>11 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
 
-      <!-- SLIDE 9: Market Viability & ROI (Business) — KPI Dashboard Style -->
+      <!-- SLIDE 9-A: Business & Market (Three Pillars: Time, Cost, Market) -->
       <section>
-        <div class="slide-container" style="padding: 24px 40px; gap: 0;">
+        <div class="slide-container">
           <div class="slide-header">06 . Business & Market</div>
-          <h2 style="margin-bottom: 18px;">사업성 분석 — 숫자로 보는 ROI</h2>
+          <h2>사업성 분석 — 3대 핵심 지표</h2>
 
-          <!-- ① TOP: 4 KPI 카드 -->
-          <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px;">
-
-            <div style="background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
-              <div style="font-size: 0.65rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">AI 요청 1건 비용</div>
-              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">₩14</div>
-              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">Gemini Flash 기준</div>
-              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(255,215,0,0.06);"><i class="fa-solid fa-bolt"></i></div>
-            </div>
-
-            <div style="background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
-              <div style="font-size: 0.65rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">AI 월 운영비</div>
-              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">₩19만</div>
-              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">200객실 · 인건비의 9%</div>
-              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(255,215,0,0.06);"><i class="fa-solid fa-coins"></i></div>
-            </div>
-
-            <div style="background: linear-gradient(135deg, rgba(82,196,26,0.12), rgba(82,196,26,0.04)); border: 1px solid rgba(82,196,26,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
-              <div style="font-size: 0.65rem; color: #52C41A; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">업무 시간 절감</div>
-              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">26%</div>
-              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">프론트 월 699h 절감</div>
-              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(82,196,26,0.08);"><i class="fa-solid fa-chart-line"></i></div>
-            </div>
-
-            <div style="background: linear-gradient(135deg, rgba(82,196,26,0.12), rgba(82,196,26,0.04)); border: 1px solid rgba(82,196,26,0.4); border-radius: 12px; padding: 16px 14px; text-align: center; position: relative; overflow: hidden;">
-              <div style="font-size: 0.65rem; color: #52C41A; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">손익분기점</div>
-              <div style="font-size: 2.4rem; font-weight: 800; color: var(--color-white); font-family: var(--font-header); line-height: 1;">22h</div>
-              <div style="font-size: 0.68rem; color: var(--color-text-muted); margin-top: 6px;">월 22~27h 절감으로 전액 회수</div>
-              <div style="position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; color: rgba(82,196,26,0.08);"><i class="fa-solid fa-hourglass-half"></i></div>
-            </div>
-
-          </div>
-
-          <!-- ② MIDDLE: 비용 비례 시각화 + 처리 시간 비교 + 시장 지표 -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 12px; margin-bottom: 14px;">
-
-            <!-- 운영비 비교 -->
-            <div class="glass-card" style="padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
+          <div class="grid-3" style="margin-top: 15px; height: 75%; gap: 15px;">
+            <!-- Column 1: 업무 시간 -->
+            <div class="glass-card highlight" style="border-color: var(--color-gold); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
               <div>
-                <div style="font-size: 0.78rem; color: var(--color-gold); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-scale-balanced"></i> &nbsp;운영비 비교</div>
-
-                <!-- AI cost bar -->
-                <div style="margin-bottom: 10px;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                    <span style="font-size: 0.68rem; color: var(--color-white); font-weight: 600;">AI 월 운영비 (Flash)</span>
-                    <span style="font-size: 0.68rem; color: var(--color-gold); font-weight: 700;">₩18.9만</span>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.08); border-radius: 4px; height: 8px; overflow: hidden;">
-                    <div style="background: linear-gradient(90deg, #FFD700, #FFE866); height: 100%; width: 9%; border-radius: 4px;"></div>
-                  </div>
+                <div style="font-size: 0.8rem; color: var(--color-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+                  <i class="fa-solid fa-clock"></i> 01. 업무 시간 절감
                 </div>
-
-                <!-- Human cost bar -->
-                <div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                    <span style="font-size: 0.68rem; color: var(--color-white); font-weight: 600;">직원 1인 인건비</span>
-                    <span style="font-size: 0.68rem; color: #FF4D4F; font-weight: 700;">₩245만~296만</span>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.08); border-radius: 4px; height: 8px; overflow: hidden;">
-                    <div style="background: linear-gradient(90deg, #FF4D4F, #FF7875); height: 100%; width: 100%; border-radius: 4px;"></div>
-                  </div>
-                </div>
-              </div>
-              <div style="font-size: 0.65rem; color: var(--color-text-muted); text-align: left; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 6px;">
-                인건비 대비 단 <strong>9%</strong> 수준으로 운영 가능
-              </div>
-            </div>
-
-            <!-- 처리 시간 비교 -->
-            <div class="glass-card" style="padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
-              <div>
-                <div style="font-size: 0.78rem; color: var(--color-gold); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-clock-rotate-left"></i> &nbsp;처리 시간 비교</div>
                 
-                <div style="display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 8px;">
-                  <div style="text-align: center;">
-                    <div style="font-size: 1.3rem; font-weight: 800; color: #FF4D4F; font-family: var(--font-header); line-height: 1.1;">4.4분</div>
-                    <div style="font-size: 0.6rem; color: var(--color-text-muted);">기존 수동</div>
+                <div style="text-align: left; display: flex; flex-direction: column; gap: 14px;">
+                  <div>
+                    <div style="font-size: 2.2rem; font-weight: 800; color: var(--color-white); line-height: 1;">17~26%</div>
+                    <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 4px;">프론트 총 근무시간 절감</div>
                   </div>
-                  <div style="color: var(--color-gold); font-size: 1.1rem; font-weight: 700;">→</div>
-                  <div style="text-align: center;">
-                    <div style="font-size: 1.3rem; font-weight: 800; color: #52C41A; font-family: var(--font-header); line-height: 1.1;">1.4분</div>
-                    <div style="font-size: 0.6rem; color: var(--color-text-muted);">AI 도입 후</div>
+                  
+                  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; color: var(--color-text-body);">
+                    <div>• 객실당 3건/일 → <strong>월 13,500건</strong> 요청</div>
+                    <div>• 요청 1건당 평균 <strong>약 4.4분</strong> 소요</div>
+                    <div>• AI 대응 가능 커뮤니케이션:<br>&nbsp;&nbsp;<strong>월 약 999시간</strong> 분량</div>
                   </div>
                 </div>
               </div>
-
-              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 6px;">
-                <span style="font-size: 0.65rem; color: var(--color-text-muted);">업무 대응 시간 단축</span>
-                <span style="background: rgba(82,196,26,0.15); border: 1px solid rgba(82,196,26,0.4); border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; color: #52C41A; font-weight: 700;">↓ 70%</span>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                반복 문의 응대를 AI가 전담 처리
               </div>
             </div>
 
-            <!-- 시장 지표 -->
-            <div class="glass-card" style="padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
+            <!-- Column 2: 비용 -->
+            <div class="glass-card highlight" style="border-color: var(--color-gold); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
               <div>
-                <div style="font-size: 0.78rem; color: var(--color-gold); font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-earth-asia"></i> &nbsp;시장 지표</div>
-
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 0.7rem; font-weight: 800; color: #FF4D4F; background: rgba(255,77,79,0.1); border: 1px solid rgba(255,77,79,0.2); padding: 1px 4px; border-radius: 4px; min-width: 32px; text-align: center;">65%</span>
-                    <div style="font-size: 0.68rem; color: var(--color-white); line-height: 1.2;">
-                      <strong>호텔 인력 부족</strong> <span style="font-size: 0.6rem; color: var(--color-text-muted);">(프론트 직군 2위)</span>
-                    </div>
+                <div style="font-size: 0.8rem; color: var(--color-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+                  <i class="fa-solid fa-coins"></i> 02. 운영 비용 비교
+                </div>
+                
+                <div style="text-align: left; display: flex; flex-direction: column; gap: 14px;">
+                  <div>
+                    <div style="font-size: 2.2rem; font-weight: 800; color: var(--color-white); line-height: 1;">9~13%</div>
+                    <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 4px;">프론트 1인 인건비 대비 비율</div>
                   </div>
-
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 0.7rem; font-weight: 800; color: var(--color-gold); background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.2); padding: 1px 4px; border-radius: 4px; min-width: 32px; text-align: center;">476만</span>
-                    <div style="font-size: 0.68rem; color: var(--color-white); line-height: 1.2;">
-                      <strong>방한 외래객 급증</strong> <span style="font-size: 0.6rem; color: var(--color-text-muted);">(Q1 기준)</span>
-                    </div>
-                  </div>
-
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 0.7rem; font-weight: 800; color: #FF4D4F; background: rgba(255,77,79,0.1); border: 1px solid rgba(255,77,79,0.2); padding: 1px 4px; border-radius: 4px; min-width: 32px; text-align: center;">-20%</span>
-                    <div style="font-size: 0.68rem; color: var(--color-white); line-height: 1.2;">
-                      <strong>숙박업 인력 감소</strong> <span style="font-size: 0.6rem; color: var(--color-text-muted);">(코로나 전 대비)</span>
-                    </div>
+                  
+                  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; color: var(--color-text-body);">
+                    <div>• AI 요청 1건당 <strong>약 ₩14</strong> (Flash 기준)</div>
+                    <div>• 월 AI 운영비: <strong>₩20만~₩34만</strong> 수준<br>&nbsp;&nbsp;(일 3~5건 요청 기준)</div>
+                    <div>• 직원 1인 실질 고용비:<br>&nbsp;&nbsp;<strong>월 약 ₩245만 ~ ₩296만</strong> 이상</div>
                   </div>
                 </div>
               </div>
-              <div style="font-size: 0.6rem; color: var(--color-text-muted); text-align: left; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 6px;">
-                자동화 솔루션 도입 최적 타이밍
+              <div style="font-size: 0.65rem; color: var(--color-text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                인건비 대비 압도적인 비용 효용성
               </div>
             </div>
 
-          </div>
-
-          <!-- ③ BOTTOM: 핵심 포지션 -->
-          <div style="background: linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,215,0,0.03)); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 10px 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 5px;">
-            <i class="fa-solid fa-lightbulb" style="color: var(--color-gold); font-size: 1.2rem; flex-shrink: 0;"></i>
-            <div style="text-align: left;">
-              <span style="font-size: 0.7rem; color: var(--color-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">핵심 포지션</span>
-              <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: var(--color-white); line-height: 1.4;">
-                AI는 단순 대체가 아닌 <strong>숙박업 인력 감소에 따른 공백을 메우는 보완 도구</strong> &mdash; 외래객 증가 및 인력난을 해결하는 최적의 도입 타이밍.
-              </p>
+            <!-- Column 3: 한국 호텔 시장 -->
+            <div class="glass-card highlight" style="border-color: var(--color-gold); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 0.8rem; color: var(--color-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+                  <i class="fa-solid fa-earth-asia"></i> 03. 한국 호텔 시장
+                </div>
+                
+                <div style="text-align: left; display: flex; flex-direction: column; gap: 14px;">
+                  <div>
+                    <div style="font-size: 2.2rem; font-weight: 800; color: var(--color-white); line-height: 1;">476만+</div>
+                    <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 4px;">2026 Q1 방한 외래객 (역대 최대)</div>
+                  </div>
+                  
+                  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem; color: var(--color-text-body);">
+                    <div>• 2025 외래객 <strong>1,870만 명</strong> 돌파 전망</div>
+                    <div>• 서울 호텔 <strong>신규 공급 거의 없음</strong> (JLL)</div>
+                    <div>• 관광 수요 지속 상승으로 가동률 극대화</div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                수요 급증 대비 인력난 속 최적 도입 타이밍
+              </div>
             </div>
           </div>
-
         </div>
         <div class="presentation-footer">
-          <span>11 / 14</span>
+          <span>12 / 16</span>
+          <span class="brand">ANOOK</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 9-B: Business & Market (ROI & Resource Optimization) -->
+      <section>
+        <div class="slide-container">
+          <div class="slide-header">06 . Business & Market</div>
+          <h2>서비스 도입 가치 및 기대 효과 (ROI)</h2>
+
+          <div class="grid-2" style="margin-top: 15px; height: 75%; gap: 20px;">
+            <!-- Left: Human Resource Optimization -->
+            <div class="glass-card" style="padding: 25px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 1.1rem; color: var(--color-gold); font-weight: 700; margin-bottom: 15px;">
+                  <i class="fa-solid fa-users-gear"></i> 휴먼 리소스 재배치
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                  <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="font-size: 0.8rem; background: rgba(255, 77, 79, 0.15); border: 1px solid rgba(255, 77, 79, 0.3); border-radius: 4px; padding: 2px 6px; color: var(--color-red); font-weight: 700; white-space: nowrap;">AI 위임</span>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">
+                      야간 · 피크타임 · 다국어 외래객 응대 · 단순 반복 문의를 AI가 24시간 실시간 자동 처리
+                    </p>
+                  </div>
+
+                  <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="font-size: 0.8rem; background: rgba(82, 196, 26, 0.15); border: 1px solid rgba(82, 196, 26, 0.3); border-radius: 4px; padding: 2px 6px; color: var(--color-green); font-weight: 700; white-space: nowrap;">휴먼 집중</span>
+                    <p style="font-size: 0.75rem; color: var(--color-text-body); margin: 0; line-height: 1.4;">
+                      남는 시간으로 체크인 병목 해소, 컴플레인 회복(Service Recovery), 업셀링, VIP 맞춤 응대 등 사람이 잘하는 고부가 업무에 리소스를 재배치
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                인력 교대 근무의 빈틈 없는 24시간 철저 밀착 대응
+              </div>
+            </div>
+
+            <!-- Right: ROI Value Conversion -->
+            <div class="glass-card highlight" style="border-color: var(--color-gold); padding: 25px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-size: 1.1rem; color: var(--color-gold); font-weight: 700; margin-bottom: 15px;">
+                  <i class="fa-solid fa-chart-line"></i> 임금 환산 가치 (ROI)
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 18px; text-align: left;">
+                  <div>
+                    <span style="font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">보수적 산정 케이스 (1개 부서 시간 절감)</span>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--color-white); margin-top: 3px;">
+                      월 약 <span style="color: var(--color-gold);">₩540만 ~ ₩650만</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style="font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">현실적 산정 케이스 (멀티태스킹 공백 보완)</span>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--color-white); margin-top: 3px;">
+                      월 약 <span style="color: var(--color-gold);">₩820만 ~ ₩990만</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                구독형 비용 대비 <strong>20~30배 이상</strong>의 압도적 경제적 가치 창출
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="presentation-footer">
+          <span>13 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1589,7 +1740,7 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>12 / 14</span>
+          <span>14 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1780,7 +1931,7 @@
           </div>
         </div>
         <div class="presentation-footer">
-          <span>13 / 14</span>
+          <span>15 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
@@ -1794,7 +1945,7 @@
           <div class="title-divider" style="margin: 25px auto;"></div>
         </div>
         <div class="presentation-footer">
-          <span>14 / 14</span>
+          <span>16 / 16</span>
           <span class="brand">ANOOK</span>
         </div>
       </section>
