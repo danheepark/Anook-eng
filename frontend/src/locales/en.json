@@ -393,6 +393,12 @@
         "loading": "Loading...",
         "saveFailed": "Failed to save."
       }
+    },
+    "staffDashboard": {
+      "myTasks": "My Tasks",
+      "allTasks": "All {{dept}} Tasks",
+      "defaultDept": "Department",
+      "empty": "No tasks found."
     }
   },
   "guestChat": {

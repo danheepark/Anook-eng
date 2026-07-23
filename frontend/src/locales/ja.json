@@ -393,6 +393,12 @@
         "loading": "読み込み中...",
         "saveFailed": "保存に失敗しました。"
       }
+    },
+    "staffDashboard": {
+      "myTasks": "マイタスク",
+      "allTasks": "{{dept}} 全タスク",
+      "defaultDept": "部署",
+      "empty": "該当するタスクはありません。"
     }
   },
   "guestChat": {

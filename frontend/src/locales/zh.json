@@ -393,6 +393,12 @@
         "loading": "加载中...",
         "saveFailed": "保存失败。"
       }
+    },
+    "staffDashboard": {
+      "myTasks": "我的任务",
+      "allTasks": "{{dept}} 全部任务",
+      "defaultDept": "部门",
+      "empty": "没有相关任务。"
     }
   },
   "guestChat": {

@@ -394,6 +394,12 @@
         "loading": "로딩 중...",
         "saveFailed": "저장에 실패했습니다."
       }
+    },
+    "staffDashboard": {
+      "myTasks": "내 작업",
+      "allTasks": "{{dept}} 전체 작업",
+      "defaultDept": "부서",
+      "empty": "해당하는 작업이 없습니다."
     }
   },
   "guestChat": {

@@ -11,12 +11,7 @@ import TaskDetailModal from './_components/TaskDetailModal/TaskDetailModal';
 import { useTasks, StaffTask } from './useTasks';
 import BoardSkeleton from './_components/BoardSkeleton/BoardSkeleton';
 import styles from './page.module.css';
-
-const COLUMN_CONFIG = [
-  { id: 'PENDING', title: '대기 중', status: 'TODO' },
-  { id: 'IN_PROGRESS', title: '진행 중', status: 'IN_PROGRESS' },
-  { id: 'COMPLETED', title: '완료', status: 'DONE' },
-];
+import { useTranslation } from '@/app/useTranslation';
 
 const PRIORITY_OPTIONS = [
   { label: '전체 우선순위', value: 'ALL' },
@@ -86,6 +81,7 @@ export default function StaffDashboardPage() {
 }
 
 function DashboardContent() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const view = searchParams.get('view');
   const { tasks, loading, error, acceptTask, completeTask, transferTask, approveCancellation, rejectCancellation } = useTasks(view === 'my' ? 'my' : 'dept');
@@ -97,7 +93,8 @@ function DashboardContent() {
   const [selectedTask, setSelectedTask] = useState<StaffTask | null>(null);
   const [activeTab, setActiveTab] = useState<'TODO' | 'IN_PROGRESS' | 'DONE'>('TODO');
 
-  const [departmentName, setDepartmentName] = useState('부서');
+  const [departmentId, setDepartmentId] = useState<string>('');
+  const [departmentName, setDepartmentName] = useState('');
   const [departmentRole, setDepartmentRole] = useState<any>('housekeeping');
 
   useEffect(() => {
@@ -105,6 +102,7 @@ function DashboardContent() {
       .then(res => res.json())
       .then(data => {
         if (data.departmentId) {
+          setDepartmentId(data.departmentId);
           // Sidebar Role 매핑
           const roleMap: Record<string, string> = {
             'HK': 'housekeeping',
@@ -114,20 +112,32 @@ function DashboardContent() {
           };
           setDepartmentRole(roleMap[data.departmentId] || 'housekeeping');
 
-          // 화면 타이틀 이름 매핑 (요청하신 정확한 명칭으로 고정)
+          // 화면 타이틀 이름 매핑
           const nameMap: Record<string, string> = {
             'HK': '하우스키핑',
             'FACILITY': '시설 관리',
             'FB': 'FB',
             'CONCIERGE': '컨시어지'
           };
-          setDepartmentName(nameMap[data.departmentId] || data.department || '부서');
+          setDepartmentName(nameMap[data.departmentId] || data.department || '');
         } else if (data.department) {
           setDepartmentName(data.department);
         }
       })
       .catch(console.error);
   }, []);
+
+  const columnConfig = useMemo(() => [
+    { id: 'PENDING', title: t.frontdeskPage.taskBoard.columns.pending, status: 'TODO' },
+    { id: 'IN_PROGRESS', title: t.frontdeskPage.taskBoard.columns.inProgress, status: 'IN_PROGRESS' },
+    { id: 'COMPLETED', title: t.frontdeskPage.taskBoard.columns.completed, status: 'DONE' },
+  ], [t]);
+
+  const staffDashboardT = t.frontdeskPage?.staffDashboard;
+  const currentDeptTitle = (departmentId && t.ticketUI.department[departmentId as keyof typeof t.ticketUI.department]) || departmentName || staffDashboardT?.defaultDept || '부서';
+  const pageTitle = view === 'my'
+    ? (staffDashboardT?.myTasks || '내 작업')
+    : (staffDashboardT?.allTasks || '{{dept}} 전체 작업').replace('{{dept}}', currentDeptTitle);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
@@ -187,11 +197,8 @@ function DashboardContent() {
       <div className={styles.headerContainer}>
         <header className={styles.header}>
           <h1 className={styles.title}>
-            {departmentName === '시설 관리' ? '시설 관리 팀' : `${departmentName} 관리`}
+            {pageTitle}
           </h1>
-          <p className={styles.subtitle}>
-            {departmentName === '시설 관리' ? '시설 관리 팀 전용 채널' : `${departmentName} 전용 채널`}
-          </p>
         </header>
 
         <div className={styles.toolbar}>
@@ -239,9 +246,9 @@ function DashboardContent() {
           <div className={styles.mobileTabs}>
             <Tabs
               options={[
-                { label: '대기 중', value: 'TODO', count: boardData.TODO.length },
-                { label: '진행 중', value: 'IN_PROGRESS', count: boardData.IN_PROGRESS.length },
-                { label: '완료', value: 'DONE', count: boardData.DONE.length }
+                { label: t.frontdeskPage.taskBoard.columns.pending, value: 'TODO', count: boardData.TODO.length },
+                { label: t.frontdeskPage.taskBoard.columns.inProgress, value: 'IN_PROGRESS', count: boardData.IN_PROGRESS.length },
+                { label: t.frontdeskPage.taskBoard.columns.completed, value: 'DONE', count: boardData.DONE.length }
               ]}
               activeValue={activeTab}
               onChange={(val) => val && setActiveTab(val as 'TODO' | 'IN_PROGRESS' | 'DONE')}
@@ -249,7 +256,7 @@ function DashboardContent() {
           </div>
 
           <section className={styles.board}>
-            {COLUMN_CONFIG.map(col => {
+            {columnConfig.map(col => {
               const columnTasks = boardData[col.status as keyof typeof boardData];
               return (
                 <div
@@ -295,7 +302,7 @@ function DashboardContent() {
                         </div>
                       ))}
                       {columnTasks.length === 0 && (
-                        <div className={styles.empty}>해당하는 작업이 없습니다.</div>
+                        <div className={styles.empty}>{staffDashboardT?.empty || '해당하는 작업이 없습니다.'}</div>
                       )}
                     </div>
                   </TaskColumn>
