@@ -315,7 +315,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                         : `• ${label}: ${formattedConfidence}`;
                       return (
                         <div className={styles.contentBlock} style={{ marginTop: '12px' }}>
-                          <span className={styles.label}>판단 근거</span>
+                          <span className={styles.label}>{language === 'en' ? 'Reasoning' : '판단 근거'}</span>
                           <p style={{ margin: 0, whiteSpace: 'pre-wrap' }} className={styles.value}>{displayReasoning}</p>
                         </div>
                       );

@@ -69,7 +69,7 @@ async def extract_rag_candidates(messages: List[Dict[str, str]]) -> Dict[str, An
         result = await call_gemini_async(
             prompt=prompt,
             system_instruction=SYSTEM_INSTRUCTION,
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.1-flash-lite",
             temperature=0.1
         )
         

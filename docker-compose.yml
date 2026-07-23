@@ -145,7 +145,11 @@ services:
 
 volumes:
   db-data:
+    name: anook-local-db-data
+    external: true
   redis-data:
+    name: anook-local-redis-data
+    external: true
   neo4j-data:
 
 

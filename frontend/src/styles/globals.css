@@ -149,3 +149,9 @@ select {
   border-radius: var(--radius-lg);
   padding: var(--space-16);
 }
+
+/* Next.js 개발 모드 / Turbopack 인디케이터 배지 숨김 */
+#next-dev-portal,
+next-route-announcer {
+  display: none !important;
+}

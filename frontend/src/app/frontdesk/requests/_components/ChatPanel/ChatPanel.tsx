@@ -83,7 +83,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
   const [loading, setLoading] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const { subscribe } = useSSE();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   // RAG 등록 플로우 상태
   const [isRagConfirmOpen, setIsRagConfirmOpen] = useState(false);
@@ -439,8 +439,8 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 <ChevronLeft size={22} />
               </button>
             )}
-            <span className={styles.roomBadge}>{roomNumber}호</span>
-            <h3 className={styles.title}>{(summary || '상담').replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')}</h3>
+            <span className={styles.roomBadge}>{language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`}</span>
+            <h3 className={styles.title}>{(summary || (language === 'en' ? 'Consultation' : '상담')).replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')}</h3>
           </div>
           <div className={styles.headerRight} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {showSearch && (

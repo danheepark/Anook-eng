@@ -56,7 +56,7 @@ export default function FrontDeskPage() {
 
   const { escalations } = useEscalations();
   const nonEmergencyEscalations = escalations.filter(r => r.priority !== 'EMERGENCY');
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   const { activeModal, closeModal } = useUiStore();
   // Chat Modal 상태
@@ -278,7 +278,11 @@ export default function FrontDeskPage() {
       const latestSummary = sortedReqs[0].summary
         .replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')
         .replace(/^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}|\d{2}-\d{2}\s\d{2}:\d{2})\s*/, '');
-      const summaryText = reqs.length > 1 ? `${latestSummary} 외 ${reqs.length - 1}건` : latestSummary;
+      const otherCount = reqs.length - 1;
+      const countSuffix = language === 'en'
+        ? ` and ${otherCount} other${otherCount > 1 ? 's' : ''}`
+        : ` 외 ${otherCount}건`;
+      const summaryText = reqs.length > 1 ? `${latestSummary}${countSuffix}` : latestSummary;
 
       return {
         roomNo,
@@ -558,7 +562,7 @@ export default function FrontDeskPage() {
             );
           })() : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-gray-400)' }}>
-              대화할 요청을 선택해주세요
+              {language === 'en' ? 'Select a request to start conversation' : '대화할 요청을 선택해주세요'}
             </div>
           )}
         </div>

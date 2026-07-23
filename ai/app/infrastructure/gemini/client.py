@@ -27,7 +27,7 @@ client = genai.Client(api_key=settings.GEMINI_API_KEY)
 def call_gemini(
     prompt: str,
     system_instruction: str,
-    model_name: str = "gemini-2.5-flash", # 최신 모델명으로 권장
+    model_name: str = "gemini-3.1-flash-lite", # 최신 모델명으로 권장
     temperature: float = 0.2,
     images: List[str] = None,
 ) -> Union[Dict[str, Any], List[Any]]:
@@ -124,7 +124,7 @@ However, you MUST write staff-facing fields (e.g., 'summary', 'details', 'reason
 async def call_gemini_async(
     prompt: str,
     system_instruction: str,
-    model_name: str = "gemini-2.5-flash",
+    model_name: str = "gemini-3.1-flash-lite",
     temperature: float = 0.2,
     images: List[str] = None,
 ) -> Union[Dict[str, Any], List[Any]]:
