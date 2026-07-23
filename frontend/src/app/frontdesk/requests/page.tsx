@@ -160,7 +160,7 @@ export default function FrontDeskPage() {
   const seenEmergencyRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    const emergencyReqs = [...pending, ...inProgress].filter(r => r.priority === 'EMERGENCY');
+    const emergencyReqs = [...pending, ...inProgress].filter(r => r.priority === 'EMERGENCY' || r.priority === 'URGENT' || r.departmentId === 'EMERGENCY');
     let targetReq = null;
 
     for (const req of emergencyReqs) {
@@ -263,9 +263,9 @@ export default function FrontDeskPage() {
 
     const groupedRooms = Array.from(roomMap.entries()).map(([roomNo, reqs]) => {
       let highestPriority = 'NORMAL';
-      if (reqs.some(r => r.priority === 'EMERGENCY')) highestPriority = 'EMERGENCY';
-      else if (reqs.some(r => r.priority === 'URGENT')) highestPriority = 'URGENT';
-
+      if (reqs.some(r => r.priority === 'EMERGENCY' || r.priority === 'URGENT' || r.departmentId === 'EMERGENCY')) {
+        highestPriority = 'EMERGENCY';
+      }
       let repStatus = reqs[0].status;
       const hasPending = reqs.some(r => r.status === 'PENDING');
       const hasInProgress = reqs.some(r => r.status === 'IN_PROGRESS' || r.status === 'ASSIGNED');

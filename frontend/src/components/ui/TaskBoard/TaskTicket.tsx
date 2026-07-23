@@ -103,21 +103,25 @@ export default function TaskTicket({
 
   const rawDynamicTitle = React.useMemo(() => {
     const intent = entities?.intent as string | undefined;
+    const isEn = language === 'en';
     if (deptKey === 'hk') {
       const items = entities?.items as any[] | undefined;
       const tasks = entities?.tasks as string[] | undefined;
       const totalCount = (items?.length || 0) + (tasks?.length || 0);
       if (totalCount > 0) {
-        // 대표 항목: items 우선, 없으면 tasks
         let firstLabel = '';
         if (items && items.length > 0) {
           const first = items[0];
           const firstItemText = typeof first.item === 'object' && first.item !== null ? (first.item.name || first.item.id || '') : first.item;
-          firstLabel = `${firstItemText} ${first.count || 1}개`;
+          firstLabel = isEn
+            ? `${first.count || 1} ${firstItemText}`
+            : `${firstItemText} ${first.count || 1}개`;
         } else if (tasks && tasks.length > 0) {
           firstLabel = tasks[0];
         }
-        const rest = totalCount > 1 ? ` 외 ${totalCount - 1}건` : '';
+        const rest = totalCount > 1
+          ? (isEn ? ` and ${totalCount - 1} other${totalCount - 1 > 1 ? 's' : ''}` : ` 외 ${totalCount - 1}건`)
+          : '';
         return `${firstLabel}${rest}`;
       }
     } else if (deptKey === 'fb') {
@@ -125,50 +129,57 @@ export default function TaskTicket({
       if (menuItems && menuItems.length > 0) {
         const first = menuItems[0];
         const opt = first.selected_option ? `(${first.selected_option})` : '';
-        const qty = first.quantity ? ` ${first.quantity}개` : '';
-        const rest = menuItems.length > 1 ? ` 외 ${menuItems.length - 1}건` : '';
-        return `${first.name}${opt}${qty}${rest}`; // Removed " 주문"
+        const qty = first.quantity
+          ? (isEn ? ` ×${first.quantity}` : ` ${first.quantity}개`)
+          : '';
+        const rest = menuItems.length > 1
+          ? (isEn ? ` and ${menuItems.length - 1} other${menuItems.length - 1 > 1 ? 's' : ''}` : ` 외 ${menuItems.length - 1}건`)
+          : '';
+        return `${first.name}${opt}${qty}${rest}`;
       }
     } else if (deptKey === 'concierge') {
       if (!intent || !entities) return null;
+      const reserveSuffix = t.cardUI?.message?.reserveSuffix || (isEn ? ' reservation' : ' 예약');
       switch (intent) {
         case 'TAXI':
-          return `택시 호출${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
+          return isEn ? `Taxi call${reserveSuffix}` : `택시 호출${reserveSuffix}`;
         case 'LUGGAGE_STORAGE': {
           const count = entities.count;
+          if (isEn) {
+            const action = entities.action === 'store' ? 'storage' : 'pickup';
+            return count ? `${count} luggage ${action}` : `Luggage ${action}`;
+          }
           const action = entities.action === 'store' ? '보관' : '찾기';
-          return count 
-            ? `짐 ${count}개 ${action}` // Removed " 요청"
-            : `수하물 ${action}`; // Removed " 요청"
+          return count ? `짐 ${count}개 ${action}` : `수하물 ${action}`;
         }
-        case 'RESTAURANT': 
-          return `식당${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
+        case 'RESTAURANT':
+          return isEn ? `Restaurant${reserveSuffix}` : `식당${reserveSuffix}`;
         case 'WAKE_UP_CALL': {
           const time = entities.time as string | undefined;
-          return time 
-            ? `${time} 모닝콜${t.cardUI?.message?.reserveSuffix || ' 예약'}` 
-            : `모닝콜${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
+          if (isEn) return time ? `${time} Wake-up call` : `Wake-up call`;
+          return time
+            ? `${time} 모닝콜${reserveSuffix}`
+            : `모닝콜${reserveSuffix}`;
         }
         case 'POSTAL_SERVICE': {
           const item = entities.item as string | undefined;
+          if (isEn) return item ? `${item} mailing` : 'Mail service';
           return item ? `${item} 발송 대행` : '우편물 발송 대행';
         }
         case 'DELIVERY': {
           const item = entities.item as string | undefined;
-          return item 
-            ? `${item} 배달` // Removed " 요청"
-            : `배달`; // Removed " 요청"
+          if (isEn) return item ? `${item} delivery` : 'Delivery';
+          return item ? `${item} 배달` : `배달`;
         }
         case 'RESERVATION': {
           const target = entities.target as string | undefined;
-          if (target && entities.time) return `${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
-          if (target) return `${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
-          return `예약`; // Changed from '예약 요청'
+          if (target) return `${target}${reserveSuffix}`;
+          return isEn ? 'Reservation' : '예약';
         }
       }
     }
     return null;
-  }, [deptKey, entities, t]);
+  }, [deptKey, entities, t, language]);
 
   const rawEntityDetails = React.useMemo(() => {
     if (!entities) return null;

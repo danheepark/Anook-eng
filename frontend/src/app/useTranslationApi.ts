@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react';
 
 export function useTranslationApi(text: string | null | undefined, targetLanguage: string) {
+  // Determine upfront if translation is needed to avoid flash of "translating..."
+  const needsTranslation = !!(
+    text &&
+    targetLanguage !== 'ko' &&
+    (targetLanguage !== 'en' || /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(text))
+  );
   const [translatedText, setTranslatedText] = useState<string | null>(text || null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(needsTranslation);
 
   useEffect(() => {
     if (!text || targetLanguage === 'ko') {
