@@ -79,7 +79,16 @@ public class GracePeriodScheduler {
                     dispatchPort.dispatchToDepartment(deptCode, payload);
                     dispatchPort.dispatchToFrontdesk(payload);
 
-                    // 고객 UI에 Grace 만료 알림 (버튼 숨기기)
+                    // 고객 UI에 상태 변경 및 Grace 만료 알림 (버튼 숨기기)
+                    RequestSsePayload statusUpdate = RequestSsePayload.statusChanged(
+                            request.getId(),
+                            request.getStatus().name(),
+                            deptCode,
+                            request.getSummary(),
+                            request.getRoomNo()
+                    );
+                    dispatchPort.dispatchToRoom(roomNo, statusUpdate);
+
                     RequestSsePayload graceExpired = RequestSsePayload.graceExpired(requestId, roomNo);
                     dispatchPort.dispatchToRoom(roomNo, graceExpired);
                 } else {
@@ -136,7 +145,16 @@ public class GracePeriodScheduler {
                     dispatchPort.dispatchToDepartment(deptCode, payload);
                     dispatchPort.dispatchToFrontdesk(payload);
 
-                    // 고객 UI에 완료(만료) 알림
+                    // 고객 UI에 상태 변경 및 완료(만료) 알림
+                    RequestSsePayload statusUpdate = RequestSsePayload.statusChanged(
+                            request.getId(),
+                            request.getStatus().name(),
+                            deptCode,
+                            request.getSummary(),
+                            request.getRoomNo()
+                    );
+                    dispatchPort.dispatchToRoom(roomNo, statusUpdate);
+
                     RequestSsePayload graceExpired = RequestSsePayload.graceExpired(requestId, roomNo);
                     dispatchPort.dispatchToRoom(roomNo, graceExpired);
                 }
