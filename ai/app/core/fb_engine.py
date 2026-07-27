@@ -8,6 +8,18 @@ from app.domains.rag import service as rag_service
 
 import os
 
+def _fetch_menu_context_raw() -> list:
+    """백엔드 PMS API에서 메뉴 raw JSON 리스트를 반환 (가드레일 검증용)"""
+    try:
+        base_url = os.getenv("BACKEND_URL", "http://localhost:8080")
+        with httpx.Client(timeout=3.0) as client:
+            resp = client.get(f"{base_url}/pms/menus")
+        if resp.status_code == 200:
+            return resp.json()
+        return []
+    except Exception:
+        return []
+
 def _fetch_menu_context() -> str:
     """백엔드 PMS API를 호출하여 메뉴 데이터를 가져와 프롬프트 컨텍스트로 변환"""
     try:
@@ -124,6 +136,80 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
     raw = {k: v for k, v in raw.items() if v is not None}
 
     result = HotelRequestSchema(**raw)
+
+    # ── CODE-LEVEL GUARDRAIL 1: Different-item duplicate order false positive ──
+    # If AI incorrectly set target_request_id for a DIFFERENT menu item, invalidate it.
+    if result.target_request_id and active_requests:
+        new_items = [mi.get("name", "").lower() for mi in (result.entities.get("menu_items") or [])]
+        target_id = result.target_request_id
+        matched = False
+        for ar in active_requests:
+            ar_id = ar.get("id") or ar.get("request_id")
+            if str(ar_id) == str(target_id):
+                # Check if any item in the active request matches the new order
+                ar_summary = (ar.get("summary") or "").lower()
+                if any(item_name in ar_summary for item_name in new_items if item_name):
+                    matched = True
+                break
+        if not matched:
+            print(f"[FB Guard] ⛔ Different item detected — clearing target_request_id (was {target_id})")
+            result.target_request_id = None
+            raw.pop("target_request_id", None)
+            # If AI was asking "Add or Replace?" for the wrong item, reset to process normally
+            if result.needs_clarification and result.clarification_options:
+                opts_lower = [o.lower() for o in result.clarification_options]
+                if "add" in opts_lower or "change" in opts_lower or "replace" in opts_lower:
+                    print(f"[FB Guard] ⛔ Resetting false Add/Replace clarification — processing as new order")
+                    result.needs_clarification = True
+                    result.clarification_options = []
+                    # Ask for quantity/options instead
+                    menu_items = result.entities.get("menu_items") or []
+                    item_name = menu_items[0]["name"] if menu_items else "the item"
+                    result.clarification_question = f"How many {item_name}s would you like?"
+
+    # ── CODE-LEVEL GUARDRAIL 2: Required option enforcement ──
+    # After AI responds, cross-check with actual menu data to ensure required options are gathered.
+    if not result.needs_clarification or (result.needs_clarification and not result.missing_fields):
+        menu_items = result.entities.get("menu_items") or []
+        _menu_cache = _fetch_menu_context_raw()
+        if _menu_cache and menu_items:
+            missing_options = []
+            for mi in menu_items:
+                item_name = mi.get("name", "")
+                selected_option = mi.get("selected_option")
+                if selected_option:
+                    continue  # Option already selected
+                # Find this item in the menu and check for required options
+                for menu_item in _menu_cache:
+                    if menu_item.get("name", "").lower() == item_name.lower():
+                        options_data = menu_item.get("options")
+                        if options_data:
+                            if isinstance(options_data, str):
+                                import json as _json
+                                try:
+                                    options_list = _json.loads(options_data)
+                                except:
+                                    options_list = []
+                            else:
+                                options_list = options_data
+                            for opt in (options_list if isinstance(options_list, list) else []):
+                                if opt.get("isRequired", False):
+                                    group_name = opt.get("groupName", "Option")
+                                    items = opt.get("items", [])
+                                    missing_options.append((item_name, group_name, items))
+                        break
+            if missing_options:
+                # Force clarification — override AI's premature finalization
+                questions = []
+                for item_name, group_name, items in missing_options:
+                    options_str = " or ".join(items)
+                    questions.append(f"For the {item_name}, which {group_name} would you like? ({options_str})")
+                print(f"[FB Guard] ⛔ Required option missing — forcing clarification: {missing_options}")
+                result.needs_clarification = True
+                result.clarification_question = " ".join(questions)
+                result.missing_fields = ["selected_option"]
+                # Prevent domain_code from being set (no ticket creation yet)
+                raw["needs_clarification"] = True
 
     # 6. BILLING_INQUIRY → 백엔드 API 호출로 실시간 데이터 기반 응답 생성
     if result.entities.get("intent") == "BILLING_INQUIRY":
