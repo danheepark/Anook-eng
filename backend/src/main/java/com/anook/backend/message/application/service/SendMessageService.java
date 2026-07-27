@@ -594,7 +594,7 @@ public class SendMessageService implements SendMessageUseCase {
     @Transactional
     public void translateMessageForStaff(Long messageId, String roomNo, String content, String guestLang) {
         // 시스템 기본 직원 언어는 한국어 (향후 직원별 언어 설정 지원 시 변경 가능)
-        String staffLang = "ko";
+        String staffLang = "en";
 
         if (guestLang.equals(staffLang)) {
             // 고객도 한국어 → 번역 불필요

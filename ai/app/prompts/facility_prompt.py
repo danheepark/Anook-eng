@@ -18,9 +18,9 @@ OUTPUT FORMAT (strictly JSON):
   "confidence": 0.0~1.0,
   "entities": {
     "intent": "ONE OF THE INTENT CODES BELOW",
-    "equipment": "고장/문제 대상물 이름 (Korean, e.g., 에어컨, TV, 변기)",
-    "symptom": "구체적 고장 증상 (Korean, e.g., 전원이 켜지지 않음, 물이 새고 있음)",
-    "location": "객실 내 문제 발생 위치 (Korean, e.g., 화장실, 침실, 거실). Default: 객실"
+    "equipment": "Name of the broken/problematic equipment (English, e.g., AC, TV, Toilet)",
+    "symptom": "Specific symptom of the problem (English, e.g., won't turn on, leaking water)",
+    "location": "Location of the problem in the room (English, e.g., Bathroom, Bedroom, Living Room). Default: Room"
   },
   "needs_clarification": false,
   "clarification_question": "",

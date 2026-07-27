@@ -39,7 +39,7 @@ def call_gemini(
     global_i18n_rule = """
 [GLOBAL SYSTEM RULE FOR MULTILINGUAL UX]
 CRITICAL: You MUST write guest-facing fields (e.g., 'clarification_question', 'guest_reply', 'fallback_message') in the EXACT SAME LANGUAGE as the guest's input. Do NOT translate these to Korean if the guest speaks another language.
-However, you MUST write staff-facing fields (e.g., 'summary', 'details', 'reasoning', 'item', 'menu') STRICTLY in KOREAN.
+However, you MUST write staff-facing fields (e.g., 'summary', 'details', 'reasoning', 'item', 'menu') STRICTLY in ENGLISH.
 """
     final_system_instruction = system_instruction + "\n" + global_i18n_rule
 
