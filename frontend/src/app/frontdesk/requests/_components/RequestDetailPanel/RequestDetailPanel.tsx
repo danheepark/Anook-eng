@@ -394,7 +394,11 @@ export default function RequestDetailPanel({
               })()}
               {detail.reasoning && (() => {
                 const cleanedReasoning = detail.reasoning
+                  .replace(/\\n/g, '\n')
+                  .replace(/([^\n])\s*•/g, '$1\n•')
                   .split('\n')
+                  .map(line => line.trim())
+                  .filter(line => line !== '')
                   .filter(line => !line.toLowerCase().includes('confidence:'))
                   .join('\n')
                   .trim();

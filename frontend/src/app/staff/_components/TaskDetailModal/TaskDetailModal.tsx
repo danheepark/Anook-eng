@@ -302,7 +302,11 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                     )}
                     {task.reasoning && (() => {
                       const cleanedReasoning = task.reasoning
+                        .replace(/\\n/g, '\n')
+                        .replace(/([^\n])\s*•/g, '$1\n•')
                         .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line !== '')
                         .filter(line => !line.toLowerCase().includes('confidence:'))
                         .join('\n')
                         .trim();

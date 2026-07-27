@@ -599,7 +599,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     # ──────────────────────────────────────────────
     try:
         router_results = route(request.text, chat_history=request.chat_history, images=request.images, system_language=request.system_language, active_requests=getattr(request, 'active_requests', []))
-        print(f"\n[Analyze] 🔀 라우터 결과: {[{'route_type': r.route_type, 'domain': r.domain, 'confidence': r.confidence} for r in router_results]}")
+        print(f"\n[Analyze] 🔀 Router result: {[{'route_type': r.route_type, 'domain': r.domain, 'confidence': r.confidence} for r in router_results]}")
     except Exception as e:
         print(f"[Analyze] ❌ 라우터 실패: {e}")
         return [_fallback_response(_get_static_reply("ERROR", request.language))]
@@ -680,7 +680,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "domains": task_domains,
                 "status": "ANALYZING"
             })
-            print(f"[Analyze] ✅ Progress 이벤트 전송 성공 (status: {resp.status_code})")
+            print(f"[Analyze] ✅ Progress event sent successfully (status: {resp.status_code})")
     except Exception as e:
         print(f"[Analyze] ⚠️ Progress 이벤트 전송 실패 (무시): {e}")
 
@@ -753,7 +753,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 response["action_type"] = primary.action_type
 
             print(f"[Analyze] 📌 DEPARTMENT → domain: {domain} (에이전트 미등록, 기본 응답)")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
 
@@ -776,7 +776,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     _get_static_reply("OPTION_NO", request.language)
                 ]
             print(f"[Analyze] 💬 {primary.route_type} 응답")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
 
@@ -798,7 +798,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "reasoning": getattr(primary, 'reasoning', '알 수 없음')
                 }
                 print(f"[Analyze] ❓ CLARIFICATION → 라우터 직접 생성 옵션 사용")
-                print(f"[Analyze] 응답: {response}\n")
+                print(f"[Analyze] Response: {response}\n")
                 final_responses.append(response)
                 continue
 
@@ -860,7 +860,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', '알 수 없음'))
                     }
                     print(f"[Analyze] ❓ CLARIFICATION → {last_agent_domain} 에이전트 재위임 (구체적 재질문)")
-                    print(f"[Analyze] 응답: {response}\n")
+                    print(f"[Analyze] Response: {response}\n")
                     final_responses.append(response)
                     continue
                 except Exception as e:
@@ -893,7 +893,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', '알 수 없음'))
                 }
                 print(f"[Analyze] ❓ CLARIFICATION → FRONT 에이전트 위임 (부서 라우팅 구체화)")
-                print(f"[Analyze] 응답: {response}\n")
+                print(f"[Analyze] Response: {response}\n")
                 final_responses.append(response)
                 continue
             except Exception as e:
@@ -909,7 +909,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "reasoning": getattr(primary, 'reasoning', '알 수 없음')
                 }
                 print(f"[Analyze] ❓ CLARIFICATION — reasoning: {primary.reasoning}")
-                print(f"[Analyze] 응답: {response}\n")
+                print(f"[Analyze] Response: {response}\n")
                 final_responses.append(response)
                 continue
 
@@ -939,7 +939,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', '알 수 없음')) if isinstance(agent_result, dict) else getattr(primary, 'reasoning', '알 수 없음')
                     }
                     print(f"[Analyze] ℹ️ INFO+FB → FB 에이전트 위임 처리")
-                    print(f"[Analyze] 응답: {response}\n")
+                    print(f"[Analyze] Response: {response}\n")
                     final_responses.append(response)
                     continue
                 except Exception as e:
@@ -1173,7 +1173,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                             response["confidence"] = 0.5 
 
                         print(f"[Analyze] ℹ️ INFO → CONCIERGE 에이전트 결과 채택")
-                        print(f"[Analyze] 응답: {response}\n")
+                        print(f"[Analyze] Response: {response}\n")
                         final_responses.append(response)
                         continue
                     else:
@@ -1233,7 +1233,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 }
                 
             print(f"[Analyze] ℹ️ INFO 응답")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
 
@@ -1260,7 +1260,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "action": "CANCEL_REQUEST",
                 }
                 print(f"[Analyze] 🛡️ FALSE ALARM CANCEL 응답")
-                print(f"[Analyze] 응답: {response}\n")
+                print(f"[Analyze] Response: {response}\n")
                 final_responses.append(response)
                 continue
             else:
@@ -1353,7 +1353,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         response["target_request_id"] = primary.target_request_id
             
             print(f"[Analyze] 🛑 CANCEL 응답")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
             
@@ -1395,7 +1395,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "reasoning": getattr(primary, 'reasoning', '알 수 없음')
             }
             print(f"[Analyze] 🚨 FRONT_ESCALATION 응답")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
 
@@ -1415,7 +1415,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "reasoning": getattr(primary, 'reasoning', '알 수 없음')
             }
             print(f"[Analyze] 📝 VOC 피드백 응답")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
 
@@ -1475,7 +1475,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 }
 
             print(f"[Analyze] 💰 BILLING_INQUIRY 응답")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
 
@@ -1492,7 +1492,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "reasoning": getattr(primary, 'reasoning', '알 수 없음')
             }
             print(f"[Analyze] 🔍 STATUS_CHECK 응답")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
             continue
 
@@ -1651,8 +1651,8 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             elif hasattr(primary, 'target_request_id') and getattr(primary, 'target_request_id', None):
                 response["target_request_id"] = getattr(primary, 'target_request_id', None)
                 
-            print(f"[Analyze] ✅ {domain} 에이전트 병렬 처리 완료")
-            print(f"[Analyze] 응답: {response}\n")
+            print(f"[Analyze] ✅ {domain} agent parallel processing complete")
+            print(f"[Analyze] Response: {response}\n")
             final_responses.append(response)
 
     if not final_responses:

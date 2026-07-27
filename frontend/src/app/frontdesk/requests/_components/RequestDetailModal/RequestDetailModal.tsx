@@ -410,7 +410,11 @@ export default function RequestDetailModal({
               })()}
               {activeDetail.reasoning && (() => {
                 const cleanedReasoning = activeDetail.reasoning
+                  .replace(/\\n/g, '\n')
+                  .replace(/([^\n])\s*•/g, '$1\n•')
                   .split('\n')
+                  .map(line => line.trim())
+                  .filter(line => line !== '')
                   .filter(line => !line.toLowerCase().includes('confidence:'))
                   .join('\n')
                   .trim();
