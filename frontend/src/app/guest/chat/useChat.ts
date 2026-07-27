@@ -220,6 +220,11 @@ export function useChat() {
         // 상태바 복원 (진행 중인 요청만)
         const active: ActiveRequest[] = reqData
           .filter((r: any) => r.status !== 'COMPLETED' && r.status !== 'CANCELLED')
+          // [Fix] CREATED 상태이면서 고객 확인 대기 중인 주문(FB/CONCIERGE 또는 유료 결제 HK)은 상태바에 표시하지 않음
+          .filter((r: any) => !(r.status === 'CREATED' && (
+            ['FB', 'CONCIERGE'].includes(r.domainCode || '') || 
+            (r.domainCode === 'HK' && r.entities?.requires_payment_confirmation === true)
+          )))
           .map((r: any) => ({
             requestId: r.id,
             domainCode: r.domainCode || 'UNKNOWN',
@@ -377,6 +382,11 @@ export function useChat() {
 
           // CANCELLED → 즉시 제거
           if (payload.status === 'CANCELLED') return filtered;
+
+          // [Fix] CREATED 상태이면서 고객 확인 대기 중인 주문(FB/CONCIERGE)은 상태바에 표시하지 않음
+          if (payload.status === 'CREATED' && payload.graceRemaining === -1) {
+            return filtered;
+          }
 
           // COMPLETED → 상태바에 유지 (RequestStatusBar 내부 3초 타이머로 fade-out)
           // 이후 3.5초 뒤에 배열에서도 제거

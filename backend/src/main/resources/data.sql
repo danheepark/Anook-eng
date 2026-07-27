@@ -94,63 +94,63 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 INSERT INTO pms_menu (name, price, price_usd, category, allergens, options, available) VALUES
     -- MAIN (메인 요리)
-    ('클래식 치즈버거',      15000, 11.5, 'MAIN',    '밀,유제품',        NULL,                          TRUE),
-    ('트러플 머쉬룸 리조또', 28000, 21.5, 'MAIN',    '유제품',           NULL,                          TRUE),
-    ('한우 불고기 덮밥',     22000, 17.0, 'MAIN',    '대두,밀',          NULL,                          TRUE),
-    ('시저 샐러드',          14000, 10.8, 'MAIN',    '유제품,계란',      '[{"groupName": "드레싱", "isRequired": true, "items": ["시저", "발사믹", "없음"]}]',      TRUE),
-    ('해산물 파스타',        25000, 19.2, 'MAIN',    '밀,갑각류,연체류', NULL,                          TRUE),
-    ('스테이크 샌드위치',    20000, 15.4, 'MAIN',    '밀,유제품',        '[{"groupName": "굽기", "isRequired": true, "items": ["레어", "미디엄", "웰던"]}]',        TRUE),
+    ('Classic Cheeseburger',      15000, 11.5, 'MAIN',    '밀,유제품',        NULL,                          TRUE),
+    ('Truffle Mushroom Risotto', 28000, 21.5, 'MAIN',    '유제품',           NULL,                          TRUE),
+    ('Beef Bulgogi Rice Bowl',     22000, 17.0, 'MAIN',    '대두,밀',          NULL,                          TRUE),
+    ('Caesar Salad',          14000, 10.8, 'MAIN',    '유제품,계란',      '[{"groupName": "Dressing", "isRequired": true, "items": ["Caesar", "Balsamic", "None"]}]',      TRUE),
+    ('Seafood Pasta',        25000, 19.2, 'MAIN',    '밀,갑각류,연체류', NULL,                          TRUE),
+    ('Steak Sandwich',    20000, 15.4, 'MAIN',    '밀,유제품',        '[{"groupName": "Doneness", "isRequired": true, "items": ["Rare", "Medium", "Well-done"]}]',        TRUE),
     -- SIDE (사이드)
-    ('감자튀김',             8000,  6.2,  'SIDE',    NULL,               NULL,                          TRUE),
-    ('시즌 과일 플레이트',   12000, 9.2,  'SIDE',    NULL,               NULL,                          TRUE),
-    ('모짜렐라 스틱',        10000, 7.7,  'SIDE',    '밀,유제품',        NULL,                          TRUE),
+    ('French Fries',             8000,  6.2,  'SIDE',    NULL,               NULL,                          TRUE),
+    ('Seasonal Fruit Plate',   12000, 9.2,  'SIDE',    NULL,               NULL,                          TRUE),
+    ('Mozzarella Sticks',        10000, 7.7,  'SIDE',    '밀,유제품',        NULL,                          TRUE),
     -- DRINK (음료)
-    ('콜라',                 4000,  3.1,  'DRINK',   NULL,               '[{"groupName": "종류", "isRequired": true, "items": ["일반", "제로"]}]',               TRUE),
-    ('오렌지 주스',          6000,  4.6,  'DRINK',   NULL,               NULL,                          TRUE),
-    ('아메리카노',           5000,  3.8,  'DRINK',   NULL,               '[{"groupName": "온도", "isRequired": true, "items": ["HOT", "ICE"]}]',                TRUE),
-    ('캐모마일 티',          5000,  3.8,  'DRINK',   NULL,               '[{"groupName": "온도", "isRequired": true, "items": ["HOT", "ICE"]}]',                TRUE),
+    ('Coke',                 4000,  3.1,  'DRINK',   NULL,               '[{"groupName": "Type", "isRequired": true, "items": ["Regular", "Zero"]}]',               TRUE),
+    ('Orange Juice',          6000,  4.6,  'DRINK',   NULL,               NULL,                          TRUE),
+    ('Americano',           5000,  3.8,  'DRINK',   NULL,               '[{"groupName": "Temperature", "isRequired": true, "items": ["HOT", "ICE"]}]',                TRUE),
+    ('Chamomile Tea',          5000,  3.8,  'DRINK',   NULL,               '[{"groupName": "Temperature", "isRequired": true, "items": ["HOT", "ICE"]}]',                TRUE),
     -- DESSERT (디저트)
-    ('뉴욕 치즈케이크',      12000, 9.2,  'DESSERT', '밀,유제품,계란',        NULL,                    TRUE),
-    ('초콜릿 브라우니',      10000, 7.7,  'DESSERT', '밀,유제품,계란,견과류', NULL,                    TRUE),
-    ('바닐라 아이스크림',    8000,  6.2,  'DESSERT', '유제품',               NULL,                    TRUE),
+    ('New York Cheesecake',      12000, 9.2,  'DESSERT', '밀,유제품,계란',        NULL,                    TRUE),
+    ('Chocolate Brownie',      10000, 7.7,  'DESSERT', '밀,유제품,계란,견과류', NULL,                    TRUE),
+    ('Vanilla Ice Cream',    8000,  6.2,  'DESSERT', '유제품',               NULL,                    TRUE),
     -- HK (하우스키핑 유료 서비스)
-    ('추가 수건',            1000,  0.8,  'HK_AMENITY',    NULL, NULL, TRUE),
-    ('생수 추가',            2000,  1.5,  'HK_AMENITY',    NULL, NULL, TRUE),
-    ('어메니티 팩',          3000,  2.3,  'HK_AMENITY',    NULL, NULL, TRUE),
-    ('엑스트라 베드',        50000, 38.5, 'HK_FURNITURE',  NULL, NULL, TRUE),
-    ('긴급 세탁',            10000, 7.7,  'HK_LAUNDRY',    NULL, NULL, TRUE),
-    ('일반 세탁',            7000,  5.4,  'HK_LAUNDRY',    NULL, NULL, TRUE),
-    ('미니바 맥주',          8000,  6.2,  'HK_MINIBAR',    NULL, NULL, TRUE),
-    ('미니바 와인',          15000, 11.5, 'HK_MINIBAR',    NULL, NULL, TRUE),
-    ('미니바 스낵',          5000,  3.8,  'HK_MINIBAR',    NULL, NULL, TRUE)
+    ('Extra Towel',            1000,  0.8,  'HK_AMENITY',    NULL, NULL, TRUE),
+    ('Extra Bottled Water',            2000,  1.5,  'HK_AMENITY',    NULL, NULL, TRUE),
+    ('Amenity Pack',          3000,  2.3,  'HK_AMENITY',    NULL, NULL, TRUE),
+    ('Extra Bed',        50000, 38.5, 'HK_FURNITURE',  NULL, NULL, TRUE),
+    ('Express Laundry',            10000, 7.7,  'HK_LAUNDRY',    NULL, NULL, TRUE),
+    ('Standard Laundry',            7000,  5.4,  'HK_LAUNDRY',    NULL, NULL, TRUE),
+    ('Minibar Beer',          8000,  6.2,  'HK_MINIBAR',    NULL, NULL, TRUE),
+    ('Minibar Wine',          15000, 11.5, 'HK_MINIBAR',    NULL, NULL, TRUE),
+    ('Minibar Snack',          5000,  3.8,  'HK_MINIBAR',    NULL, NULL, TRUE)
 ON CONFLICT (name) DO NOTHING;
 
 -- [2026-05-20] 기존 메뉴 데이터에 price_usd 정보 반영 (로컬 인스턴스 마이그레이션용)
-UPDATE pms_menu SET price_usd = 11.5 WHERE name = '클래식 치즈버거' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 21.5 WHERE name = '트러플 머쉬룸 리조또' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 17.0 WHERE name = '한우 불고기 덮밥' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 10.8 WHERE name = '시저 샐러드' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 19.2 WHERE name = '해산물 파스타' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 15.4 WHERE name = '스테이크 샌드위치' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 6.2 WHERE name = '감자튀김' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 9.2 WHERE name = '시즌 과일 플레이트' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 7.7 WHERE name = '모짜렐라 스틱' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 3.1 WHERE name = '콜라' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 4.6 WHERE name = '오렌지 주스' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 3.8 WHERE name = '아메리카노' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 3.8 WHERE name = '캐모마일 티' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 9.2 WHERE name = '뉴욕 치즈케이크' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 7.7 WHERE name = '초콜릿 브라우니' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 6.2 WHERE name = '바닐라 아이스크림' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 0.8 WHERE name = '추가 수건' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 1.5 WHERE name = '생수 추가' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 2.3 WHERE name = '어메니티 팩' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 38.5 WHERE name = '엑스트라 베드' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 7.7 WHERE name = '긴급 세탁' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 5.4 WHERE name = '일반 세탁' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 6.2 WHERE name = '미니바 맥주' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 11.5 WHERE name = '미니바 와인' AND price_usd IS NULL;
-UPDATE pms_menu SET price_usd = 3.8 WHERE name = '미니바 스낵' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 11.5 WHERE name = 'Classic Cheeseburger' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 21.5 WHERE name = 'Truffle Mushroom Risotto' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 17.0 WHERE name = 'Beef Bulgogi Rice Bowl' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 10.8 WHERE name = 'Caesar Salad' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 19.2 WHERE name = 'Seafood Pasta' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 15.4 WHERE name = 'Steak Sandwich' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 6.2 WHERE name = 'French Fries' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 9.2 WHERE name = 'Seasonal Fruit Plate' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 7.7 WHERE name = 'Mozzarella Sticks' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 3.1 WHERE name = 'Coke' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 4.6 WHERE name = 'Orange Juice' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 3.8 WHERE name = 'Americano' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 3.8 WHERE name = 'Chamomile Tea' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 9.2 WHERE name = 'New York Cheesecake' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 7.7 WHERE name = 'Chocolate Brownie' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 6.2 WHERE name = 'Vanilla Ice Cream' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 0.8 WHERE name = 'Extra Towel' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 1.5 WHERE name = 'Extra Bottled Water' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 2.3 WHERE name = 'Amenity Pack' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 38.5 WHERE name = 'Extra Bed' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 7.7 WHERE name = 'Express Laundry' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 5.4 WHERE name = 'Standard Laundry' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 6.2 WHERE name = 'Minibar Beer' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 11.5 WHERE name = 'Minibar Wine' AND price_usd IS NULL;
+UPDATE pms_menu SET price_usd = 3.8 WHERE name = 'Minibar Snack' AND price_usd IS NULL;
 
 
 

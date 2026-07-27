@@ -66,7 +66,7 @@ JSON Output:
 }
 """
 
-async def run_emergency_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "ko", active_requests: list = None, **kwargs) -> dict:
+async def run_emergency_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, **kwargs) -> dict:
     if chat_history:
         context = "\n".join([
             f"{'Guest' if m.get('role')=='user' else 'AI'}: {m.get('content')}"

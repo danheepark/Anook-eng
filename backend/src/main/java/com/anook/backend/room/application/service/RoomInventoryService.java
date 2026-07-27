@@ -70,11 +70,11 @@ public class RoomInventoryService {
     /**
      * 현재 객실의 물품 사용량 조회
      */
-    public Map<String, Integer> getInventory(String roomNo) {
+    public Map<String, Object> getInventory(String roomNo) {
         String key = REDIS_KEY_PREFIX + roomNo;
         Map<Object, Object> rawMap = redisTemplate.opsForHash().entries(key);
         
-        Map<String, Integer> inventory = new HashMap<>();
+        Map<String, Object> inventory = new HashMap<>();
 
         for (InventoryPolicyProperties.PolicyItem policy : policyProperties.getPolicies()) {
             String code = policy.getCode(); // e.g. "WATER", "TOWEL"

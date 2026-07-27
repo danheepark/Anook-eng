@@ -35,12 +35,30 @@ def _fetch_menu_context() -> str:
                 options = m.get("options")
                 allergy_str = f" (알러지: {allergens})" if allergens else ""
                 
-                # 프롬프트의 REQUIRED OPTION RULE에 맞게 포맷 유지: [선택옵션] 카테고리:옵션1|옵션2
+                option_str = ""
                 if options:
-                    option_str = f" [선택옵션] {options}"
-                else:
-                    option_str = ""
-                    
+                    if isinstance(options, str):
+                        import json
+                        try:
+                            options_list = json.loads(options)
+                        except:
+                            options_list = []
+                    else:
+                        options_list = options
+
+                    if isinstance(options_list, list):
+                        for opt in options_list:
+                            group_name = opt.get("groupName", "")
+                            is_required = opt.get("isRequired", False)
+                            items = opt.get("items", [])
+                            items_str = "|".join(items)
+                            if is_required:
+                                option_str += f" [필수옵션] {group_name}:{items_str}"
+                            else:
+                                option_str += f" [선택옵션] {group_name}:{items_str}"
+                    else:
+                        option_str = f" [선택옵션] {options}"
+                        
                 menu_lines.append(f"- [{category}] {name}: ${price:.2f}{allergy_str}{option_str}")
             return "\n".join(menu_lines)
         else:
@@ -50,7 +68,7 @@ def _fetch_menu_context() -> str:
         print(f"[FB Agent] 메뉴 조회 API 호출 중 오류 발생: {e}")
         return "메뉴 정보를 현재 불러올 수 없습니다. 프론트데스크로 문의 부탁드립니다."
 
-async def run_fb_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "ko", active_requests: list = None, room_inventory: dict = None, **kwargs) -> dict:
+async def run_fb_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, room_inventory: dict = None, **kwargs) -> dict:
     """F&B 에이전트: 메뉴 조회, RAG 지식 결합, 2턴 주문 확인 로직 처리"""
     
     # 1. pms_menu 백엔드 조회
@@ -174,7 +192,7 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
     }
 
 
-def _handle_billing_inquiry(room_no: str, user_message: str, system_language: str = "ko") -> str:
+def _handle_billing_inquiry(room_no: str, user_message: str, system_language: str = "en") -> str:
     """백엔드 영수증 요약 API를 호출하여 이용 금액 안내 메시지를 생성"""
     try:
         base_url = os.getenv("BACKEND_URL", "http://localhost:8080")

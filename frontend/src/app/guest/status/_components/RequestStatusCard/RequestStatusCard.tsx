@@ -63,8 +63,9 @@ export default function RequestStatusCard({
       if (menuItems && menuItems.length > 0) {
         const first = menuItems[0];
         const opt = first.selected_option ? `(${first.selected_option})` : '';
-        const qty = first.quantity ? ` ${first.quantity}개` : '';
-        const rest = menuItems.length > 1 ? ` 외 ${menuItems.length - 1}건` : '';
+        const qty = first.quantity ? ` x${first.quantity}` : '';
+        const restCount = menuItems.length - 1;
+        const rest = restCount > 0 ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : '';
         return `${first.name}${opt}${qty}${rest}`;
       }
     } else if (domainCode === 'CONCIERGE') {

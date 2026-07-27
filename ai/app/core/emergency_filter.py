@@ -78,7 +78,7 @@ def emergency_pre_filter(text: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def get_emergency_reply(category: str, language: str = "ko") -> str:
+def get_emergency_reply(category: str, language: str = "en") -> str:
     """긴급 상황 카테고리에 맞는 다국어 응답을 반환한다."""
     lang = (language or "ko").lower()
     if lang not in ("ko", "en"):

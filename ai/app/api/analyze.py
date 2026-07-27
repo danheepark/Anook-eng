@@ -36,12 +36,12 @@ router = APIRouter()
 class AnalyzeRequest(BaseModel):
     text: str
     room_no: str
-    language: Optional[str] = "ko"
-    system_language: Optional[str] = "ko"
+    language: Optional[str] = "en"
+    system_language: Optional[str] = "en"
     chat_history: List[dict] = []
     images: Optional[List[str]] = []
     active_requests: Optional[List[dict]] = []
-    room_inventory: Optional[Dict[str, int]] = {}
+    room_inventory: Optional[Dict[str, Any]] = {}
 
 
 # ── 부서별 에이전트 레지스트리 ──

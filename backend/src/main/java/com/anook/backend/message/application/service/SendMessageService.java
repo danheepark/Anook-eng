@@ -156,7 +156,7 @@ public class SendMessageService implements SendMessageUseCase {
             java.util.List<Map<String, Object>> activeRequests = activeRequestPort.findActiveRequests(roomNo, guestId);
 
             // 3-2. Stateful AI: 객실 일일 제한 물품(수건, 생수) 사용량 조회 (6 AM 리셋)
-            Map<String, Integer> roomInventory = roomInventoryService.getInventory(roomNo);
+            Map<String, Object> roomInventory = roomInventoryService.getInventory(roomNo);
 
             // AI 호출
             java.util.List<MessageAiResult> analyses = aiPort.analyze(content, roomNo, language, chatHistory, images,

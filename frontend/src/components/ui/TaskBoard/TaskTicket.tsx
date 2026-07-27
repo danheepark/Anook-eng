@@ -113,15 +113,12 @@ export default function TaskTicket({
         if (items && items.length > 0) {
           const first = items[0];
           const firstItemText = typeof first.item === 'object' && first.item !== null ? (first.item.name || first.item.id || '') : first.item;
-          firstLabel = isEn
-            ? `${first.count || 1} ${firstItemText}`
-            : `${firstItemText} ${first.count || 1}개`;
+          firstLabel = `${firstItemText} x${first.count || 1}`;
         } else if (tasks && tasks.length > 0) {
           firstLabel = tasks[0];
         }
-        const rest = totalCount > 1
-          ? (isEn ? ` and ${totalCount - 1} other${totalCount - 1 > 1 ? 's' : ''}` : ` 외 ${totalCount - 1}건`)
-          : '';
+        const restCount = totalCount - 1;
+        const rest = restCount > 0 ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : '';
         return `${firstLabel}${rest}`;
       }
     } else if (deptKey === 'fb') {
@@ -129,12 +126,9 @@ export default function TaskTicket({
       if (menuItems && menuItems.length > 0) {
         const first = menuItems[0];
         const opt = first.selected_option ? `(${first.selected_option})` : '';
-        const qty = first.quantity
-          ? (isEn ? ` ×${first.quantity}` : ` ${first.quantity}개`)
-          : '';
-        const rest = menuItems.length > 1
-          ? (isEn ? ` and ${menuItems.length - 1} other${menuItems.length - 1 > 1 ? 's' : ''}` : ` 외 ${menuItems.length - 1}건`)
-          : '';
+        const qty = first.quantity ? ` x${first.quantity}` : '';
+        const restCount = menuItems.length - 1;
+        const rest = restCount > 0 ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : '';
         return `${first.name}${opt}${qty}${rest}`;
       }
     } else if (deptKey === 'concierge') {
@@ -237,6 +231,9 @@ export default function TaskTicket({
       if (entities.symptom) {
         parts.push(`${l.content || '내용'}: ${entities.symptom}`);
       }
+    }
+    if ((deptKey === 'fb' || deptKey === 'hk') && parts.length === 1 && !entities.symptom) {
+      return null;
     }
     return parts.length > 0 ? parts.join('\n') : null;
   }, [department, entities, t.ticketUI?.entityLabels]);

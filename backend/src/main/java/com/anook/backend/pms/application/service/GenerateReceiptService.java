@@ -165,9 +165,10 @@ public class GenerateReceiptService implements GenerateReceiptUseCase {
 
                 if (matched) {
                     // Redis에서 현재 사용량 조회
-                    Map<String, Integer> inventory = roomInventoryService.getInventory(roomNo);
+                    Map<String, Object> inventory = roomInventoryService.getInventory(roomNo);
                     String usedKey = "free_" + policy.getCode().toLowerCase() + "_used";
-                    int currentUsed = inventory.getOrDefault(usedKey, 0);
+                    Object usedObj = inventory.getOrDefault(usedKey, 0);
+                    int currentUsed = (usedObj instanceof Number) ? ((Number) usedObj).intValue() : Integer.parseInt(usedObj.toString());
                     int allowance = policy.getAllowance();
 
                     // 초과분 계산: 이번 주문에서 추가된 물량(quantity) 중에서 무료 제공량을 초과하는 부분

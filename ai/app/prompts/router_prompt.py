@@ -128,12 +128,12 @@ You must output a JSON Array of objects.
     "route_type": "DEPARTMENT | CLARIFICATION | FRONT_ESCALATION | VOC | SOFT_FALLBACK | NON_ACTIONABLE | INFO | CANCEL | STATUS_CHECK | BILLING_INQUIRY",
     "domain": "HK | FB | FACILITY | CONCIERGE | FRONT | COMMON | EMERGENCY | null",
     "confidence": 0.0 ~ 1.0,
-    "reasoning": "{system_language} reasoning",
+    "reasoning": "English reasoning",
     "action_type": "ADD | REPLACE",
     "target_keyword": "string or null",
     "reply": "string or null (For SOFT_FALLBACK, NON_ACTIONABLE)",
     "create_ticket": true | false,
-    "summary": "Short {system_language} summary (e.g., '룸서비스 지연 컴플레인')",
+    "summary": "Short English summary (e.g., 'Room service delay complaint')",
     "priority": "NORMAL | URGENT",
     "clarification_question": "string or null (For CLARIFICATION)",
     "clarification_options": ["option1", "option2"] or [],
@@ -188,7 +188,7 @@ You must output a JSON Array of objects.
 - DO NOT output any extra text, markdown formatting, or greetings outside the JSON array.
 - Regardless of the input language (Korean or English), classify it uniformly based on meaning.
 - CRITICAL LANGUAGE RULE: ALL text outputs intended for the guest (e.g., `clarification_question`, `clarification_options`, `reply`) MUST be written in the EXACT SAME LANGUAGE as the guest's input. If the guest speaks English, you MUST generate these fields in English (e.g., `["Free Water", "Paid Drinks"]`). NEVER use Korean for guest-facing messages if the guest speaks English. DO NOT append department names in parentheses to options.
-- The `reasoning` and `summary` fields MUST be written in `{system_language}`.
+- The `reasoning` and `summary` fields MUST be written in English.
 - **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
   - “{특정 키워드/문구}” → {의도/증상} 감지 (어떤 표현이 결정적인 역할을 했는지 명시)
   - **[ESCALATION REASONING RULE (CRITICAL)]**: If you are routing to `FRONT_ESCALATION` because the user said "Yes" (네, 응, etc.) to the AI's offer to connect to the front desk, DO NOT just write "User agreed to connect". You MUST look at the user's previous unresolved question in the `[과거 대화 맥락]` and explain the ACTUAL reason for the escalation (e.g., "AI could not find information about dog-friendly wine bars, so it offered escalation and the user agreed. Reason: Information about dog-friendly wine bars is missing"). This provides vital context to the human staff.

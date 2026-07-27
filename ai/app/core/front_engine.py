@@ -6,7 +6,7 @@ from app.prompts.front_prompt import FRONT_SYSTEM_PROMPT
 from app.schemas.common import HotelRequestSchema
 from app.domains.rag import service as rag_service
 
-async def run_front_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "ko", active_requests: list = None, **kwargs) -> dict:
+async def run_front_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, **kwargs) -> dict:
     """프론트데스크 에이전트: 고객 메시지에서 프론트 관련 정보를 추출"""
     
     # 1. RAG 검색 → FRONT 도메인 지식

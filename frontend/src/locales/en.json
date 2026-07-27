@@ -523,7 +523,7 @@
       "reserveSuffix": " Reservation"
     },
     "button": {
-      "accept": "Submit Now",
+      "accept": "Confirm",
       "cancel": "Cancel"
     },
     "time": {
@@ -601,15 +601,15 @@
     "speechUnsupported": "Speech recognition is not supported in this browser."
   },
   "aiReplies": {
-    "forwardFb": "Sure! I will forward your order to the F&B team right away! 🍽️",
+    "forwardFb": "Sure! I will forward your order to the F&B team right away!",
     "forwardHk": "Got it! I will forward your request to the Housekeeping team right away. ",
-    "forwardFacility": "We sincerely apologize for the inconvenience. 🥲 We will forward this to the Facility team to handle it as quickly as possible! 🛠️",
-    "forwardConcierge": "Got it! I will forward your request to the Concierge team right away. 🛎️",
+    "forwardFacility": "We sincerely apologize for the inconvenience.  We will forward this to the Facility team to handle it as quickly as possible! ",
+    "forwardConcierge": "Got it! I will forward your request to the Concierge team right away.",
     "forwardFront": "We will connect you directly to the front desk right now to assist you further.",
-    "infoNotFound": "I'm not quite sure about that one! 🥲 I have forwarded your question to the front desk staff. They will check and reply to you here shortly. 🙏",
-    "cancelSuccess": "Your request has been successfully cancelled. 😌 Please let me know if you need anything else!",
-    "cancelPending": "Your request is already being processed, so we have sent a cancellation request to the department. 🏃‍♂️ We will notify you once confirmed!",
-    "piiGuard": "To protect your valuable personal information, we do not accept sensitive details via chat. 🔒 For detailed inquiries, please contact the front desk (extension 0) using your in-room phone for safe assistance. 😊"
+    "infoNotFound": "I'm not quite sure about that one.  I have forwarded your question to the front desk staff. They will check and reply to you here shortly.",
+    "cancelSuccess": "Your request has been successfully cancelled.  Please let me know if you need anything else!",
+    "cancelPending": "Your request is already being processed, so we have sent a cancellation request to the department.  We will notify you once confirmed!",
+    "piiGuard": "To protect your valuable personal information, we do not accept sensitive details via chat.  For detailed inquiries, please contact the front desk (extension 0) using your in-room phone for safe assistance. "
   },
   "feedbackCard": {
     "systemCompletedTitle": "Consultation and processing have been fully completed.",

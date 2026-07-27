@@ -51,7 +51,7 @@ inventory:
         - "水"
         - "ウォーター"
       allowance: 2
-      extra-charge: 2000
+      extra-charge: 1.5
     - code: TOWEL
       aliases:
         - "수건"
@@ -60,7 +60,7 @@ inventory:
         - "タオル"
         - "毛巾"
       allowance: 4
-      extra-charge: 1000
+      extra-charge: 1
 
 # 한국수출입은행 환율 API (PMS 빌링 KRW → USD 변환)
 koreaexim:

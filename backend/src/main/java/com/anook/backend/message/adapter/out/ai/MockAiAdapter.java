@@ -26,7 +26,7 @@ import java.util.Collections;
 public class MockAiAdapter implements MessageAiPort {
 
     @Override
-    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images, java.util.List<java.util.Map<String, Object>> activeRequests, java.util.Map<String, Integer> roomInventory) {
+    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images, java.util.List<java.util.Map<String, Object>> activeRequests, java.util.Map<String, Object> roomInventory) {
         log.info("[MockAI] 분석 요청(Mock) — room: {}, lang: {}, text: {}", roomNo, language, text);
 
         // 1초 딜레이 (AI 처리 시간 시뮬레이션)
@@ -40,8 +40,8 @@ public class MockAiAdapter implements MessageAiPort {
         if (containsAny(text, "수건", "물", "베개", "이불", "가운", "슬리퍼", "어메니티")) {
             String item = extractItem(text);
             return java.util.List.of(new MessageAiResult(
-                    "요청하신 물품을 객실로 곧 가져다 드리겠습니다!",
-                    "물품 요청 (" + item + ")",
+                    "We will bring the requested items to your room shortly!",
+                    "Item Request (" + item + ")",
                     "HK", "NORMAL",
                     Map.of("item", item, "qty", 1),
                     0.92,
@@ -51,15 +51,15 @@ public class MockAiAdapter implements MessageAiPort {
                     null,
                     null,
                     null,
-                    "키워드 기반 매칭 (HK)"
+                    "Keyword Matching (HK)"
             ));
         }
 
         // 시설 수리 요청
         if (containsAny(text, "에어컨", "고장", "수리", "안 돼", "작동")) {
             return java.util.List.of(new MessageAiResult(
-                    "시설 점검 요청을 접수했습니다. 엔지니어가 곧 방문드릴 예정입니다.",
-                    "에어컨 점검 요청",
+                    "We have received your facility inspection request. An engineer will visit shortly.",
+                    "Air Conditioner Inspection Request",
                     "FACILITY", "HIGH",
                     Map.of("target", "air_conditioner"),
                     0.88,
@@ -69,15 +69,15 @@ public class MockAiAdapter implements MessageAiPort {
                     null,
                     null,
                     null,
-                    "키워드 기반 매칭 (FACILITY)"
+                    "Keyword Matching (FACILITY)"
             ));
         }
 
         // 룸서비스 요청
         if (containsAny(text, "룸서비스", "음식", "주문", "먹")) {
             return java.util.List.of(new MessageAiResult(
-                    "룸서비스 주문을 접수하겠습니다. 메뉴를 확인 중입니다.",
-                    "룸서비스 주문",
+                    "We have received your room service order. We are checking the menu.",
+                    "Room Service Order",
                     "FB", "NORMAL",
                     Map.of(),
                     0.85,
@@ -87,13 +87,13 @@ public class MockAiAdapter implements MessageAiPort {
                     null,
                     null,
                     null,
-                    "키워드 기반 매칭 (FB)"
+                    "Keyword Matching (FB)"
             ));
         }
 
         // 단순 대화 (domainCode = null → 이벤트 발행 안 함)
         return java.util.List.of(new MessageAiResult(
-                "안녕하세요! 아눅 호텔 컨시어지입니다. 무엇이든 편하게 말씀해 주세요.",
+                "Hello! I am the Aneuk Hotel Concierge. Please let me know if you need anything.",
                 null,
                 null, null, Map.of(), 0.0, null, "ADD", null, null, null, null, null
         ));

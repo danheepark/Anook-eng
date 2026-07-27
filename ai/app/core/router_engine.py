@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 VALID_DOMAINS = {"HK", "FB", "FACILITY", "CONCIERGE", "FRONT", "COMMON", "EMERGENCY"}
 VALID_ROUTE_TYPES = {"DEPARTMENT", "CLARIFICATION", "FRONT_ESCALATION", "SOFT_FALLBACK", "NON_ACTIONABLE", "INFO", "CANCEL", "STATUS_CHECK", "VOC", "BILLING_INQUIRY"}
 
-def route(user_message: str, chat_history: List[dict] = None, images: List[str] = None, system_language: str = "ko", active_requests: List[dict] = None) -> List[RouterOutputSchema]:
+def route(user_message: str, chat_history: List[dict] = None, images: List[str] = None, system_language: str = "en", active_requests: List[dict] = None) -> List[RouterOutputSchema]:
     """
     고객 메시지를 분류하여 RouterOutputSchema의 리스트를 반환한다.
     다중 요청(Multi-intent)일 경우 여러 개의 스키마 객체가 반환된다.

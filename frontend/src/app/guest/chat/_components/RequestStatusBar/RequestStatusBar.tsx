@@ -58,11 +58,12 @@ export default function RequestStatusBar({
         let firstLabel = '';
         if (items && items.length > 0) {
           const first = items[0];
-          firstLabel = `${first.item} ${first.count || 1}개`;
+          firstLabel = `${first.item} x${first.count || 1}`;
         } else if (tasks && tasks.length > 0) {
           firstLabel = tasks[0];
         }
-        const rest = totalCount > 1 ? ` 외 ${totalCount - 1}건` : '';
+        const restCount = totalCount - 1;
+        const rest = restCount > 0 ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : '';
         return `${firstLabel}${rest}`;
       }
     } else if (domainCode === 'FB') {
@@ -70,9 +71,10 @@ export default function RequestStatusBar({
       if (menuItems && menuItems.length > 0) {
         const first = menuItems[0];
         const opt = first.selected_option ? `(${first.selected_option})` : '';
-        const qty = first.quantity ? ` ${first.quantity}개` : '';
-        const rest = menuItems.length > 1 ? ` 외 ${menuItems.length - 1}건` : '';
-        return `${first.name}${opt}${qty}${rest} 주문`;
+        const qty = first.quantity ? ` x${first.quantity}` : '';
+        const restCount = menuItems.length - 1;
+        const rest = restCount > 0 ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : '';
+        return `${first.name}${opt}${qty}${rest}`;
       }
     } else if (domainCode === 'CONCIERGE') {
       if (!intent || !entities) return null;
@@ -227,6 +229,10 @@ export default function RequestStatusBar({
       if (entities.symptom) {
         parts.push(`${l.content || '내용'}: ${entities.symptom}`);
       }
+    }
+    
+    if ((domainCode === 'FB' || domainCode === 'HK') && parts.length === 1 && !entities.symptom) {
+      return null;
     }
     
     return parts.length > 0 ? parts.join(', ') : null;

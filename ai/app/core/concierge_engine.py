@@ -26,7 +26,7 @@ OUTPUT:
 {"intent": "DELIVERY", "item": "개화꽃", "quantity": 10}
 """
 
-async def run_concierge_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, active_requests: list = None, system_language: str = "ko", **kwargs) -> dict:
+async def run_concierge_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, active_requests: list = None, system_language: str = "en", **kwargs) -> dict:
     """
     컨시어지 에이전트 엔진 (Step 0-2)
     ───────────────────────────

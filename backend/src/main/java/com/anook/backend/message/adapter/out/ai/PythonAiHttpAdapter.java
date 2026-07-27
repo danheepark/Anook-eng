@@ -48,7 +48,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
     }
 
     @Override
-    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images, java.util.List<java.util.Map<String, Object>> activeRequests, java.util.Map<String, Integer> roomInventory) {
+    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images, java.util.List<java.util.Map<String, Object>> activeRequests, java.util.Map<String, Object> roomInventory) {
         log.info("[PythonAI] 분석 요청 — room: {}, lang: {}, text: {}", roomNo, language, text);
 
         try {
@@ -147,8 +147,8 @@ public class PythonAiHttpAdapter implements MessageAiPort {
      */
     private java.util.List<MessageAiResult> fallbackResult() {
         return java.util.List.of(new MessageAiResult(
-                "안내에 어려움이 있어 프론트 데스크 직원을 연결해 드리겠습니다. 잠시만 기다려 주세요.",
-                "AI 분석 실패 (직원 연결)", 
+                "I'm having a little trouble with this request. I'll connect you to the front desk right away. Please wait a moment.",
+                "Front Desk Assistance", 
                 "FRONT", 
                 "URGENT", 
                 Collections.emptyMap(), 

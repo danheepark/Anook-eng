@@ -3,7 +3,7 @@ from app.prompts.hk_prompt import HK_SYSTEM_PROMPT
 from app.schemas.common import HotelRequestSchema
 from app.domains.rag import service as rag_service
 
-async def run_hk_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "ko", active_requests: list = None, room_inventory: dict = None, **kwargs) -> dict:
+async def run_hk_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, room_inventory: dict = None, **kwargs) -> dict:
     """
     HK 에이전트: One-pass로 다국어 감지 + Entity 추출 + 되묻기 판단
     
@@ -74,7 +74,20 @@ async def run_hk_agent(user_message: str, room_no: str, chat_history: list = Non
         action_type = "ADD"
 
     is_escalation = result.entities.get("intent") == "ESCALATION"
-    if is_escalation or result.needs_clarification:
+
+    # [수정] HK 유료 결제(overage) 확인 단계 (needs_clarification=True, missing_fields=[], has_extra_charge=True)
+    # 에는 domain_code="HK"를 전달하여 DB에 수락 대기 상태의 요청 카드가 생성되게 제어합니다.
+    is_confirm_stage = (
+        result.needs_clarification
+        and not getattr(result, "missing_fields", [])
+        and result.entities.get("has_extra_charge") is True
+    )
+
+    if is_escalation:
+        domain_code = None
+    elif is_confirm_stage:
+        domain_code = "HK"
+    elif result.needs_clarification:
         domain_code = None
     else:
         domain_code = result.domain if result.domain else "HK"

@@ -24,7 +24,7 @@ public class InventoryPolicyProperties {
         private String code;
         private List<String> aliases = new ArrayList<>();
         private int allowance;
-        private int extraCharge;
+        private double extraCharge;
 
         public String getCode() {
             return code;
@@ -50,11 +50,11 @@ public class InventoryPolicyProperties {
             this.allowance = allowance;
         }
 
-        public int getExtraCharge() {
+        public double getExtraCharge() {
             return extraCharge;
         }
 
-        public void setExtraCharge(int extraCharge) {
+        public void setExtraCharge(double extraCharge) {
             this.extraCharge = extraCharge;
         }
     }

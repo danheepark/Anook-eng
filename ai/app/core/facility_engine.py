@@ -39,7 +39,7 @@ def _build_guest_reply(result: HotelRequestSchema, system_language: str) -> str:
     return result.clarification_question if result.needs_clarification else getattr(result, "final_reply", fallback_msg.get(system_language, fallback_msg["en"]))
 
 
-async def run_facility_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "ko", active_requests: list = None, **kwargs) -> dict:
+async def run_facility_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, **kwargs) -> dict:
     """시설관리 에이전트: 고객 메시지에서 시설/수리 관련 정보를 추출"""
     
     # 1. RAG 검색 → FACILITY 도메인 지식 (수리비, 담당자 등)

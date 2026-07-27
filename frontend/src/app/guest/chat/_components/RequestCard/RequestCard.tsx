@@ -109,11 +109,12 @@ export default function RequestCard({
         let firstLabel = '';
         if (items && items.length > 0) {
           const first = items[0];
-          firstLabel = `${first.item} ${first.count || 1}개`;
+          firstLabel = `${first.item} x${first.count || 1}`;
         } else if (tasks && tasks.length > 0) {
           firstLabel = tasks[0];
         }
-        const rest = totalCount > 1 ? ` 외 ${totalCount - 1}건` : '';
+        const restCount = totalCount - 1;
+        const rest = restCount > 0 ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : '';
         return `${firstLabel}${rest}`;
       }
     } else if (domainCode === 'FB') {
@@ -121,9 +122,10 @@ export default function RequestCard({
       if (menuItems && menuItems.length > 0) {
         const first = menuItems[0];
         const opt = first.selected_option ? `(${first.selected_option})` : '';
-        const qty = first.quantity ? ` ${first.quantity}개` : '';
-        const rest = menuItems.length > 1 ? ` 외 ${menuItems.length - 1}건` : '';
-        return `${first.name}${opt}${qty}${rest}`; // Removed " 주문"
+        const qty = first.quantity ? ` x${first.quantity}` : '';
+        const restCount = menuItems.length - 1;
+        const rest = restCount > 0 ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : '';
+        return `${first.name}${opt}${qty}${rest}`;
       }
     } else if (domainCode === 'CONCIERGE') {
       if (!intent || !entities) return null;
@@ -301,6 +303,7 @@ export default function RequestCard({
       }
       if (entities.is_contactless) parts.push(`- ${l.contactless || '비대면'}`);
       if (entities.target_time) parts.push(`- ${l.time || '시간'}: ${entities.target_time}`);
+      if (parts.length === 1 && !entities.is_contactless && !entities.target_time) return null;
       return parts.length > 0 ? parts.join('\n') : null;
     }
 
@@ -367,9 +370,9 @@ export default function RequestCard({
       if (entities.symptom) {
         parts.push(`${l.content || '내용'}: ${entities.symptom}`);
       }
+      if (domainCode === 'FB' && parts.length === 1 && !entities.symptom) return null;
+      return parts.length > 0 ? parts.join('\n') : null;
     }
-    
-    return parts.length > 0 ? parts.join('\n') : null;
   };
 
   const rawDetails = renderDetails();
