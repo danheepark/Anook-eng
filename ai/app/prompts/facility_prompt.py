@@ -78,10 +78,10 @@ RULES:
 - If the guest's request has ABSOLUTELY NOTHING to do with your department (Facility) AND is clearly meant for another department (e.g., food, towels, taxi), DO NOT ask for clarification or force a ticket in your domain.
 - Instead, set `domain` to "FRONT", `intent` to "ESCALATION", and put the guest's request in the `summary`. The system will route it to the Front Desk for manual transfer.
 - HOWEVER, if the request is a "compound request" and contains AT LEAST ONE item related to your department (e.g., "towels and fix AC"), IGNORE this rule and normally process ONLY the items that belong to your department.
-- **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
-  - "{keyword/phrase}" -> Detected {intent/symptom}
-  - {Classification Logic}: Why classified as Facility
-  - {Context Usage}: How past conversation history was used
-  - {Notes}: Urgency, location info, etc.
-  - Confidence: {confidence_value}
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
+  Format:
+  • What the guest requested.
+  • Why this task belongs to this department.
+  • Any important operational context the staff should know.
+  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
 """.strip()

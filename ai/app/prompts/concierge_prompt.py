@@ -201,11 +201,12 @@ For each intent, you MUST extract the corresponding fields into the "entities" o
 - [Final Reply Rule]
   - When the guest EXPLICITLY CONFIRMS the request, you MUST output exactly `[FORWARD_CONCIERGE]` in the `final_reply` field. Do NOT use `[FORWARD_CONCIERGE]` when you are just asking the confirmation question.
 
-- **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
-  - "{keyword/phrase}" -> Detected {intent}
-  - {Classification Logic}: Why classified as Concierge
-  - {Context Usage}: How past conversation history was used
-  - Confidence: {confidence_value}
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
+  Format:
+  • What the guest requested.
+  • Why this task belongs to this department.
+  • Any important operational context the staff should know.
+  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ EXAMPLES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -152,8 +152,8 @@ You must output a JSON Array of objects.
   - **INFO / INQUIRY SPLITTING (CRITICAL)**: If the user asks about multiple distinct items, services, or locations in a single factual query (e.g., "우산과 자전거 빌릴 수 있나요?", "수영장과 조식 이용 시간 알려주세요", "Wi-Fi 비밀번호랑 체크아웃 시간"), you MUST split them into separate "INFO" objects, one for each distinct item/topic. This is crucial so that each topic is searched individually in the RAG knowledge base using its own `target_keyword`.
     - Example Input: "우산과 자전거 빌릴 수 있나요?"
     - Example Output Array (2 objects):
-      1. {"route_type": "INFO", "domain": "CONCIERGE", "target_keyword": "우산", "summary": "우산 대여 문의", "confidence": 0.9, "reasoning": "• \"우산\" -> 우산 대여 정보 문의 감지\n• 분류 로직: 우산 대여는 CONCIERGE 소관이므로 CONCIERGE 도메인으로 분류\n• Confidence: 0.9", "action_type": "ADD", "create_ticket": false}
-      2. {"route_type": "INFO", "domain": "CONCIERGE", "target_keyword": "자전거", "summary": "자전거 대여 문의", "confidence": 0.9, "reasoning": "• \"자전거\" -> 자전거 대여 정보 문의 감지\n• 분류 로직: 자전거 대여는 CONCIERGE 소관이므로 CONCIERGE 도메인으로 분류\n• Confidence: 0.9", "action_type": "ADD", "create_ticket": false}
+      1. {"route_type": "INFO", "domain": "CONCIERGE", "target_keyword": "우산", "summary": "Umbrella rental inquiry", "confidence": 0.9, "reasoning": "• The guest asked about renting an umbrella.\n• Umbrella rental is a Concierge service.\n• No additional operational context required.", "action_type": "ADD", "create_ticket": false}
+      2. {"route_type": "INFO", "domain": "CONCIERGE", "target_keyword": "자전거", "summary": "Bicycle rental inquiry", "confidence": 0.9, "reasoning": "• The guest asked about renting a bicycle.\n• Bicycle rental is a Concierge service.\n• No additional operational context required.", "action_type": "ADD", "create_ticket": false}
   - **MULTI-INTENT CONFIRMATION EXCEPTION (CRITICAL)**: If the user says "Yes" to an AI's confirmation question BUT ALSO adds a NEW request (e.g., "응 택시도 예약해줘", "네 그리고 수건 하나 더 주세요"), you MUST split it into TWO objects. The first object confirms the ongoing task (assigning the SAME domain as the ongoing conversation), and the second object handles the NEW request (e.g., CONCIERGE, HK).
   - **SINGLE INCIDENT RULE (CRITICAL)**: If the user reports a single incident or makes a single request (e.g., "옆방에서 싸워요", "화장실 변기가 넘쳐서 물바다가 됐어요"), DO NOT split it into multiple intents (e.g., do NOT output one for neighbor noise and another for fighting). You MUST output exactly ONE object for the single most urgent department (e.g., "EMERGENCY" or "FACILITY").
   - **CRITICAL EXCEPTION (Self-Correction/False Alarm)**: If the user's message contains a complaint followed immediately by a retraction/resolution in the SAME message (e.g., "경찰 부를 겁니다... 아 방금 나갔나 봐요 취소할게요"), DO NOT split it into a complaint intent and a cancel intent. The ENTIRE message MUST be treated as a single "SOFT_FALLBACK" object according to the FALSE ALARM RULE.
@@ -183,19 +183,27 @@ You must output a JSON Array of objects.
   - Escalation Confirmation: If the user says "Yes" to "프론트로 연결해 드릴까요?", route to `FRONT_ESCALATION` with `domain: "FRONT"`. If the user asks "Why?", explain it in `NON_ACTIONABLE`.
   - Conflict Resolution: If the AI asked "추가하시겠어요, 변경하시겠어요?" and user chooses "추가", route to `DEPARTMENT` with `action_type: "ADD"`. If "변경", use `action_type: "REPLACE"`.
 
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 3 bullets, each 1 sentence.
+
+  **[Template A: Task Reason]** (Use when route_type is DEPARTMENT, INFO, CANCEL, BILLING_INQUIRY, STATUS_CHECK, or VOC):
+  Explain why this task was created and routed to the current department.
+  • What the guest requested.
+  • Why this task belongs to this department.
+  • Any important operational context the staff should know (e.g., urgency, contactless delivery, allergy).
+
+  **[Template B: Escalation Reason]** (Use when route_type is FRONT_ESCALATION):
+  Explain why the AI transferred this conversation to a human.
+  • What the guest requested.
+  • Why the AI could not complete the request.
+  • What information, authority, or operational decision requires human involvement.
+
+  **[ESCALATION REASONING RULE (CRITICAL)]**: If you are routing to `FRONT_ESCALATION` because the user said "Yes" (네, 응, etc.) to the AI's offer to connect to the front desk, DO NOT just write "User agreed to connect". You MUST look at the user's previous unresolved question in the `[과거 대화 맥락]` and explain the ACTUAL reason for the escalation (e.g., "AI could not find information about dog-friendly wine bars, so it offered escalation and the user agreed. Reason: Information about dog-friendly wine bars is missing"). This provides vital context to the human staff.
+
 - If route_type is "SOFT_FALLBACK", "NON_ACTIONABLE", "CLARIFICATION", or "STATUS_CHECK", the domain MUST be `null`.
 - If route_type is "CANCEL", set the domain to the specific department IF the user explicitly targets one (e.g., "수건 취소해줘" -> HK). If they say "전부 취소" or just "취소", the domain MUST be `null`.
 - DO NOT output any extra text, markdown formatting, or greetings outside the JSON array.
 - Regardless of the input language (Korean or English), classify it uniformly based on meaning.
 - CRITICAL LANGUAGE RULE: ALL text outputs intended for the guest (e.g., `clarification_question`, `clarification_options`, `reply`) MUST be written in the EXACT SAME LANGUAGE as the guest's input. If the guest speaks English, you MUST generate these fields in English (e.g., `["Free Water", "Paid Drinks"]`). NEVER use Korean for guest-facing messages if the guest speaks English. DO NOT append department names in parentheses to options.
-- The `reasoning` and `summary` fields MUST be written in English.
-- **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
-  - “{특정 키워드/문구}” → {의도/증상} 감지 (어떤 표현이 결정적인 역할을 했는지 명시)
-  - **[ESCALATION REASONING RULE (CRITICAL)]**: If you are routing to `FRONT_ESCALATION` because the user said "Yes" (네, 응, etc.) to the AI's offer to connect to the front desk, DO NOT just write "User agreed to connect". You MUST look at the user's previous unresolved question in the `[과거 대화 맥락]` and explain the ACTUAL reason for the escalation (e.g., "AI could not find information about dog-friendly wine bars, so it offered escalation and the user agreed. Reason: Information about dog-friendly wine bars is missing"). This provides vital context to the human staff.
-  - {분류 로직}: 왜 이 부서로 분류했는지 단계별 설명 (예: 물품 요청이므로 하우스키핑 배정)
-  - {맥락 활용}: 과거 대화나 요청 이력에서 어떤 정보를 참조하여 판단했는지 설명
-  - {특이사항}: 긴급도 판단 근거, 누락된 필수 정보 등 구체적 분석 내용
-  - Confidence: {confidence_value} (점수 부여 이유 요약)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ Few-Shot Examples (CRITICAL)

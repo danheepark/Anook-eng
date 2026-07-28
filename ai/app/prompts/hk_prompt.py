@@ -112,9 +112,10 @@ JSON Output:
      - ❌ Bad: "Change 2 waters to 1"
      - ✅ Good: "Bottled Water x1"
    - Format: "[Item] x[Count]" (single) or "[Item] x[Count], [Item] x[Count]" (multiple)
-12. **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
-  - "{keyword/phrase}" -> Detected {intent/item}
-  - {Classification Logic}: Why classified as Housekeeping (HK)
-  - {Context Usage}: How past conversation history was used
-  - {Notes}: Missing quantity, contactless preference, priority justification, etc.
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
+  Format:
+  • What the guest requested.
+  • Why this task belongs to this department.
+  • Any important operational context the staff should know.
+  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
 """

@@ -540,7 +540,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             "priority": "EMERGENCY",
             "entities": {"intent": "EMERGENCY", "category": category},
             "confidence": 1.0,
-            "reasoning": f"• 긴급 키워드 '{em_match['matched_keyword']}' 감지\n• 1-Tier 즉시 라우팅"
+            "reasoning": f"• Emergency keyword '{em_match['matched_keyword']}' detected in the guest's message.\n• Immediate routing to emergency response team.\n• This is an automated safety protocol."
         }]
 
     # ── [실무 최적화: 역질문 단답형(네/아니요) 강제 라우팅 인터셉트] ──
@@ -747,7 +747,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "priority": "NORMAL",
                 "entities": {},
                 "confidence": primary.confidence,
-                "reasoning": getattr(primary, 'reasoning', '알 수 없음'),
+                "reasoning": getattr(primary, 'reasoning', 'Unknown'),
             }
             if hasattr(primary, 'action_type'):
                 response["action_type"] = primary.action_type
@@ -768,7 +768,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "priority": "NORMAL",
                 "entities": {},
                 "confidence": primary.confidence,
-                "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                "reasoning": getattr(primary, 'reasoning', 'Unknown')
             }
             if guest_reply == fallback_msg:
                 response["clarification_options"] = [
@@ -795,7 +795,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "confidence": primary.confidence,
                     "missing_fields": [],
                     "clarification_options": primary.clarification_options,
-                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                    "reasoning": getattr(primary, 'reasoning', 'Unknown')
                 }
                 print(f"[Analyze] ❓ CLARIFICATION → 라우터 직접 생성 옵션 사용")
                 print(f"[Analyze] Response: {response}\n")
@@ -857,7 +857,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         "confidence": agent_result.get("confidence", primary.confidence),
                         "missing_fields": agent_result.get("missing_fields", []),
                         "clarification_options": agent_result.get("clarification_options", []),
-                        "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', '알 수 없음'))
+                        "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', 'Unknown'))
                     }
                     print(f"[Analyze] ❓ CLARIFICATION → {last_agent_domain} 에이전트 재위임 (구체적 재질문)")
                     print(f"[Analyze] Response: {response}\n")
@@ -890,7 +890,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "confidence": agent_result.get("confidence", primary.confidence),
                     "missing_fields": agent_result.get("missing_fields", []),
                     "clarification_options": agent_result.get("clarification_options", []),
-                    "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', '알 수 없음'))
+                    "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', 'Unknown'))
                 }
                 print(f"[Analyze] ❓ CLARIFICATION → FRONT 에이전트 위임 (부서 라우팅 구체화)")
                 print(f"[Analyze] Response: {response}\n")
@@ -906,7 +906,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "entities": {},
                     "confidence": primary.confidence,
                     "clarification_options": primary.clarification_options or [],
-                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                    "reasoning": getattr(primary, 'reasoning', 'Unknown')
                 }
                 print(f"[Analyze] ❓ CLARIFICATION — reasoning: {primary.reasoning}")
                 print(f"[Analyze] Response: {response}\n")
@@ -936,7 +936,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         "priority": "NORMAL",
                         "entities": agent_result.get("entities", {}) if isinstance(agent_result, dict) else {},
                         "confidence": agent_result.get("confidence", primary.confidence) if isinstance(agent_result, dict) else primary.confidence,
-                        "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', '알 수 없음')) if isinstance(agent_result, dict) else getattr(primary, 'reasoning', '알 수 없음')
+                        "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', 'Unknown')) if isinstance(agent_result, dict) else getattr(primary, 'reasoning', 'Unknown')
                     }
                     print(f"[Analyze] ℹ️ INFO+FB → FB 에이전트 위임 처리")
                     print(f"[Analyze] Response: {response}\n")
@@ -1203,7 +1203,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         _get_static_reply("OPTION_YES", request.language),
                         _get_static_reply("OPTION_NO", request.language)
                     ],
-                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                    "reasoning": getattr(primary, 'reasoning', 'Unknown')
                 }
             elif need_more_info_msg in guest_reply:
                 response = {
@@ -1217,7 +1217,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         _get_static_reply("OPTION_YES", request.language),
                         _get_static_reply("OPTION_NO", request.language)
                     ],
-                    "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                    "reasoning": getattr(primary, 'reasoning', 'Unknown')
                 }
             else:
                 # LLM이 생성한 clarification_options가 있으면 사용
@@ -1321,7 +1321,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         "entities": {},
                         "confidence": primary.confidence,
                         "action": "CANCEL_ALL_REQUESTS",
-                        "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                        "reasoning": getattr(primary, 'reasoning', 'Unknown')
                     }
                 else:
                     if has_pending and not has_in_progress:
@@ -1341,7 +1341,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         "entities": {"intent": "CANCEL"},
                         "confidence": primary.confidence,
                         "action": "CANCEL_REQUEST",
-                        "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                        "reasoning": getattr(primary, 'reasoning', 'Unknown')
                     }
                     if hasattr(primary, 'action_type'):
                         response["action_type"] = primary.action_type
@@ -1392,7 +1392,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "priority": "EMERGENCY" if is_emergency else getattr(primary, 'priority', 'NORMAL'),
                 "entities": {"intent": "EMERGENCY" if is_emergency else ("COMPLAINT" if is_complaint else "ESCALATION")},
                 "confidence": 0.0,
-                "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                "reasoning": getattr(primary, 'reasoning', 'Unknown')
             }
             print(f"[Analyze] 🚨 FRONT_ESCALATION 응답")
             print(f"[Analyze] Response: {response}\n")
@@ -1412,7 +1412,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "entities": {"intent": "VOC", "sentiment": sentiment},
                 "confidence": primary.confidence,
                 "action": "VOC_FEEDBACK",
-                "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                "reasoning": getattr(primary, 'reasoning', 'Unknown')
             }
             print(f"[Analyze] 📝 VOC 피드백 응답")
             print(f"[Analyze] Response: {response}\n")
@@ -1457,7 +1457,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "entities": {"intent": "BILLING_INQUIRY", "category": target_category or "ALL"},
                     "confidence": primary.confidence,
                     "action": "BILLING_INQUIRY",
-                    "reasoning": getattr(primary, 'reasoning', '비용 문의')
+                    "reasoning": getattr(primary, 'reasoning', 'Billing inquiry')
                 }
             except Exception as e:
                 print(f"[Analyze] ⚠️ BILLING_INQUIRY 처리 실패: {e}")
@@ -1471,7 +1471,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "entities": {"intent": "BILLING_INQUIRY"},
                     "confidence": primary.confidence,
                     "action": "BILLING_INQUIRY",
-                    "reasoning": getattr(primary, 'reasoning', '비용 문의')
+                    "reasoning": getattr(primary, 'reasoning', 'Billing inquiry')
                 }
 
             print(f"[Analyze] 💰 BILLING_INQUIRY 응답")
@@ -1489,7 +1489,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "entities": {"action": "STATUS_CHECK"},
                 "confidence": primary.confidence,
                 "action": "STATUS_CHECK",
-                "reasoning": getattr(primary, 'reasoning', '알 수 없음')
+                "reasoning": getattr(primary, 'reasoning', 'Unknown')
             }
             print(f"[Analyze] 🔍 STATUS_CHECK 응답")
             print(f"[Analyze] Response: {response}\n")
@@ -1622,7 +1622,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 "confidence": agent_confidence,
                 "missing_fields": agent_result.get("missing_fields", []),
                 "clarification_options": agent_result.get("clarification_options", []),
-                "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', '알 수 없음'))
+                "reasoning": agent_result.get("reasoning", getattr(primary, 'reasoning', 'Unknown'))
             }
             if "__ai_log_meta" in agent_result:
                 response["__ai_log_meta"] = agent_result["__ai_log_meta"]

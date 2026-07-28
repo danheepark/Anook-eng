@@ -411,7 +411,7 @@ export default function RequestDetailPanel({
                   : `• ${label}: ${formattedConfidence}`;
                 return (
                   <div className={styles.contentBlock}>
-                    <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.reasoning || (language === 'en' ? 'Reasoning' : '판단 근거')}</span>
+                    <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.reasoning || (language === 'en' ? 'Reason' : '사유')}</span>
                     <p className={styles.rawText}>{displayReasoning}</p>
                   </div>
                 );

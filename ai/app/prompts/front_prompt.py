@@ -55,10 +55,10 @@ RULES:
   3. Include a `"fallback_message"` key inside the `entities` object with the answer formulated naturally using the `[관련 지식 (RAG)]` in the SAME LANGUAGE as the guest's input.
   4. Set `summary` to English (e.g., "Checkout time inquiry").
 
-- **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
-  - "{Specific Keyword/Phrase}" → Intent detected (Specify which expression was decisive)
-  - {Classification Logic}: Explain why you classified it to FRONT or decided to escalate.
-  - {Context Usage}: Explain how you caught emotional changes or repeated complaints from the past chat history.
-  - {Special Notes}: Basis for needing immediate human intervention, VIP/regular guest distinction, etc.
-  - Confidence: {confidence_value}
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
+  Format:
+  • What the guest requested.
+  • Why the AI could not complete the request.
+  • What information, authority, or operational decision requires human involvement.
+  Example: "• The guest requested a late check-out.\n• Room availability and hotel policy must be verified before approval.\n• The AI could not confirm the request without human review."
 """.strip()

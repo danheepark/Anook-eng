@@ -309,9 +309,10 @@ JSON Output:
     - NEVER set `needs_clarification: false` immediately after the guest provides missing options. You MUST STILL present the final price and ask "Shall I proceed?" with `needs_clarification: true`.
     - ONLY set `needs_clarification: false` and `final_reply: "[FORWARD_FB]"` if the guest explicitly says "Yes", "Confirm", or "Proceed" IN RESPONSE to your "Shall I proceed?" question!
 
-18. **REASONING FORMAT (MANDATORY)**: You MUST provide a detailed, step-by-step reasoning in the `reasoning` field **as a single string** using bullet points and emojis. Explain **how** you detected the intent and **how context was used**:
-  - "{keyword/phrase}" -> Detected {intent/item}
-  - {Classification Logic}: Why classified as FB
-  - {Context Usage}: How past conversation history was used
-  - {Notes}: Missing quantity, options, etc.
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
+  Format:
+  • What the guest requested.
+  • Why this task belongs to this department.
+  • Any important operational context the staff should know.
+  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
 """
