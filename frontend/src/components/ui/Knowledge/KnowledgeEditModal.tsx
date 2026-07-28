@@ -8,6 +8,7 @@ import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import { ConfirmModal } from '@/components/ui/Modal';
 import { useUiStore } from '@/stores/useUiStore';
 import styles from './KnowledgeEditModal.module.css';
+import { useTranslation } from '@/app/useTranslation';
 
 export interface KnowledgeEditModalProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ export default function KnowledgeEditModal({
   const [answer, setAnswer] = useState(initialAnswer);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const showToast = useUiStore(state => state.showToast);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -49,37 +51,37 @@ export default function KnowledgeEditModal({
         <ModalCard
           size="md"
           onClose={() => setIsConfirmOpen(true)}
-          title={isRegister ? '지식 데이터 등록' : '지식 정보 수정'}
+          title={isRegister ? (t.frontdeskPage?.rag?.modal?.registerTitle || '지식 데이터 등록') : (t.frontdeskPage?.rag?.modal?.editTitle || '지식 정보 수정')}
         >
 
         {/* Body */}
         <div className={styles.body}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>도메인 분류</label>
+            <label className={styles.label}>{t.frontdeskPage?.rag?.modal?.domainLabel || '도메인 분류'}</label>
             <Dropdown
               options={domainOptions}
               value={domainCode}
               onChange={(val) => setDomainCode(val as string)}
-              placeholder="분류 선택"
+              placeholder={t.frontdeskPage?.rag?.modal?.domainPlaceholder || '분류 선택'}
             />
           </div>
 
           <div className={styles.formGroup}>
             <InputField
-              label="제목"
+              label={t.frontdeskPage?.rag?.modal?.titleLabel || '제목'}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder="예상 질문이나 제목을 입력하세요"
+              placeholder={t.frontdeskPage?.rag?.modal?.titlePlaceholder || '예상 질문이나 제목을 입력하세요'}
             />
           </div>
 
           <div className={styles.formGroup}>
             <InputField
               as="textarea"
-              label="내용"
+              label={t.frontdeskPage?.rag?.modal?.contentLabel || '내용'}
               value={answer}
               onChange={(e: any) => setAnswer(e.target.value)}
-              placeholder="답변이나 매뉴얼 상세 내용을 입력하세요"
+              placeholder={t.frontdeskPage?.rag?.modal?.contentPlaceholder || '답변이나 매뉴얼 상세 내용을 입력하세요'}
               rows={4}
             />
           </div>
@@ -88,13 +90,13 @@ export default function KnowledgeEditModal({
         {/* Footer */}
         <div className={styles.footer}>
           <Button variant="secondary" onClick={() => setIsConfirmOpen(true)} className={styles.btn}>
-            취소
+            {t.common?.cancel || '취소'}
           </Button>
           <Button variant="primary" onClick={() => {
             if (onSave) onSave({ domainCode, question, answer });
-            showToast(isRegister ? '지식 데이터가 성공적으로 등록되었습니다.' : '지식 정보가 성공적으로 수정되었습니다.', 'success');
+            showToast(isRegister ? (t.frontdeskPage?.rag?.modal?.registerSuccess || '지식 데이터가 성공적으로 등록되었습니다.') : (t.frontdeskPage?.rag?.modal?.editSuccess || '지식 정보가 성공적으로 수정되었습니다.'), 'success');
           }} className={styles.btn}>
-            {isRegister ? '등록하기' : '변경사항 저장하기'}
+            {isRegister ? (t.frontdeskPage?.rag?.modal?.registerBtn || '등록하기') : (t.frontdeskPage?.rag?.modal?.saveBtn || '변경사항 저장하기')}
           </Button>
         </div>
       </ModalCard>
@@ -107,10 +109,10 @@ export default function KnowledgeEditModal({
           setIsConfirmOpen(false);
           onClose();
         }}
-        title="수정 취소"
-        subtitle="수정 중인 내용이 저장되지 않습니다. 정말 취소하시겠습니까?"
-        confirmText="네, 취소할게요"
-        cancelText="계속 작성하기"
+        title={t.frontdeskPage?.rag?.modal?.cancelEditTitle || '수정 취소'}
+        subtitle={t.frontdeskPage?.rag?.modal?.cancelEditSubtitle || '수정 중인 내용이 저장되지 않습니다. 정말 취소하시겠습니까?'}
+        confirmText={t.frontdeskPage?.rag?.modal?.cancelConfirm || '네, 취소할게요'}
+        cancelText={t.frontdeskPage?.rag?.modal?.cancelKeep || '계속 작성하기'}
         status="danger"
       />
     )}

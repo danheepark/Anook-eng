@@ -6,6 +6,7 @@ import ModalOverlay from './ModalOverlay';
 import ModalCard from './ModalCard';
 import { AttentionIcon, CancelIcon } from '@/components/icons';
 import Button from '@/components/ui/Button/Button';
+import { useTranslation } from '@/app/useTranslation';
 
 export interface ConfirmModalProps {
   isOpen: boolean;
@@ -30,10 +31,14 @@ export default function ConfirmModal({
   status = 'default',
   requireCheckbox = false,
   checkboxLabel,
-  cancelText = '취소',
-  confirmText = '확인',
+  cancelText,
+  confirmText,
   hideCancel = false,
 }: ConfirmModalProps) {
+  const { t } = useTranslation();
+
+  const finalCancelText = cancelText || t.common.cancel || '취소';
+  const finalConfirmText = confirmText || t.common.confirm || '확인';
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
@@ -57,7 +62,7 @@ export default function ConfirmModal({
         <div className={styles.buttonGroup}>
           {!hideCancel && (
             <Button variant="secondary" style={{ flex: 1, padding: 0 }} onClick={onClose}>
-              {cancelText}
+              {finalCancelText}
             </Button>
           )}
           <Button
@@ -65,7 +70,7 @@ export default function ConfirmModal({
             style={{ flex: 1, padding: 0 }}
             onClick={onConfirm}
           >
-            {confirmText}
+            {finalConfirmText}
           </Button>
         </div>
       </ModalCard>

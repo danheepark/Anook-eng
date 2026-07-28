@@ -226,7 +226,7 @@ export default function RequestDetailPanel({
   const getTranslatedStatus = (status: string, defaultText: string) => {
     if (detail.departmentId === 'FRONT') {
       if (status === 'PENDING') return language === 'en' ? 'Pending' : '접수 중';
-      if (status === 'IN_PROGRESS' || status === 'ASSIGNED') return language === 'en' ? 'In Consultation' : '상담 중';
+      if (status === 'IN_PROGRESS' || status === 'ASSIGNED') return language === 'en' ? 'Active Chat' : '상담 중';
     }
     if (!t.status) return defaultText;
     if (status === 'PENDING') return t.status.pending || defaultText;

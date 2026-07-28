@@ -159,7 +159,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
                 null,
                 null,
                 null,
-                "AI 서버 연결 실패 또는 에러 발생으로 인한 폴백(Fallback)"
+                "Fallback due to AI server connection failure or error"
         ));
     }
 

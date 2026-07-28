@@ -10,6 +10,7 @@ import styles from './KnowledgeReviewTab.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useRagAnalysis } from './useRagAnalysis';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
+import ChatHistoryModal from '@/app/staff/_components/TaskDetailModal/ChatHistoryModal';
 
 interface KnowledgeReviewTabProps {
   domainCode: string; // 'ALL' 또는 도메인 코드
@@ -87,6 +88,7 @@ export default function KnowledgeReviewTab({
   const [candidates, setCandidates] = useState<LocalCandidate[]>([]);
   const [analyzedPendingIds, setAnalyzedPendingIds] = useState<number[]>([]);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [chatHistoryRoomNo, setChatHistoryRoomNo] = useState<string | null>(null);
 
   const DOMAIN_OPTIONS = [
     { value: 'FRONT', label: (t.frontdeskPage?.rag?.tabs as any)?.FRONT || '프론트' },
@@ -208,8 +210,10 @@ export default function KnowledgeReviewTab({
           <div className={styles.headerTitle}>
             {isAnalyzed && (
               <>
-                <span>AI RAG 분석 결과</span>
-                <span className={styles.headerCount}>{candidates.length}건의 지식 후보</span>
+                <span>{t.frontdeskPage?.aiTraining?.analysisResult || 'AI 지식 추출 결과'}</span>
+                <span className={styles.headerCount}>
+                  {t.frontdeskPage?.aiTraining?.knowledgeCandidates?.replace('{{count}}', candidates.length.toString()) || `${candidates.length}건의 지식 후보`}
+                </span>
               </>
             )}
           </div>
@@ -259,7 +263,7 @@ export default function KnowledgeReviewTab({
       {analyzing ? (
         <div className={styles.loadingBox}>
           <div className={styles.spinner} />
-          <div>선택하신 상담 대화 내역에서 AI가 RAG 지식을 추출하는 중입니다...</div>
+          <div>{t.frontdeskPage?.aiTraining?.analyzingText || '선택하신 상담 대화 내역에서 AI가 지식 데이터를 추출하는 중입니다...'}</div>
         </div>
       ) : analysisError ? (
         <div className={styles.errorBox}>
@@ -279,9 +283,9 @@ export default function KnowledgeReviewTab({
                   className={styles.checkboxInput}
                 />
               </TableCell>
-              <TableCell>질문 (Question)</TableCell>
-              <TableCell>답변 (Answer)</TableCell>
-              <TableCell>분류 부서</TableCell>
+              <TableCell>{t.frontdeskPage?.aiTraining?.columns?.question || '질문 (Question)'}</TableCell>
+              <TableCell>{t.frontdeskPage?.aiTraining?.columns?.answer || '답변 (Answer)'}</TableCell>
+              <TableCell>{t.frontdeskPage?.aiTraining?.columns?.domain || '분류 부서'}</TableCell>
             </TableHeader>
             {candidates.map((item, idx) => (
               <TableRow key={idx}>
@@ -298,7 +302,7 @@ export default function KnowledgeReviewTab({
                     value={item.question}
                     onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
                     className={styles.cellTextarea}
-                    placeholder="질문을 입력하세요..."
+                    placeholder={t.frontdeskPage?.aiTraining?.questionPlaceholder || '질문을 입력하세요...'}
                   />
                 </TableCell>
                 <TableCell>
@@ -306,7 +310,7 @@ export default function KnowledgeReviewTab({
                     value={item.answer}
                     onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
                     className={styles.cellTextarea}
-                    placeholder="답변을 입력하세요..."
+                    placeholder={t.frontdeskPage?.aiTraining?.answerPlaceholder || '답변을 입력하세요...'}
                   />
                 </TableCell>
                 <TableCell>
@@ -328,7 +332,7 @@ export default function KnowledgeReviewTab({
 
           {candidates.length === 0 && (
             <div className={styles.emptyState}>
-              분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.
+              {t.frontdeskPage?.aiTraining?.noCandidates || '분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.'}
             </div>
           )}
 
@@ -336,10 +340,12 @@ export default function KnowledgeReviewTab({
             <div className={styles.tableFooter}>
               <div className={styles.analysisFooter}>
                 <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-                  취소
+                  {t.common?.cancel || '취소'}
                 </Button>
                 <Button variant="primary" onClick={handleBatchRegister} disabled={registering}>
-                  {registering ? '등록 중...' : `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`}
+                  {registering 
+                    ? (t.frontdeskPage?.aiTraining?.registering || '등록 중...') 
+                    : (t.frontdeskPage?.aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`)}
                 </Button>
               </div>
             </div>
@@ -369,7 +375,11 @@ export default function KnowledgeReviewTab({
                   ).padStart(2, '0')}`;
                 })()}
                 onClick={() => {
-                  setDeleteTargetId(item.id);
+                  if (item.roomNo) {
+                    setChatHistoryRoomNo(item.roomNo);
+                  } else {
+                    alert('대화 내역 정보가 없는 항목입니다.');
+                  }
                 }}
                 onEdit={(e) => {
                   e.stopPropagation();
@@ -399,6 +409,13 @@ export default function KnowledgeReviewTab({
         }
         status="danger"
         confirmText={t.frontdeskPage?.aiTraining?.rejectConfirm || '제외'}
+      />
+
+      <ChatHistoryModal
+        isOpen={!!chatHistoryRoomNo}
+        onClose={() => setChatHistoryRoomNo(null)}
+        roomNumber={chatHistoryRoomNo || ''}
+        hideBackButton={true}
       />
     </div>
   );

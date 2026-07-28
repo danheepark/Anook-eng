@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './Button.module.css';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'outlined';
+  variant?: 'primary' | 'secondary' | 'danger' | 'outlined' | 'ghost';
   size?: 'medium' | 'large';
   fullWidth?: boolean;
 }
@@ -22,7 +22,9 @@ export default function Button({
       ? styles.secondary
       : variant === 'outlined'
         ? styles.outlined
-        : styles.danger;
+        : variant === 'ghost'
+          ? styles.ghost
+          : styles.danger;
   const sizeClass = size === 'large' ? styles.large : styles.medium;
   const fullWidthClass = fullWidth ? styles.fullWidth : '';
 

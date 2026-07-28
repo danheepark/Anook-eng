@@ -9,8 +9,7 @@ import { useSSE } from '@/app/useSSE';
 import { useTranslation } from '@/app/useTranslation';
 import Button from '@/components/ui/Button/Button';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
-import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
-import ModalCard from '@/components/ui/Modal/ModalCard';
+import { RagConfirmModal } from '@/components/ui/Modal';
 import FeedbackCard from '@/app/guest/chat/_components/FeedbackCard';
 import GuestRequestCard from '@/app/guest/chat/_components/RequestCard/RequestCard';
 
@@ -322,18 +321,18 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     }
   };
 
-  // 상담 완료 버튼 클릭 시: 즉시 COMPLETED 처리 후 RAG 모달은 별도로 열기
+  // 상담 완료 버튼 클릭 시: RAG 모달을 먼저 열고, 선택 후 완료 처리
   const handleCompleteConsultation = () => {
-    // 1. 즉시 COMPLETED 상태로 변경 (고객에게 바로 상담 종료 카드 전송)
-    if (requestIds && requestIds.length > 0 && onStatusChange && status !== 'COMPLETED') {
-      onStatusChange(requestIds, 'COMPLETED');
-    }
-
-    // 2. 직원이 답변한 내용이 있으면 RAG 등록 모달 열기
     const staffMessages = messages.filter(m => m.senderType === 'STAFF');
     if (staffMessages.length > 0) {
+      // 1. 직원이 답변한 내용이 있으면 RAG 등록 모달 열기 (아직 완료 처리 안 함)
       setIsRagConfirmOpen(true);
       onRagFlowChange?.(true);
+    } else {
+      // 2. 직원이 답변한 내용이 없으면 즉시 COMPLETED 처리
+      if (requestIds && requestIds.length > 0 && onStatusChange && status !== 'COMPLETED') {
+        onStatusChange(requestIds, 'COMPLETED');
+      }
     }
   };
 
@@ -342,10 +341,17 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     if (onClose) onClose();
   };
 
+  const completeRequest = () => {
+    if (requestIds && requestIds.length > 0 && onStatusChange && status !== 'COMPLETED') {
+      onStatusChange(requestIds, 'COMPLETED');
+    }
+  };
+
   const handleRagConfirm = () => {
     setIsRagConfirmOpen(false);
     onRagFlowChange?.(false);
     if (onRagRegister) onRagRegister();
+    completeRequest();
   };
 
   // "나중에 하기" → PENDING 상태로 저장 후 완료 처리
@@ -378,11 +384,13 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     }
     setIsRagConfirmOpen(false);
     onRagFlowChange?.(false);
+    completeRequest();
   };
 
   const handleRagSkip = () => {
     setIsRagConfirmOpen(false);
     onRagFlowChange?.(false);
+    completeRequest();
   };
 
   const handleRagCancel = () => {
@@ -503,7 +511,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
               if (isSystemMsg) {
                 let cleanContent = msg.content.replace(/^\[SYSTEM\]\s*/, '');
-                if (cleanContent === '상담 및 처리가 모두 완료되었습니다.') {
+                if (cleanContent === '상담 및 처리가 모두 완료되었습니다.' || cleanContent === '이전 상담 및 처리가 모두 완료되었습니다.') {
                   cleanContent = t.frontdeskPage?.chatHistory?.systemCompleted || cleanContent;
                 }
                 return (
@@ -518,7 +526,9 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
               }
 
               const isAutoMsg = msg.content.includes('프론트 데스크 직원이 메시지를 확인했습니다') ||
-                                msg.content.includes('긴급 대응팀이 배정되었습니다');
+                msg.content.includes('The front desk staff has checked your message') ||
+                msg.content.includes('긴급 대응팀이 배정되었습니다') ||
+                msg.content.includes('An emergency response team has been assigned');
 
               // 관리자 패널 기준:
               // - GUEST → 왼쪽(received) + surface color 스타일(sent)
@@ -562,9 +572,9 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 if (onStatusChange && requestIds && requestIds.length > 0) {
                   await onStatusChange(requestIds, 'IN_PROGRESS');
                   if (isEmergency) {
-                    await handleSend('긴급 대응팀이 배정되었습니다. 신속히 조치하겠습니다. 안전한 곳에서 대기해 주시기 바랍니다.');
+                    await handleSend(t.chatPanel?.autoReplyEmergency || 'An emergency response team has been assigned. We will take prompt action. Please wait in a safe place.');
                   } else {
-                    await handleSend('프론트 데스크 직원이 메시지를 확인했습니다. 곧 안내 드리겠습니다.');
+                    await handleSend(t.chatPanel?.autoReplyStaffChecked || 'The front desk staff has checked your message. We will assist you shortly.');
                   }
                 }
               }}
@@ -597,55 +607,13 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
       </div>
 
       {/* RAG 등록 확인 모달 (3버튼: 등록하기 / 나중에 하기 / 건너뛰기) */}
-      <ModalOverlay isOpen={isRagConfirmOpen} onClose={handleRagCancel}>
-        <ModalCard size="sm">
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={handleRagCancel}
-              aria-label="닫기"
-              style={{
-                position: 'absolute',
-                top: '-12px',
-                right: '-12px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <CancelIcon width={20} height={20} color="var(--color-gray-400)" />
-            </button>
-            <div style={{ textAlign: 'center', padding: '8px 0' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{t.chatPanel?.registerAiKnowledgeTitle || 'AI 지식 등록'}</h2>
-              <p style={{ fontSize: '14px', color: 'var(--color-gray-500)', lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: t.chatPanel?.registerAiKnowledgeDesc || '이 상담 내용을 AI 지식 데이터로 등록하시겠습니까?<br />등록하면 AI가 동일한 질문에 자동으로 답변할 수 있습니다.' }} />
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
-            <Button variant="primary" onClick={handleRagConfirm} style={{ width: '100%' }}>
-              {t.chatPanel?.registerNow || '지금 등록하기'}
-            </Button>
-            <Button variant="secondary" onClick={handleRagLater} style={{ width: '100%' }}>
-              {t.chatPanel?.registerLater || '나중에 하기'}
-            </Button>
-            <button
-              onClick={handleRagSkip}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--color-gray-400)',
-                fontSize: '13px',
-                cursor: 'pointer',
-                padding: '4px 0',
-              }}
-            >
-              {t.chatPanel?.doNotRegister || '등록하지 않기'}
-            </button>
-          </div>
-        </ModalCard>
-      </ModalOverlay>
+      <RagConfirmModal
+        isOpen={isRagConfirmOpen}
+        onConfirm={handleRagConfirm}
+        onLater={handleRagLater}
+        onSkip={handleRagSkip}
+        onCancel={handleRagCancel}
+      />
     </>
   );
 }

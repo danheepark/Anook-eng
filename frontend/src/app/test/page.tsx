@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 
-import { ConfirmModal, ModalOverlay, ModalCard, LogDataModal } from '@/components/ui/Modal';
+import { ConfirmModal, ModalOverlay, ModalCard, LogDataModal, RagConfirmModal } from '@/components/ui/Modal';
 import * as Icons from '@/components/icons';
 import Button from '@/components/ui/Button/Button';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
@@ -185,7 +185,8 @@ export default function ComponentShowcasePage() {
     'ChatHistoryModal',
     'KnowledgeModal',
     'KnowledgeEditModal',
-    'LogDataModal'
+    'LogDataModal',
+    'RagConfirmModal'
   ];
 
   return (
@@ -269,6 +270,15 @@ export default function ComponentShowcasePage() {
                   subtitle="모달이 정상적으로 뜨는지 확인합니다."
                   requireCheckbox={true}
                   checkboxLabel="안내사항을 확인했습니다."
+                />
+
+                <ComponentLabel path="components/ui/Modal/RagConfirmModal.tsx" />
+                <RagConfirmModal
+                  isOpen={activeModal === 'RagConfirmModal'}
+                  onConfirm={closeModal}
+                  onLater={closeModal}
+                  onSkip={closeModal}
+                  onCancel={closeModal}
                 />
 
                 {/* 기본 ModalOverlay + ModalCard 조합 테스트 */}

@@ -18,8 +18,8 @@ export function useTranslation(overrideLang?: string) {
   const storeLanguage = useUiStore((state) => state.language) as Language;
   const language = (overrideLang || storeLanguage) as Language;
   
-  // Safe fallback to 'ko'
-  const t = dictionaries[language] || dictionaries['ko'];
+  // Safe fallback to 'en'
+  const t = dictionaries[language] || dictionaries['en'];
 
   return { t, language };
 }

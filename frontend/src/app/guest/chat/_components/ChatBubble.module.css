@@ -75,8 +75,6 @@
       /* Very light peach/apricot */
       rgba(255, 215, 230, 0.4) 100%);
   /* Very light pink */
-  background-size: 200% 100%;
-  animation: waitingBubble 3s linear infinite;
   border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow:
     inset 2px 2px 6px rgba(255, 255, 255, 0.9),
@@ -85,18 +83,9 @@
   color: var(--color-gray-900);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  animation: none !important;
 }
 
-
-@keyframes waitingBubble {
-  0% {
-    background-position: 200% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
 
 .receivedContainer {
   display: flex;

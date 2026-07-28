@@ -62,6 +62,17 @@
   filter: brightness(0.95);
 }
 
+.ghost {
+  background-color: transparent;
+  color: var(--color-gray-400);
+  font-weight: normal;
+  font-size: 13px;
+  box-shadow: none;
+}
+.ghost:hover:not(:disabled) {
+  color: var(--color-gray-500);
+}
+
 .fullWidth {
   width: 100%;
   flex: 1;

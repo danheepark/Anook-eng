@@ -5,6 +5,7 @@ import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
 import { Clock, Edit2 } from 'lucide-react';
 import Button from '@/components/ui/Button/Button';
 import styles from './KnowledgeModal.module.css';
+import { useTranslation } from '@/app/useTranslation';
 
 export interface KnowledgeModalProps {
   isOpen: boolean;
@@ -27,6 +28,8 @@ export default function KnowledgeModal({
   onEdit,
   onDelete
 }: KnowledgeModalProps) {
+  const { t } = useTranslation();
+
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
       <ModalCard
@@ -46,17 +49,17 @@ export default function KnowledgeModal({
         <div className={styles.footer}>
           <div className={styles.dateInfo}>
             <Clock size={16} className={styles.clockIcon} />
-            <span className={styles.dateText}>최종 업데이트: {updatedAt}</span>
+            <span className={styles.dateText}>{t.common?.lastUpdated || '최종 업데이트: '}{updatedAt}</span>
           </div>
           <div className={styles.actionButtons} style={{ display: 'flex', gap: 'var(--space-8)' }}>
             {onDelete && (
               <Button variant="danger" onClick={onDelete} className={styles.editBtn}>
-                삭제
+                {t.common?.delete || '삭제'}
               </Button>
             )}
             <Button variant="primary" onClick={onEdit} className={styles.editBtn}>
               <Edit2 size={16} />
-              정보 수정하기
+              {t.common?.edit || '수정'}
             </Button>
           </div>
         </div>

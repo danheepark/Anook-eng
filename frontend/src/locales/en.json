@@ -23,6 +23,9 @@
     "confirm": "Confirm",
     "close": "Close",
     "loading": "Loading...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "lastUpdated": "Last updated: ",
     "error": "An error occurred",
     "retry": "Retry",
     "logout": "Log out",
@@ -46,7 +49,7 @@
         "allRequests": "All Requests",
         "chatHistory": "Chat History",
         "voc": "Customer Feedback",
-        "aiTraining": "Add New Knowledge",
+        "aiTraining": "Pending Knowledge",
         "rag": "AI Knowledge Management",
         "aiRouting": "AI Routing Logs",
         "handover": "Handover Document",
@@ -100,7 +103,7 @@
         "concierge": "Concierge",
         "emergency": "Emergency Response",
         "allRequests": "All Requests",
-        "aiTraining": "Add New Knowledge",
+        "aiTraining": "Pending Knowledge",
         "rag": "AI Knowledge Management",
         "aiRouting": "AI Routing Logs",
         "handover": "Handover Document"
@@ -129,13 +132,39 @@
     "rag": {
       "title": "Knowledge Base",
       "addKnowledge": "+ Add Knowledge",
-      "searchPlaceholder": "Enter search term...",
-      "filterAll": "All",
-      "filterLatest": "Latest",
+      "searchPlaceholder": "Search domain, title, content, or author",
+      "allDomains": "All Domains",
+      "columns": {
+        "domain": "Domain",
+        "title": "Title",
+        "author": "Author",
+        "date": "Update Date",
+        "status": "Status"
+      },
       "empty": "No knowledge registered.",
-      "deleteTitle": "Confirm Deletion",
+      "pageInfo": "Showing {{start}} - {{end}} of {{total}}",
       "deleteConfirm": "Are you sure you want to delete this knowledge?",
+      "deleteSuccess": "Knowledge deleted successfully.",
+      "deleteTitle": "Confirm Deletion",
       "deleteButton": "Delete",
+      "modal": {
+        "registerTitle": "Register Knowledge",
+        "editTitle": "Edit Knowledge",
+        "domainLabel": "Domain Classification",
+        "domainPlaceholder": "Select domain",
+        "titleLabel": "Title",
+        "titlePlaceholder": "Enter expected question or title",
+        "contentLabel": "Content",
+        "contentPlaceholder": "Enter answer or manual details",
+        "registerBtn": "Register",
+        "saveBtn": "Save Changes",
+        "registerSuccess": "Knowledge successfully registered.",
+        "editSuccess": "Knowledge successfully updated.",
+        "cancelEditTitle": "Cancel Edit",
+        "cancelEditSubtitle": "Unsaved changes will be lost. Are you sure you want to cancel?",
+        "cancelConfirm": "Yes, cancel",
+        "cancelKeep": "Keep editing"
+      },
       "tabs": {
         "ALL": "All",
         "HK": "Housekeeping",
@@ -154,7 +183,20 @@
       "empty": "No items pending for review.",
       "rejectTitle": "Confirm Exclusion",
       "rejectSubtitle": "Are you sure you want to exclude this item from the review list?",
-      "rejectConfirm": "Exclude"
+      "rejectConfirm": "Exclude",
+      "analysisResult": "AI Knowledge Extraction Result",
+      "knowledgeCandidates": "{{count}} Knowledge Candidates",
+      "columns": {
+        "question": "Question",
+        "answer": "Answer",
+        "domain": "Domain"
+      },
+      "questionPlaceholder": "Enter question...",
+      "answerPlaceholder": "Enter answer...",
+      "registerSelected": "Register Selected ({{count}})",
+      "registering": "Registering...",
+      "noCandidates": "No analyzed Q&A candidates. Please verify if suitable answers exist in the conversation.",
+      "analyzingText": "AI is extracting AI knowledge from the selected chat history..."
     },
     "frontDesk": {
       "title": "Live Chat",
@@ -174,7 +216,7 @@
         "approve": "Approve",
         "reject": "Reject",
         "startChat": "Start Chat",
-        "manualAssign": "Assign"
+        "manualAssign": "Create Ticket"
       },
       "status": {
         "pending": "Pending",
@@ -187,7 +229,7 @@
     "chatHistory": {
       "title": "Chat History",
       "emptyMessage": "No messages",
-      "systemCompleted": "Consultation and processing have been fully completed.",
+      "systemCompleted": "All previous requests and processing have been completed.",
       "systemMessageNote": "(※ This is a system-only message for front desk operations, not visible to guests)",
       "roomConversation": "Room {{room}} Conversation",
       "roomChatRecord": "Room {{room}} Chat Record",
@@ -275,7 +317,7 @@
         "option": "Option",
         "none": "None"
       },
-      "manualAssign": "Manual Assign",
+      "manualAssign": "Create Task Ticket",
       "approveEscalation": "Approve Escalation",
       "rejectEscalation": "Reject Escalation",
       "rejectCancel": "Reject Cancel",
@@ -295,6 +337,14 @@
       "ratingEmpty": "No AI feedback registered.",
       "detailedAccessLogs": "Detailed Access Logs",
       "noLogs": "No logs found.",
+      "logDataModalTitle": "Log Data Analysis",
+      "linkedTicket": "Linked Ticket ID: ",
+      "totalTokens": "Total Tokens",
+      "isFallback": "Fallback Status",
+      "latency": "Latency",
+      "usedModel": "Model Used",
+      "rawPrompt": "RAW PROMPT",
+      "rawResponse": "RAW RESPONSE",
       "requestPreviewEmpty": "No request content",
       "tableColumns": {
         "time": "Time",
@@ -612,10 +662,12 @@
     "piiGuard": "To protect your valuable personal information, we do not accept sensitive details via chat.  For detailed inquiries, please contact the front desk (extension 0) using your in-room phone for safe assistance. "
   },
   "feedbackCard": {
-    "systemCompletedTitle": "Consultation and processing have been fully completed.",
+    "systemCompletedTitle": "All previous requests and processing have been completed.",
     "systemCompletedSubtitle": "(※ This is an internal front desk message not visible to guests)",
     "requestCompleted": "Request Completed",
-    "consultationCompleted": "Consultation completed",
+    "consultationActive": "Active Chat",
+    "consultationComplete": "End Conversation",
+    "consultationCompleted": "Conversation Ended",
     "satisfactionQuestion": "Were you satisfied with our service?",
     "thankYou": "Thank you!",
     "ratings": {
@@ -627,8 +679,8 @@
     }
   },
   "chatPanel": {
-    "consultationComplete": "Complete Consultation",
-    "startConsultation": "Start Consultation",
+    "consultationComplete": "End Conversation",
+    "startConsultation": "Start Chat",
     "startEmergency": "Start Emergency Response",
     "autoReplyStaffChecked": "The front desk staff has checked your message. We will assist you shortly.",
     "autoReplyEmergency": "An emergency response team has been dispatched. Please stay in a safe place.",
@@ -639,9 +691,9 @@
     "registerAiKnowledge": "Register AI Knowledge",
     "replyPlaceholder": "Enter reply to guest...",
     "registerAiKnowledgeTitle": "Register AI Knowledge",
-    "registerAiKnowledgeDesc": "Do you want to register this consultation as AI knowledge?<br />The AI will automatically answer similar questions in the future.",
+    "registerAiKnowledgeDesc": "Do you want to register this conversation as AI knowledge? The AI will automatically answer similar questions in the future.",
     "registerNow": "Register Now",
-    "registerLater": "Remind Me Later",
+    "registerLater": "Send to Pending",
     "doNotRegister": "Do Not Register",
     "dummyGuest": "No request details.",
     "dummyAi": "Your request has been received. The front desk staff will assist you shortly.",

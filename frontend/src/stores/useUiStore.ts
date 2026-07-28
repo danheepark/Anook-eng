@@ -64,9 +64,9 @@ export const useUiStore = create<UiState>()(
       },
       hideToast: () => set({ isToastOpen: false }),
 
-      language: 'ko',
+      language: 'en',
       setLanguage: (lang) => set({ language: lang }),
-      chatLanguage: 'ko',
+      chatLanguage: 'en',
       setChatLanguage: (lang) => set({ chatLanguage: lang }),
     }),
     {

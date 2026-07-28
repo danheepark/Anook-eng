@@ -1,0 +1,8 @@
+/* src/app/frontdesk/requests/_components/RagConfirmModal/RagConfirmModal.module.css */
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  width: 100%;
+}
