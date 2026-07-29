@@ -263,7 +263,7 @@ public class SendMessageService implements SendMessageUseCase {
                                         analysis.guestReply(), analysis.summary(), analysis.domainCode(),
                                         analysis.priority(),
                                         analysis.entities(), analysis.confidence(), analysis.action(),
-                                        analysis.actionType(),
+                                        analysis.actionType(), analysis.needsClarification(),
                                         analysis.aiLogMeta(), analysis.targetKeyword(), validTargetRequestId,
                                         analysis.clarificationOptions(),
                                         analysis.reasoning());
@@ -344,6 +344,13 @@ public class SendMessageService implements SendMessageUseCase {
                             "[Message] RequestCancelledByGuestEvent 발행 — room: {}, domain: {}, targetKeyword: {}, targetRequestId: {}",
                             roomNo, analysis.domainCode(), analysis.targetKeyword(), analysis.targetRequestId());
                 } else if (analysis.domainCode() != null) {
+                    // [AN-421] AI가 추가 질문(수량 확인, 옵션 확인, 중복 확인 등)을 하는 단계라면
+                    // 아직 주문을 확정(생성)하면 안 되므로 이벤트를 발행하지 않고 스킵합니다.
+                    if (analysis.needsClarification()) {
+                        log.info("[Message] AI needs clarification. Skipping RequestDetectedEvent.");
+                        continue;
+                    }
+
                     // [AN-342] targetRequestId가 존재 + actionType=ADD인 경우:
                     // 고객이 "추가요"로 기존 요청에 추가를 확정한 것이므로 ADD_DUPLICATE로 자동 전환.
                     // 이전에는 무조건 스킵했지만, 이는 고객의 확인 응답을 무시하는 버그였음.

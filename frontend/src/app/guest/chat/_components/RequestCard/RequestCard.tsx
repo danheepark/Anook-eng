@@ -443,7 +443,23 @@ export default function RequestCard({
               {isTranslatingDetails ? (
                 <span className={styles.translatingText}>{t.cardUI?.message?.translating || 'Translating...'}</span>
               ) : (
-                translatedDetails || rawDetails
+                (() => {
+                  const finalStr = translatedDetails || rawDetails;
+                  const rawLines = rawDetails.split('\n');
+                  const highlightItems = (entities?.highlight_items as string[]) || [];
+                  
+                  return finalStr.split('\n').map((line, idx) => {
+                    const rawLine = rawLines[idx] || '';
+                    const isMod = highlightItems.some(hi => rawLine.includes(hi));
+                    
+                    return (
+                      <div key={idx} className={isMod ? styles.modifiedLine : ''}>
+                        {line}
+                        {isMod && <span className={styles.modifiedBadge}>Modified</span>}
+                      </div>
+                    );
+                  });
+                })()
               )}
             </div>
           )}

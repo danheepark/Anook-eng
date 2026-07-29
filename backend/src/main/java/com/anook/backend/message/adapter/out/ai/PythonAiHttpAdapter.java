@@ -104,6 +104,9 @@ public class PythonAiHttpAdapter implements MessageAiPort {
 
                 String actionType = (String) response.getOrDefault("action_type", "ADD");
 
+                boolean needsClarification = response.containsKey("needs_clarification") 
+                        && (Boolean) response.get("needs_clarification");
+
                 @SuppressWarnings("unchecked")
                 Map<String, Object> aiLogMeta = response.containsKey("ai_log_meta")
                         ? (Map<String, Object>) response.get("ai_log_meta")
@@ -122,10 +125,10 @@ public class PythonAiHttpAdapter implements MessageAiPort {
 
                 String reasoning = (String) response.getOrDefault("reasoning", "알 수 없음");
 
-                log.info("[PythonAI] 개별 분석 완료 — domain: {}, confidence: {}, action: {}, actionType: {}, targetKeyword: {}, options: {}, reasoning: {}",
-                        domainCode, confidence, action, actionType, targetKeyword, clarificationOptions, reasoning);
+                log.info("[PythonAI] 개별 분석 완료 — domain: {}, confidence: {}, action: {}, actionType: {}, targetKeyword: {}, options: {}, reasoning: {}, needsClarification: {}",
+                        domainCode, confidence, action, actionType, targetKeyword, clarificationOptions, reasoning, needsClarification);
 
-                results.add(new MessageAiResult(guestReply, summary, domainCode, priority, entities, confidence, action, actionType, aiLogMeta, targetKeyword, targetRequestId, clarificationOptions, reasoning));
+                results.add(new MessageAiResult(guestReply, summary, domainCode, priority, entities, confidence, action, actionType, needsClarification, aiLogMeta, targetKeyword, targetRequestId, clarificationOptions, reasoning));
             }
 
             return results;
@@ -155,6 +158,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
                 0.0, 
                 "ADD", 
                 "ADD", 
+                false,
                 null,
                 null,
                 null,

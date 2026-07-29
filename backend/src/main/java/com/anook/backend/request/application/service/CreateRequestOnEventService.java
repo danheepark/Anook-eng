@@ -46,9 +46,11 @@ public class CreateRequestOnEventService {
 
         boolean forceEscalate = false;
         // [Cancel & Replace] AI가 기존 요청을 '수정(REPLACE)'하는 문맥이라고 판단했을 때만 자동 취소
-        // "수건 2장 줘" → "아니 3장 줘" = REPLACE (기존 요청 취소)
-        // "수건 줘" → "물도 줘" = ADD (기존 요청 유지)
-        if ("REPLACE".equalsIgnoreCase(event.getActionType())) {
+        // [AN-380] ADD_DUPLICATE 이거나 REPLACE 인 경우 기존 요청 처리
+        String analysisTargetRequestId = event.getTargetKeyword();
+        List<String> modifiedItems = new java.util.ArrayList<>();
+        
+        if (analysisTargetRequestId != null && ("REPLACE".equals(event.getActionType()) || "ADD_DUPLICATE".equals(event.getActionType()))) {
             // [Keyword Targeting] targetKeyword가 있으면 키워드 매칭으로 대상 탐색
             java.util.Optional<Request> targetRequest = java.util.Optional.empty();
 
@@ -103,7 +105,6 @@ public class CreateRequestOnEventService {
                     try {
                         existing.requestCancellation();
                         requestRepositoryPort.save(existing);
-
                         log.info("[Cancel&Replace] IN_PROGRESS 요청 취소 승인 대기 처리 — id: {}", existing.getId());
 
                         RequestSsePayload cancelPayload = RequestSsePayload.cancelRequestReceived(
@@ -116,17 +117,24 @@ public class CreateRequestOnEventService {
                             dispatchPort.dispatchToDepartment(existing.getDepartmentId(), cancelPayload);
                         }
                     } catch (Exception e) {
-                        log.warn("[Cancel&Replace] 기존 요청 취소 대기 실패 — id: {}, reason: {}", existing.getId(),
-                                e.getMessage());
+                        log.warn("[Cancel&Replace] IN_PROGRESS 기존 요청 취소 대기 실패: {}", e.getMessage());
                     }
                 }
+                
+                // [AN-423] 수정된 항목 추출 (하단에서 엔티티에 주입됨)
+                modifiedItems = computeModifiedItems(existing.getEntities(), event.getEntities());
+            } else {
+                log.info("[CreateRequest] 교체/추가할 대상(targetRequestId)이 없거나 유효하지 않아 일반 생성 진행 - EventTargetId: {}", analysisTargetRequestId);
             }
         }
 
-        // 무의미하게 짧은 단답("응", "네")은 숨기고 상세 내역만 표시.
-        // 긴 문장일 경우에는 원문과 AI가 추출한 상세 내역을 모두 표시하여 직원의 가독성을 높임.
+        Map<String, Object> finalEntities = new java.util.HashMap<>(event.getEntities() != null ? event.getEntities() : new java.util.HashMap<>());
+        if (!modifiedItems.isEmpty()) {
+            finalEntities.put("highlight_items", modifiedItems);
+        }
+
         String finalRawText = event.getRawText();
-        String formattedEntities = formatEntities(event.getEntities());
+        String formattedEntities = formatEntities(finalEntities);
 
         if (finalRawText != null && finalRawText.length() <= 3) {
             finalRawText = formattedEntities.trim(); // "응"은 버리고 상세 내역만 사용
@@ -140,7 +148,7 @@ public class CreateRequestOnEventService {
                 event.getGuestId(),
                 domainCode,
                 event.getPriority(),
-                event.getEntities(),
+                finalEntities,
                 event.getConfidence(),
                 finalRawText,
                 event.getSummary(),
@@ -343,5 +351,85 @@ public class CreateRequestOnEventService {
         }
 
         return sb.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> computeModifiedItems(Map<String, Object> oldEntities, Map<String, Object> newEntities) {
+        List<String> modifiedItems = new ArrayList<>();
+        if (oldEntities == null || newEntities == null) return modifiedItems;
+
+        // F&B (menu_items)
+        if (newEntities.containsKey("menu_items") && oldEntities.containsKey("menu_items")) {
+            Map<String, Integer> oldCounts = new java.util.HashMap<>();
+            Object oldMenu = oldEntities.get("menu_items");
+            if (oldMenu instanceof List) {
+                for (Object obj : (List<?>) oldMenu) {
+                    if (obj instanceof Map) {
+                        Map<String, Object> item = (Map<String, Object>) obj;
+                        String name = (String) item.get("name");
+                        Object qtyObj = item.get("quantity");
+                        if (name != null) {
+                            int qty = (qtyObj instanceof Number) ? ((Number) qtyObj).intValue() : 1;
+                            oldCounts.put(name, oldCounts.getOrDefault(name, 0) + qty);
+                        }
+                    }
+                }
+            }
+
+            Object newMenu = newEntities.get("menu_items");
+            if (newMenu instanceof List) {
+                for (Object obj : (List<?>) newMenu) {
+                    if (obj instanceof Map) {
+                        Map<String, Object> item = (Map<String, Object>) obj;
+                        String name = (String) item.get("name");
+                        Object qtyObj = item.get("quantity");
+                        if (name != null) {
+                            int qty = (qtyObj instanceof Number) ? ((Number) qtyObj).intValue() : 1;
+                            if (!oldCounts.containsKey(name) || oldCounts.get(name) != qty) {
+                                modifiedItems.add(name);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // HK (items)
+        if (newEntities.containsKey("items") && oldEntities.containsKey("items")) {
+            Map<String, Integer> oldCounts = new java.util.HashMap<>();
+            Object oldItems = oldEntities.get("items");
+            if (oldItems instanceof List) {
+                for (Object obj : (List<?>) oldItems) {
+                    if (obj instanceof Map) {
+                        Map<String, Object> item = (Map<String, Object>) obj;
+                        String name = (String) item.get("item");
+                        Object qtyObj = item.get("count");
+                        if (name != null) {
+                            int qty = (qtyObj instanceof Number) ? ((Number) qtyObj).intValue() : 1;
+                            oldCounts.put(name, oldCounts.getOrDefault(name, 0) + qty);
+                        }
+                    }
+                }
+            }
+
+            Object newItems = newEntities.get("items");
+            if (newItems instanceof List) {
+                for (Object obj : (List<?>) newItems) {
+                    if (obj instanceof Map) {
+                        Map<String, Object> item = (Map<String, Object>) obj;
+                        String name = (String) item.get("item");
+                        Object qtyObj = item.get("count");
+                        if (name != null) {
+                            int qty = (qtyObj instanceof Number) ? ((Number) qtyObj).intValue() : 1;
+                            if (!oldCounts.containsKey(name) || oldCounts.get(name) != qty) {
+                                modifiedItems.add(name);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return modifiedItems;
     }
 }

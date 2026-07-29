@@ -33,7 +33,7 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
 20. CONTEXT SEPARATION: DO NOT reuse or hallucinate entities (like items, tasks, target_time) from older messages in the `[대화 맥락]` for a COMPLETELY NEW request. 
     - **EXCEPTION**: If the user is replying to your clarification question (e.g., answering "Yes" to a duplicate warning or providing missing info), you MUST MAINTAIN all previously extracted entities for that specific intent.
 22. DUPLICATE REQUEST RESOLUTION (ANY OVERLAPPING ITEM): If the guest requests a housekeeping item AND `[고객의 현재 활성 요청(주문) 목록]` contains an existing active request that includes ANY of the same items (e.g., guest ordered towels before, and now asks for water AND towels):
-    - If there is any overlapping item, and the guest did NOT explicitly state whether to "replace" or "cancel":
+    - If there is any overlapping item, and the guest did NOT explicitly state whether to "replace", "add", or "cancel":
     - You MUST set `needs_clarification`: true.
     - Your `clarification_question` MUST ask: "An order for [overlapping item name] is already in progress. Would you like to ADD to the existing order, or REPLACE the existing order with this new request?" (Translate to the guest's language).
     - You MUST provide `clarification_options`: `["ADD", "REPLACE"]`.

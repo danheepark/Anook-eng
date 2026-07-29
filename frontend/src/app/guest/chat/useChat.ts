@@ -477,6 +477,12 @@ export function useChat() {
             // 같은 도메인 내 상태 변경: 기존 카드 교체
             const filtered = prev.filter(m => m.meta?.requestId !== payload.requestId && m.id !== `request-${payload.requestId}`);
 
+            // [AN-422] REPLACE에 의해 자동 취소된 기존 카드는 화면에서 완전히 삭제하여
+            // 취소+생성의 시스템적 과정을 숨기고 최종 결과만 보여준다.
+            if (payload.status === 'CANCELLED' && payload.cancelReason === 'REPLACED') {
+              return filtered;
+            }
+
             return [...filtered, {
               ...requestMsg,
               content: preservedContent,
