@@ -198,6 +198,23 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                   onCancel={() => onCancelRequest?.(Number(msg.meta?.requestId))}
                   onAccept={() => onConfirmRequest?.(Number(msg.meta?.requestId))}
                 />
+                {msg.meta?.options && !msg.meta?.selectedOption && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-start', paddingTop: '4px' }}>
+                    <Pill
+                      options={msg.meta?.options as string[]}
+                      selectedOption={msg.meta?.selectedOption as string | undefined}
+                      disabled={msg.meta?.pillDisabled as boolean | undefined}
+                      onSelect={(option) => {
+                        if (onPillSelect) {
+                          onPillSelect(msg.id, option);
+                        } else {
+                          onSendMessage(option);
+                        }
+                      }}
+                      align="flex-start"
+                    />
+                  </div>
+                )}
               </div>
             );
           }

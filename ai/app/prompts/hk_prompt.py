@@ -32,15 +32,14 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
 10. Output ONLY a valid JSON object matching the HotelRequestSchema. Do not include markdown formatting or backticks.
 20. CONTEXT SEPARATION: DO NOT reuse or hallucinate entities (like items, tasks, target_time) from older messages in the `[대화 맥락]` for a COMPLETELY NEW request. 
     - **EXCEPTION**: If the user is replying to your clarification question (e.g., answering "Yes" to a duplicate warning or providing missing info), you MUST MAINTAIN all previously extracted entities for that specific intent.
-22. DUPLICATE REQUEST RESOLUTION (SAME ITEM ONLY): If the guest requests a housekeeping item AND `[고객의 현재 활성 요청(주문) 목록]` contains an existing active request for the EXACT SAME ITEM (e.g., guest ordered towels before, and asks for MORE towels now):
-    - CRITICAL: If the guest asks for a DIFFERENT item (e.g., ordered towels before, now asks for water), DO NOT trigger this rule. Process it normally as a brand new request and DO NOT set `target_request_id`.
-    - If it IS the exact same item, and the guest did NOT explicitly state whether to "replace" or "cancel":
+22. DUPLICATE REQUEST RESOLUTION (ANY OVERLAPPING ITEM): If the guest requests a housekeeping item AND `[고객의 현재 활성 요청(주문) 목록]` contains an existing active request that includes ANY of the same items (e.g., guest ordered towels before, and now asks for water AND towels):
+    - If there is any overlapping item, and the guest did NOT explicitly state whether to "replace" or "cancel":
     - You MUST set `needs_clarification`: true.
-    - Your `clarification_question` MUST ask: "An order for [item name] is already in progress. Would you like to ADD to the existing order, or CHANGE the existing order?" (Translate to the guest's language).
-    - You MUST provide `clarification_options`: `["ADD", "CHANGE"]`.
+    - Your `clarification_question` MUST ask: "An order for [overlapping item name] is already in progress. Would you like to ADD to the existing order, or REPLACE the existing order with this new request?" (Translate to the guest's language).
+    - You MUST provide `clarification_options`: `["ADD", "REPLACE"]`.
     - You MUST identify the existing request ID from `[고객의 현재 활성 요청(주문) 목록]` and set it in `"target_request_id"`.
-    - If the guest replies "ADD" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD_DUPLICATE"`. Do NOT automatically finalize. Treat this as a brand new request. If any required details (like quantity) are missing, set `needs_clarification: true` and ask for them. Only finalize if all required details are present.
-    - **CRITICAL ADD_DUPLICATE RULE**: When processing an ADD_DUPLICATE request, DO NOT sum or calculate the total quantity with the previous order. The `items` array MUST ONLY contain the exact NEW quantity the guest is adding in this turn.
+    - If the guest replies "ADD" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD"`. (For duplicate adds, just treat it as ADD).
+    - If the guest replies "REPLACE", you MUST set `action_type` to `"REPLACE"`.
 23. SUMMARY FORMAT (CRITICAL): Your `summary` MUST be a specific 1-3 word noun phrase of what the guest wants in English (e.g., 'Towel x2', 'Room Cleaning'). DO NOT use generic phrases like 'Housekeeping request'. This applies to ALL requests, including ADD_DUPLICATE.
 
 [Final Reply Rule]

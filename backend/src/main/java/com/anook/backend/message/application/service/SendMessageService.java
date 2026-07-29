@@ -273,7 +273,7 @@ public class SendMessageService implements SendMessageUseCase {
                 if (validatedAnalysis.targetRequestId() != null) {
                     conflictRequestId = validatedAnalysis.targetRequestId();
                 }
-                if ("ADD_DUPLICATE".equals(validatedAnalysis.actionType())) {
+                if ("ADD_DUPLICATE".equals(validatedAnalysis.actionType()) || "ADD".equals(validatedAnalysis.actionType())) {
                     isAddDuplicate = true;
                 }
             }
@@ -339,7 +339,7 @@ public class SendMessageService implements SendMessageUseCase {
                     .distinct()
                     .toList();
 
-            if (!options.isEmpty() && conflictRequestId == null) {
+            if (!options.isEmpty()) {
                 payload.put("options", options);
             }
 
@@ -401,7 +401,7 @@ public class SendMessageService implements SendMessageUseCase {
                     // created in the database during the confirmation stage. If no pending request
                     // exists,
                     // it will naturally fall through and publish the RequestDetectedEvent.
-                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !isAddDuplicate) {
+                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !"ADD".equals(analysis.actionType()) && !isAddDuplicate) {
                         java.util.Map<String, Object> pendingRequest = activeRequests.stream()
                                 .filter(req -> ("CREATED".equals(req.get("status"))
                                         || "PENDING".equals(req.get("status")))
