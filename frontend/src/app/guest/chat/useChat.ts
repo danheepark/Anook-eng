@@ -470,18 +470,27 @@ export function useChat() {
               }];
             }
 
+            // [AN-422] 취소된 기존 카드는 제자리에서 취소 상태로 변경하여 채팅 기록(시간의 흐름)을 보존한다.
+            if (payload.status === 'CANCELLED' && existingIdx >= 0) {
+              const updated = [...prev];
+              updated[existingIdx] = {
+                ...updated[existingIdx],
+                meta: {
+                  ...updated[existingIdx].meta,
+                  status: payload.status,
+                  graceRemaining: 0,
+                  cancelledAt: existingMeta.cancelledAt || new Date().toISOString()
+                }
+              };
+              return updated;
+            }
+
             // 기존 카드 중 텍스트(content)가 있는 카드의 텍스트 보존 (AI 응답 텍스트 증발 방지)
             const existingWithContent = [...prev].reverse().find(m => (m.meta?.requestId === payload.requestId || m.id === `request-${payload.requestId}`) && m.content);
             const preservedContent = existingWithContent ? existingWithContent.content : '';
 
             // 같은 도메인 내 상태 변경: 기존 카드 교체
             const filtered = prev.filter(m => m.meta?.requestId !== payload.requestId && m.id !== `request-${payload.requestId}`);
-
-            // [AN-422] REPLACE에 의해 자동 취소된 기존 카드는 화면에서 완전히 삭제하여
-            // 취소+생성의 시스템적 과정을 숨기고 최종 결과만 보여준다.
-            if (payload.status === 'CANCELLED' && payload.cancelReason === 'REPLACED') {
-              return filtered;
-            }
 
             return [...filtered, {
               ...requestMsg,
