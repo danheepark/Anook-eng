@@ -288,24 +288,7 @@ public class SendMessageService implements SendMessageUseCase {
                     .distinct()
                     .toList();
 
-            if (conflictRequestId != null && !isAddDuplicate && options.isEmpty()) {
-                java.util.Map<String, Object> existingReq = activeRequestPort.findRequestById(conflictRequestId);
-                if (existingReq != null) {
-                    payload.put("uiType", "REQUEST_CARD");
 
-                    java.util.Map<String, Object> meta = new java.util.HashMap<>();
-                    meta.put("requestId", existingReq.get("id"));
-                    meta.put("domainCode", existingReq.get("departmentId"));
-                    meta.put("summary", existingReq.get("summary"));
-                    meta.put("status", existingReq.get("status"));
-                    meta.put("priority", existingReq.get("priority"));
-                    meta.put("entities", existingReq.get("entities"));
-                    meta.put("graceRemaining", 0); // 수락/취소 버튼 제거
-
-                    payload.put("meta", meta);
-                    log.info("[Message] 중복 요청 감지 — 기존 요청 ID: {}, uiType: REQUEST_CARD 지정", conflictRequestId);
-                }
-            }
 
             // [Contextual Pill Fix] Extract meta context for option pills (e.g. contextual
             // cancellation/modification)
@@ -401,7 +384,7 @@ public class SendMessageService implements SendMessageUseCase {
                     // created in the database during the confirmation stage. If no pending request
                     // exists,
                     // it will naturally fall through and publish the RequestDetectedEvent.
-                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !"ADD".equals(analysis.actionType()) && !isAddDuplicate) {
+                    if (isFinalized && !"ADD_DUPLICATE".equals(analysis.actionType()) && !"ADD".equals(analysis.actionType()) && !"REPLACE".equals(analysis.actionType()) && !isAddDuplicate) {
                         java.util.Map<String, Object> pendingRequest = activeRequests.stream()
                                 .filter(req -> ("CREATED".equals(req.get("status"))
                                         || "PENDING".equals(req.get("status")))
