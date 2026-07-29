@@ -8,7 +8,6 @@ import styles from './Header.module.css';
 import HeaderNotification from './HeaderNotification/HeaderNotification';
 import StaffNotification from './StaffNotification/StaffNotification';
 import Button from '@/components/ui/Button/Button';
-import AiServerStatusIndicator from '@/components/ui/AiServerStatusIndicator/AiServerStatusIndicator';
 import { useTranslation } from '@/app/useTranslation';
 
 interface HeaderProps {
@@ -26,7 +25,6 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
         <button className={styles.hamburgerBtn} onClick={toggleSidebar} aria-label="메뉴 열기">
           <Menu size={24} />
         </button>
-        {role === 'frontdesk' && <AiServerStatusIndicator />}
       </div>
 
       <div className={styles.right} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-16)' }}>
