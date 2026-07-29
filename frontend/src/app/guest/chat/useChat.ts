@@ -303,7 +303,7 @@ export function useChat() {
           // AI 특수 코드 매핑 (다국어 언어팩 연동, AI 할루시네이션 대비 includes 사용)
           content = translateContent(content);
 
-          const msgType = payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : (payload.uiType || 'TEXT');
+          const msgType = payload.uiType ? payload.uiType : (payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : 'TEXT');
           const msgsToAppend: ChatMessage[] = [];
 
           if (msgType === 'REQUEST_CARD') {

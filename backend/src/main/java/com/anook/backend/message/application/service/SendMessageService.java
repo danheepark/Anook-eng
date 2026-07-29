@@ -279,7 +279,16 @@ public class SendMessageService implements SendMessageUseCase {
             }
             analyses = validatedAnalyses;
 
-            if (conflictRequestId != null && !isAddDuplicate) {
+            java.util.List<String> options = analyses.stream()
+                    .map(MessageAiResult::clarificationOptions)
+                    .filter(java.util.Objects::nonNull)
+                    .flatMap(java.util.List::stream)
+                    .map(String::trim)
+                    .map(opt -> opt.equals("아니요") ? "아니오" : opt)
+                    .distinct()
+                    .toList();
+
+            if (conflictRequestId != null && !isAddDuplicate && options.isEmpty()) {
                 java.util.Map<String, Object> existingReq = activeRequestPort.findRequestById(conflictRequestId);
                 if (existingReq != null) {
                     payload.put("uiType", "REQUEST_CARD");
@@ -329,15 +338,6 @@ public class SendMessageService implements SendMessageUseCase {
                         "[Message] Option context meta added to AI_RESPONSE payload: domainCode={}, summary={}, targetKeyword={}",
                         metaDomainCode, metaSummary, metaTargetKeyword);
             }
-
-            java.util.List<String> options = analyses.stream()
-                    .map(MessageAiResult::clarificationOptions)
-                    .filter(java.util.Objects::nonNull)
-                    .flatMap(java.util.List::stream)
-                    .map(String::trim)
-                    .map(opt -> opt.equals("아니요") ? "아니오" : opt)
-                    .distinct()
-                    .toList();
 
             if (!options.isEmpty()) {
                 payload.put("options", options);
