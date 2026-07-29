@@ -37,10 +37,12 @@ public class GracePeriodScheduler {
     
     private final RequestRepositoryPort requestPort;
     private final DispatchPort dispatchPort;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
-    public GracePeriodScheduler(RequestRepositoryPort requestPort, DispatchPort dispatchPort) {
+    public GracePeriodScheduler(RequestRepositoryPort requestPort, DispatchPort dispatchPort, org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.requestPort = requestPort;
         this.dispatchPort = dispatchPort;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -73,6 +75,7 @@ public class GracePeriodScheduler {
                         request.confirmGrace();
                         requestPort.save(request);
                         log.info("[GracePeriod] CREATED→PENDING 전환 완료 — requestId: {}", requestId);
+                        eventPublisher.publishEvent(new com.anook.backend.request.application.event.RequestConfirmedEvent(this, request.getRoomNo(), request.getGuestId(), request.getSummary()));
                     }
                     log.info("[GracePeriod] 만료 → 직원 알림 발송 — requestId: {}, dept: {}", requestId, deptCode);
 
@@ -125,6 +128,7 @@ public class GracePeriodScheduler {
                         request.confirmGrace();
                         requestPort.save(request);
                         log.info("[GracePeriod] 고객 수락 → CREATED→PENDING 전환 — requestId: {}", requestId);
+                        eventPublisher.publishEvent(new com.anook.backend.request.application.event.RequestConfirmedEvent(this, request.getRoomNo(), request.getGuestId(), request.getSummary()));
                     }
                     String deptCode = request.getDomainCode() != null ? request.getDomainCode().name() : "UNKNOWN";
                     

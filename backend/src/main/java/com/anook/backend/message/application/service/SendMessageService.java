@@ -245,7 +245,8 @@ public class SendMessageService implements SendMessageUseCase {
                                 }
                             }
 
-                            if (!seemsSameRequest) {
+                            boolean isFb = "FB".equals(analysis.domainCode());
+                            if (!seemsSameRequest && !isFb) {
                                 log.info(
                                         "[Message] targetRequestId={} ignored due to item mismatch (existing: '{}', new: '{}')",
                                         validTargetRequestId, existingSummary, newSummary);

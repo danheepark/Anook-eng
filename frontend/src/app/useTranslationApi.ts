@@ -13,12 +13,14 @@ export function useTranslationApi(text: string | null | undefined, targetLanguag
   useEffect(() => {
     if (!text || targetLanguage === 'ko') {
       setTranslatedText(text || null);
+      setIsLoading(false);
       return;
     }
 
     // Skip translation if target language is English and text contains no Korean characters (already in English)
     if (targetLanguage === 'en' && !/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(text)) {
       setTranslatedText(text);
+      setIsLoading(false);
       return;
     }
 
