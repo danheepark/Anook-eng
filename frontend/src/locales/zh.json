@@ -316,7 +316,7 @@
           "NIGHT": "大夜班"
         }
       },
-      "downloadButton": "📥 导出 Excel",
+      "downloadButton": "导出 Excel",
       "downloading": "下载中...",
       "filterOptions": {
         "ALL": "所有状态",

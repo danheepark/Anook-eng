@@ -316,7 +316,7 @@
           "NIGHT": "深夜勤"
         }
       },
-      "downloadButton": "📥 エクセルダウンロード",
+      "downloadButton": "エクセルダウンロード",
       "downloading": "ダウンロード中...",
       "filterOptions": {
         "ALL": "全ステータス",

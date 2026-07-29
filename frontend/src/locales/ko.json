@@ -359,7 +359,7 @@
           "NIGHT": "심야"
         }
       },
-      "downloadButton": "📥 엑셀 다운로드",
+      "downloadButton": "엑셀 다운로드",
       "downloading": "다운로드 중...",
       "filterOptions": {
         "ALL": "전체 상태",

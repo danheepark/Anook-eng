@@ -366,7 +366,7 @@
           "NIGHT": "Night"
         }
       },
-      "downloadButton": "📥 Excel Download",
+      "downloadButton": "Excel Download",
       "downloading": "Downloading...",
       "filterOptions": {
         "ALL": "All Status",

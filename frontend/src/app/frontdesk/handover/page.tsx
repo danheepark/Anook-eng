@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import { HandoverRecord } from '@/components/ui/HandoverRecord';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import Button from '@/components/ui/Button/Button';
@@ -33,28 +34,77 @@ export default function HandoverPage() {
     itemsData,
   } = useHandover();
 
+  const [editableItems, setEditableItems] = useState([...itemsData]);
+
+  useEffect(() => {
+    setEditableItems([...itemsData]);
+  }, [itemsData]);
+
+  const handleItemUpdate = (id: string | number, field: string, value: string) => {
+    setEditableItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
   const handleExcelDownload = async () => {
     setDownloading(true);
     try {
-      const res = await fetch(
-        `/api/frontdesk/handover/export?date=${targetDate}&shiftType=${shiftType}`
-      );
-      if (!res.ok) throw new Error('엑셀 다운로드에 실패했습니다.');
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
       const shiftLabel = shiftType === 'DAY'
         ? t.frontdeskPage?.handover?.shift?.label?.DAY || '주간'
         : shiftType === 'EVENING'
           ? t.frontdeskPage?.handover?.shift?.label?.EVENING || '야간'
           : t.frontdeskPage?.handover?.shift?.label?.NIGHT || '심야';
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `인수인계_${targetDate}_${shiftLabel}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+
+      // Excel content formatting
+      const headerRows = [
+        [t.frontdeskPage?.handover?.title || "인수인계 문서"],
+        [],
+        [
+          t.frontdeskPage?.handover?.briefing?.shiftTime || '근무시간', 
+          `${briefingData?.shiftStart || '-'} ~ ${briefingData?.shiftEnd || '-'}`, 
+          t.frontdeskPage?.handover?.briefing?.manager || '담당자명', 
+          managerName
+        ],
+        [
+          t.frontdeskPage?.handover?.briefing?.resolutionStatus || '처리 현황', 
+          `${(briefingData?.totalRequestCount || 0) - (briefingData?.pendingCount || 0)} / ${briefingData?.totalRequestCount || 0}`, 
+          t.frontdeskPage?.handover?.briefing?.createdAt || '작성 일시', 
+          briefingData?.createdAt || '-'
+        ],
+        [],
+        [
+          t.frontdeskPage?.handover?.tableColumns?.room || '객실', 
+          t.frontdeskPage?.handover?.tableColumns?.status || '상태', 
+          t.frontdeskPage?.handover?.tableColumns?.category || '카테고리', 
+          t.frontdeskPage?.handover?.tableColumns?.summary || '제목/내용 요약', 
+          t.frontdeskPage?.handover?.tableColumns?.time || '시간'
+        ]
+      ];
+
+      const dataRows = editableItems.map(item => [
+        item.roomNumber || '-',
+        item.status || '',
+        item.category || '',
+        item.summary || '',
+        item.time || ''
+      ]);
+
+      const worksheet = XLSX.utils.aoa_to_sheet([...headerRows, ...dataRows]);
+      
+      // Styling and column widths
+      worksheet['!cols'] = [
+        { wch: 10 }, // Room
+        { wch: 12 }, // Status
+        { wch: 15 }, // Category
+        { wch: 60 }, // Summary
+        { wch: 12 }  // Time
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Handover');
+      
+      const fileName = `인수인계_${targetDate}_${shiftLabel}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
     } catch (err) {
       alert(err instanceof Error ? err.message : '엑셀 다운로드 중 오류가 발생했습니다.');
     } finally {
@@ -62,7 +112,7 @@ export default function HandoverPage() {
     }
   };
 
-  const filteredItems = itemsData.filter(item => {
+  const filteredItems = editableItems.filter(item => {
     if (statusFilter !== 'ALL' && item.status !== statusFilter) {
       return false;
     }
@@ -98,11 +148,11 @@ export default function HandoverPage() {
               <option value="NIGHT">{t.frontdeskPage?.handover?.shift?.NIGHT || "심야 (23:00 - 07:00)"}</option>
             </select>
             <Button
-              variant="secondary"
+              variant="primary"
               onClick={handleExcelDownload}
               disabled={downloading || loading}
             >
-              {downloading ? (t.frontdeskPage?.handover?.downloading || '다운로드 중...') : (t.frontdeskPage?.handover?.downloadButton || '📥 엑셀 다운로드')}
+              {downloading ? (t.frontdeskPage?.handover?.downloading || '다운로드 중...') : (t.frontdeskPage?.handover?.downloadButton || '엑셀 다운로드')}
             </Button>
           </div>
         </div>
@@ -136,6 +186,7 @@ export default function HandoverPage() {
           managerName={managerName}
           briefing={briefingData || undefined}
           items={filteredItems}
+          onItemUpdate={handleItemUpdate}
         />
       )}
     </div>

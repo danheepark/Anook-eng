@@ -28,9 +28,10 @@ export interface HandoverRecordProps {
   managerName?: string;
   briefing?: HandoverBriefing;
   items: HandoverItem[];
+  onItemUpdate?: (id: string | number, field: keyof HandoverItem, value: string) => void;
 }
 
-export default function HandoverRecord({ managerName, briefing, items }: HandoverRecordProps) {
+export default function HandoverRecord({ managerName, briefing, items, onItemUpdate }: HandoverRecordProps) {
   const { t } = useTranslation();
 
   return (
@@ -56,7 +57,7 @@ export default function HandoverRecord({ managerName, briefing, items }: Handove
       )}
 
       <div className={styles.tableWrapper}>
-        <HandoverTable items={items} />
+        <HandoverTable items={items} onItemUpdate={onItemUpdate} />
       </div>
     </div>
   );
