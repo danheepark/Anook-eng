@@ -90,8 +90,11 @@ INSERT INTO staff (id, name, pin, role_id, department_id) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
--- PMS 룸서비스 메뉴 (더미 데이터)
+-- PMS 룸서비스 메뉴 (영문 표준 데이터)
 -- ============================================================
+DELETE FROM pms_receipt WHERE menu_id IN (SELECT id FROM pms_menu WHERE name ~ '[가-힣]');
+DELETE FROM pms_menu WHERE name ~ '[가-힣]';
+
 INSERT INTO pms_menu (name, price, price_usd, category, allergens, options, available) VALUES
     -- MAIN (메인 요리)
     ('Classic Cheeseburger',      15000, 11.5, 'MAIN',    '밀,유제품',        NULL,                          TRUE),
@@ -123,7 +126,13 @@ INSERT INTO pms_menu (name, price, price_usd, category, allergens, options, avai
     ('Minibar Beer',          8000,  6.2,  'HK_MINIBAR',    NULL, NULL, TRUE),
     ('Minibar Wine',          15000, 11.5, 'HK_MINIBAR',    NULL, NULL, TRUE),
     ('Minibar Snack',          5000,  3.8,  'HK_MINIBAR',    NULL, NULL, TRUE)
-ON CONFLICT (name) DO NOTHING;
+ON CONFLICT (name) DO UPDATE SET
+    price = EXCLUDED.price,
+    price_usd = EXCLUDED.price_usd,
+    category = EXCLUDED.category,
+    allergens = EXCLUDED.allergens,
+    options = EXCLUDED.options,
+    available = EXCLUDED.available;
 
 -- [2026-05-20] 기존 메뉴 데이터에 price_usd 정보 반영 (로컬 인스턴스 마이그레이션용)
 UPDATE pms_menu SET price_usd = 11.5 WHERE name = 'Classic Cheeseburger' AND price_usd IS NULL;

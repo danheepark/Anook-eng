@@ -140,6 +140,64 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
 
     result = HotelRequestSchema(**raw)
 
+    # ── CODE-LEVEL GUARDRAIL 0: Prevent Add/Replace infinite loop ──
+    # The AI's duplicate-order detection (Rule 13) re-triggers every turn because
+    # the active_requests list doesn't change until the order is finalized.
+    # This guardrail checks chat history: if Add/Replace was ALREADY asked,
+    # any subsequent Add/Replace question is suppressed unconditionally.
+    if result.needs_clarification:
+        clarification_opts = getattr(result, 'clarification_options', None) or []
+        opts_lower = [o.lower() for o in clarification_opts]
+        is_add_replace_q = any(o in opts_lower for o in ('add', 'replace'))
+
+        # Also detect by question text (AI sometimes omits formal options)
+        q_text = (getattr(result, 'clarification_question', '') or '').lower()
+        if not is_add_replace_q and 'add' in q_text and 'replace' in q_text:
+            is_add_replace_q = True
+
+        if is_add_replace_q:
+            user_lower = user_message.strip().lower()
+
+            # Check if Add/Replace was already asked in a PREVIOUS turn
+            previously_asked = False
+            if chat_history:
+                for msg in chat_history:
+                    content = (msg.get('content') or '').lower()
+                    role = msg.get('role', '')
+                    if role != 'user' and 'add' in content and 'replace' in content:
+                        previously_asked = True
+                        break
+
+            # Suppress if: (a) user is directly answering "Add"/"Replace", OR
+            #               (b) this question was already asked before
+            if user_lower in ('add', 'replace') or previously_asked:
+                print(f"[FB Guard] ✅ Suppressing Add/Replace loop (prev_asked={previously_asked}, user='{user_lower}')")
+                result.clarification_options = []
+
+                if user_lower == 'replace':
+                    raw["action_type"] = "REPLACE"
+                else:
+                    result.target_request_id = None
+                    raw.pop("target_request_id", None)
+                    raw["action_type"] = "ADD_DUPLICATE"
+
+                # Generate next step instead of re-asking
+                menu_items = result.entities.get("menu_items") or []
+                missing = getattr(result, 'missing_fields', []) or []
+
+                if not missing and menu_items:
+                    items_parts = []
+                    for mi in menu_items:
+                        name = mi.get("name", "item")
+                        qty = mi.get("quantity", 1)
+                        opt = mi.get("selected_option")
+                        label = f"{name}({opt}) x{qty}" if opt else f"{name} x{qty}"
+                        items_parts.append(label)
+                    items_str = ", ".join(items_parts)
+                    result.clarification_question = f"Your order: {items_str}. Shall I proceed?"
+                    result.missing_fields = []
+                # else: missing fields remain — guardrail 2 will handle required options
+
     # ── CODE-LEVEL GUARDRAIL 1: Different-item duplicate order false positive ──
     # If AI incorrectly set target_request_id for a DIFFERENT menu item, invalidate it.
     if result.target_request_id and active_requests:
@@ -168,7 +226,8 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
                     # Ask for quantity/options instead
                     menu_items = result.entities.get("menu_items") or []
                     item_name = menu_items[0]["name"] if menu_items else "the item"
-                    result.clarification_question = f"How many {item_name}s would you like?"
+                    display_name = f"{item_name}es" if item_name.endswith(('ch', 'sh', 's', 'x')) else (f"{item_name}s" if not item_name.endswith('s') else item_name)
+                    result.clarification_question = f"How many {display_name} would you like?"
 
     # ── CODE-LEVEL GUARDRAIL 2: Required option enforcement ──
     # After AI responds, cross-check with actual menu data to ensure required options are gathered.
