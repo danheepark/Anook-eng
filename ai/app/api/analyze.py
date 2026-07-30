@@ -127,7 +127,7 @@ STATIC_REPLIES = {
     },
     "CANCEL_PENDING": {
         "ko": "해당 건은 이미 처리가 진행 중이어서 담당 부서로 취소 가능 여부를 확인 중입니다. 🏃‍♂️ 확인 후 바로 안내해 드릴게요!",
-        "en": "Your request is already being processed, so we have sent a cancellation request to the department. 🏃‍♂️ We will notify you once confirmed!",
+        "en": "Your request is already being processed, so we have sent a cancellation request to the department. \n We will notify you once confirmed!",
         "ja": "すでに処理が進行中のため、担当部署にキャンセルをリクエストしました. 🏃‍♂️ 確認次第お知らせいたします。",
         "zh": "您的请求正在处理中，因此我们已向相关部门发送了取消请求. 🏃‍♂️ 确认后我们将通知您。"
     },

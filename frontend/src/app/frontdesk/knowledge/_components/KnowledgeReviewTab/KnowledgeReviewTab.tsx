@@ -415,7 +415,6 @@ export default function KnowledgeReviewTab({
         isOpen={!!chatHistoryRoomNo}
         onClose={() => setChatHistoryRoomNo(null)}
         roomNumber={chatHistoryRoomNo || ''}
-        hideBackButton={true}
       />
     </div>
   );

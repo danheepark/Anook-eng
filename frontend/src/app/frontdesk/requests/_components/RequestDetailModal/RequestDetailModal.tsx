@@ -367,7 +367,7 @@ export default function RequestDetailModal({
             <div className={styles.gridItem}>
               <span className={styles.label}>{t.frontdeskPage.requestDetailModal.summary}</span>
               <span className={styles.value}>
-                {isTranslating ? t.common.loading : translatedSummary || activeDetail.summary}
+                {activeDetail.summary}
               </span>
             </div>
             <div className={styles.gridItem}>

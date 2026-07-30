@@ -658,7 +658,7 @@
     "forwardFront": "We will connect you directly to the front desk right now to assist you further.",
     "infoNotFound": "I'm not quite sure about that one.  I have forwarded your question to the front desk staff. They will check and reply to you here shortly.",
     "cancelSuccess": "Your request has been successfully cancelled.  Please let me know if you need anything else!",
-    "cancelPending": "Your request is already being processed, so we have sent a cancellation request to the department.  We will notify you once confirmed!",
+    "cancelPending": "Your request is already being processed, so we have sent a cancellation request to the department. \n We will notify you once confirmed!",
     "piiGuard": "To protect your valuable personal information, we do not accept sensitive details via chat.  For detailed inquiries, please contact the front desk (extension 0) using your in-room phone for safe assistance. "
   },
   "feedbackCard": {

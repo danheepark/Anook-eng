@@ -33,26 +33,31 @@ interface TaskDetailModalProps {
 }
 
 const DEPARTMENTS = [
-  { id: 'HK', name: '하우스키핑' },
-  { id: 'FACILITY', name: '시설관리' },
-  { id: 'FB', name: '식음료' },
-  { id: 'FRONT', name: '프론트데스크' },
-  { id: 'CONCIERGE', name: '컨시어지' }
+  { id: 'HK', nameEn: 'Housekeeping', nameKo: '하우스키핑' },
+  { id: 'FACILITY', nameEn: 'Facility', nameKo: '시설관리' },
+  { id: 'FB', nameEn: 'F&B', nameKo: '식음료' },
+  { id: 'FRONT', nameEn: 'Front Desk', nameKo: '프론트데스크' },
+  { id: 'CONCIERGE', nameEn: 'Concierge', nameKo: '컨시어지' }
 ];
 
-/** 영문 키 → 한국어 라벨 매핑 (여기에 한 줄 추가하면 자동으로 예쁘게 표시됨) */
-const ENTITY_LABELS: Record<string, string> = {
-  // HK
+const ENTITY_LABELS_KO: Record<string, string> = {
   is_contactless: '비대면 배달', target_time: '희망 시간',
-  // FACILITY
   equipment: '대상 설비', symptom: '증상', location: '위치',
-  // CONCIERGE
   destination: '목적지', passenger_count: '인원', restaurant_name: '식당',
   cuisine_type: '음식 종류', category: '카테고리', action: '요청 유형',
-  // 공통
   item: '대상 물품', time: '시간', special_requests: '추가 요청', count: '수량',
   type: '유형', target: '대상', special_notes: 'PMS 특이사항 노트',
   pms_allergen_warning: '⚠️ 알레르기 안전 경고 (고객 확인 완료)',
+};
+
+const ENTITY_LABELS_EN: Record<string, string> = {
+  is_contactless: 'Contactless', target_time: 'Target Time',
+  equipment: 'Equipment', symptom: 'Symptom', location: 'Location',
+  destination: 'Destination', passenger_count: 'Guests', restaurant_name: 'Restaurant',
+  cuisine_type: 'Cuisine', category: 'Category', action: 'Action',
+  item: 'Item', time: 'Time', special_requests: 'Special Requests', count: 'Quantity',
+  type: 'Type', target: 'Target', special_notes: 'PMS Special Notes',
+  pms_allergen_warning: '⚠️ Allergen Warning (Guest Confirmed)',
 };
 
 /** 직원에게 보여줄 필요 없는 내부 키 (섹션 표시 판단 + 순회에서 모두 제외) */
@@ -61,7 +66,7 @@ const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'item_requests
 /** 배열 타입 특수 렌더러가 필요한 키 (key-value 순회에서만 스킵, 섹션 표시 판단에서는 포함) */
 const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
 
-function renderEntities(entities: Record<string, any>): React.ReactNode {
+function renderEntities(entities: Record<string, any>, language: string): React.ReactNode {
   const rendered: React.ReactNode[] = [];
 
   // 0) 정규화: item 키 단독 혹은 item+count 플랫 키 → items 배열로 통일 (AI 응답 형식 불일치 보정)
@@ -76,11 +81,11 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
   if (entities.items?.length > 0) {
     rendered.push(
       <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>물품 요청</span>
+        <span className={styles.label}>{language === 'en' ? 'Item Request' : '물품 요청'}</span>
         <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
           {entities.items.map((it: any, idx: number) => {
             const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
-            return <li key={idx}>• {itemText} - {it.count}개</li>;
+            return <li key={idx}>• {itemText} - {it.count}{language === 'en' ? ' ea' : '개'}</li>;
           })}
         </ul>
       </div>
@@ -89,7 +94,7 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
   if (entities.tasks?.length > 0) {
     rendered.push(
       <div key="tasks" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>수행 업무</span>
+        <span className={styles.label}>{language === 'en' ? 'Task Request' : '수행 업무'}</span>
         <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
           {entities.tasks.map((t: string, idx: number) => (
             <li key={idx}>• {t}</li>
@@ -101,12 +106,12 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
   if (entities.menu_items?.length > 0) {
     rendered.push(
       <div key="menu_items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>주문 메뉴</span>
+        <span className={styles.label}>{language === 'en' ? 'Order Menu' : '주문 메뉴'}</span>
         <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
           {entities.menu_items.map((mi: any, idx: number) => (
             <li key={idx}>
-              • {mi.name} {mi.quantity}개
-              {mi.selected_option && mi.selected_option !== '없음' ? ` (${mi.selected_option})` : ''}
+              • {mi.name} {mi.quantity}{language === 'en' ? ' ea' : '개'}
+              {mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'none' ? ` (${mi.selected_option})` : ''}
             </li>
           ))}
         </ul>
@@ -114,12 +119,12 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
     );
   }
 
-  // 2) 단순 key-value: 라벨 매핑에 있으면 한국어, 없으면 영문 키 그대로 (폴백)
+  // 2) 단순 key-value: 라벨 매핑에 있으면 언어별, 없으면 영문 키 그대로 (폴백)
   for (const [key, value] of Object.entries(entities)) {
     if (HIDDEN_ENTITY_KEYS.has(key) || ARRAY_KEYS.has(key)) continue;
-    if (value === null || value === undefined || value === '' || value === false || value === '없음') continue;
+    if (value === null || value === undefined || value === '' || value === false || value === '없음' || value === 'none') continue;
 
-    const label = ENTITY_LABELS[key] || key;
+    const label = language === 'en' ? (ENTITY_LABELS_EN[key] || key) : (ENTITY_LABELS_KO[key] || key);
 
     // boolean 타입 (is_contactless 등) 은 뱃지로 표시
     if (value === true) {
@@ -142,7 +147,7 @@ function renderEntities(entities: Record<string, any>): React.ReactNode {
     }
   }
 
-  return rendered.length > 0 ? rendered : <span>분석 데이터 없음</span>;
+  return rendered.length > 0 ? rendered : <span>{language === 'en' ? 'No analysis data' : '분석 데이터 없음'}</span>;
 }
 
 export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onComplete, onTransfer, onApproveCancellation, onRejectCancellation }: TaskDetailModalProps) {
@@ -243,23 +248,23 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 <span className={styles.roomBadge}>
                   {language === 'ko' ? `${task.roomNumber}호` : `NO.${task.roomNumber}`}
                 </span>
-                <h2 className={styles.title}>{isTranslating ? t.common.loading || 'Loading...' : (translatedSummary || task.summary)}</h2>
+                <h2 className={styles.title}>{task.summary}</h2>
                 {task.priority === 'URGENT' && (
-                  <StatusBadge variant="red">긴급</StatusBadge>
+                  <StatusBadge variant="red">{language === 'en' ? 'URGENT' : '긴급'}</StatusBadge>
                 )}
                 {task.cancelRequested && (
-                  <StatusBadge variant="red">취소 대기중</StatusBadge>
+                  <StatusBadge variant="red">{language === 'en' ? 'Cancel Pending' : '취소 대기중'}</StatusBadge>
                 )}
               </div>
             </div>
 
             <div className={styles.content}>
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>요청 시간</span>
+                <span className={styles.infoLabel}>{language === 'en' ? 'Request Time' : '요청 시간'}</span>
                 <span className={styles.infoValue}>{formattedDate}</span>
               </div>
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>상태</span>
+                <span className={styles.infoLabel}>{language === 'en' ? 'Status' : '상태'}</span>
                 <span className={styles.infoValue}>
                   {task.status === 'PENDING' ? t.cardUI.status.pending :
                    task.status === 'IN_PROGRESS' ? t.cardUI.status.inProgress :
@@ -268,16 +273,20 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 </span>
               </div>
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>부서</span>
+                <span className={styles.infoLabel}>{language === 'en' ? 'Department' : '부서'}</span>
                 <span className={styles.infoValue}>
-                  {DEPARTMENTS.find(d => d.id === task.departmentId)?.name || task.departmentId}
+                  {(() => {
+                    const d = DEPARTMENTS.find(dept => dept.id === task.departmentId);
+                    if (!d) return task.departmentId;
+                    return language === 'en' ? d.nameEn : d.nameKo;
+                  })()}
                 </span>
               </div>
 
               {task.cancelRequested && (
                 <div className={styles.cancelAlertBox}>
-                  <strong>⚠️ 고객 취소 요청</strong>
-                  <p>고객이 해당 요청에 대해 취소를 신청했습니다. 진행 상황을 확인하고 취소 승인 또는 반려를 선택해주세요.</p>
+                  <strong>⚠️ {language === 'en' ? 'Guest Cancellation Request' : '고객 취소 요청'}</strong>
+                  <p>{language === 'en' ? 'The guest has requested to cancel this task. Please review and approve or reject the cancellation.' : '고객이 해당 요청에 대해 취소를 신청했습니다. 진행 상황을 확인하고 취소 승인 또는 반려를 선택해주세요.'}</p>
                 </div>
               )}
 
@@ -285,12 +294,12 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
               {(task.entities && Object.keys(task.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k)).length > 0) || task.reasoning ? (
                 <div className={styles.descriptionSection}>
                   <div className={styles.sectionHeader}>
-                    <h3 className={styles.descriptionTitle}>AI 분석 상세 내역</h3>
+                    <h3 className={styles.descriptionTitle}>{language === 'en' ? 'AI Analysis Details' : 'AI 분석 상세 내역'}</h3>
                     <button
                       className={styles.chatHistoryIconButton}
                       onClick={openChatHistory}
-                      title="대화 내역 보기"
-                      aria-label="대화 내역 보기"
+                      title={language === 'en' ? 'View Chat History' : '대화 내역 보기'}
+                      aria-label={language === 'en' ? 'View Chat History' : '대화 내역 보기'}
                     >
                       <History size={20} />
                     </button>
@@ -298,7 +307,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   <div className={styles.descriptionBox}>
                     {task.entities && Object.keys(task.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k)).length > 0 && (
                       <div className={styles.entityList}>
-                        {renderEntities(task.entities)}
+                        {renderEntities(task.entities, language)}
                       </div>
                     )}
                     {task.reasoning && (() => {
@@ -311,13 +320,10 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                         .filter(line => !line.toLowerCase().includes('confidence:'))
                         .join('\n')
                         .trim();
-                      const formattedConfidence = task.confidence !== null && task.confidence !== undefined
-                        ? `${Math.round(task.confidence * 100)}%`
-                        : '100%';
-                      const label = language === 'en' ? 'confidence' : '신뢰도';
-                      const displayReasoning = cleanedReasoning
-                        ? `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`
-                        : `• ${label}: ${formattedConfidence}`;
+                      const displayReasoning = cleanedReasoning;
+                      
+                      if (!displayReasoning) return null;
+                      
                       return (
                         <div className={styles.contentBlock} style={{ marginTop: '12px' }}>
                           <span className={styles.label}>{language === 'en' ? 'Reason' : '사유'}</span>
@@ -331,16 +337,16 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
               {task.imageUrl && (
                 <div className={styles.descriptionSection}>
-                  <h3 className={styles.descriptionTitle}>첨부 사진</h3>
+                  <h3 className={styles.descriptionTitle}>{language === 'en' ? 'Attached Photo' : '첨부 사진'}</h3>
                   <div className={styles.descriptionBox} style={{ textAlign: 'center' }}>
-                    <img src={task.imageUrl} alt="첨부 사진" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', objectFit: 'contain' }} />
+                    <img src={task.imageUrl} alt={language === 'en' ? 'Attached Photo' : '첨부 사진'} style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', objectFit: 'contain' }} />
                   </div>
                 </div>
               )}
 
               {transferReasonText && (
                 <div className={styles.descriptionSection}>
-                  <h3 className={styles.descriptionTitle}>업무 전달 사유</h3>
+                  <h3 className={styles.descriptionTitle}>{language === 'en' ? 'Transfer Reason' : '업무 전달 사유'}</h3>
                   <div className={styles.transferReasonBox}>
                     {transferReasonText}
                   </div>
@@ -356,18 +362,18 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                     onClick={() => setIsManualAssignOpen(true)}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
-                    title={!isOnline ? "오프라인 상태에서는 사용할 수 없습니다" : undefined}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    업무 배정
+                    {language === 'en' ? 'Assign Task' : '업무 배정'}
                   </Button>
                   <Button
                     variant="primary"
                     onClick={handleAccept}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
-                    title={!isOnline ? "오프라인 상태에서는 사용할 수 없습니다" : undefined}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    업무 수락
+                    {language === 'en' ? 'Accept Task' : '업무 수락'}
                   </Button>
                 </>
               )}
@@ -378,9 +384,9 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   onClick={handleComplete}
                   className={styles.actionButton}
                   disabled={isSubmitting || !isOnline}
-                  title={!isOnline ? "오프라인 상태에서는 사용할 수 없습니다" : undefined}
+                  title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                 >
-                  업무 완료
+                  {language === 'en' ? 'Complete Task' : '업무 완료'}
                 </Button>
               )}
 
@@ -391,18 +397,18 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                     onClick={handleRejectCancellation}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
-                    title={!isOnline ? "오프라인 상태에서는 사용할 수 없습니다" : undefined}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    취소 반려
+                    {language === 'en' ? 'Reject Cancel' : '취소 반려'}
                   </Button>
                   <Button
                     variant="primary"
                     onClick={handleApproveCancellation}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
-                    title={!isOnline ? "오프라인 상태에서는 사용할 수 없습니다" : undefined}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    취소 승인
+                    {language === 'en' ? 'Approve Cancel' : '취소 승인'}
                   </Button>
                 </>
               )}
@@ -424,7 +430,11 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
           id: task.id,
           priority: task.priority,
           departmentId: task.departmentId,
-          departmentName: DEPARTMENTS.find(d => d.id === task.departmentId)?.name || task.departmentId,
+          departmentName: (() => {
+            const d = DEPARTMENTS.find(dept => dept.id === task.departmentId);
+            if (!d) return task.departmentId;
+            return language === 'en' ? d.nameEn : d.nameKo;
+          })(),
           roomNo: String(task.roomNumber),
           summary: task.summary,
           createdAt: task.createdAt,
