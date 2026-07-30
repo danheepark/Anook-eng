@@ -51,7 +51,8 @@ const ENTITY_LABELS: Record<string, string> = {
   cuisine_type: '음식 종류', category: '카테고리', action: '요청 유형',
   // 공통
   item: '대상 물품', time: '시간', special_requests: '추가 요청', count: '수량',
-  type: '유형', target: '대상',
+  type: '유형', target: '대상', special_notes: 'PMS 특이사항 노트',
+  pms_allergen_warning: '⚠️ 알레르기 안전 경고 (고객 확인 완료)',
 };
 
 /** 직원에게 보여줄 필요 없는 내부 키 (섹션 표시 판단 + 순회에서 모두 제외) */

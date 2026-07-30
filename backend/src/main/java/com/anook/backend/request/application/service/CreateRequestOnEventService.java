@@ -228,29 +228,18 @@ public class CreateRequestOnEventService {
             }
         }
 
-        // [AN-252] EMERGENCY 도메인은 Grace Period 생략 (인명피해, 화재 등 긴급 상황)
         boolean isEmergency = savedRequest.getPriority() == Priority.EMERGENCY;
-        boolean isAddDuplicate = "ADD_DUPLICATE".equals(event.getActionType());
+        boolean isComplaint = savedRequest.getEntities() != null && "COMPLAINT".equalsIgnoreCase(String.valueOf(savedRequest.getEntities().get("intent")));
 
-        // [AN-381] 고객이 AI의 프론트 연결 제안에 "네"라고 응답한 경우 이미 더블체크가 완료된 것이므로 10초 대기(Grace Period) 생략
-        boolean isEscalationConfirmed = savedRequest.getDomainCode() == DomainCode.FRONT
-                && event.getRawText() != null
-                && (event.getRawText().trim().equals("네") || event.getRawText().trim().equals("예")
-                || event.getRawText().trim().equalsIgnoreCase("yes") || event.getRawText().trim().equals("응"));
-
-        // [AN-344] FB/CONCIERGE는 AI가 이미 확인 질문을 했으므로 Grace Period 타이머 대신
-        // 고객의 명시적 확인(진행 버튼)을 기다림 → graceRemaining = -1 (무한 대기)
-        // HK/FACILITY도 중복 추가(ADD_DUPLICATE) 시 일반 요청과 동일하게 10초 대기(Grace Period) 적용하지만,
-        // 추가 요금 결제가 필요한 HK 요청(has_extra_charge=true)은 FB/CONCIERGE와 동일하게 고객의 명시적 확인 대기.
         boolean isFbOrConcierge = savedRequest.getDomainCode() == DomainCode.FB
                 || savedRequest.getDomainCode() == DomainCode.CONCIERGE;
-        
+
         boolean isPaidHk = savedRequest.getDomainCode() == DomainCode.HK &&
                 savedRequest.getEntities() != null &&
                 ("true".equalsIgnoreCase(String.valueOf(savedRequest.getEntities().get("has_extra_charge"))));
-                
+
         boolean requiresExplicitConfirm = isFbOrConcierge || isPaidHk;
-        boolean skipGrace = isEmergency || isEscalationConfirmed;
+        boolean skipGrace = isEmergency || isComplaint;
 
         String deptCode = savedRequest.getDomainCode() != null ? savedRequest.getDomainCode().name() : "UNKNOWN";
         int graceRemaining;

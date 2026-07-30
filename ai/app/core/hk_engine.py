@@ -3,7 +3,7 @@ from app.prompts.hk_prompt import HK_SYSTEM_PROMPT
 from app.schemas.common import HotelRequestSchema
 from app.domains.rag import service as rag_service
 
-async def run_hk_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, room_inventory: dict = None, **kwargs) -> dict:
+async def run_hk_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, room_inventory: dict = None, special_notes: str = None, **kwargs) -> dict:
     """
     HK 에이전트: One-pass로 다국어 감지 + Entity 추출 + 되묻기 판단
     
@@ -23,14 +23,16 @@ async def run_hk_agent(user_message: str, room_no: str, chat_history: list = Non
         print(f"[HK Agent] RAG 검색 실패: {e}")
 
     # 2. 대화 맥락 조립
+    prompt = ""
+    if special_notes:
+        prompt += f"[투숙객 PMS 특이사항 (Special Notes)]\n{special_notes}\n\n"
+
     if chat_history:
         context = "\n".join([
             f"{'Guest' if m.get('role')=='user' else 'AI'}: {m.get('content')}"
             for m in chat_history[-5:]
         ])
-        prompt = f"[Chat History]\n{context}\n\n"
-    else:
-        prompt = ""
+        prompt += f"[Chat History]\n{context}\n\n"
     
     # 3. RAG 지식 삽입 + 현재 메시지
     if rag_context:

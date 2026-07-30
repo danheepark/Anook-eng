@@ -67,6 +67,7 @@ export default function PmsPage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [checkoutDate, setCheckoutDate] = useState('');
+  const [specialNotes, setSpecialNotes] = useState('');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -91,6 +92,7 @@ export default function PmsPage() {
         name: name.trim(),
         phone: phone.trim(),
         checkoutDate,
+        specialNotes: specialNotes.trim(),
       });
       resetForm();
       setShowCheckIn(false);
@@ -101,7 +103,7 @@ export default function PmsPage() {
 
   const resetForm = () => {
     setRoomNumber(''); setName(''); setPhone('');
-    setCheckoutDate(''); setFormErrors({});
+    setCheckoutDate(''); setSpecialNotes(''); setFormErrors({});
   };
 
   // ── 체크아웃 버튼 클릭 → 미결제 확인 ──
@@ -299,7 +301,14 @@ export default function PmsPage() {
                   <div>
                     <span className={styles.roomBadge}>{guest.roomNumber}</span>
                   </div>
-                  <div className={styles.guestName}>{guest.name}</div>
+                  <div className={styles.guestName}>
+                    {guest.name}
+                    {guest.specialNotes && (
+                      <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 2, fontWeight: 500 }}>
+                        📝 {guest.specialNotes}
+                      </div>
+                    )}
+                  </div>
                   <div className={styles.dateText}>{formatDateTime(guest.checkinDate)}</div>
                   <div className={styles.dateText}>{formatDate(guest.checkoutDate)}</div>
                   <div>
@@ -464,6 +473,16 @@ export default function PmsPage() {
                   onChange={e => setCheckoutDate(e.target.value)}
                 />
                 {formErrors.checkoutDate && <div className={styles.fieldError}>{formErrors.checkoutDate}</div>}
+              </div>
+
+              <div>
+                <label className={styles.fieldLabel}>특이사항 / 메모 (Special Notes)</label>
+                <input
+                  className={styles.fieldInput}
+                  placeholder="예: Peanut Allergy, 아기 침대 필요"
+                  value={specialNotes}
+                  onChange={e => setSpecialNotes(e.target.value)}
+                />
               </div>
             </div>
 

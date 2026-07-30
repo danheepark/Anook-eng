@@ -30,7 +30,13 @@ public class ConfirmRequestOnEventService {
     @EventListener
     @Transactional
     public void onGuestRequestConfirmed(RequestConfirmedEvent event) {
-        log.info("[Message] RequestConfirmedEvent 수신 — room: {}, summary: {}", event.getRoomNo(), event.getSummary());
+        log.info("[Message] RequestConfirmedEvent 수신 — room: {}, summary: {}, domain: {}", event.getRoomNo(), event.getSummary(), event.getDomainCode());
+
+        // FRONT / EMERGENCY 도메인 (직원 연결 / 긴급 상황)은 "주문이 성공적으로 등록되었습니다" 메시지 발송 생략
+        if ("FRONT".equals(event.getDomainCode()) || "EMERGENCY".equals(event.getDomainCode())) {
+            log.info("[Message] FRONT/EMERGENCY 도메인은 자동 주문 확인 메시지 발송 생략 — room: {}", event.getRoomNo());
+            return;
+        }
 
         String replyMessage = "Your order has been successfully registered. We will prepare it shortly.";
 

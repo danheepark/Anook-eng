@@ -40,6 +40,9 @@ public class GuestJpaEntity {
     @Column(name = "checkout_date", nullable = false)
     private LocalDate checkoutDate;
 
+    @Column(name = "special_notes")
+    private String specialNotes;
+
     // === Domain → Entity ===
     public static GuestJpaEntity from(Guest domain) {
         GuestJpaEntity entity = new GuestJpaEntity();
@@ -50,11 +53,12 @@ public class GuestJpaEntity {
         entity.accessCode = domain.getAccessCode();
         entity.checkinDate = domain.getCheckinDate();
         entity.checkoutDate = domain.getCheckoutDate();
+        entity.specialNotes = domain.getSpecialNotes();
         return entity;
     }
 
     // === Entity → Domain ===
     public Guest toDomain() {
-        return new Guest(id, roomNumber, name, phone, accessCode, checkinDate, checkoutDate);
+        return new Guest(id, roomNumber, name, phone, accessCode, checkinDate, checkoutDate, specialNotes);
     }
 }

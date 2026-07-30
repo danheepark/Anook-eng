@@ -59,6 +59,7 @@ public class SendMessageService implements SendMessageUseCase {
     private final MessageActiveRequestPort activeRequestPort;
     private final ConfirmRequestUseCase confirmRequestUseCase;
     private final com.anook.backend.room.application.service.RoomInventoryService roomInventoryService;
+    private final com.anook.backend.guest.application.port.out.GuestRepositoryPort guestRepositoryPort;
 
     @Autowired
     @Lazy
@@ -158,9 +159,14 @@ public class SendMessageService implements SendMessageUseCase {
             // 3-2. Stateful AI: 객실 일일 제한 물품(수건, 생수) 사용량 조회 (6 AM 리셋)
             Map<String, Object> roomInventory = roomInventoryService.getInventory(roomNo);
 
+            // 3-3. PMS 투숙객 특이사항/메모(special_notes) 조회
+            String specialNotes = guestRepositoryPort.findByRoomNumber(roomNo)
+                    .map(com.anook.backend.guest.domain.model.Guest::getSpecialNotes)
+                    .orElse(null);
+
             // AI 호출
             java.util.List<MessageAiResult> analyses = aiPort.analyze(content, roomNo, language, chatHistory, images,
-                    activeRequests, roomInventory);
+                    activeRequests, roomInventory, specialNotes);
 
             // 4. AI 응답 메시지 저장
             String combinedReply = analyses.stream()

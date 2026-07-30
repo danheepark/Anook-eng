@@ -54,14 +54,18 @@ async def run_facility_agent(user_message: str, room_no: str, chat_history: list
         print(f"[FACILITY Agent] RAG 검색 실패: {e}")
 
     # 2. 대화 맥락 조립
+    prompt = ""
+    if special_notes := kwargs.get("special_notes"):
+        prompt += f"[투숙객 PMS 특이사항 (Special Notes)]\n{special_notes}\n\n"
+
     if chat_history:
         context = "\n".join([
             f"{'고객' if m.get('role')=='user' else 'AI'}: {m.get('content')}"
             for m in chat_history[-5:]
         ])
-        prompt = f"[대화 맥락]\n{context}\n\n"
+        prompt += f"[대화 맥락]\n{context}\n\n"
     else:
-        prompt = f"고객 객실: {room_no}\n"
+        prompt += f"고객 객실: {room_no}\n"
     
     # 3. RAG 지식 삽입 + 현재 메시지
     if rag_context:

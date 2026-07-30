@@ -19,6 +19,7 @@ public class Guest {
     private String accessCode;      // pms_guest.access_code (QR 인증용)
     private LocalDateTime checkinDate;  // pms_guest.checkin_date
     private LocalDate checkoutDate;     // pms_guest.checkout_date
+    private String specialNotes;        // pms_guest.special_notes (투숙객 특이사항/메모)
 
     // === 기본 생성자 (프레임워크용) ===
     protected Guest() {
@@ -26,7 +27,7 @@ public class Guest {
 
     // === 전체 필드 생성자 (Entity → Domain 변환용) ===
     public Guest(Long id, String roomNumber, String name, String phone,
-                 String accessCode, LocalDateTime checkinDate, LocalDate checkoutDate) {
+                 String accessCode, LocalDateTime checkinDate, LocalDate checkoutDate, String specialNotes) {
         this.id = id;
         this.roomNumber = roomNumber;
         this.name = name;
@@ -34,13 +35,14 @@ public class Guest {
         this.accessCode = accessCode;
         this.checkinDate = checkinDate;
         this.checkoutDate = checkoutDate;
+        this.specialNotes = specialNotes;
     }
 
     /**
      * 팩토리 메서드 (PMS 체크인 시 사용)
      * 보안을 위한 랜덤 접속 코드(UUID)를 자동으로 생성합니다.
      */
-    public static Guest create(String roomNumber, String name, String phone, LocalDate checkoutDate) {
+    public static Guest create(String roomNumber, String name, String phone, LocalDate checkoutDate, String specialNotes) {
         Guest guest = new Guest();
         guest.roomNumber = roomNumber;
         guest.name = name;
@@ -48,6 +50,7 @@ public class Guest {
         guest.accessCode = UUID.randomUUID().toString(); // ★ QR 인증용 랜덤 코드 자동 생성
         guest.checkinDate = LocalDateTime.now();
         guest.checkoutDate = checkoutDate;
+        guest.specialNotes = specialNotes;
         return guest;
     }
 
@@ -59,4 +62,5 @@ public class Guest {
     public String getAccessCode() { return accessCode; }
     public LocalDateTime getCheckinDate() { return checkinDate; }
     public LocalDate getCheckoutDate() { return checkoutDate; }
+    public String getSpecialNotes() { return specialNotes; }
 }

@@ -18,5 +18,7 @@ public record CheckInGuestCommand(
         String phone,
 
         @NotNull(message = "예정 체크아웃 날짜는 필수입니다.")
-        LocalDate checkoutDate
+        LocalDate checkoutDate,
+
+        String specialNotes
 ) {}

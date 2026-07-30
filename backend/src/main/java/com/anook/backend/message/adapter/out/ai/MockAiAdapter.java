@@ -26,7 +26,7 @@ import java.util.Collections;
 public class MockAiAdapter implements MessageAiPort {
 
     @Override
-    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images, java.util.List<java.util.Map<String, Object>> activeRequests, java.util.Map<String, Object> roomInventory) {
+    public java.util.List<MessageAiResult> analyze(String text, String roomNo, String language, java.util.List<java.util.Map<String, String>> chatHistory, java.util.List<String> images, java.util.List<java.util.Map<String, Object>> activeRequests, java.util.Map<String, Object> roomInventory, String specialNotes) {
         log.info("[MockAI] 분석 요청(Mock) — room: {}, lang: {}, text: {}", roomNo, language, text);
 
         // 1초 딜레이 (AI 처리 시간 시뮬레이션)

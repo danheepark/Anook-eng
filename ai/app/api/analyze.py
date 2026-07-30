@@ -42,6 +42,7 @@ class AnalyzeRequest(BaseModel):
     images: Optional[List[str]] = []
     active_requests: Optional[List[dict]] = []
     room_inventory: Optional[Dict[str, Any]] = {}
+    special_notes: Optional[str] = None
 
 
 # ── 부서별 에이전트 레지스트리 ──
@@ -598,7 +599,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
     # STEP 2: 라우터 엔진으로 도메인 분류
     # ──────────────────────────────────────────────
     try:
-        router_results = route(request.text, chat_history=request.chat_history, images=request.images, system_language=request.system_language, active_requests=getattr(request, 'active_requests', []))
+        router_results = route(request.text, chat_history=request.chat_history, images=request.images, system_language=request.system_language, active_requests=getattr(request, 'active_requests', []), special_notes=getattr(request, 'special_notes', None))
         print(f"\n[Analyze] 🔀 Router result: {[{'route_type': r.route_type, 'domain': r.domain, 'confidence': r.confidence} for r in router_results]}")
     except Exception as e:
         print(f"[Analyze] ❌ 라우터 실패: {e}")
@@ -733,7 +734,8 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     images=request.images,
                     system_language=request.language,
                     active_requests=getattr(request, 'active_requests', []),
-                    room_inventory=getattr(request, 'room_inventory', {})
+                    room_inventory=getattr(request, 'room_inventory', {}),
+                    special_notes=getattr(request, 'special_notes', None)
                 )
                 agent_tasks.append((domain, primary, coro))
                 continue

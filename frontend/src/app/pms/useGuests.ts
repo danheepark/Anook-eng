@@ -11,6 +11,7 @@ export interface Guest {
   accessCode: string; // ★ 추가
   checkinDate: string;
   checkoutDate: string;
+  specialNotes?: string | null;
 }
 
 interface CheckInPayload {
@@ -18,6 +19,7 @@ interface CheckInPayload {
   name: string;
   phone: string;
   checkoutDate: string;
+  specialNotes?: string;
 }
 
 export default function useGuests() {

@@ -287,4 +287,7 @@ DROP INDEX IF EXISTS idx_knowledge_entry_unique_domain_question;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_knowledge_entry_unique_domain_question
 ON knowledge_entry(domain_code, question) WHERE status = 'APPROVED';
 
+-- [2026-07-30] PMS 투숙객 특이사항/메모(special_notes) 컬럼 추가
+ALTER TABLE pms_guest ADD COLUMN IF NOT EXISTS special_notes TEXT;
+
 

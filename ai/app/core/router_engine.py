@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 VALID_DOMAINS = {"HK", "FB", "FACILITY", "CONCIERGE", "FRONT", "COMMON", "EMERGENCY"}
 VALID_ROUTE_TYPES = {"DEPARTMENT", "CLARIFICATION", "FRONT_ESCALATION", "SOFT_FALLBACK", "NON_ACTIONABLE", "INFO", "CANCEL", "STATUS_CHECK", "VOC", "BILLING_INQUIRY"}
 
-def route(user_message: str, chat_history: List[dict] = None, images: List[str] = None, system_language: str = "en", active_requests: List[dict] = None) -> List[RouterOutputSchema]:
+def route(user_message: str, chat_history: List[dict] = None, images: List[str] = None, system_language: str = "en", active_requests: List[dict] = None, special_notes: str = None) -> List[RouterOutputSchema]:
     """
     고객 메시지를 분류하여 RouterOutputSchema의 리스트를 반환한다.
     다중 요청(Multi-intent)일 경우 여러 개의 스키마 객체가 반환된다.
@@ -49,6 +49,10 @@ def route(user_message: str, chat_history: List[dict] = None, images: List[str] 
         if chat_history:
             chat_history.insert(0, {"role": "ai", "content": "[SYSTEM: 이전 요청은 직원 연결 또는 상담 완료로 종료되었습니다. 아래부터는 완전히 독립적인 새로운 요청으로 평가하세요.]"})
 
+    notes_str = ""
+    if special_notes:
+        notes_str = f"\n[투숙객 PMS 특이사항 (Special Notes)]\n{special_notes}\n"
+
     # ── 1.5) 활성 요청 목록(Context) 조립 ──
     active_requests_str = ""
     if active_requests:
@@ -65,9 +69,9 @@ def route(user_message: str, chat_history: List[dict] = None, images: List[str] 
             context_lines.append(f"{role}: {msg.get('content')}")
         
         context_str = "\n".join(context_lines)
-        final_prompt = f"{active_requests_str}[과거 대화 맥락]\n{context_str}\n\n[현재 요청]\n고객: {user_message}"
+        final_prompt = f"{notes_str}{active_requests_str}[과거 대화 맥락]\n{context_str}\n\n[현재 요청]\n고객: {user_message}"
     else:
-        final_prompt = f"{active_requests_str}[현재 요청]\n고객: {user_message}"
+        final_prompt = f"{notes_str}{active_requests_str}[현재 요청]\n고객: {user_message}"
 
     # ── 2) Gemini 호출 ──
     system_instruction_with_lang = ROUTER_SYSTEM_PROMPT.replace("{system_language}", system_language)

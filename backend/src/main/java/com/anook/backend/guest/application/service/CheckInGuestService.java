@@ -39,7 +39,7 @@ public class CheckInGuestService implements CheckInGuestUseCase {
         }
 
         // 3) 도메인 모델 생성 및 저장
-        Guest guest = Guest.create(command.roomNumber(), command.name(), command.phone(), command.checkoutDate());
+        Guest guest = Guest.create(command.roomNumber(), command.name(), command.phone(), command.checkoutDate(), command.specialNotes());
         Guest saved = guestRepository.save(guest);
 
         return CheckInGuestResult.from(saved);

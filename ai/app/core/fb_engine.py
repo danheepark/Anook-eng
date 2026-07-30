@@ -80,7 +80,7 @@ def _fetch_menu_context() -> str:
         print(f"[FB Agent] 메뉴 조회 API 호출 중 오류 발생: {e}")
         return "메뉴 정보를 현재 불러올 수 없습니다. 프론트데스크로 문의 부탁드립니다."
 
-async def run_fb_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, room_inventory: dict = None, **kwargs) -> dict:
+async def run_fb_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, system_language: str = "en", active_requests: list = None, room_inventory: dict = None, special_notes: str = None, **kwargs) -> dict:
     """F&B 에이전트: 메뉴 조회, RAG 지식 결합, 2턴 주문 확인 로직 처리"""
     
     # 1. pms_menu 백엔드 조회
@@ -99,6 +99,9 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
 
     # 3. 대화 맥락 조립
     prompt = ""
+    if special_notes:
+        prompt += f"[투숙객 PMS 특이사항 (Special Notes)]\n{special_notes}\n\n"
+
     if menu_context:
         prompt += f"[Available Menu]\n{menu_context}\n\n"
         

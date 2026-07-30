@@ -25,7 +25,7 @@ public interface MessageAiPort {
      * @param activeRequests 현재 활성 요청 목록
      * @return AI 분석 결과 (다중 인텐트 대응을 위해 List 반환)
      */
-    List<MessageAiResult> analyze(String text, String roomNo, String language, List<Map<String, String>> chatHistory, List<String> images, List<Map<String, Object>> activeRequests, Map<String, Object> roomInventory);
+    List<MessageAiResult> analyze(String text, String roomNo, String language, List<Map<String, String>> chatHistory, List<String> images, List<Map<String, Object>> activeRequests, Map<String, Object> roomInventory, String specialNotes);
 
     /**
      * 한국어(또는 원본 언어) 텍스트를 대상 언어로 번역

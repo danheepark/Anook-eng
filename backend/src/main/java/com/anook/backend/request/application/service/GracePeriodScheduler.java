@@ -75,7 +75,7 @@ public class GracePeriodScheduler {
                         request.confirmGrace();
                         requestPort.save(request);
                         log.info("[GracePeriod] CREATED→PENDING 전환 완료 — requestId: {}", requestId);
-                        eventPublisher.publishEvent(new com.anook.backend.request.application.event.RequestConfirmedEvent(this, request.getRoomNo(), request.getGuestId(), request.getSummary()));
+                        eventPublisher.publishEvent(new com.anook.backend.request.application.event.RequestConfirmedEvent(this, request.getRoomNo(), request.getGuestId(), request.getSummary(), deptCode));
                     }
                     log.info("[GracePeriod] 만료 → 직원 알림 발송 — requestId: {}, dept: {}", requestId, deptCode);
 
@@ -128,7 +128,7 @@ public class GracePeriodScheduler {
                         request.confirmGrace();
                         requestPort.save(request);
                         log.info("[GracePeriod] 고객 수락 → CREATED→PENDING 전환 — requestId: {}", requestId);
-                        eventPublisher.publishEvent(new com.anook.backend.request.application.event.RequestConfirmedEvent(this, request.getRoomNo(), request.getGuestId(), request.getSummary()));
+                        eventPublisher.publishEvent(new com.anook.backend.request.application.event.RequestConfirmedEvent(this, request.getRoomNo(), request.getGuestId(), request.getSummary(), request.getDomainCode() != null ? request.getDomainCode().name() : null));
                     }
                     String deptCode = request.getDomainCode() != null ? request.getDomainCode().name() : "UNKNOWN";
                     
