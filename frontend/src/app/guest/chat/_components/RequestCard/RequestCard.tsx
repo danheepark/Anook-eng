@@ -422,11 +422,18 @@ export default function RequestCard({
         <div className={styles.rightColumn}>
           <div className={styles.content}>
             <div className={styles.summaryRow} style={{ position: 'relative', paddingRight: '50px' }}>
-              <div className={styles.summary}>
+              <div className={styles.summary} style={{ display: 'flex', alignItems: 'center' }}>
                 {isTranslating ? (
                   <span className={styles.translatingText}>{t.cardUI?.message?.translating || 'Translating...'}</span>
                 ) : (
-                  finalTitle
+                  <>
+                    <span>{finalTitle}</span>
+                    {isCancelPending && (
+                      <span className={styles.cancelPendingBadge}>
+                        {targetLang === 'ko' ? '취소 대기중' : 'Cancel Pending'}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
               <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>

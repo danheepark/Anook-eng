@@ -13,6 +13,7 @@ public record StaffTaskResult(
         Long assignedStaffId,
         Float confidence,
         LocalDateTime createdAt,
+        LocalDateTime updatedAt,
         Integer version,
         boolean cancelRequested,
         LocalDateTime cancelRequestedAt,

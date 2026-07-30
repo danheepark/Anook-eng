@@ -250,14 +250,9 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   {language === 'ko' ? `${task.roomNumber}호` : `NO.${task.roomNumber}`}
                 </span>
                 <h2 className={styles.title}>{task.summary}</h2>
-                {(task.priority === 'URGENT' || task.cancelRequested) && (
+                {task.priority === 'URGENT' && (
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
-                    {task.priority === 'URGENT' && (
-                      <StatusBadge variant="red">{language === 'en' ? 'URGENT' : '긴급'}</StatusBadge>
-                    )}
-                    {task.cancelRequested && (
-                      <StatusBadge variant="red">{language === 'en' ? 'Cancel Pending' : '취소 대기중'}</StatusBadge>
-                    )}
+                    <StatusBadge variant="red">{language === 'en' ? 'URGENT' : '긴급'}</StatusBadge>
                   </div>
                 )}
               </div>
@@ -282,7 +277,8 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>{language === 'en' ? 'Status' : '상태'}</span>
                 <span className={styles.infoValue}>
-                  {task.status === 'PENDING' ? t.cardUI.status.pending :
+                  {task.cancelRequested ? (language === 'en' ? 'Cancel Pending' : '취소 대기중') :
+                   task.status === 'PENDING' ? t.cardUI.status.pending :
                    task.status === 'IN_PROGRESS' ? t.cardUI.status.inProgress :
                    task.status === 'COMPLETED' ? t.cardUI.status.completedMark :
                    task.status === 'CANCELLED' ? t.cardUI.status.cancelled : task.status}

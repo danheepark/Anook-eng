@@ -236,9 +236,6 @@ export default function TaskTicket({
         parts.push(`${l.content || '내용'}: ${entities.symptom}`);
       }
     }
-    if ((deptKey === 'fb' || deptKey === 'hk') && parts.length === 1 && !entities.symptom) {
-      return null;
-    }
     return parts.length > 0 ? parts.join('\n') : null;
   }, [department, entities, t.ticketUI?.entityLabels]);
 
@@ -312,13 +309,18 @@ export default function TaskTicket({
 
   let timeDisplay = '';
   if (status === 'DONE') {
-    let parsedString = createdAt;
-    const date = new Date(parsedString);
-    const hours = date.getHours();
-    const mins = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hr = hours % 12 || 12;
-    timeDisplay = `${String(hr).padStart(2, '0')}:${mins} ${ampm}`;
+    let parsedString = updatedAt || createdAt;
+    const date = new Date(String(parsedString).replace(' ', 'T'));
+    if (!isNaN(date.getTime())) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = date.getHours();
+      const mins = String(date.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hr = hours % 12 || 12;
+      timeDisplay = `${year}.${month}.${day} ${String(hr).padStart(2, '0')}:${mins} ${ampm}`;
+    }
   } else if (status === 'IN_PROGRESS' && updatedAt) {
     const relTime = getRelativeTime(updatedAt, language, t.ticketUI.time);
     if (relTime === t.ticketUI.time.justNow) {

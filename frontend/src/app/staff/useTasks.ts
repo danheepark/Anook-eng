@@ -16,6 +16,7 @@ export interface StaffTask {
   assignedStaffId: number | null;
   confidence: number | null;
   createdAt: string;
+  updatedAt?: string;
   version: number;
   cancelRequested: boolean;
   cancelRequestedAt: string | null;

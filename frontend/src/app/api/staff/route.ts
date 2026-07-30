@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
           assignedStaffName: item.assignedStaffName,
           confidence: item.confidence ?? null,
           createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
           version: item.version,
           cancelRequested: item.cancelRequested ?? false,
           cancelRequestedAt: item.cancelRequestedAt ?? null,

@@ -185,10 +185,24 @@ function DashboardContent() {
       });
     };
 
+    const safeParseTime = (dateStr?: string | null) => {
+      if (!dateStr) return 0;
+      const normalized = String(dateStr).replace(' ', 'T');
+      const time = new Date(normalized).getTime();
+      return isNaN(time) ? 0 : time;
+    };
+
     return {
       TODO: filteredTasks.filter(t => (t.status === 'PENDING' || t.status === 'ESCALATED') && !t.cancelRequested),
       IN_PROGRESS: sortByCancelRequested(filteredTasks.filter(t => t.status === 'IN_PROGRESS')),
-      DONE: filteredTasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED'),
+      DONE: [...filteredTasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED')].sort((a, b) => {
+        const timeA = safeParseTime(a.updatedAt || a.cancelRequestedAt || a.createdAt);
+        const timeB = safeParseTime(b.updatedAt || b.cancelRequestedAt || b.createdAt);
+        if (timeA !== timeB) {
+          return timeB - timeA;
+        }
+        return b.id - a.id;
+      }),
     };
   }, [filteredTasks]);
 
@@ -284,6 +298,7 @@ function DashboardContent() {
                             description={task.rawText || ''}
                             status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
                             createdAt={task.createdAt}
+                            updatedAt={task.updatedAt}
                             cancelRequested={task.cancelRequested}
                             isCancelled={task.status === 'CANCELLED'}
                             isEscalated={task.status === 'ESCALATED'}
