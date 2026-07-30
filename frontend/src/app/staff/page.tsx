@@ -295,6 +295,14 @@ function DashboardContent() {
                               e.stopPropagation();
                               completeTask(task.id, task.version);
                             } : undefined}
+                            onApproveCancel={col.status === 'IN_PROGRESS' && task.cancelRequested ? (e) => {
+                              e.stopPropagation();
+                              approveCancellation(task.id, task.version);
+                            } : undefined}
+                            onRejectCancel={col.status === 'IN_PROGRESS' && task.cancelRequested ? (e) => {
+                              e.stopPropagation();
+                              rejectCancellation(task.id, task.version);
+                            } : undefined}
                             entities={task.entities}
                             highlightSearch={searchValue}
                             isActiveMatch={searchValue ? filteredTasks[currentMatch]?.id === task.id : false}

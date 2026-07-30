@@ -186,9 +186,10 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
       setIsSubmitting(true);
       try {
         await onComplete(task.id, task.version);
+        showToast(language === 'en' ? 'Task completed successfully.' : '요청이 완료 처리되었습니다.', 'success');
         handleClose();
       } catch (err) {
-        showToast(err instanceof Error ? err.message : '요청 완료 중 오류가 발생했습니다.', 'error');
+        showToast(err instanceof Error ? err.message : (language === 'en' ? 'An error occurred while completing the task.' : '요청 완료 중 오류가 발생했습니다.'), 'error');
         handleClose();
       } finally {
         setIsSubmitting(false);
@@ -201,10 +202,10 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
       setIsSubmitting(true);
       try {
         await onApproveCancellation(task.id, task.version);
-        showToast('취소가 승인되었습니다.', 'success');
+        showToast(language === 'en' ? 'Cancellation approved.' : '취소가 승인되었습니다.', 'success');
         handleClose();
       } catch (err) {
-        showToast(err instanceof Error ? err.message : '취소 승인 중 오류가 발생했습니다.', 'error');
+        showToast(err instanceof Error ? err.message : (language === 'en' ? 'An error occurred while approving cancellation.' : '취소 승인 중 오류가 발생했습니다.'), 'error');
         handleClose();
       } finally {
         setIsSubmitting(false);
@@ -217,10 +218,10 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
       setIsSubmitting(true);
       try {
         await onRejectCancellation(task.id, task.version);
-        showToast('취소가 반려되었습니다.', 'success');
+        showToast(language === 'en' ? 'Cancellation rejected.' : '취소가 반려되었습니다.', 'success');
         handleClose();
       } catch (err) {
-        showToast(err instanceof Error ? err.message : '취소 반려 중 오류가 발생했습니다.', 'error');
+        showToast(err instanceof Error ? err.message : (language === 'en' ? 'An error occurred while rejecting cancellation.' : '취소 반려 중 오류가 발생했습니다.'), 'error');
         handleClose();
       } finally {
         setIsSubmitting(false);
@@ -249,18 +250,26 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   {language === 'ko' ? `${task.roomNumber}호` : `NO.${task.roomNumber}`}
                 </span>
                 <h2 className={styles.title}>{task.summary}</h2>
-                {task.priority === 'URGENT' && (
-                  <StatusBadge variant="red">{language === 'en' ? 'URGENT' : '긴급'}</StatusBadge>
-                )}
-                {task.cancelRequested && (
-                  <StatusBadge variant="red">{language === 'en' ? 'Cancel Pending' : '취소 대기중'}</StatusBadge>
+                {(task.priority === 'URGENT' || task.cancelRequested) && (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
+                    {task.priority === 'URGENT' && (
+                      <StatusBadge variant="red">{language === 'en' ? 'URGENT' : '긴급'}</StatusBadge>
+                    )}
+                    {task.cancelRequested && (
+                      <StatusBadge variant="red">{language === 'en' ? 'Cancel Pending' : '취소 대기중'}</StatusBadge>
+                    )}
+                  </div>
                 )}
               </div>
               
               {task.cancelRequested && (
                 <div className={styles.cancelAlertBox}>
                   <strong>{language === 'en' ? 'Guest Cancellation Request' : '고객 취소 요청'}</strong>
-                  <p>{language === 'en' ? 'The guest has requested to cancel this task. Please review and approve or reject the cancellation.' : '고객이 해당 요청에 대해 취소를 신청했습니다. 진행 상황을 확인하고 취소 승인 또는 반려를 선택해주세요.'}</p>
+                  <p>
+                    {language === 'en' 
+                      ? 'The guest has requested cancellation. Please review and respond.' 
+                      : '고객이 취소를 요청했습니다. 내용을 확인하고 승인/반려를 선택해주세요.'}
+                  </p>
                 </div>
               )}
             </div>
@@ -393,13 +402,13 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
               {task.status === 'IN_PROGRESS' && task.cancelRequested && (
                 <>
                   <Button
-                    variant="outlined"
+                    variant="secondary"
                     onClick={handleRejectCancellation}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
                     title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    {language === 'en' ? 'Reject Cancel' : '취소 반려'}
+                    {language === 'en' ? 'Reject' : '취소 반려'}
                   </Button>
                   <Button
                     variant="primary"
@@ -408,7 +417,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                     disabled={isSubmitting || !isOnline}
                     title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    {language === 'en' ? 'Approve Cancel' : '취소 승인'}
+                    {language === 'en' ? 'Approve' : '취소 승인'}
                   </Button>
                 </>
               )}

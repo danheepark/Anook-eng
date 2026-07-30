@@ -19,6 +19,8 @@ export interface TaskTicketProps {
   cancelRequested?: boolean;
   onAccept?: (e: React.MouseEvent) => void;
   onComplete?: (e: React.MouseEvent) => void;
+  onApproveCancel?: (e: React.MouseEvent) => void;
+  onRejectCancel?: (e: React.MouseEvent) => void;
   isCancelled?: boolean;
   isEscalated?: boolean;
   entities?: {
@@ -72,6 +74,8 @@ export default function TaskTicket({
   cancelRequested = false,
   onAccept,
   onComplete,
+  onApproveCancel,
+  onRejectCancel,
   isCancelled = false,
   isEscalated = false,
   entities,
@@ -421,6 +425,7 @@ export default function TaskTicket({
               <span className={styles.redDot} />
             </div>
           )}
+          {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
         </div>
       </div>
 
@@ -457,28 +462,53 @@ export default function TaskTicket({
           {timeDisplay}
         </span>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
           {status === 'TODO' && onAccept && (
             <Button
               variant="primary"
               onClick={onAccept}
-              style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px' }}
+              style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
               disabled={!isOnline}
               title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
             >
               {t.ticketUI.button.accept}
             </Button>
           )}
-          {status === 'IN_PROGRESS' && onComplete && (
+          {status === 'IN_PROGRESS' && !cancelRequested && onComplete && (
             <Button
               variant="primary"
               onClick={onComplete}
-              style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px' }}
+              style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
               disabled={!isOnline}
               title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
             >
               {t.ticketUI.button.complete}
             </Button>
+          )}
+          {status === 'IN_PROGRESS' && cancelRequested && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {onRejectCancel && (
+                <Button
+                  variant="secondary"
+                  onClick={onRejectCancel}
+                  style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', backgroundColor: '#ffffff', border: '1px solid var(--color-gray-300)', minWidth: '76px', justifyContent: 'center' }}
+                  disabled={!isOnline}
+                  title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
+                >
+                  {language === 'en' ? 'Reject' : '취소 반려'}
+                </Button>
+              )}
+              {onApproveCancel && (
+                <Button
+                  variant="primary"
+                  onClick={onApproveCancel}
+                  style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
+                  disabled={!isOnline}
+                  title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
+                >
+                  {language === 'en' ? 'Approve' : '취소 승인'}
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
