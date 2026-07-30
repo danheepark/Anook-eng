@@ -1,11 +1,15 @@
 /* src/styles/variables.css — 디자인 토큰 (MVP 아키텍처 v3 섹션 10) */
 :root {
   /* Colors */
-  --color-primary: #1F2937; /* dark charcoal gray (gray-800) */
-  --color-primary-hover: #111827; /* near black (gray-900) */
-  --color-secondary: #6B7280; /* gray-500 */
+  --color-primary: #1F2937;
+  /* dark charcoal gray (gray-800) */
+  --color-primary-hover: #111827;
+  /* near black (gray-900) */
+  --color-secondary: #6B7280;
+  /* gray-500 */
   --color-bg: #ffffff;
-  --color-surface: #F3F4F6; /* gray-100 */
+  --color-surface: #F3F4F6;
+  /* gray-100 */
   --color-surface-hover: #334155;
 
 
@@ -32,10 +36,12 @@
 
   --color-tag-background-green: #F0FDF4;
   --color-tag-background-red: #FEF2F2;
+  --color-tag-background-orange: #FFF5F2;
   --color-tag-background-gray: #F3F4F6;
   --color-tag-background-violet: #F5F3FF;
   --color-tag-text-green: #166534;
   --color-tag-text-red: #991B1B;
+  --color-tag-text-orange: #FF5703;
   --color-tag-text-gray: #374151;
   --color-tag-text-violet: #5B21B6;
 

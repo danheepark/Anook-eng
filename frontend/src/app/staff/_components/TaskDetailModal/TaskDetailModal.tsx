@@ -256,6 +256,13 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   <StatusBadge variant="red">{language === 'en' ? 'Cancel Pending' : '취소 대기중'}</StatusBadge>
                 )}
               </div>
+              
+              {task.cancelRequested && (
+                <div className={styles.cancelAlertBox}>
+                  <strong>{language === 'en' ? 'Guest Cancellation Request' : '고객 취소 요청'}</strong>
+                  <p>{language === 'en' ? 'The guest has requested to cancel this task. Please review and approve or reject the cancellation.' : '고객이 해당 요청에 대해 취소를 신청했습니다. 진행 상황을 확인하고 취소 승인 또는 반려를 선택해주세요.'}</p>
+                </div>
+              )}
             </div>
 
             <div className={styles.content}>
@@ -282,13 +289,6 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   })()}
                 </span>
               </div>
-
-              {task.cancelRequested && (
-                <div className={styles.cancelAlertBox}>
-                  <strong>⚠️ {language === 'en' ? 'Guest Cancellation Request' : '고객 취소 요청'}</strong>
-                  <p>{language === 'en' ? 'The guest has requested to cancel this task. Please review and approve or reject the cancellation.' : '고객이 해당 요청에 대해 취소를 신청했습니다. 진행 상황을 확인하고 취소 승인 또는 반려를 선택해주세요.'}</p>
-                </div>
-              )}
 
               {/* AI 분석 상세 내역 — summary + entities + reasoning */}
               {(task.entities && Object.keys(task.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k)).length > 0) || task.reasoning ? (

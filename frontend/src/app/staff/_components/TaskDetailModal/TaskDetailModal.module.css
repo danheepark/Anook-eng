@@ -164,10 +164,9 @@
 .cancelAlertBox {
   margin-top: var(--space-16);
   padding: var(--space-12) var(--space-16);
-  background-color: var(--color-warning-light, #fef3c7);
-  border: 1px solid var(--color-warning, #f59e0b);
+  background-color: var(--color-tag-background-orange, #FFF0E6);
+  border: 1px solid var(--color-tag-text-orange, #FF5F1F);
   border-radius: var(--radius-md);
-  color: var(--color-gray-900);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -175,7 +174,7 @@
 
 .cancelAlertBox strong {
   font: var(--text-body-bold);
-  color: var(--color-warning-dark, #b45309);
+  color: var(--color-tag-text-orange, #FF5F1F);
 }
 
 .cancelAlertBox p {
