@@ -470,19 +470,57 @@ export function useChat() {
               }];
             }
 
-            // [AN-422] 취소된 기존 카드는 제자리에서 취소 상태로 변경하여 채팅 기록(시간의 흐름)을 보존한다.
-            if (payload.status === 'CANCELLED' && existingIdx >= 0) {
+            // [불변 채팅 기록] 취소 대기(Cancel Pending): 원래 카드는 버튼만 숨기고, 새 카드를 하단에 추가
+            if (isCancelPending && existingIdx >= 0) {
               const updated = [...prev];
               updated[existingIdx] = {
                 ...updated[existingIdx],
                 meta: {
                   ...updated[existingIdx].meta,
-                  status: payload.status,
-                  graceRemaining: 0,
-                  cancelledAt: existingMeta.cancelledAt || new Date().toISOString()
+                  graceRemaining: 0
                 }
               };
-              return updated;
+              return [...updated, {
+                ...requestMsg,
+                id: `request-${payload.requestId}-cancelpending-${Date.now()}`,
+                meta: {
+                  ...requestMsg.meta,
+                  cancelPending: true,
+                  entities: payload.entities || existingMeta.entities,
+                  priority: payload.priority || existingMeta.priority,
+                  cancelReason: payload.cancelReason || existingMeta.cancelReason,
+                  createdAt: existingMeta.createdAt || payload.createdAt || new Date().toISOString(),
+                  graceRemaining: 0
+                }
+              }];
+            }
+
+            // [불변 채팅 기록] 취소 완료(CANCELLED): 원래 카드 불변 유지, 새 취소 카드를 하단에 추가
+            if (payload.status === 'CANCELLED' && existingIdx >= 0) {
+              const updated = [...prev];
+              // 원래 카드: 버튼만 숨기고 나머지 전부 그대로 유지
+              updated[existingIdx] = {
+                ...updated[existingIdx],
+                meta: {
+                  ...updated[existingIdx].meta,
+                  graceRemaining: 0
+                }
+              };
+              // 새 취소 카드: 하단에 추가
+              return [...updated, {
+                ...requestMsg,
+                id: `request-${payload.requestId}-cancelled-${Date.now()}`,
+                meta: {
+                  ...requestMsg.meta,
+                  status: 'CANCELLED',
+                  entities: payload.entities || existingMeta.entities,
+                  priority: payload.priority || existingMeta.priority,
+                  cancelReason: payload.cancelReason || existingMeta.cancelReason,
+                  cancelledAt: new Date().toISOString(),
+                  createdAt: existingMeta.createdAt || payload.createdAt || new Date().toISOString(),
+                  graceRemaining: 0
+                }
+              }];
             }
 
             // 기존 카드 중 텍스트(content)가 있는 카드의 텍스트 보존 (AI 응답 텍스트 증발 방지)
