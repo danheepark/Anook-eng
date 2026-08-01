@@ -172,6 +172,10 @@ You must output a JSON Array of objects.
   - Completed Task Cancellation: If the user explicitly names a previously ordered item to cancel (e.g., "Cancel the towel"), route to `CANCEL` with the specific `target_keyword`.
   - False Alarm: If the user retracts a complaint IN THE SAME TURN (e.g., "Neighbor is noisy... never mind, they stopped"), route to `SOFT_FALLBACK`, NOT CANCEL.
   - Cancellation Targeting: If the AI asked "Which item to cancel?", the user's reply (e.g., "The towel") MUST be routed to `CANCEL` with the target item, NOT a new order.
+- **INTENT WITHDRAWAL DURING CLARIFICATION (CRITICAL)**:
+  - If the last AI message in `[과거 대화 맥락]` was a clarification question asking for missing information, AND the user responds with a dismissive, nonsensical, or withdrawal message (e.g., "ㅋㅋ", "haha", "됐어", "never mind", "whatever", "그냥", "idk", "nvm", meaningless characters like "ㅁㄴㅇ" or "asdf"), you MUST classify it as `NON_ACTIONABLE` with `domain: null` and generate a polite closing `reply`.
+  - DO NOT continue the clarification loop or re-ask the same question. The guest has clearly lost interest or withdrawn their intent.
+  - Example: AI asked "What time would you like the taxi?" → Guest: "haha" → Route to `NON_ACTIONABLE`, reply: "No worries! Feel free to reach out anytime you need help."
 
 - **COMPLAINT ESCALATION RULE (FRONT vs FACILITY)**:
   - **FACILITY Issues**: Physical malfunctions, broken appliances, plumbing issues, or water leaks (e.g., "물이 새요", "에어컨이 안 돼요") MUST be routed to `DEPARTMENT` with `domain: "FACILITY"` (set priority to URGENT if severe). DO NOT route physical problems to FRONT_ESCALATION. Facility staff will inspect and initiate room changes if necessary.

@@ -173,6 +173,12 @@ STATIC_REPLIES = {
         "ja": "システムに一時的な問題が発生しているようです. 少し経ってからもう一度お試しいただけますか？ 🥲🙏",
         "zh": "系统似乎出现了暂时的故障。您能稍后再试一次吗？ 🥲🙏"
     },
+    "CONVERSATION_END": {
+        "ko": "네, 알겠습니다! 😊 필요하신 건이 생기시면 언제든 편하게 말씀해 주세요.",
+        "en": "No worries! 😊 Feel free to reach out anytime you need help.",
+        "ja": "かしこまりました！😊 何かございましたら、いつでもお気軽にお申し付けください。",
+        "zh": "好的，没问题！😊 如果有需要，请随时告诉我。"
+    },
     "COMPLAINT": {
         "ko": "불편을 드려 대단히 죄송합니다. 🥲 지금 바로 프론트 직원과 직접 연결하여 도움을 드리겠습니다.",
         "en": "We sincerely apologize for the inconvenience. We will connect you directly to the front desk right now. 🥲",
@@ -242,6 +248,52 @@ def _get_static_reply(key: str, lang: str) -> str:
     if lang not in ["ko", "en", "ja", "zh"]:
         lang = "en"
     return STATIC_REPLIES.get(key, {}).get(lang, STATIC_REPLIES.get(key, {}).get("en", "We are processing your request."))
+
+
+# ── Guest Intent Classification (LLM-based) ──
+# Replaces hardcoded pattern matching with natural language understanding.
+# Used by the anti-infinite-loop guardrail to distinguish:
+#   - NO_INTENT: Guest is being dismissive, joking, or withdrawing (→ Case 1: graceful close)
+#   - HAS_INTENT: Guest has genuine service intent but AI can't resolve it (→ Case 2: Human Escalation)
+def _classify_guest_intent(recent_messages: list, language: str) -> str:
+    """
+    Uses a single LLM call to classify whether the guest's recent responses
+    show genuine service intent or are dismissive/nonsensical.
+    Returns: "NO_INTENT" or "HAS_INTENT"
+    """
+    messages_text = "\n".join([f"- \"{msg}\"" for msg in recent_messages if msg])
+    if not messages_text:
+        return "NO_INTENT"
+    
+    prompt = (
+        f"You are analyzing a hotel concierge AI conversation.\n"
+        f"The AI has been repeatedly asking the guest for required information "
+        f"(e.g., destination, time, quantity, restaurant name) to fulfill a service request, "
+        f"but the guest has not provided the needed information after multiple attempts.\n\n"
+        f"[Guest's Recent Messages]\n{messages_text}\n\n"
+        f"Classify the guest's overall intent based on their recent messages:\n"
+        f"- NO_INTENT: The guest is being dismissive, sending gibberish/spam, joking around, "
+        f"withdrawing their request, or clearly has no interest in continuing the service request. "
+        f"Examples: 'haha', 'never mind', 'ㅋㅋ', 'whatever', 'idk', meaningless characters, "
+        f"'됐어', '算了', '結構です', repeated nonsense.\n"
+        f"- HAS_INTENT: The guest is genuinely trying to provide information but the AI cannot "
+        f"understand or process their answer. They have a real service need but are struggling "
+        f"to communicate it precisely. "
+        f"Examples: 'the place from yesterday', 'that Italian restaurant', 'the one near the station', "
+        f"vague but sincere attempts to answer the AI's question.\n"
+    )
+    
+    try:
+        result = call_gemini(
+            prompt=prompt,
+            system_instruction='Output ONLY a JSON object: {"intent": "NO_INTENT"} or {"intent": "HAS_INTENT"}. No other text.'
+        )
+        classification = result.get("intent", "HAS_INTENT")
+        print(f"[Analyze] 🧠 Guest intent classification: {classification} (messages: {recent_messages})")
+        return classification
+    except Exception as e:
+        print(f"[Analyze] ⚠️ Guest intent classification failed (defaulting to HAS_INTENT): {e}")
+        return "HAS_INTENT"  # Default to Case 2 (safer — offers escalation rather than terminating)
 
 def _summarize_from_context(current_text: str, chat_history: list, fallback: str) -> str:
     try:
@@ -452,37 +504,63 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                 should_escalate = True
 
             if should_escalate:
-                # 하드코딩된 대화 종료 멘트 대신, Gemini를 호출하여 정중하고 유연한 SOFT_FALLBACK 안내 멘트를 생성합니다.
-                try:
-                    import asyncio
-                    recent_chat = "\n".join([f"{m.get('role', 'user')}: {m.get('content', '')}" for m in request.chat_history[-4:]])
-                    escalation_prompt = (
-                        f"고객과의 대화에서 AI가 여러 번 질문을 던졌지만, 고객이 명확한 답을 주지 않고 계속 겉도는 상황입니다.\n"
-                        f"정중하게 '제가 정확한 의미를 파악하기 조금 어렵네요. 🥲 직원분의 도움이 필요하시다면 제가 연결해드릴까요?' 라는 뉘앙스로 자연스럽게 안내하세요.\n"
-                        f"반드시 고객의 언어(주 언어: {request.language})로 작성하세요.\n\n"
-                        f"[최근 대화]\n{recent_chat}"
-                    )
-                    raw_fallback = call_gemini(
-                        prompt=escalation_prompt,
-                        system_instruction='반드시 {"reply": "..."} 형태의 JSON으로만 응답하세요.'
-                    )
-                    generated_reply = raw_fallback.get("reply", _get_static_reply("FALLBACK_FAILURE", request.language))
-                except Exception as e:
-                    print(f"[Analyze] ⚠️ Fallback 멘트 생성 실패: {e}")
-                    generated_reply = _get_static_reply("FALLBACK_FAILURE", request.language)
+                # ── [Case 1 vs Case 2 Branch] ──
+                # Use LLM to naturally classify whether the guest has real service intent
+                # or is being dismissive/nonsensical, instead of hardcoded pattern matching.
+                recent_user_msgs = [m.get("content", "").strip() for m in request.chat_history[-6:] if m.get("role") == "user"]
+                # Include current turn's message (not yet in chat_history)
+                recent_user_msgs.append(request.text.strip())
+                # Check only the last 3 messages
+                recent_user_msgs = recent_user_msgs[-3:]
+                
+                guest_intent = _classify_guest_intent(recent_user_msgs, request.language)
+                
+                if guest_intent == "NO_INTENT":
+                    # ━━ Case 1: No service intent → Graceful conversation close (no escalation offer) ━━
+                    print(f"\n[Analyze] 🚫 Case 1: NO_INTENT detected → Graceful conversation close (no escalation offer)")
+                    response["guest_reply"] = _get_static_reply("CONVERSATION_END", request.language)
+                    response["summary"] = "Conversation closed (no intent)"
+                    response["domain_code"] = None
+                    response["action_type"] = "NONE"
+                    response["priority"] = "NORMAL"
+                    response["entities"] = {}
+                    response["confidence"] = 0.0
+                    response["missing_fields"] = []
+                    response["clarification_options"] = []  # No buttons!
+                else:
+                    # ━━ Case 2: Has intent but AI can't resolve → Human Escalation proposal ━━
+                    print(f"\n[Analyze] 🤝 Case 2: HAS_INTENT but AI cannot resolve → Human Escalation proposal")
+                    try:
+                        recent_chat = "\n".join([f"{m.get('role', 'user')}: {m.get('content', '')}" for m in request.chat_history[-4:]])
+                        escalation_prompt = (
+                            f"This is a conversation between a hotel AI concierge and a guest. "
+                            f"The AI has asked multiple questions but could not extract the required information.\n"
+                            f"The guest clearly wants a service but the AI has reached its limit and cannot resolve it alone.\n"
+                            f"Politely acknowledge the AI's limitation and ask whether the guest would like to be connected to the front desk staff for assistance.\n"
+                            f"You MUST write the response in the guest's language (primary language: {request.language}).\n\n"
+                            f"[Recent Conversation]\n{recent_chat}"
+                        )
+                        raw_fallback = call_gemini(
+                            prompt=escalation_prompt,
+                            system_instruction='Output ONLY a JSON object: {"reply": "your polite escalation message here"}. No other text.'
+                        )
+                        generated_reply = raw_fallback.get("reply", _get_static_reply("FALLBACK_FAILURE", request.language))
+                    except Exception as e:
+                        print(f"[Analyze] ⚠️ Fallback message generation failed: {e}")
+                        generated_reply = _get_static_reply("FALLBACK_FAILURE", request.language)
 
-                response["guest_reply"] = generated_reply
-                response["summary"] = "안내 및 거절 (입력 오류 누적)"
-                response["domain_code"] = None
-                response["action_type"] = "NONE"
-                response["priority"] = "NORMAL"
-                response["entities"] = {}
-                response["confidence"] = 0.0
-                response["missing_fields"] = []
-                response["clarification_options"] = [
-                    _get_static_reply("OPTION_YES", request.language),
-                    _get_static_reply("OPTION_NO", request.language)
-                ]
+                    response["guest_reply"] = generated_reply
+                    response["summary"] = "AI resolution failed (staff connection offered)"
+                    response["domain_code"] = None
+                    response["action_type"] = "NONE"
+                    response["priority"] = "NORMAL"
+                    response["entities"] = {}
+                    response["confidence"] = 0.0
+                    response["missing_fields"] = []
+                    response["clarification_options"] = [
+                        _get_static_reply("OPTION_YES", request.language),
+                        _get_static_reply("OPTION_NO", request.language)
+                    ]
         
         # ── [비동기 로깅 메타데이터 주입] ──
         # STEP 4에서 이미 에이전트별 메타가 세팅되었으면 스킵 (이중 주입 방지)
@@ -1681,14 +1759,6 @@ class TranslateRequest(BaseModel):
     target_language: str
 
 @router.post("/translate-summary")
-async def translate_text(request: TranslateRequest) -> dict:
-    prompt = f"Translate the following hotel dashboard summary into {request.target_language}. Keep it extremely concise, like a short title or noun phrase (e.g., 'Request for 2 towels' instead of 'I would like to request 2 towels'). Respond ONLY with the translated text.\n\nText: {request.text}"
-    translated_text = await call_gemini_async(
-        prompt=prompt,
-        system_instruction="You are a professional translator for a hotel dashboard UI. Provide exact, concise translations without formatting or conversational filler."
-    )
-    return {"translated_text": translated_text}
-
 async def translate_text(request: TranslateRequest) -> dict:
     prompt = f"Translate the following hotel dashboard summary into {request.target_language}. Keep it extremely concise, like a short title or noun phrase (e.g., 'Request for 2 towels' instead of 'I would like to request 2 towels'). Respond ONLY with the translated text.\n\nText: {request.text}"
     translated_text = await call_gemini_async(
