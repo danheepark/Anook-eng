@@ -43,6 +43,7 @@
   font: var(--text-body-md-medium);
   word-break: keep-all;
   overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .received {

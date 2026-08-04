@@ -51,7 +51,15 @@ RULES:
 - `intent` MUST always be included in `entities` (for dashboard statistics).
 - `equipment` MUST always be extracted. If unclear, infer from context (e.g., "I want to wash but no water" → equipment: "Shower/Plumbing", "It's too dark" → equipment: "Lighting").
 - `location`: If the guest does NOT mention a specific location, default to "Room".
-- If the equipment or symptom is too vague (e.g., "Something is broken"), set `needs_clarification=true` and ask in the EXACT SAME LANGUAGE the guest used: exactly WHAT is broken and HOW.
+- If the equipment or symptom is too vague (e.g., "Something is broken"), set `needs_clarification=true`.
+- 🚨 MULTI-QUESTION FORMATTING RULE (CRITICAL FOR READABILITY) 🚨:
+  When asking clarifying questions for multiple missing fields (e.g., equipment, symptom, or location), NEVER combine them into a single continuous sentence.
+  You MUST separate each item or detail onto its own line using explicit line breaks (`\n`) and bullet points (`- `).
+  - ✅ Correct Example (EN Default):
+    "I'd like to help get this sorted out. Could you tell me a bit more?\n- Equipment: What's the issue with? (e.g., AC, TV, toilet)\n- Problem: What's happening exactly?\n- Location: Where in the room is it?"
+  - ❌ Wrong Example:
+    "What equipment is broken and what is the symptom and where is it located?"
+- DEFAULT & CRITICAL LANGUAGE RULE: English is the DEFAULT language for all AI outputs (`clarification_question`, `summary`, etc.). Always use English by default unless the guest explicitly communicates in another language (e.g., Korean).
 - Write `summary`, `equipment`, `symptom`, and `location` in English.
 - Assess `priority` based on severity. You MUST choose ONLY ONE of the following two priorities:
   - URGENT: Severe damages or breakdowns that make the room completely unusable and strongly require an immediate room change (e.g., completely clogged toilet (ALWAYS URGENT), massive water leak, complete failure of AC/Heater).
@@ -62,7 +70,7 @@ RULES:
 - DUPLICATE REQUEST RESOLUTION (ANY OVERLAPPING EQUIPMENT): If the guest requests a facility repair/inspection AND `[고객의 현재 활성 요청(주문) 목록]` contains an existing active request that includes ANY of the same equipment (e.g., guest already reported AC broken, and now reports AC and TV):
     - If there is any overlapping equipment, and the guest did NOT explicitly state whether to "replace" (change/modify) or "cancel" the existing one:
     - You MUST set `needs_clarification`: true.
-    - Your `clarification_question` MUST ask: "An inspection/repair request for [overlapping equipment] is already in progress. Would you like to ADD to the existing request, or REPLACE the existing request with this new one?" (Translate to the guest's language).
+    - Your `clarification_question` MUST ask: "It looks like there's already an active request for [overlapping equipment]. Would you like to add a new report or replace the existing one?" (Translate to the guest's language).
     - You MUST provide `clarification_options`: `["ADD", "REPLACE"]`.
     - You MUST identify the existing request ID from `[고객의 현재 활성 요청(주문) 목록]` and set it in `"target_request_id"` at the top level of the JSON output.
     - If the guest replies "ADD" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD"`. (For duplicate adds, just treat it as ADD).

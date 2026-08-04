@@ -97,61 +97,61 @@ _background_tasks = set()
 STATIC_REPLIES = {
     "ESCALATION": {
         "ko": "제가 바로 답변드리기 어려운 부분이라, 프론트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
-        "en": "I'll connect you to the front desk right away to assist you further. Please hold on a moment! 😊",
+        "en": "Let me connect you to the front desk right away — they'll be able to help! Please hold on a moment. 😊",
         "ja": "すぐに対応できるよう、フロントデスクにお繋ぎいたします。少々お待ちくださいませ。😊",
         "zh": "我会立刻为您连接到前台以便进一步协助您。请稍等片刻！😊"
     },
     "ESCALATION_INFO": {
         "ko": "더 자세한 정보를 위해 프론트 데스크 직원에게 연결해 드릴게요! 잠시만 기다려 주세요.",
-        "en": "I'll connect you to the front desk for more detailed information! Please hold on a moment. 😊",
+        "en": "Let me connect you to the front desk for more details! One moment, please. 😊",
         "ja": "より詳細な情報については、フロントデスクにお繋ぎいたします！少々お待ちください。😊",
         "zh": "为了提供更详细的信息，我会为您连接到前台！请稍等片刻。😊"
     },
     "CLARIFICATION": {
         "ko": "어떤 말씀이신지 조금만 더 자세히 알려주시겠어요? 말씀해주시면 바로 도와드릴게요!",
-        "en": "Could you tell me a bit more about what you need? I'd be happy to help you right away! 😊",
+        "en": "Could you tell me a bit more about what you need? I'd love to help! 😊",
         "ja": "どのようなご用件か、もう少し詳しく教えていただけますか？すぐにお手伝いさせていただきます！😊",
         "zh": "您能详细告诉我您的需求吗？我很乐意立刻帮助您！😊"
     },
     "CANCEL_REJECTED": {
         "ko": "안타깝게도 해당 요청은 취소가 어렵습니다. 🥲 이미 처리가 시작되었거나 부서 확인이 필요한 상태이니 양해 부탁드립니다. 🙏",
-        "en": "Unfortunately, this request cannot be cancelled. It is already in progress or requires department confirmation. 🥲🙏",
+        "en": "I'm sorry, but this request can't be cancelled — it's already in progress or needs department confirmation. 🥲🙏",
         "ja": "申し訳ありませんが、キャンセルリクエストは却下されました。すでに処理が開始されているか、部門の確認が必要です。🥲🙏",
         "zh": "抱歉，取消请求被拒绝。该请求已在处理中或需要部门批准。🥲🙏"
     },
     "CANCEL_SUCCESS": {
         "ko": "네, 요청하신 건이 정상적으로 즉시 취소 처리되었습니다. 😌 다른 필요하신 사항이 있다면 언제든 말씀해 주세요!",
-        "en": "Your request has been successfully cancelled. 😌 Please let me know if you need anything else!",
+        "en": "Done! Your request has been cancelled. 😌 Let me know if there's anything else I can help with!",
         "ja": "リクエストは正常にキャンセルされました。😌 他にご要望がございましたら、いつでもお申し付けください。",
         "zh": "您的请求已成功取消。😌 如果您还有其他需要，请随时告诉我！"
     },
     "CANCEL_PENDING": {
         "ko": "해당 건은 이미 처리가 진행 중이어서 담당 부서로 취소 가능 여부를 확인 중입니다. 🏃‍♂️ 확인 후 바로 안내해 드릴게요!",
-        "en": "Your request is already being processed, so we have sent a cancellation request to the department. \n We will notify you once confirmed!",
+        "en": "Your request is already being worked on, so I've sent a cancellation request to the team. \n I'll let you know as soon as it's confirmed!",
         "ja": "すでに処理が進行中のため、担当部署にキャンセルをリクエストしました. 🏃‍♂️ 確認次第お知らせいたします。",
         "zh": "您的请求正在处理中，因此我们已向相关部门发送了取消请求. 🏃‍♂️ 确认后我们将通知您。"
     },
     "CANCEL_IN_PROGRESS": {
         "ko": "네, 요청하신 건에 대해 취소를 접수해 드릴게요! 😌 아직 대기 중이라면 바로 취소되며, 이미 처리 중이라면 부서 확인 후 안내해 드리겠습니다.",
-        "en": "We will process the cancellation for the specific request. Pending ones are canceled immediately, while in-progress ones require department confirmation. 😌",
+        "en": "I'll process the cancellation for you. Pending requests are cancelled right away, while ones already in progress will need a quick check with the team. 😌",
         "ja": "ご指定のリクエストのキャンセル手続きを行います. 待機中のものは即座にキャンセルされ, 対応中のものは部門の確認が必要となります. 😌",
         "zh": "我们将为您处理指定请求的取消操作。待处理的将立即取消，处理中的需要相关部门确认。😌"
     },
     "CANCEL": {
         "ko": "대기 중인 요청은 즉시 취소 처리됩니다. 단, 이미 직원이 처리를 시작한 경우 담당 부서 확인 후 취소됩니다.",
-        "en": "Pending requests will be canceled immediately. If staff have already begun processing, it will be canceled after department confirmation. 😌",
+        "en": "Pending requests will be cancelled right away. If the staff has already started working on it, we'll confirm with the team first. 😌",
         "ja": "待機中のリクエストは即座にキャンセルされます。すでにスタッフが対応を開始している場合は、担当部門の確認後にキャンセルされます。😌",
         "zh": "待处理的请求将立即取消。如果工作人员已经开始处理，将在相关部门确认后取消。😌"
     },
     "STATUS_CHECK": {
         "ko": "현재 고객님의 최근 요청 진행 상태를 확인해 드리겠습니다.",
-        "en": "I will check the status of your most recent request right now. 🔍",
+        "en": "Let me check on your most recent request right now. 🔍",
         "ja": "お客様の最新のリクエストの状況をただいま確認いたします。🔍",
         "zh": "我将立刻为您查询最近请求的处理状态。🔍"
     },
     "TARGETED_CANCEL": {
         "ko": "지목하신 요청의 취소를 진행합니다. 대기 중인 건은 즉시 취소되며, 처리 중인 건은 부서 확인 후 취소됩니다.",
-        "en": "We will process the cancellation for the specific request. Pending ones are canceled immediately, while in-progress ones require department confirmation. 😌",
+        "en": "I'll process the cancellation for you. Pending requests are cancelled right away, while ones already in progress will need a quick check with the team. 😌",
         "ja": "ご指定のリクエストのキャンセル手続きを行います. 待機中のものは即座にキャンセルされ, 対応中のものは部門の確認が必要となります. 😌",
         "zh": "我们将为您处理指定请求的取消操作。待处理的将立即取消，处理中的需要相关部门确认。😌"
     },
@@ -163,13 +163,13 @@ STATIC_REPLIES = {
     },
     "INFO_NOT_FOUND": {
         "ko": "그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏",
-        "en": "I'm not quite sure about that one! I have forwarded your question to the front desk staff. They will check and reply to you here shortly. 🥲🙏",
+        "en": "I'm not quite sure about that one! I've passed your question along to the front desk — they'll get back to you here shortly. 🥲🙏",
         "ja": "申し訳ありません、そちらについてはお答えいたしかねます。フロントデスクのスタッフに質問を転送いたしましたので、確認後すぐにこちらでご返答させていただきます. 🥲🙏",
         "zh": "抱歉，关于这个问题我不太确定！我已经将您的问题转交给了前台员工。他们会核实后尽快在这里回复您。🥲🙏"
     },
     "ERROR": {
         "ko": "잠시 통신이 원활하지 않았나 봐요. 🥲 번거로우시겠지만 조금만 이따가 다시 한 번 말씀해 주시겠어요? 🙏",
-        "en": "It looks like we're having a tiny system hiccup. Could you try asking again in just a moment? 🥲🙏",
+        "en": "Looks like we hit a small hiccup. Could you try again in just a moment? 🥲🙏",
         "ja": "システムに一時的な問題が発生しているようです. 少し経ってからもう一度お試しいただけますか？ 🥲🙏",
         "zh": "系统似乎出现了暂时的故障。您能稍后再试一次吗？ 🥲🙏"
     },
@@ -181,25 +181,25 @@ STATIC_REPLIES = {
     },
     "COMPLAINT": {
         "ko": "불편을 드려 대단히 죄송합니다. 🥲 지금 바로 프론트 직원과 직접 연결하여 도움을 드리겠습니다.",
-        "en": "We sincerely apologize for the inconvenience. We will connect you directly to the front desk right now. 🥲",
+        "en": "I'm so sorry about the trouble. Let me connect you to the front desk right now. 🥲",
         "ja": "ご不便をおかけして大変申し訳ございません。ただいまフロントデスクに直接お繋ぎいたします。🥲",
         "zh": "给您带来不便，我们深表歉意。现在立刻为您直接连接到前台。🥲"
     },
     "FALLBACK_FAILURE": {
         "ko": "제가 정확한 의미를 파악하기 조금 어렵네요. 🥲 직원분의 도움이 필요하시다면 제가 연결해드릴까요?",
-        "en": "I'm having trouble understanding your request. If you need assistance, shall I connect you to the front desk? 🥲",
+        "en": "I'm having a bit of trouble understanding — would you like me to connect you to the front desk? 🥲",
         "ja": "リクエストを理解できませんでした. フロントデスクのサポートが必要な場合は, フロントデスクにお繋ぎいたしましょうか？ 🥲",
         "zh": "我无法理解您的请求. 如果您需要前台的帮助, 需要我为您连接前台吗？ 🥲"
     },
     "NEED_MORE_INFO": {
         "ko": "조금 더 상세한 안내가 필요하시다면 프론트 데스크로 바로 연결해 드릴까요?",
-        "en": "Would you like me to connect you to the front desk for more detailed information? 😊",
+        "en": "Would you like me to connect you to the front desk for more details? 😊",
         "ja": "より詳細な情報をご希望の場合は、フロントデスクにお繋ぎいたしましょうか？ 😊",
         "zh": "您需要我将您连接到前台以获取更详细的信息吗？ 😊"
     },
     "EMERGENCY_REPLY": {
         "ko": "🚨 응급 상황을 인지하였습니다. 즉시 호텔 보안팀을 호출하고 직원을 파견하겠습니다. 부디 안전한 곳에 머물러 주십시오.",
-        "en": "🚨 We have recognized an emergency. We are immediately dispatching hotel security. Please stay safe.",
+        "en": "🚨 Emergency noted. We're dispatching hotel security right away. Please stay somewhere safe.",
         "ja": "🚨 緊急事態を認識しました. 直ちにホテルのセキュリティチームを呼び, スタッフを派遣します. 安全な場所にとどまってください.",
         "zh": "🚨 我们已经确认了紧急情况. 将立即呼叫酒店安保团队, 并派遣员工. 请待在安全的地方."
     },
@@ -229,7 +229,7 @@ STATIC_REPLIES = {
     },
     "DUPLICATE_CONFIRM": {
         "ko": "이미 '{summary}'을(를) 요청하셨는데, 이번 요청을 추가로 접수할까요? 아니면 기존 요청을 변경하시겠어요?",
-        "en": "You already have an active request: '{summary}'. Would you like to add this as a new request, or replace the existing one?",
+        "en": "You already have an active request for '{summary}'. Would you like to add this as a new one, or replace the existing request?",
         "ja": "すでに「{summary}」をリクエストされていますが、追加でリクエストしますか？それとも既存のリクエストを変更しますか？",
         "zh": "您已经请求了「{summary}」，您想追加请求还是修改现有请求？"
     }
@@ -247,7 +247,7 @@ def _get_static_reply(key: str, lang: str) -> str:
     lang = lang.lower()
     if lang not in ["ko", "en", "ja", "zh"]:
         lang = "en"
-    return STATIC_REPLIES.get(key, {}).get(lang, STATIC_REPLIES.get(key, {}).get("en", "We are processing your request."))
+    return STATIC_REPLIES.get(key, {}).get(lang, STATIC_REPLIES.get(key, {}).get("en", "Working on your request — one moment!"))
 
 
 # ── Guest Intent Classification (LLM-based) ──
@@ -1272,7 +1272,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 
                 # [수정] 정보가 없을 때 강제 이관(ESCALATION) 대신 Soft Fallback을 통해 고객에게 연결 의사 묻기
                 response = {
-                    "guest_reply": "제가 바로 확인해 드리기 어려운 내용이네요. 프론트 데스크 직원을 바로 연결해 드릴까요?" if request.language == "ko" else "Oh, that's a bit tricky for me to answer right away. Shall I connect you to the front desk?",
+                    "guest_reply": "제가 바로 확인해 드리기 어려운 내용이네요. 프론트 데스크 직원을 바로 연결해 드릴까요?" if request.language == "ko" else "That's a tricky one for me — would you like me to connect you to the front desk?",
                     "summary": "추가 정보 필요 (프론트 연결 제안)",
                     "domain_code": None,
                     "priority": "NORMAL",
@@ -1329,7 +1329,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             # FALSE ALARM: EMERGENCY 도메인 취소 (오인 신고 정정)
             if primary.domain == "EMERGENCY":
                 false_alarm_reply_ko = "확인되었습니다. 긴급 호출을 취소 처리하겠습니다. 혹시 다른 도움이 필요하시면 말씀해 주세요."
-                false_alarm_reply_en = "Understood. The emergency call has been cancelled. Please let us know if you need anything else."
+                false_alarm_reply_en = "Got it — the emergency call has been cancelled. Let me know if there's anything else you need."
                 response = {
                     "guest_reply": false_alarm_reply_ko if request.language == "ko" else false_alarm_reply_en,
                     "summary": "긴급 호출 취소 (오인 신고)",
@@ -1483,7 +1483,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
         if primary.route_type == "VOC":
             sentiment = primary.sentiment if hasattr(primary, 'sentiment') else "POSITIVE"
             reply_ko = "따뜻한 말씀 감사드립니다! 담당 부서에 꼭 전달하겠습니다." if sentiment == "POSITIVE" else "소중한 의견 감사드립니다. 서비스 개선에 꼭 참고하겠습니다."
-            reply_en = "Thank you for your kind words! We will definitely pass it on to the department." if sentiment == "POSITIVE" else "Thank you for your valuable feedback. We will use it to improve our service."
+            reply_en = "Thank you so much for the kind words! We'll definitely pass this along to the team." if sentiment == "POSITIVE" else "We really appreciate your feedback — we'll use it to keep improving."
             response = {
                 "guest_reply": reply_ko if request.language == "ko" else reply_en,
                 "summary": "고객 피드백 (VOC)",
@@ -1515,7 +1515,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 if not items:
                     cat_label = target_category or "전체"
                     guest_reply_ko = f"현재까지 {cat_label} 이용 내역이 없습니다."
-                    guest_reply_en = f"There are no {cat_label} charges recorded for your room at this time."
+                    guest_reply_en = f"There are no {cat_label} charges on your room at the moment."
                     guest_reply = guest_reply_ko if request.language == "ko" else guest_reply_en
                 else:
                     prompt_text = build_billing_prompt(billing_data, request.language)
@@ -1542,7 +1542,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             except Exception as e:
                 print(f"[Analyze] ⚠️ BILLING_INQUIRY 처리 실패: {e}")
                 err_ko = "비용 조회에 일시적 오류가 발생했습니다. 프론트 데스크에 문의해 주세요."
-                err_en = "We encountered a temporary error retrieving your billing information. Please contact the front desk."
+                err_en = "We ran into a temporary issue pulling up your billing info. Please check with the front desk."
                 response = {
                     "guest_reply": err_ko if request.language == "ko" else err_en,
                     "summary": "비용 조회 오류",
