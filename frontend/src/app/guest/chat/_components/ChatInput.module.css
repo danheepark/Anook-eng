@@ -63,7 +63,16 @@
   }
 }
 
+.inputContainer {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .input {
+  width: 100%;
   flex: 1;
   background: transparent;
   border: none;
@@ -78,10 +87,58 @@
   line-height: 24px;
   box-sizing: border-box;
   font-family: inherit;
+  position: relative;
+  z-index: 2;
 }
 
 .input::placeholder {
-  color: var(--color-gray-500);
+  color: var(--color-gray-400);
+}
+
+.placeholderOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 10px var(--space-16);
+  pointer-events: none;
+  overflow: hidden;
+  user-select: none;
+  z-index: 1;
+}
+
+.placeholderText {
+  font: var(--text-body-md-medium);
+  color: var(--color-gray-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  line-height: 24px;
+  animation: slideUpFade 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes slideUpFade {
+  0% {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  12% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  88% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
 }
 
 .actionGroup {

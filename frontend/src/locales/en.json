@@ -452,13 +452,12 @@
     }
   },
   "guestChat": {
-    "welcomeMessage": "Hi there! I'm your Hotel AI Assistant.\nI'm here to make your stay as comfortable as possible.\nJust let me know what you need!",
-    "quickReplyPrompt": "How can I help? Pick an option below or just type your request!",
+    "welcomeMessage": "What can I help with during your stay?",
     "quickReplyOptions": [
-      "Need 2 extra towels",
-      "When's breakfast?",
-      "Can you clean my room?",
-      "Can I get a late checkout?"
+      "2 extra towels",
+      "Breakfast hours",
+      "Room cleaning",
+      "Late checkout"
     ],
     "activeRequestsCount": "{count} active requests",
     "progress": {
@@ -644,6 +643,11 @@
   },
   "chatInput": {
     "placeholder": "Ask me anything...",
+    "placeholders": [
+      "Try “Bring two extra towels”",
+      "Try “What time is breakfast?”",
+      "Try “Clean my room at 2 PM”"
+    ],
     "listening": "Listening...",
     "camera": "Take Photo",
     "gallery": "Gallery",

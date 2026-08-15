@@ -598,6 +598,11 @@
   },
   "chatInput": {
     "placeholder": "请问有什么可以帮您...",
+    "placeholders": [
+      "试试“送两条额外毛巾”",
+      "试试“早餐是几点？”",
+      "试试“下午2点打扫房间”"
+    ],
     "listening": "正在聆听...",
     "camera": "拍照",
     "gallery": "相册",

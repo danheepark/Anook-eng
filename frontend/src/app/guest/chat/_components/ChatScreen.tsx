@@ -246,7 +246,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                       padding: '0 var(--space-8)',
                       textAlign: 'center',
                       lineHeight: '1.5',
-                      transform: 'translateY(6vh)'
+                      transform: 'translateY(-7vh)'
                     }}>
                       <div style={{ marginBottom: 'var(--space-32)', display: 'flex', justifyContent: 'center' }}>
                         <img
@@ -259,7 +259,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                           }}
                         />
                       </div>
-                      <div style={{ font: 'var(--text-h1-bold)', color: 'var(--color-gray-900)', marginBottom: 'var(--space-8)' }}>
+                      <div className={styles.welcomeTitle}>
                         {welcomeLine1}
                       </div>
                       {welcomeLine2 && (

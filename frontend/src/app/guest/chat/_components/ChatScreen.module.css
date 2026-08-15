@@ -122,6 +122,24 @@
   padding-top: calc(var(--space-24) + var(--status-bar-offset, 60px) + 54px);
 }
 
+.welcomeTitle {
+  font-family: 'Fraunces 72pt', 'Fraunces', serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 38px;
+  text-align: center;
+  background: linear-gradient(91.29deg, #7452A0 6.35%, #254E90 97.32%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  padding: 0 0 16px;
+  max-width: 383px;
+  margin: 0 auto;
+  font-variation-settings: 'opsz' 72;
+  display: inline-block;
+}
+
 .spacer {
   flex: 1;
 }
