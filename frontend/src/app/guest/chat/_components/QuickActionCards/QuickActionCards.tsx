@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './QuickActionCards.module.css';
-import { Home, Utensils, ConciergeBell } from 'lucide-react';
+import { Home, Utensils } from 'lucide-react';
+import { TaxiIcon } from '@/components/icons';
 import { useTranslation } from '@/app/useTranslation';
 import QuickActionCard from './QuickActionCard';
 
@@ -12,7 +13,7 @@ export interface QuickActionCardsProps {
 export default function QuickActionCards({ onSelect, disabled = false }: QuickActionCardsProps) {
   const { t } = useTranslation();
   const cardsData = (t.guestChat as any)?.quickCards || {
-    hk: { line1: 'Extra', line2: 'towels', query: 'Extra towels' },
+    hk: { line1: 'Request', line2: 'extra towels', query: 'Request extra towels' },
     fb: { line1: 'Order', line2: 'room service', query: 'Order room service' },
     concierge: { line1: 'Book', line2: 'a taxi', query: 'Book a taxi' }
   };
@@ -29,9 +30,9 @@ export default function QuickActionCards({ onSelect, disabled = false }: QuickAc
       id: 'hk',
       domain: 'HK',
       icon: Home,
-      line1: cardsData.hk?.line1 || 'Extra',
-      line2: cardsData.hk?.line2 || 'towels',
-      query: cardsData.hk?.query || 'Extra towels'
+      line1: cardsData.hk?.line1 || 'Request',
+      line2: cardsData.hk?.line2 || 'extra towels',
+      query: cardsData.hk?.query || 'Request extra towels'
     },
     {
       id: 'fb',
@@ -44,7 +45,7 @@ export default function QuickActionCards({ onSelect, disabled = false }: QuickAc
     {
       id: 'concierge',
       domain: 'CONCIERGE',
-      icon: ConciergeBell,
+      icon: TaxiIcon,
       line1: cardsData.concierge?.line1 || 'Book',
       line2: cardsData.concierge?.line2 || 'a taxi',
       query: cardsData.concierge?.query || 'Book a taxi'

@@ -456,9 +456,9 @@
     "welcomeMessage": "What can I help with during your stay?",
     "quickCards": {
       "hk": {
-        "line1": "Extra",
-        "line2": "towels",
-        "query": "Extra towels"
+        "line1": "Request",
+        "line2": "extra towels",
+        "query": "Request extra towels"
       },
       "fb": {
         "line1": "Order",
