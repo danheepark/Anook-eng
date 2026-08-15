@@ -296,8 +296,14 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
         </div>
         <div className={styles.actionGroup}>
           {isStaff ? (
-            <button className={`${isStaff ? styles.staffIconButton : styles.iconButton} ${styles.sendButton}`} onClick={handleSend} aria-label="메시지 전송" style={{ opacity: value.trim() ? 1 : 0.5, cursor: value.trim() ? 'pointer' : 'default' }}>
-              <SendIcon size={24} color="var(--color-gray-700)" />
+            <button
+              className={styles.staffIconButton}
+              onClick={handleSend}
+              aria-label="메시지 전송"
+              disabled={!value.trim() && !imageFile}
+              style={{ opacity: value.trim() || imageFile ? 1 : 0.5, cursor: value.trim() || imageFile ? 'pointer' : 'default' }}
+            >
+              <SendIcon size={18} color="currentColor" />
             </button>
           ) : isTyping ? (
             <button className={`${styles.iconButton} ${styles.stopButton}`} onClick={onStop} aria-label="답변 멈추기">

@@ -122,10 +122,12 @@ export default function HeaderNotification() {
     <>
     <div className={styles.container} ref={popupRef}>
       <button className={styles.bellButton} onClick={() => setIsOpen(!isOpen)} aria-label={language === 'en' ? 'Notifications' : '알림'}>
-        <Bell size={18} color="currentColor" />
-        {totalNotifications > 0 && (
-          <span className={styles.unreadDot} />
-        )}
+        <div className={styles.iconWrapper}>
+          <Bell size={18} color="currentColor" />
+          {totalNotifications > 0 && (
+            <span className={styles.unreadDot} />
+          )}
+        </div>
       </button>
 
       {isOpen && (

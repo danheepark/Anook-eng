@@ -1,0 +1,222 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.triggerBtn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 4px;
+  transition: all var(--transition, 0.2s ease);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+}
+
+.triggerBtn:hover {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-900);
+  border-color: var(--color-gray-300);
+}
+
+.triggerBtn.hasFilter {
+  border-color: var(--color-gray-400);
+  color: var(--color-gray-900);
+  font-weight: 600;
+  background-color: var(--color-gray-50);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.arrow {
+  color: currentColor;
+  transition: transform 0.2s ease-in-out;
+}
+
+.arrowOpen {
+  transform: rotate(180deg);
+}
+
+/* Popover */
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 260px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  z-index: 100;
+  padding: var(--space-12, 12px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10, 10px);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.presetsSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.presetButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.presetBtn {
+  flex: 1;
+  padding: 6px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-gray-200);
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.presetBtn:hover {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-900);
+  border-color: var(--color-gray-300);
+}
+
+.presetBtnActive {
+  background-color: var(--color-gray-900) !important;
+  color: var(--color-white) !important;
+  border-color: var(--color-gray-900) !important;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--color-gray-100);
+  margin: 2px 0;
+}
+
+.customSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionHeader {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dateInputsRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.inputCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inputLabel {
+  font-size: 11px;
+  color: var(--color-gray-500);
+}
+
+.dateInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 4px;
+  font-size: 11px;
+  font-family: inherit;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-sm, 6px);
+  background-color: var(--color-white);
+  color: var(--color-gray-800);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.dateInput:focus {
+  border-color: var(--color-gray-900);
+}
+
+.tilde {
+  color: var(--color-gray-400);
+  padding-bottom: 8px;
+  font-size: 12px;
+}
+
+.actionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.resetBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.resetBtn:hover {
+  color: var(--color-gray-900);
+}
+
+.applyBtn {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-sm, 6px);
+  border: none;
+  background-color: var(--color-gray-900);
+  color: var(--color-white);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.applyBtn:hover {
+  opacity: 0.9;
+}

@@ -17,11 +17,18 @@ import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import ChatPanel from './_components/ChatPanel/ChatPanel';
 import RequestDetailPanel from './_components/RequestDetailPanel/RequestDetailPanel';
 import RegisterTrainingModal from './_components/RegisterTrainingModal/RegisterTrainingModal';
+import DateFilterDropdown, { DateFilterType, DateRange } from './_components/DateFilterDropdown';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useUiStore } from '@/stores/useUiStore';
 import { useSSE } from '@/app/useSSE';
-import InputField from '@/components/ui/Inputfield/InputField';
+const getTodayYMD = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
 
 export default function FrontDeskPage() {
   const [activeTab, setActiveTab] = useState('active');
@@ -29,6 +36,11 @@ export default function FrontDeskPage() {
   const [roomSearchValue, setRoomSearchValue] = useState('');
   const [roomCurrentMatch, setRoomCurrentMatch] = useState(0);
   const [chatSearchValue, setChatSearchValue] = useState('');
+  const [dateFilterType, setDateFilterType] = useState<DateFilterType>('today');
+  const [customDateRange, setCustomDateRange] = useState<DateRange>(() => {
+    const today = getTodayYMD();
+    return { startDate: today, endDate: today };
+  });
   const { requests, loading, error, refetch } = useFrontdeskRequests('FRONT');
   // 긴급대응(EMERGENCY) 부서 요청도 프론트 데스크에서 최우선으로 표시
   const { requests: emergencyRequests, loading: emergLoading, refetch: emergRefetch } = useFrontdeskRequests('EMERGENCY');
@@ -317,15 +329,58 @@ export default function FrontDeskPage() {
   }, [activeTab, pending, inProgress, completed, lastMessageTimes]);
 
   const filteredGroupedRooms = React.useMemo(() => {
-    if (!roomSearchValue) return groupedRooms;
+    let result = groupedRooms;
+
+    // Apply date filter when activeTab === 'completed'
+    if (activeTab === 'completed' && dateFilterType !== 'all') {
+      const getLocalYMD = (dateStr: string) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr.replace(' ', 'T'));
+        if (isNaN(d.getTime())) return '';
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      const now = new Date();
+      const todayYMD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
+      const yest = new Date();
+      yest.setDate(yest.getDate() - 1);
+      const yestYMD = `${yest.getFullYear()}-${String(yest.getMonth() + 1).padStart(2, '0')}-${String(yest.getDate()).padStart(2, '0')}`;
+
+      result = result.filter(room => {
+        const roomYMD = getLocalYMD(room.createdAt);
+        if (!roomYMD) return true;
+
+        if (dateFilterType === 'today') {
+          return roomYMD === todayYMD;
+        }
+        if (dateFilterType === 'yesterday') {
+          return roomYMD === yestYMD;
+        }
+        if (dateFilterType === 'custom') {
+          const { startDate, endDate } = customDateRange;
+          if (startDate && endDate) {
+            return roomYMD >= startDate && roomYMD <= endDate;
+          }
+          if (startDate) return roomYMD >= startDate;
+          if (endDate) return roomYMD <= endDate;
+        }
+        return true;
+      });
+    }
+
+    if (!roomSearchValue) return result;
     const query = roomSearchValue.toLowerCase();
-    return groupedRooms.filter(room =>
+    return result.filter(room =>
       String(room.roomNo).toLowerCase().includes(query) ||
       room.summaryText.toLowerCase().includes(query) ||
       (room.rawText && room.rawText.toLowerCase().includes(query)) ||
       (lastGuestMessages[String(room.roomNo)] && lastGuestMessages[String(room.roomNo)].toLowerCase().includes(query))
     );
-  }, [groupedRooms, roomSearchValue, lastGuestMessages]);
+  }, [groupedRooms, roomSearchValue, lastGuestMessages, activeTab, dateFilterType, customDateRange]);
 
   const scrollToRoomMatch = (index: number) => {
     const target = filteredGroupedRooms[index];
@@ -416,46 +471,54 @@ export default function FrontDeskPage() {
       <div className={styles.splitLayout}>
         {/* Left Pane: Request List */}
         <div className={`${styles.leftPane} ${mobileView !== 'list' ? styles.mobileHidden : ''}`}>
-          <div className={styles.leftPaneHeader}>
-            <div className={styles.leftPaneHeaderLeft}>
-              <h1 className={styles.leftPaneTitle}>{t.frontdeskPage.sidebar.menus.frontDesk}</h1>
-            </div>
-          </div>
           <div className={styles.leftPaneContent}>
-            {/* Room Search Bar */}
-          <div style={{ marginBottom: 'var(--space-16)' }}>
-              <SmartSearchBar
-                inputWrapperStyle={{ flex: 1 }}
-                placeholder={t.frontdeskPage.chatHistory.searchPlaceholder}
-                value={roomSearchValue}
-                onChange={(val) => {
-                  setRoomSearchValue(val);
-                  setRoomCurrentMatch(0);
-                }}
-                currentMatch={roomCurrentMatch}
-                totalMatches={roomSearchValue ? filteredGroupedRooms.length : 0}
-                onPrev={() => {
-                  const newIndex = Math.max(0, roomCurrentMatch - 1);
-                  setRoomCurrentMatch(newIndex);
-                  scrollToRoomMatch(newIndex);
-                }}
-                onNext={() => {
-                  const newIndex = Math.min(filteredGroupedRooms.length - 1, roomCurrentMatch + 1);
-                  setRoomCurrentMatch(newIndex);
-                  scrollToRoomMatch(newIndex);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (filteredGroupedRooms.length > 0) {
-                      const newIndex = (roomCurrentMatch + 1) % filteredGroupedRooms.length;
-                      setRoomCurrentMatch(newIndex);
-                      scrollToRoomMatch(newIndex);
+            {/* Room Search Bar & Date Filter */}
+            <div style={{ display: 'flex', gap: 'var(--space-8)', marginBottom: 'var(--space-16)', alignItems: 'center' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <SmartSearchBar
+                  inputWrapperStyle={{ flex: 1 }}
+                  placeholder={t.frontdeskPage.chatHistory.searchPlaceholder}
+                  value={roomSearchValue}
+                  onChange={(val) => {
+                    setRoomSearchValue(val);
+                    setRoomCurrentMatch(0);
+                  }}
+                  currentMatch={roomCurrentMatch}
+                  totalMatches={roomSearchValue ? filteredGroupedRooms.length : 0}
+                  onPrev={() => {
+                    const newIndex = Math.max(0, roomCurrentMatch - 1);
+                    setRoomCurrentMatch(newIndex);
+                    scrollToRoomMatch(newIndex);
+                  }}
+                  onNext={() => {
+                    const newIndex = Math.min(filteredGroupedRooms.length - 1, roomCurrentMatch + 1);
+                    setRoomCurrentMatch(newIndex);
+                    scrollToRoomMatch(newIndex);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (filteredGroupedRooms.length > 0) {
+                        const nextIndex = (roomCurrentMatch + 1) % filteredGroupedRooms.length;
+                        setRoomCurrentMatch(nextIndex);
+                        scrollToRoomMatch(nextIndex);
+                      }
                     }
-                  }
-                }}
-              />
-          </div>
+                  }}
+                />
+              </div>
+
+              {activeTab === 'completed' && (
+                <DateFilterDropdown
+                  filterType={dateFilterType}
+                  customRange={customDateRange}
+                  onChange={(type, range) => {
+                    setDateFilterType(type);
+                    if (range) setCustomDateRange(range);
+                  }}
+                />
+              )}
+            </div>
           {/* Tabs inside left pane */}
           <div style={{ marginBottom: 'var(--space-4)' }}>
             <Tabs

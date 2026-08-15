@@ -2,6 +2,7 @@
 
 import React, { Suspense } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, Plus } from 'lucide-react';
 import { useUiStore } from '@/stores/useUiStore';
 import styles from './Header.module.css';
@@ -17,6 +18,21 @@ interface HeaderProps {
 export default function Header({ className = '', role = 'frontdesk' }: HeaderProps) {
   const { toggleSidebar, openModal } = useUiStore();
   const { t } = useTranslation();
+  const pathname = usePathname();
+
+  // Dynamic Page Title
+  const getPageTitle = () => {
+    if (pathname === '/frontdesk/requests') return t.frontdeskPage?.sidebar?.menus?.frontDesk || 'Live Chat';
+    if (pathname === '/frontdesk/housekeeping') return t.frontdeskPage?.taskBoard?.titles?.housekeeping || 'Housekeeping';
+    if (pathname === '/frontdesk/fb') return t.frontdeskPage?.taskBoard?.titles?.fb || 'F&B';
+    if (pathname === '/frontdesk/facility') return t.frontdeskPage?.taskBoard?.titles?.facility || 'Facility';
+    if (pathname === '/frontdesk/concierge') return t.frontdeskPage?.taskBoard?.titles?.concierge || 'Concierge';
+    if (pathname === '/frontdesk/all-requests') return t.frontdeskPage?.taskBoard?.titles?.allRequests || 'All Requests';
+    if (pathname === '/frontdesk/chat-history') return t.frontdeskPage?.sidebar?.menus?.chatHistory || 'Chat History';
+    return null;
+  };
+
+  const title = getPageTitle();
 
   return (
     <header className={`${styles.header} ${className}`.trim()}>
@@ -24,9 +40,13 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
         <button className={styles.hamburgerBtn} onClick={toggleSidebar} aria-label="메뉴 열기">
           <Menu size={24} />
         </button>
+        {title && <h1 className={styles.pageTitle}>{title}</h1>}
       </div>
 
       <div className={styles.right}>
+        {/* Slot for page-specific search bar or actions */}
+        <div id="header-search-slot" className={styles.searchSlot} />
+
         {role === 'frontdesk' && (
           <>
             <button

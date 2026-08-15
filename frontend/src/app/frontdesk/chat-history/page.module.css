@@ -35,9 +35,9 @@
 }
 
 .leftPane {
-  width: 25%;
+  width: 26%;
   min-width: 300px;
-  max-width: 400px;
+  max-width: 440px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -49,37 +49,31 @@
 .leftPaneContent {
   flex: 1;
   overflow-y: auto;
-  padding: 0 var(--space-16) var(--space-16);
+  padding: var(--space-16);
   display: flex;
   flex-direction: column;
 }
 
-.leftPaneHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 var(--space-16);
-  background-color: var(--color-white);
-  flex-shrink: 0;
+.moreBtn {
   box-sizing: border-box;
-}
-
-.leftPaneHeaderLeft {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-12);
-  flex: 1;
-  min-width: 0;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  color: var(--color-gray-600);
+  cursor: pointer;
+  transition: all var(--transition, 0.2s ease);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.leftPaneTitle {
-  font: var(--text-h2-bold) !important;
+.moreBtn:hover {
+  background-color: var(--color-gray-100);
   color: var(--color-gray-900);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-color: var(--color-gray-300);
 }
 
 .rightPane {
@@ -94,7 +88,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin: 0 calc(var(--space-24) * -1);
+  margin: 0 calc(var(--space-16) * -1);
 }
 
 .headerActions {

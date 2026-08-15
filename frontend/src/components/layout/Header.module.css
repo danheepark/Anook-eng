@@ -16,10 +16,26 @@
   gap: var(--space-8);
 }
 
+.searchSlot {
+  display: flex;
+  align-items: center;
+}
+
+.searchSlot:empty {
+  display: none;
+}
+
 .left {
   display: flex;
   align-items: center;
   gap: var(--space-16);
+}
+
+.pageTitle {
+  font: var(--text-h2-bold) !important;
+  color: var(--color-gray-900);
+  margin: 0;
+  white-space: nowrap;
 }
 
 .hamburgerBtn {

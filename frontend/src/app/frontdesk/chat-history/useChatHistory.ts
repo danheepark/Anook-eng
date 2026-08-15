@@ -30,13 +30,22 @@ export default function useChatHistory() {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: ChatRoom[] = await res.json();
-      setRooms(data);
       
-      // 첫 번째 객실 자동 선택 (functional update로 의존성 제거)
+      // 최신 대화 순으로 정렬
+      const sorted = [...data].sort((a, b) => {
+        const timeA = a.lastMessageAt ? new Date(a.lastMessageAt.replace(' ', 'T')).getTime() : 0;
+        const timeB = b.lastMessageAt ? new Date(b.lastMessageAt.replace(' ', 'T')).getTime() : 0;
+        if (timeA !== timeB) return timeB - timeA;
+        return String(a.roomNo).localeCompare(String(b.roomNo));
+      });
+      
+      setRooms(sorted);
+      
+      // 가장 최근 대화가 있는 객실 자동 선택
       setSelectedRoom(prev => {
-        if (data.length > 0 && !prev) {
-          return data[0].roomNo;
-        } else if (data.length === 0) {
+        if (sorted.length > 0 && !prev) {
+          return sorted[0].roomNo;
+        } else if (sorted.length === 0) {
           return null;
         }
         return prev;

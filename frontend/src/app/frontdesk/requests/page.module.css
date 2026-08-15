@@ -42,10 +42,10 @@
   overflow: hidden;
 }
 .leftPane {
-  width: 25%;
-  min-width: 280px;
-  max-width: 400px;
-  flex-shrink: 1;
+  width: 26%;
+  min-width: 300px;
+  max-width: 440px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--color-gray-200);
@@ -56,42 +56,14 @@
 .leftPaneContent {
   flex: 1;
   overflow-y: auto;
-  padding: 0 var(--space-16) var(--space-16);
+  padding: var(--space-16);
   display: flex;
   flex-direction: column;
 }
 
-.leftPaneHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 var(--space-16);
-  background-color: var(--color-white);
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-
-.leftPaneHeaderLeft {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  flex: 1;
-  min-width: 0;
-}
-
-.leftPaneTitle {
-  font: var(--text-h2-bold) !important;
-  color: var(--color-gray-900);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .rightPane {
   flex: 1;
-  min-width: 320px;
+  min-width: 400px;
   display: flex;
   flex-direction: column;
   background-color: var(--color-white);
@@ -99,10 +71,10 @@
 }
 
 .detailPane {
-  width: 25%;
-  min-width: 280px;
-  max-width: 400px;
-  flex-shrink: 1;
+  width: 26%;
+  min-width: 300px;
+  max-width: 440px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--color-gray-200);
@@ -123,11 +95,27 @@
   margin: 0 calc(var(--space-16) * -1);
 }
 
+/* Large / Ultra-wide screens (1800px+) */
+@media (min-width: 1800px) {
+  .leftPane {
+    width: 26%;
+    min-width: 340px;
+    max-width: 480px;
+  }
+  
+  .detailPane {
+    width: 26%;
+    min-width: 340px;
+    max-width: 480px;
+  }
+}
+
 /* Gradual spacing & width compression when space is constrained on tablet/small desktops */
 @media (min-width: 769px) and (max-width: 1200px) {
   .leftPane {
-    width: 22%;
+    width: 25%;
     min-width: 250px;
+    max-width: 320px;
   }
   
   .rightPane {
@@ -135,24 +123,19 @@
   }
   
   .detailPane {
-    width: 22%;
+    width: 25%;
     min-width: 250px;
+    max-width: 320px;
   }
   
   .leftPaneContent {
     padding: var(--space-16);
   }
   
-  .leftPaneHeader {
-    height: 60px;
-    padding: 0 var(--space-16);
-  }
-  
   .cardGrid {
     margin: 0 calc(var(--space-16) * -1);
   }
 }
-
 
 /* ── Mobile Layout & Responsive Overrides ── */
 .mobileHidden {

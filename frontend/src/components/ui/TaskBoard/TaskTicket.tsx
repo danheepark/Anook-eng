@@ -392,12 +392,9 @@ export default function TaskTicket({
       <div className={styles.header}>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {roomNo && (
-            <>
-              <span className={styles.roomNo}>
-                {language === 'ko' ? `${roomNo}호` : `NO.${roomNo}`}
-              </span>
-              <div className={styles.headerDivider} />
-            </>
+            <span className={styles.roomNo}>
+              {language === 'ko' ? `${roomNo}호` : `NO.${roomNo}`}
+            </span>
           )}
           {department && (
             <div className={styles.deptBadge}>

@@ -7,6 +7,8 @@ import TaskColumn from '@/components/ui/TaskBoard/TaskColumn';
 import TaskTicket from '@/components/ui/TaskBoard/TaskTicket';
 import RequestDetailModal from '../requests/_components/RequestDetailModal/RequestDetailModal';
 import useFrontdeskRequests from '../useFrontdeskRequests';
+import HeaderSearchSlot from '@/components/layout/HeaderSearchSlot';
+import DateFilterDropdown, { DateFilterType, DateRange } from '../requests/_components/DateFilterDropdown';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
@@ -19,22 +21,77 @@ const mapStatus = (s: string): 'TODO' | 'IN_PROGRESS' | 'DONE' => {
   return 'TODO';
 };
 
+const getTodayYMD = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const getYesterdayYMD = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 export default function FbPage() {
   const [searchValue, setSearchValue] = useState('');
   const [activeTab, setActiveTab] = useState('pending');
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [detailTarget, setDetailTarget] = useState<number | null>(null);
+  const [dateFilterType, setDateFilterType] = useState<DateFilterType>('today');
+  const [customRange, setCustomRange] = useState<DateRange>(() => {
+    const today = getTodayYMD();
+    return { startDate: today, endDate: today };
+  });
+
   const { t } = useTranslation();
   const { pending, inProgress, completed, loading, error, refetch } = useFrontdeskRequests('FB', searchValue, 'all');
 
+  const filteredCompleted = React.useMemo(() => {
+    if (dateFilterType === 'all') return completed;
+
+    const getLocalYMD = (dateStr: string) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr.replace(' ', 'T'));
+      if (isNaN(d.getTime())) return '';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const todayYMD = getTodayYMD();
+    const yestYMD = getYesterdayYMD();
+
+    return completed.filter(req => {
+      const reqYMD = getLocalYMD(req.updatedAt || req.createdAt);
+      if (!reqYMD) return true;
+
+      if (dateFilterType === 'today') return reqYMD === todayYMD;
+      if (dateFilterType === 'yesterday') return reqYMD === yestYMD;
+      if (dateFilterType === 'custom') {
+        const { startDate, endDate } = customRange;
+        if (startDate && endDate) return reqYMD >= startDate && reqYMD <= endDate;
+        if (startDate) return reqYMD >= startDate;
+        if (endDate) return reqYMD <= endDate;
+      }
+      return true;
+    });
+  }, [completed, dateFilterType, customRange]);
+
   // Search matching indices
   const allVisibleTickets = React.useMemo(() => {
-    return [...pending, ...inProgress, ...completed];
-  }, [pending, inProgress, completed]);
+    return [...pending, ...inProgress, ...filteredCompleted];
+  }, [pending, inProgress, filteredCompleted]);
 
   const matches = React.useMemo(() => {
     if (!searchValue) return [];
-    return allVisibleTickets.filter(req => 
+    return allVisibleTickets.filter(req =>
       req.roomNo?.toString().includes(searchValue) ||
       req.summary?.toLowerCase().includes(searchValue.toLowerCase()) ||
       (req.rawText || '').toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -78,44 +135,36 @@ export default function FbPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header Section */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>{t.frontdeskPage.taskBoard.titles.fb}</h1>
-        </div>
-        <div className={styles.headerActions}>
-          <div className={styles.searchBarWrapper}>
-            <SmartSearchBar
-              inputWrapperStyle={{ flex: 1 }}
-              value={searchValue}
-              onChange={(val) => setSearchValue(val)}
-              placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}
-              currentMatch={currentMatchIndex}
-              totalMatches={matches.length}
-              onPrev={() => {
-                const newIndex = Math.max(0, currentMatchIndex - 1);
-                setCurrentMatchIndex(newIndex);
-                scrollToMatch(newIndex);
-              }}
-              onNext={() => {
-                const newIndex = Math.min(matches.length - 1, currentMatchIndex + 1);
-                setCurrentMatchIndex(newIndex);
-                scrollToMatch(newIndex);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  if (matches.length > 0) {
-                    const nextIndex = (currentMatchIndex + 1) % matches.length;
-                    setCurrentMatchIndex(nextIndex);
-                    scrollToMatch(nextIndex);
-                  }
-                }
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      <HeaderSearchSlot>
+        <SmartSearchBar
+          inputWrapperStyle={{ width: 260 }}
+          value={searchValue}
+          onChange={(val) => setSearchValue(val)}
+          placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}
+          currentMatch={currentMatchIndex}
+          totalMatches={matches.length}
+          onPrev={() => {
+            const newIndex = Math.max(0, currentMatchIndex - 1);
+            setCurrentMatchIndex(newIndex);
+            scrollToMatch(newIndex);
+          }}
+          onNext={() => {
+            const newIndex = Math.min(matches.length - 1, currentMatchIndex + 1);
+            setCurrentMatchIndex(newIndex);
+            scrollToMatch(newIndex);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (matches.length > 0) {
+                const nextIndex = (currentMatchIndex + 1) % matches.length;
+                setCurrentMatchIndex(nextIndex);
+                scrollToMatch(nextIndex);
+              }
+            }
+          }}
+        />
+      </HeaderSearchSlot>
 
       {/* Task Board Section */}
       {loading ? (
@@ -127,7 +176,7 @@ export default function FbPage() {
               options={[
                 { label: t.frontdeskPage.taskBoard.columns.pending, value: 'pending', count: pending.length },
                 { label: t.frontdeskPage.taskBoard.columns.inProgress, value: 'inProgress', count: inProgress.length },
-                { label: t.frontdeskPage.taskBoard.columns.completed, value: 'completed', count: completed.length }
+                { label: t.frontdeskPage.taskBoard.columns.completed, value: 'completed', count: filteredCompleted.length }
               ]}
               activeValue={activeTab}
               onChange={(val) => val && setActiveTab(val)}
@@ -140,21 +189,21 @@ export default function FbPage() {
               <TaskColumn title={t.frontdeskPage.taskBoard.columns.pending} count={pending.length} status="TODO">
                 {pending.map(req => (
                   <div key={req.id} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                  <TaskTicket 
-                    ticketId={req.id}
-                    roomNo={req.roomNo}
-                    department={req.departmentName}
-                    priority={mapPriority(req.priority)}
-                    title={req.summary}
-                    description={req.rawText || ''}
-                    status={mapStatus(req.status)}
-                    isCancelled={req.status === 'CANCELLED'}
-                    cancelRequested={req.cancelRequested}
-                    createdAt={req.createdAt}
-                    entities={req.entities}
-                    highlightSearch={searchValue}
-                    isActiveMatch={matches[currentMatchIndex]?.id === req.id}
-                  />
+                    <TaskTicket
+                      ticketId={req.id}
+                      roomNo={req.roomNo}
+                      department={req.departmentName}
+                      priority={mapPriority(req.priority)}
+                      title={req.summary}
+                      description={req.rawText || ''}
+                      status={mapStatus(req.status)}
+                      isCancelled={req.status === 'CANCELLED'}
+                      cancelRequested={req.cancelRequested}
+                      createdAt={req.createdAt}
+                      entities={req.entities}
+                      highlightSearch={searchValue}
+                      isActiveMatch={matches[currentMatchIndex]?.id === req.id}
+                    />
                   </div>
                 ))}
               </TaskColumn>
@@ -165,22 +214,22 @@ export default function FbPage() {
               <TaskColumn title={t.frontdeskPage.taskBoard.columns.inProgress} count={inProgress.length} status="IN_PROGRESS">
                 {inProgress.map(req => (
                   <div key={req.id} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                  <TaskTicket 
-                    ticketId={req.id}
-                    roomNo={req.roomNo}
-                    department={req.departmentName}
-                    priority={mapPriority(req.priority)}
-                    title={req.summary}
-                    description={req.rawText || ''}
-                    status={mapStatus(req.status)}
-                    isCancelled={req.status === 'CANCELLED'}
-                    cancelRequested={req.cancelRequested}
-                    createdAt={req.createdAt}
-                    updatedAt={req.updatedAt}
-                    entities={req.entities}
-                    highlightSearch={searchValue}
-                    isActiveMatch={matches[currentMatchIndex]?.id === req.id}
-                  />
+                    <TaskTicket
+                      ticketId={req.id}
+                      roomNo={req.roomNo}
+                      department={req.departmentName}
+                      priority={mapPriority(req.priority)}
+                      title={req.summary}
+                      description={req.rawText || ''}
+                      status={mapStatus(req.status)}
+                      isCancelled={req.status === 'CANCELLED'}
+                      cancelRequested={req.cancelRequested}
+                      createdAt={req.createdAt}
+                      updatedAt={req.updatedAt}
+                      entities={req.entities}
+                      highlightSearch={searchValue}
+                      isActiveMatch={matches[currentMatchIndex]?.id === req.id}
+                    />
                   </div>
                 ))}
               </TaskColumn>
@@ -188,24 +237,38 @@ export default function FbPage() {
 
             {/* Column 3: 완료 */}
             <div className={`${styles.columnWrapper} ${activeTab !== 'completed' ? styles.mobileHidden : ''}`}>
-              <TaskColumn title={t.frontdeskPage.taskBoard.columns.completed} count={completed.length} status="DONE">
-                {completed.map(req => (
-                  <div key={req.id} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                  <TaskTicket 
-                    ticketId={req.id}
-                    roomNo={req.roomNo}
-                    department={req.departmentName}
-                    priority={mapPriority(req.priority)}
-                    title={req.summary}
-                    description={req.rawText || ''}
-                    status={mapStatus(req.status)}
-                    isCancelled={req.status === 'CANCELLED'}
-                    cancelRequested={req.cancelRequested}
-                    createdAt={req.createdAt}
-                    entities={req.entities}
-                    highlightSearch={searchValue}
-                    isActiveMatch={matches[currentMatchIndex]?.id === req.id}
+              <TaskColumn 
+                title={t.frontdeskPage.taskBoard.columns.completed} 
+                count={filteredCompleted.length} 
+                status="DONE"
+                headerRight={
+                  <DateFilterDropdown
+                    filterType={dateFilterType}
+                    customRange={customRange}
+                    onChange={(type, range) => {
+                      setDateFilterType(type);
+                      if (range) setCustomRange(range);
+                    }}
                   />
+                }
+              >
+                {filteredCompleted.map(req => (
+                  <div key={req.id} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
+                    <TaskTicket
+                      ticketId={req.id}
+                      roomNo={req.roomNo}
+                      department={req.departmentName}
+                      priority={mapPriority(req.priority)}
+                      title={req.summary}
+                      description={req.rawText || ''}
+                      status={mapStatus(req.status)}
+                      isCancelled={req.status === 'CANCELLED'}
+                      cancelRequested={req.cancelRequested}
+                      createdAt={req.createdAt}
+                      entities={req.entities}
+                      highlightSearch={searchValue}
+                      isActiveMatch={matches[currentMatchIndex]?.id === req.id}
+                    />
                   </div>
                 ))}
               </TaskColumn>

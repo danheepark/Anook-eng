@@ -134,10 +134,12 @@ export default function StaffNotification() {
   return (
     <div className={styles.container} ref={popupRef}>
       <button className={styles.bellButton} onClick={() => setIsOpen(!isOpen)} aria-label="부서 알림함">
-        <Bell size={18} color="currentColor" />
-        {totalNotifications > 0 && (
-          <span className={styles.unreadDot} />
-        )}
+        <div className={styles.iconWrapper}>
+          <Bell size={18} color="currentColor" />
+          {totalNotifications > 0 && (
+            <span className={styles.unreadDot} />
+          )}
+        </div>
       </button>
 
       {isOpen && (

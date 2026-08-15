@@ -11,24 +11,56 @@ import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import PopoverMenu from '@/components/ui/PopoverMenu/PopoverMenu';
 import { MoreIcon } from '@/components/icons';
 
+import DateFilterDropdown, { DateFilterType, DateRange } from '../requests/_components/DateFilterDropdown';
+
+const getTodayYMD = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const getYesterdayYMD = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 export default function ChatHistoryPage() {
   const [roomSearchValue, setRoomSearchValue] = useState('');
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
-  const { rooms, selectedRoom, loadingRooms, error, selectRoom, fetchRooms, deleteRoom } = useChatHistory();
-  const { t } = useTranslation();
-
-  const [targetDate, setTargetDate] = useState<string>(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+  const [dateFilterType, setDateFilterType] = useState<DateFilterType>('today');
+  const [customRange, setCustomRange] = useState<DateRange>(() => {
+    const today = getTodayYMD();
+    return { startDate: today, endDate: today };
   });
+
+  const { rooms, selectedRoom, loadingRooms, error, selectRoom, fetchRooms, deleteRoom } = useChatHistory();
+  const { t, language } = useTranslation();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // targetDate가 변경될 때마다 방 목록 새로고침
+  // Filter type / range 변경 시 방 목록 새로고침
   React.useEffect(() => {
-    fetchRooms(targetDate);
-  }, [targetDate, fetchRooms]);
+    if (dateFilterType === 'today') {
+      fetchRooms(getTodayYMD());
+    } else if (dateFilterType === 'yesterday') {
+      fetchRooms(getYesterdayYMD());
+    } else if (dateFilterType === 'custom') {
+      if (customRange.startDate && customRange.startDate === customRange.endDate) {
+        fetchRooms(customRange.startDate);
+      } else {
+        fetchRooms(); // fetch all and filter client-side for range
+      }
+    } else {
+      fetchRooms();
+    }
+  }, [dateFilterType, customRange, fetchRooms]);
 
   const handleDeleteConfirm = async () => {
     if (selectedRoom) {
@@ -43,21 +75,13 @@ export default function ChatHistoryPage() {
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-8)' }}>
       <div style={{ position: 'relative' }}>
         <button
+          type="button"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            borderRadius: 'var(--radius-sm)',
-            color: 'var(--color-gray-600)'
-          }}
+          className={styles.moreBtn}
+          aria-label="대화 옵션 더보기"
+          title="대화 옵션 더보기"
         >
-          <MoreIcon />
+          <MoreIcon size={18} />
         </button>
         {isPopoverOpen && (
           <PopoverMenu
@@ -80,13 +104,53 @@ export default function ChatHistoryPage() {
   const [roomCurrentMatch, setRoomCurrentMatch] = useState(0);
 
   const filteredRooms = React.useMemo(() => {
-    if (!roomSearchValue) return rooms;
+    let result = [...rooms];
+
+    // Sort by newest/latest message time first (descending)
+    result.sort((a, b) => {
+      const timeA = a.lastMessageAt ? new Date(a.lastMessageAt.replace(' ', 'T')).getTime() : 0;
+      const timeB = b.lastMessageAt ? new Date(b.lastMessageAt.replace(' ', 'T')).getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+      return String(a.roomNo).localeCompare(String(b.roomNo));
+    });
+
+    if (dateFilterType !== 'all') {
+      const getLocalYMD = (dateStr: string) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr.replace(' ', 'T'));
+        if (isNaN(d.getTime())) return '';
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      const todayYMD = getTodayYMD();
+      const yestYMD = getYesterdayYMD();
+
+      result = result.filter(room => {
+        const roomYMD = getLocalYMD(room.lastMessageAt || '');
+        if (!roomYMD) return true;
+
+        if (dateFilterType === 'today') return roomYMD === todayYMD;
+        if (dateFilterType === 'yesterday') return roomYMD === yestYMD;
+        if (dateFilterType === 'custom') {
+          const { startDate, endDate } = customRange;
+          if (startDate && endDate) return roomYMD >= startDate && roomYMD <= endDate;
+          if (startDate) return roomYMD >= startDate;
+          if (endDate) return roomYMD <= endDate;
+        }
+        return true;
+      });
+    }
+
+    if (!roomSearchValue) return result;
     const query = roomSearchValue.toLowerCase();
-    return rooms.filter(room => 
+    return result.filter(room => 
       room.roomNo.toLowerCase().includes(query) ||
       (room.lastMessage && room.lastMessage.toLowerCase().includes(query))
     );
-  }, [rooms, roomSearchValue]);
+  }, [rooms, roomSearchValue, dateFilterType, customRange]);
 
   const scrollToRoomMatch = (index: number) => {
     const target = filteredRooms[index];
@@ -112,59 +176,48 @@ export default function ChatHistoryPage() {
       <div className={styles.splitLayout}>
         {/* Left Pane: Room List */}
         <div className={`${styles.leftPane} ${mobileView !== 'list' ? styles.mobileHidden : ''}`}>
-          <div className={styles.leftPaneHeader}>
-            <div className={styles.leftPaneHeaderLeft}>
-              <h1 className={styles.leftPaneTitle}>{t.frontdeskPage.sidebar.menus.chatHistory}</h1>
-            </div>
-          </div>
           <div className={styles.leftPaneContent}>
-            {/* Room Search Bar */}
-            <div style={{ marginBottom: 'var(--space-16)' }}>
-              <SmartSearchBar
-                inputWrapperStyle={{ flex: 1 }}
-                value={roomSearchValue}
-                onChange={(val) => {
-                  setRoomSearchValue(val);
-                  setRoomCurrentMatch(0);
-                }}
-                currentMatch={roomCurrentMatch}
-                totalMatches={filteredRooms.length}
-                onPrev={() => {
-                  const newIndex = Math.max(0, roomCurrentMatch - 1);
-                  setRoomCurrentMatch(newIndex);
-                  scrollToRoomMatch(newIndex);
-                }}
-                onNext={() => {
-                  const newIndex = Math.min(filteredRooms.length - 1, roomCurrentMatch + 1);
-                  setRoomCurrentMatch(newIndex);
-                  scrollToRoomMatch(newIndex);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (filteredRooms.length > 0) {
-                      const newIndex = (roomCurrentMatch + 1) % filteredRooms.length;
-                      setRoomCurrentMatch(newIndex);
-                      scrollToRoomMatch(newIndex);
+            {/* Room Search Bar & Date Filter */}
+            <div style={{ display: 'flex', gap: 'var(--space-8)', marginBottom: 'var(--space-16)', alignItems: 'center' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <SmartSearchBar
+                  inputWrapperStyle={{ flex: 1 }}
+                  value={roomSearchValue}
+                  onChange={(val) => {
+                    setRoomSearchValue(val);
+                    setRoomCurrentMatch(0);
+                  }}
+                  currentMatch={roomCurrentMatch}
+                  totalMatches={filteredRooms.length}
+                  onPrev={() => {
+                    const newIndex = Math.max(0, roomCurrentMatch - 1);
+                    setRoomCurrentMatch(newIndex);
+                    scrollToRoomMatch(newIndex);
+                  }}
+                  onNext={() => {
+                    const newIndex = Math.min(filteredRooms.length - 1, roomCurrentMatch + 1);
+                    setRoomCurrentMatch(newIndex);
+                    scrollToRoomMatch(newIndex);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (filteredRooms.length > 0) {
+                        const nextIndex = (roomCurrentMatch + 1) % filteredRooms.length;
+                        setRoomCurrentMatch(nextIndex);
+                        scrollToRoomMatch(nextIndex);
+                      }
                     }
-                  }
+                  }}
+                />
+              </div>
+              <DateFilterDropdown
+                filterType={dateFilterType}
+                customRange={customRange}
+                onChange={(type, range) => {
+                  setDateFilterType(type);
+                  if (range) setCustomRange(range);
                 }}
-              />
-            </div>
-            {/* Date picker */}
-            <div style={{ marginBottom: 'var(--space-16)' }}>
-              <input
-                type="date"
-                style={{
-                  padding: 'var(--space-8) var(--space-12)',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-gray-200)',
-                  font: 'var(--text-body-regular)',
-                  color: 'var(--color-gray-700)',
-                  width: '100%',
-                }}
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
               />
             </div>
 
@@ -180,8 +233,7 @@ export default function ChatHistoryPage() {
                   <div key={room.roomNo} id={`room-card-${room.roomNo}`}>
                     <RequestCard
                       roomNumber={room.roomNo}
-                      title={t.frontdeskPage.chatHistory?.roomConversation?.replace('{{room}}', room.roomNo) || `${room.roomNo}호 대화`}
-                      description={room.lastMessage || t.frontdeskPage.chatHistory?.emptyMessage || '메시지 없음'}
+                      title={room.lastMessage || t.frontdeskPage.chatHistory?.emptyMessage || (language === 'en' ? 'No messages' : '메시지 없음')}
                       createdAt={room.lastMessageAt || ''}
                       isSelected={selectedRoom === room.roomNo}
                       isActiveMatch={roomSearchValue ? filteredRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
@@ -205,7 +257,7 @@ export default function ChatHistoryPage() {
             <ChatPanel
               roomNumber={selectedRoom}
               status="COMPLETED"
-              summary={t.frontdeskPage.chatHistory?.fullLog || '전체 대화 로그'}
+              summary=""
               onClose={() => {}}
               headerRightContent={headerRight}
               showSearch={true}
