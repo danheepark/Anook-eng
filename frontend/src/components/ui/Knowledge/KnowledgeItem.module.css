@@ -1,91 +1,153 @@
 .container {
   display: flex;
-  flex-direction: column;
-  padding: var(--space-24);
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-gray-100);
-  border-radius: var(--radius-lg);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 12px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-gray-200);
+  border-radius: 0;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color var(--transition, 0.2s ease);
+  box-shadow: none;
+  box-sizing: border-box;
+  gap: 0;
 }
 
 .container:hover {
-  background-color: var(--color-gray-50);
-  border-color: var(--color-gray-300);
+  border-bottom-color: var(--color-gray-300);
+  box-shadow: none;
 }
 
-.topRow {
+.mainInfo {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-16);
-}
-
-.badgeWrapper {
-  margin-bottom: 0;
-}
-
-.topRight {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-8);
-}
-
-.actionIcon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-gray-500);
-  padding: var(--space-4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-
-.actionIcon:hover {
-  color: var(--color-gray-800);
-}
-
-.bottomRow {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: var(--space-12);
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 1 56%;
+  max-width: 58%;
+  min-width: 0;
 }
 
 .title {
   font: var(--text-h3-bold);
   color: var(--color-gray-900);
-  margin: 0 0 var(--space-8) 0;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.description {
+.subtitle {
   font: var(--text-body-regular);
-  color: var(--color-gray-600);
+  font-size: 13px;
+  color: var(--color-gray-500);
   margin: 0;
-  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.badgeWrapper {
+  width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dateWrapper {
+  width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .dateText {
   font: var(--text-caption-medium);
+  font-size: 12px;
   color: var(--color-gray-500);
+  white-space: nowrap;
 }
 
-@media (max-width: 768px) {
+.actions {
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-8, 8px);
+  flex-shrink: 0;
+}
+
+.actionIcon {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-300);
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-600);
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition, 0.15s ease);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.actionIcon:hover {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-900);
+  border-color: var(--color-gray-400);
+}
+
+.deleteIcon:hover {
+  background-color: var(--color-tag-background-red, #fee2e2);
+  color: var(--color-error, #ef4444);
+  border-color: var(--color-dept-emergency-border, #fca5a5);
+}
+
+/* Mobile Layout (~680px) */
+@media (max-width: 680px) {
   .container {
-    padding: var(--space-16);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    padding: 14px 12px;
   }
-}
 
-.activeCardGlow {
-  border-color: #ffd54f !important;
-  box-shadow: 0 0 12px rgba(255, 213, 79, 0.4) !important;
-  background-color: rgba(255, 213, 79, 0.05) !important;
-  transition: all var(--transition);
+  .mainInfo {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 100%;
+    gap: 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-gray-100);
+  }
+
+  .badgeWrapper {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .dateWrapper {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .actions {
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  .actionIcon {
+    width: 32px;
+    height: 32px;
+  }
 }

@@ -144,6 +144,7 @@
         "CONCIERGE": "コンシェルジュ",
         "FRONT": "フロントデスク",
         "EMERGENCY": "緊急",
+        "UNKNOWN": "未分類",
         "COMMON": "共通"
       }
     },

@@ -428,7 +428,7 @@ export default function RequestDetailModal({
   const handleApproveEscalation = async () => {
     setConfirmType('none');
     setSaving(true);
-    const ok = await approveEscalation(activeDetail.id, editDeptId);
+    const ok = await approveEscalation(activeDetail.id, editDeptId, editPriority);
     setSaving(false);
     if (ok) {
       onUpdate();

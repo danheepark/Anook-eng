@@ -173,6 +173,7 @@
         "CONCIERGE": "Concierge",
         "FRONT": "Front Desk",
         "EMERGENCY": "Emergency",
+        "UNKNOWN": "Unknown",
         "COMMON": "Common"
       }
     },

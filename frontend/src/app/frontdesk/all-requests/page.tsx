@@ -138,7 +138,7 @@ export default function AllRequestsPage() {
       {/* Teleport Search Bar to Header */}
       <HeaderSearchSlot>
         <SmartSearchBar
-          inputWrapperStyle={{ flex: 1 }}
+          inputWrapperStyle={{ width: 200 }}
           value={searchValue}
           onChange={(val) => setSearchValue(val)}
           placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}

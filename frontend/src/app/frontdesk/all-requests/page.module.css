@@ -7,6 +7,7 @@
   box-sizing: border-box;
   padding: var(--space-24);
   overflow-y: auto;
+  background-color: var(--color-white);
 }
 
 .header {
@@ -40,8 +41,9 @@
 
 .board {
   display: flex;
-  gap: var(--space-24); /* 컬럼 사이 간격 */
+  gap: var(--space-16); /* 컬럼 사이 간격 */
   min-height: auto; /* 내부 스크롤 해제 */
+  align-items: flex-start;
 }
 
 .columnWrapper {

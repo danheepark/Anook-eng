@@ -12,8 +12,8 @@
   height: 36px;
   padding: 0 10px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-gray-200);
-  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  background-color: var(--color-gray-50);
   color: var(--color-gray-700);
   cursor: pointer;
   font-size: 13px;
@@ -27,14 +27,14 @@
 .triggerBtn:hover {
   background-color: var(--color-gray-100);
   color: var(--color-gray-900);
-  border-color: var(--color-gray-300);
+  border-color: var(--color-gray-400);
 }
 
 .triggerBtn.hasFilter {
   border-color: var(--color-gray-400);
   color: var(--color-gray-900);
   font-weight: 600;
-  background-color: var(--color-gray-50);
+  background-color: var(--color-gray-100);
 }
 
 .label {

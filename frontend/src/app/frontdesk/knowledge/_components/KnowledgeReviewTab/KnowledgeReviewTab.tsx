@@ -5,11 +5,13 @@ import { createPortal } from 'react-dom';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import Button from '@/components/ui/Button/Button';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
+import PendingKnowledgeItem from '@/components/ui/Knowledge/PendingKnowledgeItem';
+import PendingKnowledgeHeader from '@/components/ui/Knowledge/PendingKnowledgeHeader';
+import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
 import { useKnowledge } from '../../useKnowledge';
 import styles from './KnowledgeReviewTab.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useRagAnalysis } from './useRagAnalysis';
-import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import ChatHistoryModal from '@/app/staff/_components/TaskDetailModal/ChatHistoryModal';
 
 interface KnowledgeReviewTabProps {
@@ -17,6 +19,7 @@ interface KnowledgeReviewTabProps {
   searchValue: string;
   onMatchesChange?: (matches: number[]) => void;
   activeMatchId?: number | null;
+  onCandidateStateChange?: (isAnalyzed: boolean, count: number) => void;
 }
 
 interface LocalCandidate {
@@ -31,8 +34,10 @@ export default function KnowledgeReviewTab({
   searchValue,
   onMatchesChange,
   activeMatchId,
+  onCandidateStateChange,
 }: KnowledgeReviewTabProps) {
   const { t, language } = useTranslation();
+  const aiTraining = (t.frontdeskPage as any)?.aiTraining;
   const { data, loading, error, deleteEntry, refresh } = useKnowledge(
     domainCode === 'ALL' ? undefined : domainCode
   );
@@ -59,38 +64,49 @@ export default function KnowledgeReviewTab({
     );
   });
 
-  const matches = filteredItems.map(item => item.id);
+  const matches = searchValue.trim() ? filteredItems.map(item => item.id) : [];
 
   // matches 변경 시 부모 컴포넌트에 알림
   useEffect(() => {
     onMatchesChange?.(matches);
   }, [JSON.stringify(matches)]);
 
-  // activeMatchId 변경 시 해당 카드로 스크롤 (분석 전 리스트 상태일 때만)
-  useEffect(() => {
-    if (activeMatchId && !isAnalyzed) {
-      setTimeout(() => {
-        const el = document.getElementById(`candidate-${activeMatchId}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, 50);
-    }
-  }, [activeMatchId]);
-
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // AI 분석 테이블 제어용 로컬 상태
-  const [isAnalyzed, setIsAnalyzed] = useState(false);
+  // RAG 분석 후보 상태
   const [candidates, setCandidates] = useState<LocalCandidate[]>([]);
+  const [isAnalyzed, setIsAnalyzed] = useState(false);
   const [analyzedPendingIds, setAnalyzedPendingIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    onCandidateStateChange?.(isAnalyzed, candidates.length);
+  }, [isAnalyzed, candidates.length]);
+
+  // 단일 삭제/제외 확인 모달
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+
+  // 채팅 히스토리 모달
   const [chatHistoryRoomNo, setChatHistoryRoomNo] = useState<string | null>(null);
 
+  // 후보 항목 수정 모달
+  const [editCandidateIndex, setEditCandidateIndex] = useState<number | null>(null);
+  const [isCandidateModalOpen, setIsCandidateModalOpen] = useState(false);
+
+  // activeMatchId 스크롤
+  useEffect(() => {
+    if (activeMatchId && !isAnalyzed) {
+      const element = document.getElementById(`knowledge-${activeMatchId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [activeMatchId, searchValue, isAnalyzed]);
+
   const DOMAIN_OPTIONS = [
+    { value: 'UNKNOWN', label: language === 'en' ? 'Unknown' : '미분류' },
     { value: 'FRONT', label: (t.frontdeskPage?.rag?.tabs as any)?.FRONT || '프론트' },
     { value: 'HK', label: (t.frontdeskPage?.rag?.tabs as any)?.HK || '하우스키핑' },
     { value: 'FACILITY', label: (t.frontdeskPage?.rag?.tabs as any)?.FACILITY || '시설관리' },
@@ -112,7 +128,7 @@ export default function KnowledgeReviewTab({
         data.map(item => ({
           question: item.question || '',
           answer: item.answer || '',
-          domainCode: item.domainCode || 'COMMON',
+          domainCode: item.domainCode || 'UNKNOWN',
           selected: true,
         }))
       );
@@ -159,29 +175,31 @@ export default function KnowledgeReviewTab({
       return;
     }
 
-    const payload = selectedCandidates.map(c => ({
-      question: c.question,
-      answer: c.answer,
-      domainCode: c.domainCode,
-    }));
-
-    const success = await batchRegisterApproved(analyzedPendingIds, payload);
-    if (success) {
+    try {
+      await batchRegisterApproved(
+        analyzedPendingIds,
+        selectedCandidates.map(c => ({
+          question: c.question,
+          answer: c.answer,
+          domainCode: c.domainCode,
+        }))
+      );
       setIsAnalyzed(false);
       setCandidates([]);
       setAnalyzedPendingIds([]);
       await refresh();
+    } catch (err: any) {
+      console.error('[KnowledgeReviewTab] 일괄 등록 실패:', err);
     }
   };
 
-  // 개별 pending 항목 제외 (삭제)
   const handleReject = async () => {
     if (deleteTargetId === null) return;
     try {
       await deleteEntry(deleteTargetId);
       setDeleteTargetId(null);
     } catch (err) {
-      console.error('[AiTraining] 제외 실패:', err);
+      console.error('[KnowledgeReviewTab] 제외 실패:', err);
     }
   };
 
@@ -204,39 +222,6 @@ export default function KnowledgeReviewTab({
 
   return (
     <div className={styles.container}>
-      {/* Header Area (Only rendered if analyzed or portal is NOT active, to prevent empty gray border line) */}
-      {(isAnalyzed || !mounted || typeof window === 'undefined' || !document.getElementById('knowledge-header-actions')) && (
-        <div className={styles.headerArea}>
-          <div className={styles.headerTitle}>
-            {isAnalyzed && (
-              <>
-                <span>{t.frontdeskPage?.aiTraining?.analysisResult || 'AI 지식 추출 결과'}</span>
-                <span className={styles.headerCount}>
-                  {t.frontdeskPage?.aiTraining?.knowledgeCandidates?.replace('{{count}}', candidates.length.toString()) || `${candidates.length}건의 지식 후보`}
-                </span>
-              </>
-            )}
-          </div>
-          {(!mounted || typeof window === 'undefined' || !document.getElementById('knowledge-header-actions')) && (
-            <div>
-              {isAnalyzed ? (
-                <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-                  {language === 'en' ? 'Back' : '뒤로가기'}
-                </Button>
-              ) : (
-                <Button
-                  variant="primary"
-                  onClick={handleAnalyze}
-                  disabled={analyzing || filteredItems.length === 0}
-                >
-                  {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Organize' : '지식으로 정리')}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Render Portal in the background when active */}
       {mounted && typeof window !== 'undefined' && document.getElementById('knowledge-header-actions') && (
         createPortal(
@@ -251,7 +236,7 @@ export default function KnowledgeReviewTab({
                 onClick={handleAnalyze}
                 disabled={analyzing || filteredItems.length === 0}
               >
-                {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Organize' : '지식으로 정리')}
+                {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Add Knowledge' : '지식 추가')}
               </Button>
             )}
           </div>,
@@ -263,7 +248,7 @@ export default function KnowledgeReviewTab({
       {analyzing ? (
         <div className={styles.loadingBox}>
           <div className={styles.spinner} />
-          <div>{t.frontdeskPage?.aiTraining?.analyzingText || '선택하신 상담 대화 내역에서 AI가 지식 데이터를 추출하는 중입니다...'}</div>
+          <div>{aiTraining?.analyzingText || '선택하신 상담 대화 내역에서 AI가 지식 데이터를 추출하는 중입니다...'}</div>
         </div>
       ) : analysisError ? (
         <div className={styles.errorBox}>
@@ -271,70 +256,43 @@ export default function KnowledgeReviewTab({
           <span>{analysisError}</span>
         </div>
       ) : isAnalyzed ? (
-        // RAG 분석 결과 인라인 테이블
-        <div className={styles.tableContainer}>
-          <Table columns="48px 1fr 1.2fr 130px">
-            <TableHeader>
-              <TableCell className={styles.checkboxCell}>
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={handleSelectAll}
-                  className={styles.checkboxInput}
-                />
-              </TableCell>
-              <TableCell>{t.frontdeskPage?.aiTraining?.columns?.question || '질문 (Question)'}</TableCell>
-              <TableCell>{t.frontdeskPage?.aiTraining?.columns?.answer || '답변 (Answer)'}</TableCell>
-              <TableCell>{t.frontdeskPage?.aiTraining?.columns?.domain || '분류 부서'}</TableCell>
-            </TableHeader>
-            {candidates.map((item, idx) => (
-              <TableRow key={idx}>
-                <TableCell className={styles.checkboxCell}>
-                  <input
-                    type="checkbox"
-                    checked={item.selected}
-                    onChange={() => handleToggle(idx)}
-                    className={styles.checkboxInput}
-                  />
-                </TableCell>
-                <TableCell>
-                  <textarea
-                    value={item.question}
-                    onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
-                    className={styles.cellTextarea}
-                    placeholder={t.frontdeskPage?.aiTraining?.questionPlaceholder || '질문을 입력하세요...'}
-                  />
-                </TableCell>
-                <TableCell>
-                  <textarea
-                    value={item.answer}
-                    onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
-                    className={styles.cellTextarea}
-                    placeholder={t.frontdeskPage?.aiTraining?.answerPlaceholder || '답변을 입력하세요...'}
-                  />
-                </TableCell>
-                <TableCell>
-                  <select
-                    value={item.domainCode}
-                    onChange={(e) => handleDomainChange(idx, e.target.value)}
-                    className={styles.selectInput}
-                  >
-                    {DOMAIN_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </TableCell>
-              </TableRow>
-            ))}
-          </Table>
+        // RAG 분석 결과 (KnowledgeItem 컴포넌트 목록 사용)
+        <div className={styles.candidateContainer}>
+          <PendingKnowledgeHeader
+            allSelected={allSelected}
+            onSelectAll={handleSelectAll}
+            title="Q&A"
+            deptLabel={language === 'en' ? 'Department' : '부서'}
+          />
 
-          {candidates.length === 0 && (
-            <div className={styles.emptyState}>
-              {t.frontdeskPage?.aiTraining?.noCandidates || '분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.'}
-            </div>
-          )}
+          <div className={styles.cardList}>
+            {candidates.length === 0 ? (
+              <div className={styles.emptyState}>
+                {aiTraining?.noCandidates || '분석된 Q&A 후보가 없습니다. 대화 내용에 적합한 답변이 존재하는지 확인해주세요.'}
+              </div>
+            ) : (
+              candidates.map((item, idx) => (
+                <PendingKnowledgeItem
+                  key={idx}
+                  id={idx}
+                  domainCode={item.domainCode}
+                  question={item.question}
+                  answer={item.answer}
+                  selected={item.selected}
+                  onSelect={() => handleToggle(idx)}
+                  onQuestionChange={(val) => handleTextChange(idx, 'question', val)}
+                  onAnswerChange={(val) => handleTextChange(idx, 'answer', val)}
+                  questionPlaceholder={aiTraining?.questionPlaceholder || (language === 'en' ? 'Enter question...' : '질문을 입력하세요...')}
+                  answerPlaceholder={aiTraining?.answerPlaceholder || (language === 'en' ? 'Enter answer...' : '답변을 입력하세요...')}
+                  domainOptions={DOMAIN_OPTIONS}
+                  onDomainChange={(val) => handleDomainChange(idx, val)}
+                  onDelete={() => {
+                    setCandidates(prev => prev.filter((_, i) => i !== idx));
+                  }}
+                />
+              ))
+            )}
+          </div>
 
           {candidates.length > 0 && (
             <div className={styles.tableFooter}>
@@ -344,8 +302,8 @@ export default function KnowledgeReviewTab({
                 </Button>
                 <Button variant="primary" onClick={handleBatchRegister} disabled={registering}>
                   {registering 
-                    ? (t.frontdeskPage?.aiTraining?.registering || '등록 중...') 
-                    : (t.frontdeskPage?.aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`)}
+                    ? (aiTraining?.registering || '등록 중...') 
+                    : (aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`)}
                 </Button>
               </div>
             </div>
@@ -356,14 +314,14 @@ export default function KnowledgeReviewTab({
         <div className={styles.cardList}>
           {filteredItems.length === 0 ? (
             <div className={styles.emptyState}>
-              {t.frontdeskPage?.aiTraining?.empty || '검토 대기 중인 항목이 없습니다.'}
+              {aiTraining?.empty || '검토 대기 중인 항목이 없습니다.'}
             </div>
           ) : (
             filteredItems.map(item => (
               <KnowledgeItem
                 key={item.id}
                 id={item.id}
-                domainCode={item.domainCode}
+                domainCode={(!item.domainCode || item.domainCode === 'COMMON' || item.domainCode === 'UNKNOWN') ? 'UNKNOWN' : item.domainCode}
                 question={item.question}
                 answer={item.answer || '대화 내용 요약: ' + item.question}
                 updatedAt={(() => {
@@ -397,25 +355,49 @@ export default function KnowledgeReviewTab({
         </div>
       )}
 
-      {/* 개별 pending 항목 제외 (삭제) 모달 */}
+      {/* 제외/삭제 확인 모달 */}
       <ConfirmModal
         isOpen={deleteTargetId !== null}
         onClose={() => setDeleteTargetId(null)}
         onConfirm={handleReject}
-        title={t.frontdeskPage?.aiTraining?.rejectTitle || '제외 확인'}
-        subtitle={
-          t.frontdeskPage?.aiTraining?.rejectSubtitle ||
-          '이 항목을 정말 검토 목록에서 제외하시겠습니까?'
-        }
+        title={aiTraining?.rejectTitle || '제외 확인'}
+        subtitle={aiTraining?.rejectSubtitle || '이 항목을 정말 검토 목록에서 제외하시겠습니까?'}
+        confirmText={aiTraining?.rejectConfirm || '제외'}
+        cancelText={t.common?.cancel || '취소'}
         status="danger"
-        confirmText={t.frontdeskPage?.aiTraining?.rejectConfirm || '제외'}
       />
 
-      <ChatHistoryModal
-        isOpen={!!chatHistoryRoomNo}
-        onClose={() => setChatHistoryRoomNo(null)}
-        roomNumber={chatHistoryRoomNo || ''}
-      />
+      {/* 후보 지식 수정 모달 */}
+      {isCandidateModalOpen && editCandidateIndex !== null && candidates[editCandidateIndex] && (
+        <KnowledgeEditModal
+          isOpen={isCandidateModalOpen}
+          onClose={() => {
+            setIsCandidateModalOpen(false);
+            setEditCandidateIndex(null);
+          }}
+          mode="edit"
+          initialQuestion={candidates[editCandidateIndex].question}
+          initialAnswer={candidates[editCandidateIndex].answer}
+          initialDomainCode={candidates[editCandidateIndex].domainCode}
+          domainOptions={DOMAIN_OPTIONS}
+          onSave={({ domainCode, question, answer }) => {
+            setCandidates(prev =>
+              prev.map((c, i) => (i === editCandidateIndex ? { ...c, domainCode, question, answer } : c))
+            );
+            setIsCandidateModalOpen(false);
+            setEditCandidateIndex(null);
+          }}
+        />
+      )}
+
+      {/* 채팅 히스토리 모달 */}
+      {chatHistoryRoomNo && (
+        <ChatHistoryModal
+          isOpen={!!chatHistoryRoomNo}
+          roomNumber={chatHistoryRoomNo}
+          onClose={() => setChatHistoryRoomNo(null)}
+        />
+      )}
     </div>
   );
 }

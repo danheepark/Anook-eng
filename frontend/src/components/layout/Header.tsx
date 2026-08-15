@@ -30,6 +30,7 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
     if (pathname === '/frontdesk/concierge') return t.frontdeskPage?.taskBoard?.titles?.concierge || 'Concierge';
     if (pathname === '/frontdesk/all-requests') return t.frontdeskPage?.taskBoard?.titles?.allRequests || 'All Requests';
     if (pathname === '/frontdesk/chat-history') return t.frontdeskPage?.sidebar?.menus?.chatHistory || 'Chat History';
+    if (pathname === '/frontdesk/knowledge') return t.frontdeskPage?.sidebar?.menus?.rag || 'Knowledge Base';
     return null;
   };
 

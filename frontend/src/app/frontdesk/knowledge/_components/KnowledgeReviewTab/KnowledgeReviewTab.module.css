@@ -1,8 +1,8 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-24);
-  padding: 0 0 var(--space-48) 0;
+  gap: 0;
+  padding: 0;
   color: var(--color-gray-900);
 }
 
@@ -32,8 +32,8 @@
 .cardList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-16);
-  margin-top: var(--space-24);
+  gap: 0;
+  margin-top: 0;
 }
 
 .emptyState {
@@ -43,7 +43,79 @@
   font: var(--text-body-medium);
 }
 
-/* AI Analysis Table Styles */
+/* AI Analysis Candidate List Styles */
+.candidateContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.candidateHeaderRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--color-gray-100);
+  border: none;
+  border-radius: 0;
+  box-sizing: border-box;
+  gap: 0;
+}
+
+.headerCheckbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-right: 4px;
+}
+
+.checkboxInput {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--color-gray-300);
+  cursor: pointer;
+  accent-color: var(--color-gray-900);
+  margin: 0;
+}
+
+.headerQA {
+  flex: 0 1 56%;
+  max-width: 58%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  font: var(--text-caption-medium);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+}
+
+.headerDept {
+  width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--text-caption-medium);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.headerActionsPlaceholder {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8, 8px);
+  width: 80px;
+  flex-shrink: 0;
+}
+
 .loadingBox {
   display: flex;
   flex-direction: column;
@@ -84,115 +156,10 @@
   gap: var(--space-8);
 }
 
-.tableContainer {
-  width: 100%;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  table-layout: fixed;
-}
-
-.th {
-  background-color: var(--color-gray-50);
-  padding: var(--space-12) var(--space-16);
-  font: var(--text-label-medium);
-  color: var(--color-gray-600);
-  border-bottom: 1px solid var(--color-gray-200);
-  font-weight: 600;
-}
-
-.thCheckbox {
-  width: 48px;
-  text-align: center;
-}
-
-.thQuestion {
-  width: 35%;
-}
-
-.thAnswer {
-  width: 45%;
-}
-
-.thDomain {
-  width: 120px;
-}
-
-.td {
-  padding: var(--space-8) var(--space-12);
-  border-bottom: 1px solid var(--color-gray-100);
-  vertical-align: middle;
-}
-
-.tdCheckbox {
-  text-align: center;
-}
-
-.checkboxInput {
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-small);
-  border: 1px solid var(--color-gray-300);
-  cursor: pointer;
-  accent-color: var(--color-primary);
-}
-
-.cellTextarea {
-  width: 100%;
-  padding: var(--space-8) var(--space-10);
-  border: 1px solid transparent;
-  border-radius: var(--radius-medium);
-  font: var(--text-body-small);
-  color: var(--color-gray-800);
-  resize: vertical;
-  background-color: transparent;
-  transition: border-color 0.2s, background-color 0.2s;
-  field-sizing: content;
-  vertical-align: middle;
-}
-
-.cellTextarea:hover {
-  background-color: var(--color-gray-50);
-  border-color: var(--color-gray-200);
-}
-
-.cellTextarea:focus {
-  background-color: #fff;
-  border-color: var(--color-primary);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary-light);
-}
-
-.selectInput {
-  width: 100%;
-  padding: var(--space-8) var(--space-12);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-medium);
-  font: var(--text-body-small);
-  color: var(--color-gray-800);
-  background-color: #fff;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.selectInput:hover {
-  border-color: var(--color-gray-400);
-}
-
-.selectInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-light);
-}
-
 .tableFooter {
-  padding: var(--space-16);
+  padding: var(--space-16) 0;
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid var(--color-gray-200);
 }
 
 .analysisFooter {
@@ -200,37 +167,4 @@
   justify-content: flex-end;
   gap: var(--space-12);
   margin-top: var(--space-8);
-}
-
-.tableContainer :global(.tableRow) {
-  height: auto !important;
-  min-height: var(--space-80);
-  align-items: stretch !important;
-  border-bottom: 1px solid var(--color-gray-200) !important;
-}
-
-.tableContainer :global(.tableRow):last-child {
-  border-bottom: none !important;
-}
-
-.tableContainer :global(.rowItem) {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  display: flex;
-  align-items: center;
-}
-
-.tableContainer :global(.rowItem) > * {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  max-width: 100%;
-}
-
-.checkboxCell {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
 }

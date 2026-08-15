@@ -36,6 +36,8 @@ import Toast from '@/components/ui/Modal/Toast';
 
 import ChatHistory from '@/components/ui/ChatHistory/ChatHistory';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
+import PendingKnowledgeItem from '@/components/ui/Knowledge/PendingKnowledgeItem';
+import PendingKnowledgeHeader from '@/components/ui/Knowledge/PendingKnowledgeHeader';
 import KnowledgeModal from '@/components/ui/Knowledge/KnowledgeModal';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
 import BoardSkeleton from '@/app/staff/_components/BoardSkeleton/BoardSkeleton';
@@ -92,6 +94,13 @@ export default function ComponentShowcasePage() {
   const [chatScreenStatus, setChatScreenStatus] = useState<'normal' | 'emergency' | 'escalated' | 'progress'>('normal');
   const [requestCardKey, setRequestCardKey] = useState(0);
   const [searchValue, setSearchValue] = useState('');
+
+  const [testPendingItem, setTestPendingItem] = useState({
+    domainCode: 'FB',
+    question: 'Does the Caesar Salad contain any allergens?',
+    answer: 'The Caesar Salad contains dairy and egg ingredients.',
+    selected: true,
+  });
 
   const sampleRooms = [
     { id: '1001', roomNumber: '1001', statusText: '보관됨' },
@@ -850,6 +859,47 @@ export default function ComponentShowcasePage() {
             <Button variant="outlined" onClick={() => setSelectedKnowledge(sampleKnowledges[0])}>
               Knowledge Modal 열기
             </Button>
+          </div>
+        </section>
+
+        {/* Pending Knowledge Candidate 섹션 추가 */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-16)', marginBottom: 'var(--space-32)' }}>
+          <h2 style={{ font: 'var(--text-h2-bold)', color: 'var(--color-gray-900)' }}>
+            Pending Knowledge Candidate (대기 중인 지식 후보 / 분석 검토)
+          </h2>
+          <div>
+            <ComponentLabel path="components/ui/Knowledge/PendingKnowledgeHeader.tsx" />
+            <span style={{ display: 'inline-block', width: '8px' }} />
+            <ComponentLabel path="components/ui/Knowledge/PendingKnowledgeItem.tsx" />
+          </div>
+          <div style={{ background: 'var(--color-bg)', padding: '0 var(--space-32)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+            <PendingKnowledgeHeader
+              allSelected={testPendingItem.selected}
+              onSelectAll={(checked) => setTestPendingItem(prev => ({ ...prev, selected: checked }))}
+              title="Q&A"
+              deptLabel="Department"
+            />
+            <PendingKnowledgeItem
+              id={101}
+              domainCode={testPendingItem.domainCode}
+              question={testPendingItem.question}
+              answer={testPendingItem.answer}
+              selected={testPendingItem.selected}
+              onSelect={(checked) => setTestPendingItem(prev => ({ ...prev, selected: checked }))}
+              onQuestionChange={(val) => setTestPendingItem(prev => ({ ...prev, question: val }))}
+              onAnswerChange={(val) => setTestPendingItem(prev => ({ ...prev, answer: val }))}
+              domainOptions={[
+                { value: 'ALL', label: '전체' },
+                { value: 'HK', label: 'Housekeeping' },
+                { value: 'FB', label: 'F&B' },
+                { value: 'FACILITY', label: 'Facility' },
+                { value: 'CONCIERGE', label: 'Concierge' },
+                { value: 'FRONT', label: 'Front Desk' },
+                { value: 'EMERGENCY', label: 'Emergency' }
+              ]}
+              onDomainChange={(d) => setTestPendingItem(prev => ({ ...prev, domainCode: d }))}
+              onDelete={() => alert('후보 항목 삭제')}
+            />
           </div>
         </section>
 

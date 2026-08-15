@@ -19,6 +19,7 @@ interface LogDataModalProps {
 
 export default function LogDataModal({ isOpen, onClose, log }: LogDataModalProps) {
   const { t } = useTranslation();
+  const aiRouting = (t.frontdeskPage as any)?.aiRouting;
 
   if (!isOpen) return null;
 
@@ -34,11 +35,11 @@ export default function LogDataModal({ isOpen, onClose, log }: LogDataModalProps
               </div>
               <div className={styles.titleGroup}>
                 <div className={styles.titleRow}>
-                  <h2 className={styles.title}>{t.frontdeskPage?.aiRouting?.logDataModalTitle || '로그 데이터 분석'}</h2>
+                  <h2 className={styles.title}>{aiRouting?.logDataModalTitle || '로그 데이터 분석'}</h2>
                   <Tag variant="gray">RAW DATA</Tag>
                 </div>
                 <p className={styles.subtitle}>
-                  {t.frontdeskPage?.aiRouting?.linkedTicket || '연결된 티켓 번호: '}<span className={styles.ticketId}>request_id: #{log?.id}</span>
+                  {aiRouting?.linkedTicket || '연결된 티켓 번호: '}<span className={styles.ticketId}>request_id: #{log?.id}</span>
                 </p>
               </div>
             </div>
@@ -46,15 +47,15 @@ export default function LogDataModal({ isOpen, onClose, log }: LogDataModalProps
 
           {/* Stats Grid */}
           <div className={styles.statsGrid}>
-            <SummaryCard title={t.frontdeskPage?.aiRouting?.totalTokens || '총 토큰'} value={log?.totalTokens?.toLocaleString() || "0"} size="sm" />
-            <SummaryCard title={t.frontdeskPage?.aiRouting?.isFallback || 'Fallback 여부'} value={log?.isFallback ? "YES" : "NO"} size="sm" />
-            <SummaryCard title={t.frontdeskPage?.aiRouting?.latency || '처리 시간'} value={`${log?.latencyMs || 0}ms`} size="sm" />
-            <SummaryCard title={t.frontdeskPage?.aiRouting?.usedModel || '사용 모델'} value={log?.modelName || "N/A"} size="sm" />
+            <SummaryCard title={aiRouting?.totalTokens || '총 토큰'} value={log?.totalTokens?.toLocaleString() || "0"} size="sm" />
+            <SummaryCard title={aiRouting?.isFallback || 'Fallback 여부'} value={log?.isFallback ? "YES" : "NO"} size="sm" />
+            <SummaryCard title={aiRouting?.latency || '처리 시간'} value={`${log?.latencyMs || 0}ms`} size="sm" />
+            <SummaryCard title={aiRouting?.usedModel || '사용 모델'} value={log?.modelName || "N/A"} size="sm" />
           </div>
 
           {/* Prompt Section */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>{t.frontdeskPage?.aiRouting?.rawPrompt || '입력 프롬프트 원문 (RAW PROMPT)'}</h3>
+            <h3 className={styles.sectionTitle}>{aiRouting?.rawPrompt || '입력 프롬프트 원문 (RAW PROMPT)'}</h3>
             <div className={styles.promptText}>
               {log?.rawPrompt || "No prompt data."}
             </div>
@@ -62,7 +63,7 @@ export default function LogDataModal({ isOpen, onClose, log }: LogDataModalProps
 
           {/* Response Section */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>{t.frontdeskPage?.aiRouting?.rawResponse || 'AI 출력 JSON 원문 (RAW RESPONSE)'}</h3>
+            <h3 className={styles.sectionTitle}>{aiRouting?.rawResponse || 'AI 출력 JSON 원문 (RAW RESPONSE)'}</h3>
             <div className={styles.jsonContainer} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
               {log?.rawResponse || "No response data."}
             </div>

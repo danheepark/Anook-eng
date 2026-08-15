@@ -27,23 +27,26 @@ export interface LoginFormProps {
   error?: string;
   /** 하단 카피라이트 등 추가 푸터 내용 */
   footerContent?: React.ReactNode;
+  /** 버튼 텍스트 */
+  buttonText?: string;
 }
 
 /**
  * [공통 UI 컴포넌트] LoginForm
- * 프리미엄 다크 모드 스타일이 적용된 범용 로그인 폼입니다.
+ * 프리미엄 스타일이 적용된 범용 로그인 폼입니다.
  */
 export default function LoginForm({
   title = 'Anook',
   subtitle = 'Management System',
   icon,
-  inputLabel = '접속 PIN 번호',
-  placeholder = 'PIN 번호를 입력하세요',
+  inputLabel = 'Access PIN',
+  placeholder = 'Enter PIN or Access Code',
   maxLength = 6,
   onLogin,
   isLoading = false,
   error,
-  footerContent
+  footerContent,
+  buttonText = 'Log In'
 }: LoginFormProps) {
   const [pin, setPin] = useState('');
 
@@ -87,7 +90,7 @@ export default function LoginForm({
           disabled={isLoading || !pin}
           className={styles.submitBtn}
         >
-          {isLoading ? '인증 중...' : '로그인'}
+          {isLoading ? 'Authenticating...' : buttonText}
         </Button>
       </form>
 

@@ -274,7 +274,7 @@ function DashboardContent() {
     <div className={styles.container}>
       <HeaderSearchSlot>
         <SmartSearchBar
-          inputWrapperStyle={{ width: 260 }}
+          inputWrapperStyle={{ width: 200 }}
           value={searchValue}
           onChange={(val) => {
             setSearchValue(val);

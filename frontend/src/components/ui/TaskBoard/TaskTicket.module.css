@@ -213,8 +213,8 @@
 }
 
 .description {
-  font: var(--text-caption-regular);
-  color: var(--color-gray-500);
+  font: var(--text-body-regular);
+  color: #2A2A2A;
   margin-top: var(--space-4);
   word-break: break-word;
   white-space: pre-wrap;
@@ -235,9 +235,14 @@
 .footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-top: auto;
   width: 100%;
+}
+
+.footer > div:last-child {
+  margin-left: auto;
+  margin-bottom: -8px;
 }
 
 .assigneeText {
@@ -245,6 +250,7 @@
   color: var(--color-gray-400);
   white-space: nowrap;
   line-height: 1;
+  margin-bottom: -2px;
 }
 
 .textStatus {

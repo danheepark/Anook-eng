@@ -22,7 +22,7 @@ export default function LoginForm() {
   useEffect(() => {
     const errorParam = searchParams.get('error');
     if (errorParam === 'DUPLICATE_LOGIN') {
-      showToast('다른 기기에서 로그인이 감지되어 세션이 종료되었습니다.', 'error');
+      showToast('Session ended due to login detected on another device.', 'error');
       router.replace('/login');
     }
   }, [searchParams, showToast, router]);
@@ -35,17 +35,19 @@ export default function LoginForm() {
     <div className={styles.container}>
       <CommonLoginForm
         title="ANOOK"
-        subtitle="AI 기반 호텔 통합 관리 시스템"
+        subtitle="AI-Powered Hotel Management System"
         icon={<SecurityIcon width={32} height={32} />}
-        placeholder="PIN 번호 또는 접속 코드 입력"
+        inputLabel="Access PIN"
+        placeholder="Enter PIN or Access Code"
+        buttonText="Log In"
         onLogin={handleLogin}
         isLoading={isLoading}
         error={error || ''}
-        maxLength={20} // ★ 길이를 20자리로 확장
+        maxLength={20}
         footerContent={
           <>
             <p>© 2026 Team Anook. All rights reserved.</p>
-            <p>관리자 문의: 02-1234-5678</p>
+            <p>Admin Support: 02-1234-5678</p>
           </>
         }
       />

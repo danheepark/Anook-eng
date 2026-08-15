@@ -123,7 +123,7 @@ export default function DateFilterDropdown({
         onClick={() => setIsOpen(!isOpen)}
         aria-label="날짜 필터"
       >
-        <CalendarIcon size={14} color="currentColor" style={{ marginRight: 2 }} />
+        <CalendarIcon size={14} color="currentColor" />
         <span className={styles.label}>{getButtonLabel()}</span>
         <svg
           width="12"

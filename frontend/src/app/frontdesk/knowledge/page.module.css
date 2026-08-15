@@ -1,89 +1,72 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-16);
+  gap: var(--space-40, 40px);
   flex: 1;
   min-height: 0;
   box-sizing: border-box;
-  padding: var(--space-12) var(--space-24) var(--space-24) var(--space-24);
+  padding: var(--space-24);
   overflow-y: auto;
+  background-color: var(--color-white);
 }
 
-.header {
+.section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0;
 }
 
-.title {
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--space-16, 16px);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font: var(--text-h2-bold);
+  font-size: 1.125rem;
+  font-weight: 700;
   color: var(--color-gray-900);
-  padding: 0;
   margin: 0;
 }
 
-.headerActions {
-  display: flex;
-  gap: var(--space-12);
+.countBadge {
+  display: inline-flex;
   align-items: center;
-}
-
-.tabsWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.mainTabs {
-  /* 스타일 조정 */
+  justify-content: center;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  background-color: var(--color-gray-100);
+  padding: 1px 8px;
+  border-radius: 9999px;
 }
 
 .subTabs {
-  /* 중분류 탭 스타일 조정 */
+  flex: 1;
+  min-width: 0;
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
-.contentWrapper {
+.sectionBody {
   flex: 1;
-  overflow-y: auto;
+  margin-top: 0;
 }
 
 @media (max-width: 768px) {
   .container {
     padding: var(--space-16);
-    gap: var(--space-16);
+    gap: var(--space-32, 32px);
   }
 
-  .header {
+  .sectionHeader {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
     gap: var(--space-12);
   }
-
-  .headerActions {
-    width: 100%;
-  }
-
-  .searchBarWrapper {
-    width: 100% !important;
-  }
-
-  .searchInputContainer {
-    width: 100% !important;
-    flex: 1 !important;
-  }
-}
-
-.searchBarWrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  width: auto;
-}
-
-.searchInputContainer {
-  width: 240px;
-}
-
-:global(#knowledge-header-actions) button {
-  width: 110px !important;
 }

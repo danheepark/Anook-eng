@@ -1,39 +1,20 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-24);
-  padding: 0 0 var(--space-48) 0;
+  gap: 0;
+  padding: 0;
   color: var(--color-gray-900);
 }
 
 .headerArea {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--color-gray-100);
-  padding-bottom: var(--space-16);
-}
-
-.headerTitle {
-  font: var(--text-h4);
-  font-weight: 700;
-  color: var(--color-gray-900);
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-}
-
-.headerCount {
-  font: var(--text-body-medium);
-  color: var(--color-primary);
-  font-weight: 600;
+  display: none;
 }
 
 .cardList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-16);
-  margin-top: var(--space-24);
+  gap: 0;
+  margin-top: 0;
 }
 
 .statusMessage {

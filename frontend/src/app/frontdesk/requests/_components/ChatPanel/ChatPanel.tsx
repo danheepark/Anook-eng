@@ -642,7 +642,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                   <React.Fragment key={`unread-container-${msg.id}`}>
                     <div className={styles.unreadDivider}>
                       <span className={styles.unreadText}>
-                        {t.chatPanel?.unread || (language === 'en' ? 'Unread' : '읽지 않은 메시지')}
+                        {(t.chatPanel as any)?.unread || (language === 'en' ? 'Unread' : '읽지 않은 메시지')}
                       </span>
                     </div>
                     {renderedItem}

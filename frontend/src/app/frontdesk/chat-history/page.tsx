@@ -81,7 +81,7 @@ export default function ChatHistoryPage() {
           aria-label="대화 옵션 더보기"
           title="대화 옵션 더보기"
         >
-          <MoreIcon size={18} />
+          <MoreIcon width={18} height={18} />
         </button>
         {isPopoverOpen && (
           <PopoverMenu

@@ -144,6 +144,7 @@
         "CONCIERGE": "礼宾",
         "FRONT": "前台",
         "EMERGENCY": "紧急情况",
+        "UNKNOWN": "未分类",
         "COMMON": "通用"
       }
     },

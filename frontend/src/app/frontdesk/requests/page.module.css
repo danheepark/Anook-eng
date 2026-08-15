@@ -42,9 +42,9 @@
   overflow: hidden;
 }
 .leftPane {
-  width: 26%;
-  min-width: 300px;
-  max-width: 440px;
+  width: 25%;
+  min-width: 320px;
+  max-width: 420px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -63,7 +63,7 @@
 
 .rightPane {
   flex: 1;
-  min-width: 400px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   background-color: var(--color-white);
@@ -71,9 +71,9 @@
 }
 
 .detailPane {
-  width: 26%;
-  min-width: 300px;
-  max-width: 440px;
+  width: 28%;
+  min-width: 340px;
+  max-width: 460px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -98,34 +98,37 @@
 /* Large / Ultra-wide screens (1800px+) */
 @media (min-width: 1800px) {
   .leftPane {
-    width: 26%;
-    min-width: 340px;
+    width: 24%;
+    min-width: 360px;
     max-width: 480px;
   }
   
   .detailPane {
     width: 26%;
-    min-width: 340px;
-    max-width: 480px;
+    min-width: 380px;
+    max-width: 500px;
   }
 }
 
-/* Gradual spacing & width compression when space is constrained on tablet/small desktops */
-@media (min-width: 769px) and (max-width: 1200px) {
+/* Maintain comfortable fixed widths for side panels, allowing middle chat to shrink flexibly */
+@media (min-width: 769px) and (max-width: 1300px) {
   .leftPane {
-    width: 25%;
-    min-width: 250px;
-    max-width: 320px;
+    width: 320px;
+    min-width: 320px;
+    max-width: 340px;
+    flex-shrink: 0;
   }
   
   .rightPane {
-    min-width: 300px;
+    flex: 1;
+    min-width: 0;
   }
   
   .detailPane {
-    width: 25%;
-    min-width: 250px;
-    max-width: 320px;
+    width: 340px;
+    min-width: 340px;
+    max-width: 360px;
+    flex-shrink: 0;
   }
   
   .leftPaneContent {

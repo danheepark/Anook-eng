@@ -44,6 +44,7 @@ export default function KnowledgeEditModal({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const showToast = useUiStore(state => state.showToast);
   const { t } = useTranslation();
+  const ragModal = (t.frontdeskPage?.rag as any)?.modal;
 
   return (
     <>
@@ -51,37 +52,37 @@ export default function KnowledgeEditModal({
         <ModalCard
           size="md"
           onClose={() => setIsConfirmOpen(true)}
-          title={isRegister ? (t.frontdeskPage?.rag?.modal?.registerTitle || '지식 데이터 등록') : (t.frontdeskPage?.rag?.modal?.editTitle || '지식 정보 수정')}
+          title={isRegister ? (ragModal?.registerTitle || '지식 데이터 등록') : (ragModal?.editTitle || '지식 정보 수정')}
         >
 
         {/* Body */}
         <div className={styles.body}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>{t.frontdeskPage?.rag?.modal?.domainLabel || '도메인 분류'}</label>
+            <label className={styles.label}>{ragModal?.domainLabel || '도메인 분류'}</label>
             <Dropdown
               options={domainOptions}
               value={domainCode}
               onChange={(val) => setDomainCode(val as string)}
-              placeholder={t.frontdeskPage?.rag?.modal?.domainPlaceholder || '분류 선택'}
+              placeholder={ragModal?.domainPlaceholder || '분류 선택'}
             />
           </div>
 
           <div className={styles.formGroup}>
             <InputField
-              label={t.frontdeskPage?.rag?.modal?.titleLabel || '제목'}
+              label={ragModal?.titleLabel || '제목'}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder={t.frontdeskPage?.rag?.modal?.titlePlaceholder || '예상 질문이나 제목을 입력하세요'}
+              placeholder={ragModal?.titlePlaceholder || '예상 질문이나 제목을 입력하세요'}
             />
           </div>
 
           <div className={styles.formGroup}>
             <InputField
               as="textarea"
-              label={t.frontdeskPage?.rag?.modal?.contentLabel || '내용'}
+              label={ragModal?.contentLabel || '내용'}
               value={answer}
               onChange={(e: any) => setAnswer(e.target.value)}
-              placeholder={t.frontdeskPage?.rag?.modal?.contentPlaceholder || '답변이나 매뉴얼 상세 내용을 입력하세요'}
+              placeholder={ragModal?.contentPlaceholder || '답변이나 매뉴얼 상세 내용을 입력하세요'}
               rows={4}
             />
           </div>
@@ -94,9 +95,9 @@ export default function KnowledgeEditModal({
           </Button>
           <Button variant="primary" onClick={() => {
             if (onSave) onSave({ domainCode, question, answer });
-            showToast(isRegister ? (t.frontdeskPage?.rag?.modal?.registerSuccess || '지식 데이터가 성공적으로 등록되었습니다.') : (t.frontdeskPage?.rag?.modal?.editSuccess || '지식 정보가 성공적으로 수정되었습니다.'), 'success');
+            showToast(isRegister ? (ragModal?.registerSuccess || '지식 데이터가 성공적으로 등록되었습니다.') : (ragModal?.editSuccess || '지식 정보가 성공적으로 수정되었습니다.'), 'success');
           }} className={styles.btn}>
-            {isRegister ? (t.frontdeskPage?.rag?.modal?.registerBtn || '등록하기') : (t.frontdeskPage?.rag?.modal?.saveBtn || '변경사항 저장하기')}
+            {isRegister ? (ragModal?.registerBtn || '등록하기') : (ragModal?.saveBtn || '변경사항 저장하기')}
           </Button>
         </div>
       </ModalCard>
@@ -109,10 +110,10 @@ export default function KnowledgeEditModal({
           setIsConfirmOpen(false);
           onClose();
         }}
-        title={t.frontdeskPage?.rag?.modal?.cancelEditTitle || '수정 취소'}
-        subtitle={t.frontdeskPage?.rag?.modal?.cancelEditSubtitle || '수정 중인 내용이 저장되지 않습니다. 정말 취소하시겠습니까?'}
-        confirmText={t.frontdeskPage?.rag?.modal?.cancelConfirm || '네, 취소할게요'}
-        cancelText={t.frontdeskPage?.rag?.modal?.cancelKeep || '계속 작성하기'}
+        title={ragModal?.cancelEditTitle || '수정 취소'}
+        subtitle={ragModal?.cancelEditSubtitle || '수정 중인 내용이 저장되지 않습니다. 정말 취소하시겠습니까?'}
+        confirmText={ragModal?.cancelConfirm || '네, 취소할게요'}
+        cancelText={ragModal?.cancelKeep || '계속 작성하기'}
         status="danger"
       />
     )}

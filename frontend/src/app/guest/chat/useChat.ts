@@ -31,7 +31,7 @@ export function useChat() {
     variant: 'received',
     type: 'WELCOME',
     content: t.guestChat.welcomeMessage,
-    meta: { options: t.guestChat.quickReplyOptions }
+    meta: { options: (t.guestChat as any).quickReplyOptions }
   }]);
   const [isTyping, setIsTyping] = useState(false);
   const [isStaffTyping, setIsStaffTyping] = useState(false);
@@ -60,12 +60,12 @@ export function useChat() {
           variant: 'received',
           type: 'WELCOME',
           content: t.guestChat.welcomeMessage,
-          meta: { options: t.guestChat.quickReplyOptions }
+          meta: { options: (t.guestChat as any).quickReplyOptions }
         }];
       }
       return prev;
     });
-  }, [t.guestChat.welcomeMessage, t.guestChat.quickReplyOptions]);
+  }, [t.guestChat.welcomeMessage, (t.guestChat as any).quickReplyOptions]);
 
   // 0. 세션 정보 가져오기
   useEffect(() => {
@@ -127,7 +127,7 @@ export function useChat() {
             variant: 'received',
             type: 'WELCOME',
             content: t.guestChat.welcomeMessage,
-            meta: { options: t.guestChat.quickReplyOptions }
+            meta: { options: (t.guestChat as any).quickReplyOptions }
           }]);
           return;
         }

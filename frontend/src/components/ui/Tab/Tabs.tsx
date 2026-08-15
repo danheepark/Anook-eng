@@ -16,7 +16,8 @@ export interface TabsProps {
   activeValue: string;
   onChange: (value: string) => void;
   className?: string;
-  variant?: 'line' | 'pill';
+  variant?: 'line' | 'pill' | 'segmented';
+  size?: 'sm' | 'md' | 'lg' | 'h2';
 }
 
 export default function Tabs({
@@ -24,10 +25,15 @@ export default function Tabs({
   activeValue,
   onChange,
   className = '',
-  variant = 'line'
+  variant = 'line',
+  size
 }: TabsProps) {
   const isPill = variant === 'pill';
-  const containerClass = isPill ? styles.variantPill : styles.variantLine;
+  const isSegmented = variant === 'segmented';
+
+  let containerClass = styles.variantLine;
+  if (isPill) containerClass = styles.variantPill;
+  if (isSegmented) containerClass = styles.variantSegmented;
 
   return (
     <div className={`${styles.container} ${containerClass} ${className}`.trim()} role="tablist">
@@ -37,6 +43,8 @@ export default function Tabs({
         let tabClass = styles.tabButton;
         if (isPill) {
           tabClass += ` ${styles.pillTab} ${isActive ? styles.pillTabActive : ''}`;
+        } else if (isSegmented) {
+          tabClass += ` ${styles.segmentedTab} ${isActive ? styles.segmentedTabActive : ''}`;
         } else {
           tabClass += ` ${styles.lineTab} ${isActive ? styles.lineTabActive : ''}`;
         }
@@ -44,6 +52,7 @@ export default function Tabs({
         return (
           <button
             key={option.value}
+            type="button"
             role="tab"
             aria-selected={isActive}
             className={tabClass.trim()}

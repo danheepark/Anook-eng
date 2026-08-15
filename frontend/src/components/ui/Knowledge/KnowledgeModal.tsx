@@ -49,17 +49,17 @@ export default function KnowledgeModal({
         <div className={styles.footer}>
           <div className={styles.dateInfo}>
             <Clock size={16} className={styles.clockIcon} />
-            <span className={styles.dateText}>{t.common?.lastUpdated || '최종 업데이트: '}{updatedAt}</span>
+            <span className={styles.dateText}>{(t.common as any)?.lastUpdated || '최종 업데이트: '}{updatedAt}</span>
           </div>
           <div className={styles.actionButtons} style={{ display: 'flex', gap: 'var(--space-8)' }}>
             {onDelete && (
               <Button variant="danger" onClick={onDelete} className={styles.editBtn}>
-                {t.common?.delete || '삭제'}
+                {(t.common as any)?.delete || '삭제'}
               </Button>
             )}
             <Button variant="primary" onClick={onEdit} className={styles.editBtn}>
               <Edit2 size={16} />
-              {t.common?.edit || '수정'}
+              {(t.common as any)?.edit || '수정'}
             </Button>
           </div>
         </div>

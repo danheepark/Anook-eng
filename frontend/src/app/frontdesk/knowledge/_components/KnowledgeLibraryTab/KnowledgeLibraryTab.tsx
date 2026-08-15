@@ -59,7 +59,7 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
     // 기본적으로 id 등 다른 기준으로 정렬할 수 있으나 생략
   }
 
-  const matches = filteredData.map(item => item.id);
+  const matches = searchValue.trim() ? filteredData.map(item => item.id) : [];
 
   // matches 변경 시 부모 컴포넌트에 알림
   React.useEffect(() => {
@@ -68,7 +68,7 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
 
   // activeMatchId 변경 시 해당 카드로 스크롤
   React.useEffect(() => {
-    if (activeMatchId) {
+    if (activeMatchId && searchValue.trim()) {
       setTimeout(() => {
         const el = document.getElementById(`knowledge-${activeMatchId}`);
         if (el) {
@@ -76,7 +76,7 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
         }
       }, 50);
     }
-  }, [activeMatchId]);
+  }, [activeMatchId, searchValue]);
 
   return (
     <div className={styles.container}>
@@ -92,7 +92,7 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
                 setIsEditModalOpen(true);
               }}
             >
-              {language === 'en' ? 'Add' : '지식 추가'}
+              {language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
             </Button>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
               setIsEditModalOpen(true);
             }}
           >
-            {language === 'en' ? 'Add' : '지식 추가'}
+            {language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
           </Button>,
           document.getElementById('knowledge-header-actions')!
         )
@@ -142,7 +142,7 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
                 onDelete={() => {
                   setDeleteTargetId(item.id);
                 }}
-                isActiveMatch={activeMatchId === item.id}
+                isActiveMatch={Boolean(searchValue.trim()) && activeMatchId === item.id}
                 highlightQuery={searchValue}
               />
             ))

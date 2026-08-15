@@ -166,6 +166,7 @@
         "CONCIERGE": "컨시어즈",
         "FRONT": "프론트 데스크",
         "EMERGENCY": "긴급 대응",
+        "UNKNOWN": "미분류",
         "COMMON": "공통 (호텔 전반)"
       }
     },

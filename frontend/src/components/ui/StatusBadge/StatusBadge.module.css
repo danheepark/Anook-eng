@@ -32,3 +32,33 @@
   background-color: var(--color-tag-background-gray);
   color: var(--color-tag-text-gray);
 }
+
+.hk {
+  background-color: var(--color-dept-hk-bg);
+  color: var(--color-dept-hk-text);
+}
+
+.fb {
+  background-color: var(--color-dept-fb-bg);
+  color: var(--color-dept-fb-text);
+}
+
+.facility {
+  background-color: var(--color-dept-facility-bg);
+  color: var(--color-dept-facility-text);
+}
+
+.concierge {
+  background-color: var(--color-dept-concierge-bg);
+  color: var(--color-dept-concierge-text);
+}
+
+.front {
+  background-color: var(--color-dept-front-bg);
+  color: var(--color-dept-front-text);
+}
+
+.emergency {
+  background-color: var(--color-dept-emergency-bg);
+  color: var(--color-dept-emergency-text);
+}

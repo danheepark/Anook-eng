@@ -42,7 +42,7 @@ export default function FeedbackCard({
   systemContent,
   systemSubtitle
 }: FeedbackCardProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
