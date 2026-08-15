@@ -105,6 +105,18 @@
   text-overflow: ellipsis;
 }
 
+.titleMedium {
+  font: var(--text-body-md-medium);
+  color: var(--color-gray-800);
+  font-weight: 500;
+}
+
+.titleRegular {
+  font: var(--text-body-regular);
+  color: var(--color-gray-700);
+  font-weight: 400;
+}
+
 .description {
   font: var(--text-body-regular);
   color: var(--color-gray-500);

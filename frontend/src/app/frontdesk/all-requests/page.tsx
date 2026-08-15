@@ -269,6 +269,7 @@ export default function AllRequestsPage() {
                     isEscalated={req.status === 'ESCALATED'}
                     cancelRequested={req.cancelRequested}
                     createdAt={req.createdAt}
+                    updatedAt={req.updatedAt}
                     entities={req.entities}
                     highlightSearch={searchValue}
                     isActiveMatch={matches[currentMatchIndex]?.id === req.id}

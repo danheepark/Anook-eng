@@ -265,6 +265,7 @@ export default function FacilityPage() {
                     isCancelled={req.status === 'CANCELLED'}
                     cancelRequested={req.cancelRequested}
                     createdAt={req.createdAt}
+                    updatedAt={req.updatedAt}
                     entities={req.entities}
                     highlightSearch={searchValue}
                     isActiveMatch={matches[currentMatchIndex]?.id === req.id}

@@ -33,6 +33,12 @@ public interface FrontdeskMessageJpaRepository extends JpaRepository<FrontdeskMe
     java.util.Optional<FrontdeskMessageJpaEntity> findFirstByRoomNoOrderByCreatedAtDesc(String roomNo);
 
     /**
+     * 특정 roomNo의 시스템/포워딩 메시지를 제외한 사용자 가시 메시지 목록 (최신순)
+     */
+    @Query("SELECT m FROM FrontdeskMessage m WHERE m.roomNo = :roomNo AND m.content NOT LIKE '[FORWARD_%' AND m.content NOT LIKE '[SYSTEM%' AND m.content NOT LIKE '[INFO_%' AND m.content NOT LIKE '[PII_%' ORDER BY m.createdAt DESC")
+    List<FrontdeskMessageJpaEntity> findVisibleMessagesByRoomNoDesc(String roomNo);
+
+    /**
      * 특정 roomNo의 모든 메시지 삭제
      */
     @org.springframework.data.jpa.repository.Modifying

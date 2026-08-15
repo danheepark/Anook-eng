@@ -229,23 +229,30 @@ export default function ChatHistoryPage() {
               <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-gray-400)' }}>채팅 내역이 없습니다</div>
             ) : (
               <div className={styles.cardGrid}>
-                {filteredRooms.map(room => (
-                  <div key={room.roomNo} id={`room-card-${room.roomNo}`}>
-                    <RequestCard
-                      roomNumber={room.roomNo}
-                      title={room.lastMessage || t.frontdeskPage.chatHistory?.emptyMessage || (language === 'en' ? 'No messages' : '메시지 없음')}
-                      createdAt={room.lastMessageAt || ''}
-                      isSelected={selectedRoom === room.roomNo}
-                      isActiveMatch={roomSearchValue ? filteredRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
-                      highlightSearch={roomSearchValue}
-                      onCardClick={() => {
-                        selectRoom(room.roomNo);
-                        setRoomSearchValue('');
-                        setMobileView('chat');
-                      }}
-                    />
-                  </div>
-                ))}
+                {filteredRooms.map(room => {
+                  const rawMsg = room.lastMessage || '';
+                  const isSys = rawMsg.startsWith('[FORWARD_') || rawMsg.startsWith('[SYSTEM') || rawMsg.startsWith('[INFO_') || rawMsg.startsWith('[PII_');
+                  const cleanPreview = (!isSys && rawMsg) ? rawMsg : (t.frontdeskPage.chatHistory?.emptyMessage || (language === 'en' ? 'No messages' : '메시지 없음'));
+
+                  return (
+                    <div key={room.roomNo} id={`room-card-${room.roomNo}`}>
+                      <RequestCard
+                        roomNumber={room.roomNo}
+                        title={cleanPreview}
+                        titleWeight="regular"
+                        createdAt={room.lastMessageAt || ''}
+                        isSelected={selectedRoom === room.roomNo}
+                        isActiveMatch={roomSearchValue ? filteredRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
+                        highlightSearch={roomSearchValue}
+                        onCardClick={() => {
+                          selectRoom(room.roomNo);
+                          setRoomSearchValue('');
+                          setMobileView('chat');
+                        }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

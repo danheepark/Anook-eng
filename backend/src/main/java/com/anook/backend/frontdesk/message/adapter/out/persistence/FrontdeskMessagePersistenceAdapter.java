@@ -23,6 +23,14 @@ public class FrontdeskMessagePersistenceAdapter implements FrontdeskMessageQuery
 
     private final FrontdeskMessageJpaRepository jpaRepository;
 
+    private FrontdeskMessageJpaEntity getLatestVisibleMessage(String roomNo) {
+        List<FrontdeskMessageJpaEntity> visible = jpaRepository.findVisibleMessagesByRoomNoDesc(roomNo);
+        if (!visible.isEmpty()) {
+            return visible.get(0);
+        }
+        return jpaRepository.findFirstByRoomNoOrderByCreatedAtDesc(roomNo).orElse(null);
+    }
+
     @Override
     public List<Map<String, Object>> findRoomsWithMessages() {
         List<String> roomNos = jpaRepository.findDistinctRoomNos();
@@ -30,10 +38,11 @@ public class FrontdeskMessagePersistenceAdapter implements FrontdeskMessageQuery
         return roomNos.stream().map(roomNo -> {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("roomNo", roomNo);
-            jpaRepository.findFirstByRoomNoOrderByCreatedAtDesc(roomNo).ifPresent(msg -> {
+            FrontdeskMessageJpaEntity msg = getLatestVisibleMessage(roomNo);
+            if (msg != null) {
                 map.put("lastMessage", msg.getContent());
                 map.put("lastMessageAt", msg.getCreatedAt());
-            });
+            }
             return map;
         }).toList();
     }
@@ -48,10 +57,11 @@ public class FrontdeskMessagePersistenceAdapter implements FrontdeskMessageQuery
         return roomNos.stream().map(roomNo -> {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("roomNo", roomNo);
-            jpaRepository.findFirstByRoomNoOrderByCreatedAtDesc(roomNo).ifPresent(msg -> {
+            FrontdeskMessageJpaEntity msg = getLatestVisibleMessage(roomNo);
+            if (msg != null) {
                 map.put("lastMessage", msg.getContent());
                 map.put("lastMessageAt", msg.getCreatedAt());
-            });
+            }
             return map;
         }).toList();
     }

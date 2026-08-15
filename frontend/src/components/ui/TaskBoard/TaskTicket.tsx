@@ -236,8 +236,12 @@ export default function TaskTicket({
         parts.push(`${l.content || '내용'}: ${entities.symptom}`);
       }
     }
+    if (entities.target_time) {
+      const timeLabel = t.ticketUI?.badge?.targetTime || (language === 'en' ? 'Target Time' : '희망 시간');
+      parts.push(`${timeLabel}: ${entities.target_time}`);
+    }
     return parts.length > 0 ? parts.join('\n') : null;
-  }, [department, entities, t.ticketUI?.entityLabels]);
+  }, [department, entities, t.ticketUI?.entityLabels, t.ticketUI?.badge?.targetTime, language]);
 
   const sourceTitle = rawDynamicTitle || title;
   const { translatedText: translatedSummary, isLoading: isTranslating } = useTranslationApi(sourceTitle, language);
@@ -302,25 +306,35 @@ export default function TaskTicket({
     return displaySummary;
   };
 
-  let displayTitle = getFixedTitle();
-  
-  // '요청'과 '주문' 단어가 타이틀 끝에 있는 경우 제거 (예약은 유지) - 비활성화됨
-  displayTitle = displayTitle.trim();
+  const toSentenceCase = (str: string) => {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  let displayTitle = toSentenceCase(getFixedTitle().trim());
+
+  const formatDateTime = (dateVal: string | Date | undefined) => {
+    if (!dateVal) return '';
+    let date: Date;
+    if (dateVal instanceof Date) {
+      date = dateVal;
+    } else {
+      date = new Date(String(dateVal).replace(' ', 'T'));
+    }
+    if (isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = date.getHours();
+    const mins = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hr = hours % 12 || 12;
+    return `${year}.${month}.${day} ${String(hr).padStart(2, '0')}:${mins} ${ampm}`;
+  };
 
   let timeDisplay = '';
   if (status === 'DONE') {
-    let parsedString = updatedAt || createdAt;
-    const date = new Date(String(parsedString).replace(' ', 'T'));
-    if (!isNaN(date.getTime())) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = date.getHours();
-      const mins = String(date.getMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const hr = hours % 12 || 12;
-      timeDisplay = `${year}.${month}.${day} ${String(hr).padStart(2, '0')}:${mins} ${ampm}`;
-    }
+    timeDisplay = formatDateTime(updatedAt || createdAt) || formatDateTime(createdAt);
   } else if (status === 'IN_PROGRESS' && updatedAt) {
     const relTime = getRelativeTime(updatedAt, language, t.ticketUI.time);
     if (relTime === t.ticketUI.time.justNow) {
@@ -379,6 +393,44 @@ export default function TaskTicket({
     else if (displayDescription === '직원') displayDescription = 'Staff';
   }
 
+  // 단일 항목 등 제목과 본문 내용이 완전히 동일/중복인 경우 중복 라인 제거
+  const cleanedDescription = React.useMemo(() => {
+    if (!displayDescription) return '';
+    const normTitle = String(displayTitle || '')
+      .replace(/^[-•*]\s*/gm, '')
+      .replace(/[×xX]/g, 'x')
+      .replace(/\s+/g, '')
+      .toLowerCase()
+      .trim();
+
+    const lines = displayDescription.split('\n').map(l => l.trim()).filter(Boolean);
+    
+    // 단일 라인이고 타이틀과 동일하면 숨김
+    if (lines.length === 1) {
+      const normLine = lines[0]
+        .replace(/^[-•*]\s*/gm, '')
+        .replace(/[×xX]/g, 'x')
+        .replace(/\s+/g, '')
+        .toLowerCase()
+        .trim();
+      if (normLine === normTitle) return '';
+      return lines[0];
+    }
+
+    // 복수 라인일 때 단순히 타이틀만 반복하는 라인 필터링 (예: '- cleaning'과 'Target Time: 14:00' 중 '- cleaning' 제거)
+    const filteredLines = lines.filter(line => {
+      const normLine = line
+        .replace(/^[-•*]\s*/gm, '')
+        .replace(/[×xX]/g, 'x')
+        .replace(/\s+/g, '')
+        .toLowerCase()
+        .trim();
+      return normLine !== normTitle;
+    });
+
+    return filteredLines.length > 0 ? filteredLines.join('\n') : '';
+  }, [displayTitle, displayDescription]);
+
   return (
     <div 
       id={ticketId ? `ticket-${ticketId}` : undefined}
@@ -402,65 +454,53 @@ export default function TaskTicket({
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {isCancelled && (
-            <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
-              {t.ticketUI.badge.cancelled}
-            </span>
-          )}
-          {isEscalated && (
-            <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
-              {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
-            </span>
-          )}
-          {cancelRequested && (
-            <span className={`${styles.textStatus} ${styles.textStatusCancelPending}`}>
-              {t.ticketUI.badge.cancelPending}
-            </span>
-          )}
-          {priority === 'URGENT' && (
-            <div className={`${styles.textStatus} ${styles.textStatusUrgent}`}>
-              {t.ticketUI.badge.urgent}
-              <span className={styles.redDot} />
-            </div>
-          )}
-          {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
+        <div className={styles.headerRight}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {isCancelled && (
+              <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
+                {t.ticketUI.badge.cancelled}
+              </span>
+            )}
+            {isEscalated && (
+              <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
+                {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
+              </span>
+            )}
+            {cancelRequested && (
+              <span className={`${styles.textStatus} ${styles.textStatusCancelPending}`}>
+                {t.ticketUI.badge.cancelPending}
+              </span>
+            )}
+            {priority === 'URGENT' && (
+              <div className={`${styles.textStatus} ${styles.textStatusUrgent}`}>
+                {t.ticketUI.badge.urgent}
+                <span className={styles.redDot} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {(entities?.is_contactless || entities?.target_time) && (
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', marginTop: '-4px' }}>
-          {entities.is_contactless && (
-            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
-          )}
-          {entities.target_time && (
-            <StatusBadge variant="gray">{t.ticketUI.badge.targetTime}: {entities.target_time}</StatusBadge>
-          )}
-        </div>
-      )}
-
       <div className={styles.content}>
+        {entities?.is_contactless && (
+          <div className={styles.badgeRow}>
+            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
+          </div>
+        )}
         <h3 className={styles.title}>
           {isTranslating ? t.common.loading || 'Loading...' : (
             highlightSearch ? renderHighlightedText(displayTitle as string, highlightSearch, isActiveMatch) : displayTitle
           )}
         </h3>
-        <p className={styles.description}>
-          {highlightSearch ? renderHighlightedText(displayDescription || '', highlightSearch, isActiveMatch) : displayDescription}
-        </p>
+        {cleanedDescription && (
+          <p className={`${styles.description} ${(!cleanedDescription.trim().startsWith('-') && !cleanedDescription.trim().startsWith('•')) ? styles.descriptionCompact : ''}`}>
+            {highlightSearch ? renderHighlightedText(cleanedDescription, highlightSearch, isActiveMatch) : cleanedDescription}
+          </p>
+        )}
       </div>
 
-      <div className={styles.divider} />
-
       <div className={styles.footer}>
-        <span className={styles.timeText}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          {timeDisplay}
-        </span>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {status === 'TODO' && onAccept && (
             <Button
               variant="primary"
@@ -509,6 +549,12 @@ export default function TaskTicket({
               )}
             </div>
           )}
+        </div>
+
+        <div className={styles.ticketMeta}>
+          {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
+          {ticketId && timeDisplay && <span className={styles.metaDot}>·</span>}
+          {timeDisplay && <span className={styles.timeText}>{timeDisplay}</span>}
         </div>
       </div>
     </div>

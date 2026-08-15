@@ -29,6 +29,7 @@ export interface RequestCardProps {
   isEmergency?: boolean;
   highlightSearch?: string;
   isActiveMatch?: boolean;
+  titleWeight?: 'bold' | 'medium' | 'regular';
 }
 
 export default function RequestCard({
@@ -48,13 +49,14 @@ export default function RequestCard({
   requestId,
   status,
   onStatusChange,
-  reverseActions,
+  reverseActions = false,
   isSelected = false,
   hasNewMessage = false,
   newMessageCount,
   isEmergency = false,
   highlightSearch = '',
-  isActiveMatch = false
+  isActiveMatch = false,
+  titleWeight = 'bold'
 }: RequestCardProps) {
   const isWarning = variant === 'warning';
   const { t, language } = useTranslation();
@@ -102,7 +104,7 @@ export default function RequestCard({
 
         <div className={styles.contentSection}>
           <div className={styles.contentHeader}>
-            <h3 className={styles.title}>
+            <h3 className={`${styles.title} ${titleWeight === 'medium' ? styles.titleMedium : titleWeight === 'regular' ? styles.titleRegular : ''}`}>
               {highlightSearch ? (
                 <span dangerouslySetInnerHTML={{
                   __html: displayTitle.replace(
