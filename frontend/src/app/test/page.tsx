@@ -19,6 +19,7 @@ import ChatBubble from '@/app/guest/chat/_components/ChatBubble';
 import ChatInput from '@/app/guest/chat/_components/ChatInput';
 
 import ChatScreen from '@/app/guest/chat/_components/ChatScreen';
+import QuickActionCards from '@/app/guest/chat/_components/QuickActionCards';
 import Pill from '@/components/ui/Pill/Pill';
 import FeedbackCard from '@/app/guest/chat/_components/FeedbackCard';
 import ChatEndCard from '@/app/guest/chat/_components/ChatEndCard/ChatEndCard';
@@ -206,6 +207,127 @@ export default function ComponentShowcasePage() {
           <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-md)' }}>
             <ComponentLabel path="components/layout/Header.tsx" />
             <Header />
+          </div>
+        </section>
+
+        {/* 2. TYPOGRAPHY & FONT SYSTEM */}
+        <section style={{ marginBottom: 'var(--space-60)' }}>
+          <h2 style={{ font: 'var(--text-h2-bold)', marginBottom: 'var(--space-16)', color: 'var(--color-gray-700)' }}>
+            2. Typography & Font System
+          </h2>
+          <div style={{ background: 'var(--color-bg)', padding: 'var(--space-32)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-32)' }}>
+            
+            {/* 1. Guest Welcome Editorial Serif Heading */}
+            <div>
+              <h3 style={{ font: 'var(--text-h3-bold)', color: 'var(--color-gray-700)', borderBottom: '1px solid var(--color-surface)', paddingBottom: 'var(--space-8)', marginBottom: 'var(--space-16)' }}>
+                1. Guest Welcome Editorial Serif & Gradient (Fraunces 72pt)
+              </h3>
+              <div style={{ padding: 'var(--space-32)', background: 'linear-gradient(180deg, #F9F8FD 0%, #EDE9F8 100%)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+                <div style={{
+                  fontFamily: "'Fraunces 72pt', 'Fraunces', serif",
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: '40px',
+                  lineHeight: '38px',
+                  textAlign: 'center',
+                  background: 'linear-gradient(91.29deg, #7452A0 6.35%, #254E90 97.32%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  padding: '0 0 16px',
+                  fontVariationSettings: "'opsz' 72",
+                  display: 'inline-block'
+                }}>
+                  What can I help with<br />during your stay?
+                </div>
+                <div style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-500)', marginTop: 'var(--space-8)' }}>
+                  <code>font-family: 'Fraunces 72pt'; font-size: 40px; line-height: 38px; background: linear-gradient(91.29deg, #7452A0 6.35%, #254E90 97.32%);</code>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Hero & Headings */}
+            <div>
+              <h3 style={{ font: 'var(--text-h3-bold)', color: 'var(--color-gray-700)', borderBottom: '1px solid var(--color-surface)', paddingBottom: 'var(--space-8)', marginBottom: 'var(--space-16)' }}>
+                2. Hero & Headings
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-16)' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-hero-bold (36px / 700)</span>
+                  <span style={{ font: 'var(--text-hero-bold)', color: 'var(--color-gray-900)' }}>Hero Bold Title (36px)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-hero-regular (36px / 400)</span>
+                  <span style={{ font: 'var(--text-hero-regular)', color: 'var(--color-gray-900)' }}>Hero Regular Title (36px)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-h1-bold (24px / 700)</span>
+                  <span style={{ font: 'var(--text-h1-bold)', color: 'var(--color-gray-900)' }}>Heading 1 Bold (24px)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-h2-bold (18px / 700)</span>
+                  <span style={{ font: 'var(--text-h2-bold)', color: 'var(--color-gray-900)' }}>Heading 2 Bold (18px)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-h3-bold (16px / 700)</span>
+                  <span style={{ font: 'var(--text-h3-bold)', color: 'var(--color-gray-900)' }}>Heading 3 Bold (16px)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-h3-medium (16px / 500)</span>
+                  <span style={{ font: 'var(--text-h3-medium)', color: 'var(--color-gray-900)' }}>Heading 3 Medium (16px)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-h3-regular (16px / 400)</span>
+                  <span style={{ font: 'var(--text-h3-regular)', color: 'var(--color-gray-900)' }}>Heading 3 Regular (16px)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Body Typography */}
+            <div>
+              <h3 style={{ font: 'var(--text-h3-bold)', color: 'var(--color-gray-700)', borderBottom: '1px solid var(--color-surface)', paddingBottom: 'var(--space-8)', marginBottom: 'var(--space-16)' }}>
+                3. Body & Content Text
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-16)' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-body-lg-medium (16px / 500)</span>
+                  <span style={{ font: 'var(--text-body-lg-medium)', color: 'var(--color-gray-900)' }}>Body Large Medium (16px) — 주요 카드 본문 및 강조 설명</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-body-md-medium (15px / 500)</span>
+                  <span style={{ font: 'var(--text-body-md-medium)', color: 'var(--color-gray-900)' }}>Body Medium Medium (15px) — 버튼 및 탭 네비게이션</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-body-bold (14px / 700)</span>
+                  <span style={{ font: 'var(--text-body-bold)', color: 'var(--color-gray-900)' }}>Body Bold (14px) — 카드 타이틀 및 강조 라벨</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-body-medium (14px / 500)</span>
+                  <span style={{ font: 'var(--text-body-medium)', color: 'var(--color-gray-900)' }}>Body Medium (14px) — 일반 대화 버블 및 입력창</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-body-regular (14px / 400)</span>
+                  <span style={{ font: 'var(--text-body-regular)', color: 'var(--color-gray-900)' }}>Body Regular (14px) — 기본 본문 텍스트 및 설명문</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Captions & Badges */}
+            <div>
+              <h3 style={{ font: 'var(--text-h3-bold)', color: 'var(--color-gray-700)', borderBottom: '1px solid var(--color-surface)', paddingBottom: 'var(--space-8)', marginBottom: 'var(--space-16)' }}>
+                4. Captions & Badges
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-16)' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-caption-medium (12px / 500)</span>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-600)' }}>Caption Medium (12px) — 뱃지, 태그, 타임스탬프</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-24)', borderBottom: '1px solid var(--color-gray-100)', paddingBottom: 'var(--space-12)' }}>
+                  <span style={{ font: 'var(--text-caption-medium)', color: 'var(--color-gray-400)', width: '220px', flexShrink: 0 }}>--text-caption-regular (12px / 400)</span>
+                  <span style={{ font: 'var(--text-caption-regular)', color: 'var(--color-gray-500)' }}>Caption Regular (12px) — 부가 정보 및 메타데이터</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -512,6 +634,14 @@ export default function ComponentShowcasePage() {
                       selectedOption={selectedQuickBtn}
                       onSelect={(opt) => setSelectedQuickBtn(opt)} 
                     />
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, minWidth: '320px' }}>
+                  <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Quick Action Cards (게스트 퀵 액션 카드)</h4>
+                  <ComponentLabel path="app/guest/chat/_components/QuickActionCards/QuickActionCards.tsx" />
+                  <div style={{ padding: 'var(--space-24)', background: 'linear-gradient(180deg, #F9F8FD 0%, #EDE9F8 100%)', border: '1px solid var(--color-surface)', borderRadius: 'var(--radius-lg)' }}>
+                    <QuickActionCards onSelect={(query) => alert(`선택된 액션: ${query}`)} />
                   </div>
                 </div>
                 

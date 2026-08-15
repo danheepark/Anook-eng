@@ -7,13 +7,30 @@ export interface PillProps {
   onSelect: (option: string) => void;
   align?: 'center' | 'flex-start' | 'flex-end';
   disabled?: boolean;
+  scrollable?: boolean;
+  columns?: number;
 }
 
-export default function Pill({ options, selectedOption, onSelect, align = 'center', disabled = false }: PillProps) {
+export default function Pill({ 
+  options, 
+  selectedOption, 
+  onSelect, 
+  align = 'center', 
+  disabled = false, 
+  scrollable = false,
+  columns 
+}: PillProps) {
   if (!options || options.length === 0) return null;
 
+  const containerClass = columns === 3 
+    ? styles.grid3 
+    : `${styles.container} ${scrollable ? styles.scrollContainer : ''}`;
+
   return (
-    <div className={styles.container} style={{ justifyContent: align }}>
+    <div 
+      className={containerClass} 
+      style={{ justifyContent: (scrollable || columns) ? undefined : align }}
+    >
       {options.map((option, index) => (
         <button 
           key={index} 

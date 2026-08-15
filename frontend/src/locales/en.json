@@ -310,6 +310,7 @@
         "topic": "Topic",
         "question": "Question",
         "language": "Language",
+        "reasoning": "Reason",
         "items": "Item Requests",
         "tasks": "Task Requests",
         "menu_items": "Order Menu",
@@ -453,12 +454,23 @@
   },
   "guestChat": {
     "welcomeMessage": "What can I help with during your stay?",
-    "quickReplyOptions": [
-      "2 extra towels",
-      "Breakfast hours",
-      "Room cleaning",
-      "Late checkout"
-    ],
+    "quickCards": {
+      "hk": {
+        "line1": "Extra",
+        "line2": "towels",
+        "query": "Extra towels"
+      },
+      "fb": {
+        "line1": "Order",
+        "line2": "room service",
+        "query": "Order room service"
+      },
+      "concierge": {
+        "line1": "Book",
+        "line2": "a taxi",
+        "query": "Book a taxi"
+      }
+    },
     "activeRequestsCount": "{count} active requests",
     "progress": {
       "checking": "Checking your request...",
@@ -564,7 +576,7 @@
       "confirmGuide": "Tap the proceed button to confirm.",
       "cancelPendingShort": "Checking cancellation",
       "translating": "Translating...",
-      "escalationRequest": "Front desk staff connection request",
+      "escalationRequest": "Connecting to Front Desk",
       "cancelRequest": "Cancel Request",
       "proceed": "Proceed",
       "urgentPrefix": "[Urgent] ",

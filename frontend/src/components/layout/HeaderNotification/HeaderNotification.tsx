@@ -6,6 +6,7 @@ import RejectCancellationModal from '@/app/frontdesk/requests/_components/Reject
 import RejectEscalationModal from '@/app/frontdesk/requests/_components/RejectEscalationModal/RejectEscalationModal';
 import RequestDetailModal from '@/app/frontdesk/requests/_components/RequestDetailModal/RequestDetailModal';
 import { useUiStore } from '@/stores/useUiStore';
+import { useTranslation } from '@/app/useTranslation';
 import NotificationCard from '@/components/ui/NotificationCard/NotificationCard';
 import styles from './HeaderNotification.module.css';
 
@@ -14,6 +15,7 @@ export default function HeaderNotification() {
   const [currentTime, setCurrentTime] = useState(Date.now());
   const popupRef = useRef<HTMLDivElement>(null);
   const { showToast } = useUiStore();
+  const { language } = useTranslation();
 
   // 반려 모달 상태
   const [cancelRejectTarget, setCancelRejectTarget] = useState<number | null>(null);
@@ -53,14 +55,14 @@ export default function HeaderNotification() {
     try {
       const res = await fetch(`/api/frontdesk/requests/${id}/cancellation/approve`, { method: 'PATCH' });
       if (res.ok) {
-        showToast('취소가 승인되었습니다.', 'success');
+        showToast(language === 'en' ? 'Cancellation approved.' : '취소가 승인되었습니다.', 'success');
         refetchRequests();
       } else {
-        showToast('취소 승인에 실패했습니다.', 'error');
+        showToast(language === 'en' ? 'Failed to approve cancellation.' : '취소 승인에 실패했습니다.', 'error');
       }
     } catch (e) { 
       console.error(e);
-      showToast('취소 승인 중 오류가 발생했습니다.', 'error');
+      showToast(language === 'en' ? 'An error occurred during approval.' : '취소 승인 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -70,7 +72,6 @@ export default function HeaderNotification() {
 
   const handleApproveEscalation = async (id: number) => {
     try {
-      // 이관 승인: 현재 부서 유지 + NORMAL 우선순위로 에스컬레이션 처리
       const target = escalations.find(r => r.id === id);
       const res = await fetch(`/api/frontdesk/requests/${id}/escalate`, {
         method: 'PATCH',
@@ -78,14 +79,14 @@ export default function HeaderNotification() {
         body: JSON.stringify({ departmentId: target?.departmentId || 'FRONT', priority: 'NORMAL' })
       });
       if (res.ok) {
-        showToast('이관 요청이 승인되었습니다.', 'success');
+        showToast(language === 'en' ? 'Transfer request approved.' : '이관 요청이 승인되었습니다.', 'success');
         refetchEscalations();
       } else {
-        showToast('이관 승인에 실패했습니다.', 'error');
+        showToast(language === 'en' ? 'Failed to approve transfer.' : '이관 승인에 실패했습니다.', 'error');
       }
     } catch (e) { 
       console.error(e);
-      showToast('이관 승인 중 오류가 발생했습니다.', 'error');
+      showToast(language === 'en' ? 'An error occurred during transfer approval.' : '이관 승인 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -93,10 +94,34 @@ export default function HeaderNotification() {
     setEscalationRejectTarget(id);
   };
 
+  const formatDeptName = (codeOrName: string) => {
+    if (!codeOrName) return '';
+    const upper = codeOrName.toUpperCase();
+    if (upper.includes('HK') || upper.includes('HOUSEKEEPING') || upper.includes('하우스키핑')) {
+      return language === 'en' ? 'Housekeeping' : '하우스키핑';
+    }
+    if (upper.includes('FB') || upper.includes('FNB') || upper.includes('식음료')) {
+      return language === 'en' ? 'F&B' : 'F&B';
+    }
+    if (upper.includes('FACILITY') || upper.includes('MAINTENANCE') || upper.includes('시설')) {
+      return language === 'en' ? 'Facility' : '시설관리';
+    }
+    if (upper.includes('CONCIERGE') || upper.includes('컨시어지')) {
+      return language === 'en' ? 'Concierge' : '컨시어지';
+    }
+    if (upper.includes('EMERGENCY') || upper.includes('긴급')) {
+      return language === 'en' ? 'Emergency' : '긴급대응팀';
+    }
+    if (upper.includes('FRONT') || upper.includes('프론트')) {
+      return language === 'en' ? 'Front Desk' : '프론트데스크';
+    }
+    return codeOrName;
+  };
+
   return (
     <>
     <div className={styles.container} ref={popupRef}>
-      <button className={styles.bellButton} onClick={() => setIsOpen(!isOpen)}>
+      <button className={styles.bellButton} onClick={() => setIsOpen(!isOpen)} aria-label={language === 'en' ? 'Notifications' : '알림'}>
         <Bell size={24} color="var(--color-gray-600)" />
         {totalNotifications > 0 && (
           <span className={styles.badge}>{totalNotifications}</span>
@@ -106,22 +131,27 @@ export default function HeaderNotification() {
       {isOpen && (
         <div className={styles.popup}>
           <div className={styles.header}>
-            <h3 className={styles.title}>타 부서 이관/취소 승인 대기함</h3>
-            <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label="닫기">
+            <h3 className={styles.title}>
+              {language === 'en' ? 'Pending Approvals' : '타 부서 이관/취소 승인 대기함'}
+            </h3>
+            <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label={language === 'en' ? 'Close' : '닫기'}>
               <X size={20} />
             </button>
           </div>
 
           <div className={styles.content}>
             {totalNotifications === 0 ? (
-              <div className={styles.empty}>대기 중인 요청이 없습니다.</div>
+              <div className={styles.empty}>
+                {language === 'en' ? 'No pending requests.' : '대기 중인 요청이 없습니다.'}
+              </div>
             ) : (
               <div className={styles.list}>
                 {allNotifications.map(({ type, data: req, time }) => {
                   if (type === 'cancel') {
                     const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
                     let cleanDesc = rawParts[0] || '';
-                    cleanDesc = cleanDesc.replace(/^\[주문 상세\]\s*-\s*details:\s*/i, '');
+                    cleanDesc = cleanDesc.split(/\[주문\s*상세\]/i)[0].trim();
+                    cleanDesc = cleanDesc.replace(/^details:\s*/i, '').trim();
                     
                     return (
                     <NotificationCard
@@ -130,11 +160,11 @@ export default function HeaderNotification() {
                       title={req.summary}
                       description={cleanDesc}
                       roomNumber={req.roomNo}
-                      departmentName={req.departmentName}
+                      departmentName={formatDeptName(req.departmentName)}
                       createdAt={time}
                       priority={req.priority}
-                      primaryLabel="취소 승인"
-                      secondaryLabel="반려"
+                      primaryLabel={language === 'en' ? 'Approve Cancel' : '취소 승인'}
+                      secondaryLabel={language === 'en' ? 'Reject' : '반려'}
                       onPrimaryClick={() => handleApproveCancel(req.id)}
                       onSecondaryClick={() => handleRejectCancel(req.id)}
                       onClick={() => setDetailTarget(req.id)}
@@ -150,20 +180,9 @@ export default function HeaderNotification() {
                     // 1. 발신 부서 파싱: "[HK] 사유" 형태
                     const match = lastTransferPart.match(/^\[([A-Z_]+)\]/);
                     if (match) {
-                      const senderCode = match[1];
-                      const deptMap: Record<string, string> = {
-                        'HK': '하우스키핑',
-                        'FB': 'F&B',
-                        'FNB': 'F&B',
-                        'FRONT': '프론트데스크',
-                        'FACILITY': '시설 관리 팀',
-                        'MAINTENANCE': '시설 관리 팀',
-                        'EMERGENCY': '긴급대응팀',
-                        'CONCIERGE': '컨시어지',
-                      };
-                      senderDeptName = deptMap[senderCode] || senderCode;
-                    } else if (senderDeptName === '프론트데스크') {
-                      senderDeptName = '하우스키핑';
+                      senderDeptName = match[1];
+                    } else if (senderDeptName === '프론트데스크' || senderDeptName === 'Front Desk') {
+                      senderDeptName = 'HK';
                     }
 
                     // 2. 이관 사유 중 상세 설명만 추출: "[HK] 제목\n상세설명" -> "상세설명"
@@ -177,11 +196,11 @@ export default function HeaderNotification() {
                       title={req.summary}
                       description={transferReason}
                       roomNumber={req.roomNo}
-                      departmentName={senderDeptName}
+                      departmentName={formatDeptName(senderDeptName)}
                       createdAt={time}
                       priority={req.priority}
-                      primaryLabel="수락 (배정)"
-                      secondaryLabel="반려"
+                      primaryLabel={language === 'en' ? 'Accept (Assign)' : '수락 (배정)'}
+                      secondaryLabel={language === 'en' ? 'Reject' : '반려'}
                       onPrimaryClick={() => handleApproveEscalation(req.id)}
                       onSecondaryClick={() => handleRejectEscalation(req.id)}
                       onClick={() => setDetailTarget(req.id)}

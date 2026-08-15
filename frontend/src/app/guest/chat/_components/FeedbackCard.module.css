@@ -64,7 +64,7 @@
 }
 
 .subtitle {
-  font: var(--text-body-medium);
+  font: var(--text-body-regular);
   color: var(--color-gray-500);
 }
 

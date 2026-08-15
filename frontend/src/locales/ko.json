@@ -303,6 +303,7 @@
         "topic": "주제",
         "question": "질문",
         "language": "언어",
+        "reasoning": "사유",
         "items": "물품 요청",
         "tasks": "작업 요청",
         "menu_items": "주문 메뉴",
@@ -447,12 +448,23 @@
   "guestChat": {
     "welcomeMessage": "안녕하세요! 호텔 AI 비서입니다.\n머무시는 동안 편안한 휴식이 될 수 있도록 도와드릴게요.\n필요하신건 뭐든 말씀해 주세요!",
     "quickReplyPrompt": "무엇을 도와드릴까요? 아래에서 선택하시거나 직접 말씀해 주세요!",
-    "quickReplyOptions": [
-      "수건 2개 추가해 주세요",
-      "조식은 몇 시인가요?",
-      "객실 청소 부탁해요",
-      "체크아웃 연장 가능한가요?"
-    ],
+    "quickCards": {
+      "hk": {
+        "line1": "수건",
+        "line2": "추가 요청",
+        "query": "수건 추가해 주세요"
+      },
+      "fb": {
+        "line1": "룸서비스",
+        "line2": "주문하기",
+        "query": "룸서비스 주문할게요"
+      },
+      "concierge": {
+        "line1": "택시",
+        "line2": "호출하기",
+        "query": "택시 불러주세요"
+      }
+    },
     "activeRequestsCount": "{count}개의 진행 중인 요청",
     "progress": {
       "checking": "요청하신 내용을 확인하고 있습니다...",
@@ -557,7 +569,7 @@
       "confirmGuide": "확인 후 진행 버튼을 눌러주세요.",
       "cancelPendingShort": "취소 요청 확인 중",
       "translating": "요약 중...",
-      "escalationRequest": "프론트 데스크 직원 연결 요청",
+      "escalationRequest": "프론트 데스크 연결 중",
       "cancelRequest": "요청 취소",
       "proceed": "진행",
       "urgentPrefix": "[긴급] ",

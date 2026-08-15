@@ -268,6 +268,7 @@
         "topic": "主题",
         "question": "问题",
         "language": "语言",
+        "reasoning": "原因",
         "items": "物品请求",
         "tasks": "任务请求",
         "menu_items": "点餐菜单",
@@ -404,12 +405,23 @@
   "guestChat": {
     "welcomeMessage": "您好！我是酒店AI助手。\n我将帮助您拥有舒适的住宿体验。\n请告诉我您需要什么！",
     "quickReplyPrompt": "我能如何帮助您？请选择以下选项或输入您的请求！",
-    "quickReplyOptions": [
-      "需要2条额外毛巾",
-      "早餐时间是几点？",
-      "请打扫我的房间",
-      "我可以延迟退房吗？"
-    ],
+    "quickCards": {
+      "hk": {
+        "line1": "额外",
+        "line2": "毛巾",
+        "query": "需要额外毛巾"
+      },
+      "fb": {
+        "line1": "客房",
+        "line2": "送餐",
+        "query": "点客房送餐"
+      },
+      "concierge": {
+        "line1": "预约",
+        "line2": "出租车",
+        "query": "帮我叫一辆出租车"
+      }
+    },
     "activeRequestsCount": "{count} 个进行中的请求",
     "progress": {
       "checking": "正在检查您的请求...",
@@ -519,7 +531,7 @@
       "confirmGuide": "请确认后点击进行按钮。",
       "cancelPendingShort": "取消请求确认中",
       "translating": "正在翻译...",
-      "escalationRequest": "前台员工连接请求",
+      "escalationRequest": "正在连接前台",
       "cancelRequest": "取消请求",
       "proceed": "进行",
       "urgentPrefix": "[紧急] ",

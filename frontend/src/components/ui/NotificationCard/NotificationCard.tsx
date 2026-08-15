@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from '@/components/ui/Button/Button';
 import Tag from '@/components/ui/StatusBadge/StatusBadge';
+import { useTranslation } from '@/app/useTranslation';
 import styles from './NotificationCard.module.css';
 
 export type NotificationVariant = 'cancel' | 'escalation';
@@ -32,26 +33,30 @@ interface NotificationCardProps {
   onClick?: () => void;
 }
 
-const VARIANT_CONFIG: Record<NotificationVariant, { label: string; badgeVariant: 'red' | 'purple' | 'green' | 'gray' }> = {
-  cancel: { label: '취소 요청', badgeVariant: 'red' },
-  escalation: { label: '이관 요청', badgeVariant: 'purple' },
-};
-
-function formatRelativeTime(isoStr?: string): string {
+function formatRelativeTime(isoStr?: string, language?: string): string {
   if (!isoStr) return '';
   const d = new Date(isoStr);
   const now = new Date();
-  const diffInMs = now.getTime() - d.getTime();
+  const diffInMs = Math.max(0, now.getTime() - d.getTime());
   const diffInMins = Math.floor(diffInMs / (1000 * 60));
   
-  if (diffInMins < 1) return '방금 전';
-  if (diffInMins < 60) return `${diffInMins}분 전`;
-  
+  if (language === 'ko') {
+    if (diffInMins < 1) return '방금 전';
+    if (diffInMins < 60) return `${diffInMins}분 전`;
+    const diffInHours = Math.floor(diffInMins / 60);
+    if (diffInHours < 24) return `${diffInHours}시간 전`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}일 전`;
+  }
+
+  if (diffInMins < 1) return 'Just now';
+  if (diffInMins === 1) return '1 min ago';
+  if (diffInMins < 60) return `${diffInMins} mins ago`;
   const diffInHours = Math.floor(diffInMins / 60);
-  if (diffInHours < 24) return `${diffInHours}시간 전`;
-  
+  if (diffInHours === 1) return '1 hr ago';
+  if (diffInHours < 24) return `${diffInHours} hrs ago`;
   const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays}일 전`;
+  return `${diffInDays}d ago`;
 }
 
 export default function NotificationCard({
@@ -68,8 +73,17 @@ export default function NotificationCard({
   onSecondaryClick,
   onClick,
 }: NotificationCardProps) {
-  const config = VARIANT_CONFIG[variant];
+  const { language } = useTranslation();
   const isUrgent = priority === 'URGENT';
+
+  const badgeText = variant === 'cancel'
+    ? (language === 'en' ? 'Cancel Request' : '취소 요청')
+    : (language === 'en' ? 'Transfer Request' : '이관 요청');
+
+  const badgeVariant = variant === 'cancel' ? 'red' : 'purple';
+  const roomDisplay = language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`;
+
+  const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
   return (
     <div
@@ -79,13 +93,13 @@ export default function NotificationCard({
       {/* 컨텐츠 섹션 (Left & Middle) */}
       <div className={styles.contentSection}>
         <div className={styles.tagsRow}>
-          <Tag variant={config.badgeVariant}>{config.label}</Tag>
-          {isUrgent && <Tag variant="red">긴급</Tag>}
+          <Tag variant={badgeVariant}>{badgeText}</Tag>
+          {isUrgent && <Tag variant="red">{language === 'en' ? 'Urgent' : '긴급'}</Tag>}
         </div>
 
         <div className={styles.titleRow}>
-          <span className={styles.roomNumber}>{roomNumber}호</span>
-          <h3 className={styles.title}>{title}</h3>
+          <span className={styles.roomNumber}>{roomDisplay}</span>
+          <h3 className={styles.title}>{toSentenceCase(title)}</h3>
         </div>
 
         {description && <p className={styles.description}>{description}</p>}
@@ -111,7 +125,7 @@ export default function NotificationCard({
       {/* 오른쪽 섹션 (Right - 시간 표시) */}
       <div className={styles.rightSection}>
         <span className={styles.timeText}>
-          {[departmentName, createdAt ? formatRelativeTime(createdAt) : null]
+          {[departmentName, createdAt ? formatRelativeTime(createdAt, language) : null]
             .filter(Boolean)
             .join(' • ')}
         </span>

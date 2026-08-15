@@ -268,6 +268,7 @@
         "topic": "トピック",
         "question": "質問",
         "language": "言語",
+        "reasoning": "理由",
         "items": "品目リクエスト",
         "tasks": "タスクリクエスト",
         "menu_items": "注文メニュー",
@@ -404,12 +405,23 @@
   "guestChat": {
     "welcomeMessage": "こんにちは！ホテルAIアシスタントです。\n快適なご滞在をサポートいたします。\n何かご要望がございましたら、お気軽にお申し付けください！",
     "quickReplyPrompt": "何かお手伝いできることはありますか？以下のオプションを選択するか、ご要望を入力してください！",
-    "quickReplyOptions": [
-      "タオルを2枚追加でお願いします",
-      "朝食は何時ですか？",
-      "部屋を掃除してください",
-      "チェックアウトを延長できますか？"
-    ],
+    "quickCards": {
+      "hk": {
+        "line1": "タオル",
+        "line2": "追加",
+        "query": "タオルを追加してください"
+      },
+      "fb": {
+        "line1": "ルーム",
+        "line2": "サービス",
+        "query": "ルームサービスを注文したいです"
+      },
+      "concierge": {
+        "line1": "タクシー",
+        "line2": "手配",
+        "query": "タクシーを手配してください"
+      }
+    },
     "activeRequestsCount": "{count}件の進行中のリクエスト",
     "progress": {
       "checking": "リクエストを確認中...",
@@ -519,7 +531,7 @@
       "confirmGuide": "確認後、進行ボタンを押してください。",
       "cancelPendingShort": "キャンセル要請確認中",
       "translating": "翻訳中...",
-      "escalationRequest": "フロントデスクスタッフ接続リクエスト",
+      "escalationRequest": "フロントデスクに接続中",
       "cancelRequest": "リクエストをキャンセル",
       "proceed": "進行",
       "urgentPrefix": "[緊急] ",

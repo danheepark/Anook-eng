@@ -160,7 +160,13 @@ export default function RequestStatusBar({
     return displaySummary;
   };
 
-  let finalTitle = getFixedTitle();
+  const toSentenceCase = (text: string) => {
+    if (!text) return '';
+    const trimmed = text.trim();
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  };
+
+  let finalTitle = toSentenceCase(getFixedTitle());
   if (isCancelled) {
     finalTitle += ` ${t.cardUI?.message?.cancelledCard || '취소됨'}`;
   }

@@ -135,6 +135,29 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
 
     const label = labels[key as keyof typeof labels] || key; // 매핑 없으면 영어 키 그대로 표시 (폴백)
 
+    if (key === 'reasoning') {
+      const rawVal = String(value);
+      const bulletLines = rawVal
+        .replace(/\\n/g, '\n')
+        .replace(/([^\n])\s*•/g, '$1\n•')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line !== '')
+        .map(line => line.startsWith('•') ? line : `• ${line}`);
+
+      rendered.push(
+        <div key={key} className={styles.contentBlock} style={{ marginBottom: '12px' }}>
+          <span className={styles.label}>{language === 'en' ? 'Reason' : (labels[key as keyof typeof labels] || '사유')}</span>
+          <div className={styles.rawText} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {bulletLines.map((line, idx) => (
+              <div key={idx}>{line}</div>
+            ))}
+          </div>
+        </div>
+      );
+      continue;
+    }
+
     // boolean true인 경우 라벨만 표시 (예: is_contactless -> "비대면 배달")
     if (value === true) {
       rendered.push(
@@ -408,27 +431,30 @@ export default function RequestDetailModal({
                   </div>
                 );
               })()}
-              {activeDetail.reasoning && (() => {
-                const cleanedReasoning = activeDetail.reasoning
+              {activeDetail.reasoning && !activeDetail.entities?.reasoning && (() => {
+                const bulletLines = activeDetail.reasoning
                   .replace(/\\n/g, '\n')
                   .replace(/([^\n])\s*•/g, '$1\n•')
                   .split('\n')
                   .map(line => line.trim())
                   .filter(line => line !== '')
                   .filter(line => !line.toLowerCase().includes('confidence:'))
-                  .join('\n')
-                  .trim();
+                  .map(line => line.startsWith('•') ? line : `• ${line}`);
+
                 const formattedConfidence = activeDetail.confidence !== null && activeDetail.confidence !== undefined
                   ? `${Math.round(activeDetail.confidence * 100)}%`
                   : '100%';
                 const label = language === 'en' ? 'confidence' : '신뢰도';
-                const displayReasoning = cleanedReasoning
-                  ? `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`
-                  : `• ${label}: ${formattedConfidence}`;
+                bulletLines.push(`• ${label}: ${formattedConfidence}`);
+
                 return (
                   <div className={styles.contentBlock} style={{ marginTop: '12px' }}>
                     <span className={styles.label}>{t.frontdeskPage.requestDetailModal.reasoning}</span>
-                    <p className={styles.rawText}>{displayReasoning}</p>
+                    <div className={styles.rawText} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {bulletLines.map((line, idx) => (
+                        <div key={idx}>{line}</div>
+                      ))}
+                    </div>
                   </div>
                 );
               })()}

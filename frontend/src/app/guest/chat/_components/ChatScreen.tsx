@@ -4,6 +4,7 @@ import ChatBubble from './ChatBubble';
 import ChatInput from './ChatInput';
 
 import Pill from '@/components/ui/Pill/Pill';
+import QuickActionCards from './QuickActionCards';
 import ChatBackground from './ChatBackground';
 import ChatEndCard from './ChatEndCard/ChatEndCard';
 import FeedbackCard from './FeedbackCard';
@@ -272,28 +273,38 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                 ) : (
                   msg.content ? <ChatBubble variant="received" animate={index === messages.length - 1}>{msg.content}</ChatBubble> : null
                 )}
-                {!msg.meta?.selectedOption && (
+                {isWelcome ? (
                   <div style={{
+                    width: '100%',
+                    marginBottom: '-16px',
                     display: 'flex',
-                    justifyContent: isWelcome ? 'center' : 'flex-start',
-                    marginBottom: isWelcome ? '-36px' : '0',
-                    paddingBottom: '0',
-                    paddingLeft: '0'
+                    justifyContent: 'center'
                   }}>
-                    <Pill
-                      options={msg.meta?.options as string[]}
-                      selectedOption={msg.meta?.selectedOption as string | undefined}
-                      disabled={msg.meta?.pillDisabled as boolean | undefined}
-                      onSelect={(option) => {
-                        if (onPillSelect) {
-                          onPillSelect(msg.id, option);
-                        } else {
-                          onSendMessage(option);
-                        }
-                      }}
-                      align={isWelcome ? 'center' : 'flex-start'}
-                    />
+                    <QuickActionCards onSelect={onSendMessage} />
                   </div>
+                ) : (
+                  !msg.meta?.selectedOption && msg.meta?.options && (
+                    <div style={{
+                      width: '100%',
+                      marginBottom: '0',
+                      display: 'flex',
+                      justifyContent: 'flex-start'
+                    }}>
+                      <Pill
+                        options={msg.meta?.options as string[]}
+                        selectedOption={msg.meta?.selectedOption as string | undefined}
+                        disabled={msg.meta?.pillDisabled as boolean | undefined}
+                        onSelect={(option) => {
+                          if (onPillSelect) {
+                            onPillSelect(msg.id, option);
+                          } else {
+                            onSendMessage(option);
+                          }
+                        }}
+                        align="flex-start"
+                      />
+                    </div>
+                  )
                 )}
               </div>
             );

@@ -60,10 +60,21 @@ RULES:
   3. Include a `"fallback_message"` key inside the `entities` object with the answer formulated naturally using the `[관련 지식 (RAG)]` in the SAME LANGUAGE as the guest's input.
   4. Set `summary` to English (e.g., "Checkout time inquiry").
 
-- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
-  Format:
-  • What the guest requested.
-  • Why the AI could not complete the request.
-  • What information, authority, or operational decision requires human involvement.
-  Example: "• The guest requested a late check-out.\n• Room availability and hotel policy must be verified before approval.\n• The AI could not confirm the request without human review."
+- **REASONING FORMAT (MANDATORY)**:
+The `reasoning` field explains why the request requires Front Desk involvement from an operational perspective.
+
+Do NOT repeat or summarize what the guest requested, since the request is already visible in the conversation and request summary.
+Do NOT describe the model's internal reasoning process.
+Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence".
+
+Write as a single English string with exactly 2 bullet points (•).
+Each bullet must be one concise sentence.
+
+[Format]
+• Why the request cannot be completed automatically.
+• What information, authority, confirmation, or operational decision requires Front Desk involvement.
+
+The first bullet should explain the operational constraint, not the AI's limitation.
+The second bullet should make clear what Front Desk needs to verify, decide, or authorize.
+Example: "• Room availability and housekeeping cleaning schedules must be verified against current occupancy.\n• Front Desk must confirm eligibility in PMS and authorize the checkout extension fee."
 """.strip()

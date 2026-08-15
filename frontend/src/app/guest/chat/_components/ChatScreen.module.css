@@ -30,7 +30,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--space-24) + 54px) var(--space-24) var(--space-24);
+  padding: calc(var(--space-24) + 54px) var(--space-16) var(--space-24);
   gap: var(--space-16);
   overflow-y: auto;
   background-color: transparent;
@@ -145,8 +145,8 @@
 }
 
 .footer {
-  padding: 0 12px 12px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  padding: 0 var(--space-16) var(--space-16);
+  padding-bottom: calc(var(--space-16) + env(safe-area-inset-bottom));
   border-top: none;
   background-color: transparent;
   position: sticky;

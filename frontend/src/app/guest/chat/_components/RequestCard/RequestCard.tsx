@@ -221,7 +221,12 @@ export default function RequestCard({
   }
   
   const getFixedTitle = () => {
-    if (isTranslating || isEscalatedChat || baseSummary.includes('프론트 연결')) {
+    // FRONT 도메인이거나 이관(ESCALATION) 건인 경우 항상 고정 타이틀 표시
+    if (domainCode === 'FRONT' || isEscalatedChat || entities?.intent === 'ESCALATION' || baseSummary.includes('프론트 연결')) {
+      return language === 'en' ? 'Connecting to Front Desk' : (t.cardUI?.message?.escalationRequest || '프론트 데스크 연결 중');
+    }
+
+    if (isTranslating) {
       return displaySummary;
     }
     
@@ -230,11 +235,6 @@ export default function RequestCard({
     }
     
     const intent = entities?.intent as string | undefined;
-    
-    // 강제 예외 처리: intent가 ESCALATION인 경우 (프론트 데스크 등)
-    if (intent === 'ESCALATION') {
-      return t.cardUI?.message?.escalationRequest || '프론트 데스크 직원 연결';
-    }
     
     // Fallback: intent 기반 번역 매핑 (요약문이 빈 문자열일 때만 사용)
     if (!summary && domainCode !== 'HK' && domainCode !== 'FACILITY') {
@@ -249,11 +249,14 @@ export default function RequestCard({
     return displaySummary;
   };
 
-  let finalTitle = getFixedTitle();
-  
-  // '요청'과 '주문' 단어가 타이틀 끝에 있는 경우 제거 (예약은 유지) - 비활성화됨
-  finalTitle = finalTitle.trim();
+  const toSentenceCase = (text: string) => {
+    if (!text) return '';
+    const trimmed = text.trim();
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  };
 
+  let finalTitle = toSentenceCase(getFixedTitle());
+  
   if (isCancelled) {
     finalTitle += t.cardUI?.message?.cancelSuffix || ' 취소';
   }
@@ -295,11 +298,12 @@ export default function RequestCard({
     if (domainCode === 'HK') {
       if (Array.isArray(entities.items)) {
         entities.items.forEach((it: { item: string; count?: number }) => {
-          parts.push(`- ${it.item} ${it.count ? `×${it.count}` : ''}`.trim());
+          const itemName = typeof it.item === 'string' ? toSentenceCase(it.item) : it.item;
+          parts.push(`- ${itemName} ${it.count ? `×${it.count}` : ''}`.trim());
         });
       }
       if (Array.isArray(entities.tasks)) {
-        entities.tasks.forEach((tStr: string) => parts.push(`- ${tStr}`));
+        entities.tasks.forEach((tStr: string) => parts.push(`- ${toSentenceCase(tStr)}`));
       }
       if (entities.is_contactless) parts.push(`- ${l.contactless || '비대면'}`);
       if (entities.target_time) parts.push(`- ${l.time || '시간'}: ${entities.target_time}`);

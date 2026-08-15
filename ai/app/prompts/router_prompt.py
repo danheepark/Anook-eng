@@ -196,12 +196,13 @@ You must output a JSON Array of objects.
   • Any important operational context the staff should know (e.g., urgency, contactless delivery, allergy).
 
   **[Template B: Escalation Reason]** (Use when route_type is FRONT_ESCALATION):
-  Explain why the AI transferred this conversation to a human.
-  • What the guest requested.
-  • Why the AI could not complete the request.
-  • What information, authority, or operational decision requires human involvement.
+  Explain why the request requires Front Desk involvement from an operational perspective.
+  Do NOT repeat or summarize what the guest requested (since it is already visible in the summary).
+  Write as a single English string with exactly 2 bullet points (•). Each bullet must be one concise sentence.
+  • Why the request cannot be completed automatically (explain the operational constraint, not AI limitation).
+  • What information, authority, confirmation, or operational decision requires Front Desk involvement.
 
-  **[ESCALATION REASONING RULE (CRITICAL)]**: If you are routing to `FRONT_ESCALATION` because the user said "Yes" (네, 응, etc.) to the AI's offer to connect to the front desk, DO NOT just write "User agreed to connect". You MUST look at the user's previous unresolved question in the `[과거 대화 맥락]` and explain the ACTUAL reason for the escalation (e.g., "AI could not find information about dog-friendly wine bars, so it offered escalation and the user agreed. Reason: Information about dog-friendly wine bars is missing"). This provides vital context to the human staff.
+  **[ESCALATION REASONING RULE (CRITICAL)]**: If you are routing to `FRONT_ESCALATION` because the user said "Yes" (네, 응, etc.) to the AI's offer to connect to the front desk, DO NOT just write "User agreed to connect". You MUST look at the user's previous unresolved question in the `[과거 대화 맥락]` and explain the ACTUAL reason for the escalation (e.g., "• Information regarding dog-friendly wine bars is not available in hotel records.\n• Front Desk must look up verified local recommendations and assist the guest."). This provides vital context to the human staff.
 
 - If route_type is "SOFT_FALLBACK", "NON_ACTIONABLE", "CLARIFICATION", or "STATUS_CHECK", the domain MUST be `null`.
 - If route_type is "CANCEL", set the domain to the specific department IF the user explicitly targets one (e.g., "수건 취소해줘" -> HK). If they say "전부 취소" or just "취소", the domain MUST be `null`.

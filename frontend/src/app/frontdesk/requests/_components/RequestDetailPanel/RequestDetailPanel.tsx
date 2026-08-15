@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import styles from './RequestDetailPanel.module.css';
 import Button from '@/components/ui/Button/Button';
-import Dropdown from '@/components/ui/Dropdown/Dropdown';
-import { CancelIcon } from '@/components/icons';
 import { useUiStore } from '@/stores/useUiStore';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
@@ -50,8 +48,6 @@ interface RequestDetailPanelProps {
   onMobileBack?: () => void;
 }
 
-
-
 const STATUS_MAP: Record<string, { text: string; variant: 'red' | 'purple' | 'green' | 'gray' }> = {
   PENDING: { text: '대기 중', variant: 'red' },
   ASSIGNED: { text: '배정됨', variant: 'purple' },
@@ -59,129 +55,6 @@ const STATUS_MAP: Record<string, { text: string; variant: 'red' | 'purple' | 'gr
   COMPLETED: { text: '완료', variant: 'gray' },
   ESCALATED: { text: '에스컬레이션', variant: 'red' },
 };
-
-const ENTITY_LABELS_KO: Record<string, string> = {
-  is_contactless: '비대면 배달', target_time: '희망 시간',
-  equipment: '대상 설비', symptom: '증상', location: '위치',
-  destination: '목적지', passenger_count: '인원', restaurant_name: '식당',
-  cuisine_type: '음식 종류', category: '카테고리', action: '요청 유형',
-  item: '대상 물품', time: '시간', special_requests: '추가 요청', count: '수량',
-  type: '유형', target: '대상', issue: '문제/증상', priority: '예상 긴급도',
-  topic: '주제', question: '질문', language: '언어',
-};
-
-const ENTITY_LABELS_EN: Record<string, string> = {
-  is_contactless: 'Contactless Delivery', target_time: 'Target Time',
-  equipment: 'Equipment', symptom: 'Symptom', location: 'Location',
-  destination: 'Destination', passenger_count: 'Passengers', restaurant_name: 'Restaurant',
-  cuisine_type: 'Cuisine', category: 'Category', action: 'Action Type',
-  item: 'Item', time: 'Time', special_requests: 'Special Requests', count: 'Quantity',
-  type: 'Type', target: 'Target', issue: 'Issue/Symptom', priority: 'Est. Priority',
-  topic: 'Topic', question: 'Question', language: 'Language',
-};
-
-/** 직원에게 보여줄 필요 없는 내부 키 (섹션 표시 판단 + 순회에서 모두 제외) */
-const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'fallback_message', 'item_requests', 'service_requests']);
-
-/** 배열 타입 특수 렌더러가 필요한 키 (key-value 순회에서만 스킵, 섹션 표시 판단에서는 포함) */
-const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
-
-function renderEntities(entities: Record<string, any>, language: string): React.ReactNode {
-  const rendered: React.ReactNode[] = [];
-  const entityLabels = language === 'en' ? ENTITY_LABELS_EN : ENTITY_LABELS_KO;
-
-  // 0) 정규화: item 키 단독 혹은 item+count 플랫 키 → items 배열로 통일 (AI 응답 형식 불일치 보정)
-  if (entities.item && !entities.items?.length) {
-    entities = { ...entities, items: [{ item: entities.item, count: entities.count || 1 }] };
-    delete entities.item;
-    delete entities.count;
-  }
-
-  // 1) 배열 타입 특수 렌더링
-  if (entities.items?.length > 0) {
-    rendered.push(
-      <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>{language === 'en' ? 'Item Requests' : '물품 요청'}</span>
-        <ul style={{ margin: 0, paddingLeft: '20px' }}>
-          {entities.items.map((it: any, idx: number) => {
-            const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
-            return <li key={idx}>{itemText} - {it.count}{language === 'en' ? ' item(s)' : '개'}</li>;
-          })}
-        </ul>
-      </div>
-    );
-  }
-  if (entities.tasks?.length > 0) {
-    rendered.push(
-      <div key="tasks" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>{language === 'en' ? 'Task Requests' : '작업 요청'}</span>
-        <ul style={{ margin: 0, paddingLeft: '20px' }}>
-          {entities.tasks.map((task: string, idx: number) => (
-            <li key={idx}>{task}</li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-  if (entities.menu_items?.length > 0) {
-    rendered.push(
-      <div key="menu_items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>{language === 'en' ? 'Order Menu' : '주문 메뉴'}</span>
-        <ul style={{ margin: 0, paddingLeft: '20px' }}>
-          {entities.menu_items.map((mi: any, idx: number) => (
-            <li key={idx}>
-              {mi.name} - {mi.quantity}{language === 'en' ? ' item(s)' : '개'}
-              {mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'None' && ` (${language === 'en' ? 'Option' : '옵션'}: ${mi.selected_option})`}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
-  // 2) 일반 Key-Value 렌더링
-  for (const [key, value] of Object.entries(entities)) {
-    // 숨길 키이거나 이미 처리된 배열 키면 스킵
-    if (HIDDEN_ENTITY_KEYS.has(key) || ARRAY_KEYS.has(key)) continue;
-    // 값이 비어있으면 스킵
-    if (value === null || value === undefined || value === '' || value === false || value === '없음' || value === 'None') continue;
-
-    const label = entityLabels[key] || key; // 매핑 없으면 영어 키 그대로 표시 (폴백)
-
-    if (key === 'details') {
-      rendered.push(
-        <div key={key} className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-          <span className={styles.label}>{language === 'en' ? 'Details' : '상세 내용'}</span>
-          <p className={styles.rawText}>{value}</p>
-        </div>
-      );
-      continue;
-    }
-
-    // boolean true인 경우 라벨만 표시 (예: is_contactless -> "비대면 배달")
-    if (value === true) {
-      rendered.push(
-        <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
-          <span className={styles.label}>{label}</span>
-        </div>
-      );
-      continue;
-    }
-
-    const displayValue = typeof value === 'object' && value !== null
-      ? (value.name || value.id || JSON.stringify(value))
-      : String(value);
-
-    rendered.push(
-      <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
-        <span className={styles.label}>{label}</span>
-        <span className={styles.value}>{displayValue}</span>
-      </div>
-    );
-  }
-
-  return rendered.length > 0 ? rendered : <pre className={styles.jsonBlock}>{JSON.stringify(entities, null, 2)}</pre>;
-}
 
 export default function RequestDetailPanel({
   requestId,
@@ -305,15 +178,68 @@ export default function RequestDetailPanel({
     }
   };
 
-  const formatDateTime = (dt: string) => {
-    if (!dt) return '';
-    const d = new Date(dt);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+  const formatTimeDisplay = (createdAt: string, status: string) => {
+    if (!createdAt) return '';
+    const createdDate = new Date(createdAt);
+    const isFinished = status === 'COMPLETED' || status === 'CANCELLED';
+
+    if (isFinished) {
+      if (language === 'ko') {
+        const yyyy = createdDate.getFullYear();
+        const m = createdDate.getMonth() + 1;
+        const d = createdDate.getDate();
+        let hours = createdDate.getHours();
+        const ampm = hours >= 12 ? '오후' : '오전';
+        hours = hours % 12 || 12;
+        const minutes = String(createdDate.getMinutes()).padStart(2, '0');
+        return `${yyyy}년 ${m}월 ${d}일 · ${ampm} ${hours}:${minutes}`;
+      }
+      return (
+        createdDate.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }) +
+        ' · ' +
+        createdDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      );
+    }
+
+    const now = new Date();
+    const diffMs = Math.max(0, now.getTime() - createdDate.getTime());
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (language === 'ko') {
+      if (diffMins < 1) return '방금 전 요청됨';
+      if (diffMins < 60) return `${diffMins}분 전 요청됨`;
+      if (diffHours < 24) return `${diffHours}시간 전 요청됨`;
+      return `${diffDays}일 전 요청됨`;
+    }
+
+    if (diffMins < 1) return 'Requested just now';
+    if (diffMins === 1) return 'Requested 1 min ago';
+    if (diffMins < 60) return `Requested ${diffMins} mins ago`;
+    if (diffHours === 1) return 'Requested 1 hr ago';
+    if (diffHours < 24) return `Requested ${diffHours} hrs ago`;
+    return `Requested ${diffDays} days ago`;
+  };
+
+  const extractReasoningBullets = (reasoningStr?: string | null, entitiesReasoning?: any): string[] => {
+    const raw = reasoningStr || entitiesReasoning || '';
+    if (!raw) return [];
+    return String(raw)
+      .replace(/\\n/g, '\n')
+      .replace(/([^\n])\s*([•·\*\-])\s+/g, '$1\n$2 ')
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line !== '' && !line.toLowerCase().includes('confidence:'))
+      .map(line => /^[•·\*\-]\s*/.test(line) ? line.replace(/^[·\*\-]\s*/, '• ') : `• ${line}`);
   };
 
   return (
@@ -334,88 +260,39 @@ export default function RequestDetailPanel({
       </div>
 
       <div className={styles.detailContent}>
-        {/* 기본 정보 */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.basicInfo || '기본 정보'}</h3>
-          <div className={styles.grid}>
-            <div className={styles.gridItem}>
-              <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.roomNo || '객실'}</span>
-              <span className={styles.value}>{detail.roomNo}</span>
-            </div>
-
-            <div className={styles.gridItem}>
-              <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.createdAt || '생성 시간'}</span>
-              <span className={styles.value}>{formatDateTime(detail.createdAt)}</span>
-            </div>
-            <div className={styles.gridItem}>
-              <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.updatedAt || '최종 수정'}</span>
-              <span className={styles.value}>{formatDateTime(detail.updatedAt)}</span>
-            </div>
-          </div>
+        {/* 1. 최상단 시간 표시 */}
+        <div className={styles.timeSection}>
+          <span className={styles.timeText}>
+            {formatTimeDisplay(detail.createdAt, detail.status)}
+          </span>
         </div>
 
-        {/* 요약 + 원문 */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.requestContent || '요청 내용'}</h3>
-          <div className={styles.contentBlock}>
-            <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.summary || '요약'}</span>
-            <p className={styles.contentText}>{detail.summary}</p>
-          </div>
+        {/* 2. Review required 섹션 */}
+        {(() => {
+          const bullets = extractReasoningBullets(detail.reasoning, detail.entities?.reasoning);
+          if (bullets.length === 0) return null;
+          return (
+            <div className={styles.reviewSection}>
+              <h3 className={styles.reviewTitle}>
+                {language === 'en' ? 'Review required' : '검토 필요 사항'}
+              </h3>
+              <div className={styles.bulletList}>
+                {bullets.map((bullet, idx) => (
+                  <div key={idx} className={styles.bulletItem}>
+                    {bullet}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
-        </div>
-
-        {/* 첨부 사진 */}
+        {/* 3. 첨부 사진 */}
         {detail.imageUrl && (
-          <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.photo || '첨부 사진'}</h3>
-            <div className={styles.contentBlock} style={{ textAlign: 'center' }}>
-              <img src={detail.imageUrl} alt={language === 'en' ? 'Attached Photo' : '첨부 사진'} style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', objectFit: 'contain' }} />
-            </div>
-          </div>
-        )}
-
-        {/* AI 분석 결과 */}
-        {((detail.entities && Object.keys(detail.entities).length > 0) || detail.reasoning) && (
-          <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>{t.frontdeskPage?.requestDetailModal?.aiAnalysisView || 'AI 분석 상세 내역'}</h3>
-
-            <div className={styles.aiInfo}>
-              {(() => {
-                if (!detail.entities) return null;
-                // 직원에게 보여줄 필요 없는 키 제외하고 렌더링할 게 있는지 확인
-                const displayableKeys = Object.keys(detail.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k));
-                if (displayableKeys.length === 0) return null;
-
-                return (
-                  <div className={styles.entityList}>
-                    {renderEntities(detail.entities, language)}
-                  </div>
-                );
-              })()}
-              {detail.reasoning && (() => {
-                const cleanedReasoning = detail.reasoning
-                  .replace(/\\n/g, '\n')
-                  .replace(/([^\n])\s*•/g, '$1\n•')
-                  .split('\n')
-                  .map(line => line.trim())
-                  .filter(line => line !== '')
-                  .filter(line => !line.toLowerCase().includes('confidence:'))
-                  .join('\n')
-                  .trim();
-                const formattedConfidence = detail.confidence !== null && detail.confidence !== undefined
-                  ? `${Math.round(detail.confidence * 100)}%`
-                  : '100%';
-                const label = language === 'en' ? 'confidence' : '신뢰도';
-                const displayReasoning = cleanedReasoning
-                  ? `${cleanedReasoning}\n• ${label}: ${formattedConfidence}`
-                  : `• ${label}: ${formattedConfidence}`;
-                return (
-                  <div className={styles.contentBlock}>
-                    <span className={styles.label}>{t.frontdeskPage?.requestDetailModal?.reasoning || (language === 'en' ? 'Reason' : '사유')}</span>
-                    <p className={styles.rawText}>{displayReasoning}</p>
-                  </div>
-                );
-              })()}
+          <div className={styles.photoSection}>
+            <h3 className={styles.photoTitle}>{language === 'en' ? 'Attached Photo' : '첨부 사진'}</h3>
+            <div className={styles.photoBox}>
+              <img src={detail.imageUrl} alt={language === 'en' ? 'Attached Photo' : '첨부 사진'} className={styles.photoImg} />
             </div>
           </div>
         )}
