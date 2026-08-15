@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { History } from 'lucide-react';
 import styles from './RequestDetailModal.module.css';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
@@ -15,6 +16,7 @@ import RejectCancellationModal from '../RejectCancellationModal/RejectCancellati
 import useApproveEscalation from '../ApproveEscalationModal/useApproveEscalation';
 import useRequestDetail from './useRequestDetail';
 import ManualAssignModal from '../ManualAssignModal/ManualAssignModal';
+import ChatHistoryModal from '@/app/staff/_components/TaskDetailModal/ChatHistoryModal';
 import { useTranslation } from '@/app/useTranslation';
 import { useTranslationApi } from '@/app/useTranslationApi';
 import { useRouter } from 'next/navigation';
@@ -311,22 +313,17 @@ export default function RequestDetailModal({
     cancelRequestedAt: null,
   } : null);
 
-  const [editPriority, setEditPriority] = useState('');
-  const [editDeptId, setEditDeptId] = useState('');
+  const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
+  const [showManualAssign, setShowManualAssign] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const { showToast } = useUiStore();
+  const { t, language } = useTranslation();
+  const { translatedText: translatedSummary } = useTranslationApi(activeDetail?.summary, language);
+
+  const [editPriority, setEditPriority] = useState(activeDetail?.priority || 'NORMAL');
+  const [editDeptId, setEditDeptId] = useState(activeDetail?.departmentId || 'HK');
   const [saving, setSaving] = useState(false);
   const [confirmType, setConfirmType] = useState<'none' | 'cancel' | 'approve' | 'reject' | 'cancelApprove' | 'cancelReject'>('none');
-  const [showManualAssign, setShowManualAssign] = useState(false);
-  const showToast = useUiStore((s) => s.showToast);
-
-  const { t, language } = useTranslation();
-  const { translatedText: translatedSummary, isLoading: isTranslating } = useTranslationApi(activeDetail?.summary, language);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchDetail(requestId);
-    }
-  }, [isOpen, requestId]);
 
   useEffect(() => {
     if (activeDetail) {
@@ -334,6 +331,12 @@ export default function RequestDetailModal({
       setEditDeptId(activeDetail.departmentId);
     }
   }, [activeDetail]);
+
+  useEffect(() => {
+    if (isOpen && requestId) {
+      fetchDetail(requestId);
+    }
+  }, [isOpen, requestId, fetchDetail]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -376,7 +379,6 @@ export default function RequestDetailModal({
     }
 
     if (editDeptId !== activeDetail.departmentId) {
-      // 프론트데스크(관리자)는 즉시 부서 배정, 타부서(직원)는 이관 요청(승인 대기)
       const deptChangeOk = callerDepartment === 'FRONT'
         ? await changeDepartment(activeDetail.id, editDeptId)
         : await requestEscalation(activeDetail.id, editDeptId);
@@ -399,7 +401,6 @@ export default function RequestDetailModal({
       if (ok) changed = true;
     }
 
-    // 항상 배정/저장 API를 호출하여 태스크 티켓이 발행되도록 보장
     if (newDeptId) {
       const ok = await changeDepartment(activeDetail.id, newDeptId, newSummary, newDescription);
       if (ok) changed = true;
@@ -419,32 +420,21 @@ export default function RequestDetailModal({
     const ok = await cancelRequest(activeDetail.id);
     setSaving(false);
     if (ok) {
-      showToast('요청이 취소되었습니다.', 'success');
       onUpdate();
       onClose();
-    } else {
-      showToast('요청 취소에 실패했습니다.', 'error');
     }
   };
 
   const handleApproveEscalation = async () => {
     setConfirmType('none');
-
     setSaving(true);
-    // 상세 모달 내에서 직접 승인할 때는 현재 모달에 세팅된 editDeptId와 editPriority 값을 전달합니다.
-    const ok = await approveEscalation(activeDetail.id, editDeptId, editPriority);
+    const ok = await approveEscalation(activeDetail.id, editDeptId);
     setSaving(false);
     if (ok) {
-      showToast('에스컬레이션이 승인되어 재배정 대기 상태가 되었습니다.', 'success');
       onUpdate();
       onClose();
-    } else {
-      showToast('승인 처리에 실패했습니다.', 'error');
     }
   };
-
-
-
 
   const formatTimeDateOrder = (dt: string | Date | undefined) => {
     if (!dt) return '';
@@ -497,7 +487,7 @@ export default function RequestDetailModal({
 
   return (
     <>
-      <ModalOverlay isOpen={isOpen && !showManualAssign} onClose={onClose}>
+      <ModalOverlay isOpen={isOpen && !showManualAssign && !isChatHistoryOpen} onClose={onClose}>
         <ModalCard size="md" overflowVisible={false} onClose={onClose}>
         {/* 헤더 */}
         <div className={styles.header}>
@@ -559,43 +549,54 @@ export default function RequestDetailModal({
 
         {/* 하단 버튼 */}
         <div className={styles.footer}>
-          {activeDetail.status === 'ESCALATED' && (
-            <>
-              <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-                {t.frontdeskPage.requestDetailModal.buttons.rejectEscalation}
-              </Button>
-              <Button className={styles.footerButton} variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
-                {t.frontdeskPage.requestDetailModal.buttons.approveEscalation}
-              </Button>
-            </>
-          )}
+          <button
+            type="button"
+            className={styles.chatHistoryBtn}
+            onClick={() => setIsChatHistoryOpen(true)}
+          >
+            <History size={16} />
+            <span>{language === 'en' ? 'Chat History' : '대화 내역'}</span>
+          </button>
 
-          {activeDetail.cancelRequested && (
-            <>
-              <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-                {t.frontdeskPage.requestDetailModal.buttons.rejectCancel}
-              </Button>
-              <Button className={styles.footerButton} variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
-                {t.frontdeskPage.requestDetailModal.buttons.approveCancel}
-              </Button>
-            </>
-          )}
-
-          {!activeDetail.cancelRequested && activeDetail.status !== 'ESCALATED' && activeDetail.status !== 'COMPLETED' && activeDetail.status !== 'CANCELLED' && (
-            <>
-              <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
-                {t.frontdeskPage.requestDetailModal.buttons.forceCancel}
-              </Button>
-              <Button className={styles.footerButton} variant="primary" onClick={() => setShowManualAssign(true)}>
-                {language === 'en' ? 'Assign Task' : '업무 배정'}
-              </Button>
-              {hasChanges && (
-                <Button className={styles.footerButton} variant="primary" onClick={handleSave} disabled={saving || loading}>
-                  {saving ? t.frontdeskPage.requestDetailModal.buttons.saving : t.frontdeskPage.requestDetailModal.buttons.save}
+          <div className={styles.footerRight}>
+            {activeDetail.status === 'ESCALATED' && (
+              <>
+                <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+                  {t.frontdeskPage.requestDetailModal.buttons.rejectEscalation}
                 </Button>
-              )}
-            </>
-          )}
+                <Button className={styles.footerButton} variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
+                  {t.frontdeskPage.requestDetailModal.buttons.approveEscalation}
+                </Button>
+              </>
+            )}
+
+            {activeDetail.cancelRequested && (
+              <>
+                <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+                  {t.frontdeskPage.requestDetailModal.buttons.rejectCancel}
+                </Button>
+                <Button className={styles.footerButton} variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
+                  {t.frontdeskPage.requestDetailModal.buttons.approveCancel}
+                </Button>
+              </>
+            )}
+
+            {!activeDetail.cancelRequested && activeDetail.status !== 'ESCALATED' && activeDetail.status !== 'COMPLETED' && activeDetail.status !== 'CANCELLED' && (
+              <>
+                <Button className={styles.footerButton} variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
+                  {t.frontdeskPage.requestDetailModal.buttons.forceCancel}
+                </Button>
+                <Button className={styles.footerButton} variant="primary" onClick={() => setShowManualAssign(true)}>
+                  {language === 'en' ? 'Assign Task' : '업무 배정'}
+                </Button>
+                {hasChanges && (
+                  <Button className={styles.footerButton} variant="primary" onClick={handleSave} disabled={saving || loading}>
+                    {saving ? t.frontdeskPage.requestDetailModal.buttons.saving : t.frontdeskPage.requestDetailModal.buttons.save}
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </ModalCard>
     </ModalOverlay>
@@ -671,6 +672,12 @@ export default function RequestDetailModal({
         saving={saving}
       />
     )}
+
+    <ChatHistoryModal
+      isOpen={isChatHistoryOpen}
+      onClose={() => setIsChatHistoryOpen(false)}
+      roomNumber={String(activeDetail.roomNo)}
+    />
   </>
 );
 }

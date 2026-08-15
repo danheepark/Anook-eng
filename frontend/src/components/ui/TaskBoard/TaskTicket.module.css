@@ -129,8 +129,15 @@
 
 .headerRight {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.statusRow {
+  display: flex;
   gap: var(--space-8);
+  align-items: center;
 }
 
 .ticketMeta {
@@ -227,7 +234,7 @@
 
 .footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-top: auto;
   width: 100%;

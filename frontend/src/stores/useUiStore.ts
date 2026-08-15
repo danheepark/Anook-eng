@@ -11,6 +11,10 @@ interface UiState {
   hasNewFrontdeskMessage: boolean;
   setHasNewFrontdeskMessage: (val: boolean) => void;
 
+  // Header title
+  headerTitle: string | null;
+  setHeaderTitle: (title: string | null) => void;
+
   // Toast properties
   isToastOpen: boolean;
   toastMessage: string;
@@ -44,6 +48,9 @@ export const useUiStore = create<UiState>()(
 
       hasNewFrontdeskMessage: false,
       setHasNewFrontdeskMessage: (val) => set({ hasNewFrontdeskMessage: val }),
+
+      headerTitle: null,
+      setHeaderTitle: (title) => set({ headerTitle: title }),
 
       isToastOpen: false,
       toastMessage: '',

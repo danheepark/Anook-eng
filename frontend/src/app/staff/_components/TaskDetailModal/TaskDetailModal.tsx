@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { History } from 'lucide-react';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import Button from '@/components/ui/Button/Button';
-import Dropdown from '@/components/ui/Dropdown/Dropdown';
-import InputField from '@/components/ui/Inputfield/InputField';
 import styles from './TaskDetailModal.module.css';
 import { StaffTask } from '../../useTasks';
 import { useUiStore } from '@/stores/useUiStore';
@@ -14,12 +14,6 @@ import { useTranslation } from '@/app/useTranslation';
 import { useTranslationApi } from '@/app/useTranslationApi';
 import ChatHistoryModal from './ChatHistoryModal';
 import ManualAssignModal from '@/app/frontdesk/requests/_components/ManualAssignModal/ManualAssignModal';
-
-interface ChatMsg {
-  id: number | string;
-  senderType: string;
-  content: string;
-}
 
 interface TaskDetailModalProps {
   isOpen: boolean;
@@ -33,11 +27,11 @@ interface TaskDetailModalProps {
 }
 
 const DEPARTMENTS = [
-  { id: 'HK', nameEn: 'Housekeeping', nameKo: '하우스키핑' },
-  { id: 'FACILITY', nameEn: 'Facility', nameKo: '시설관리' },
-  { id: 'FB', nameEn: 'F&B', nameKo: '식음료' },
-  { id: 'FRONT', nameEn: 'Front Desk', nameKo: '프론트데스크' },
-  { id: 'CONCIERGE', nameEn: 'Concierge', nameKo: '컨시어지' }
+  { id: 'HK', nameEn: 'Housekeeping', nameKo: '하우스키핑', name: 'Housekeeping' },
+  { id: 'FACILITY', nameEn: 'Facility', nameKo: '시설관리', name: 'Facility' },
+  { id: 'FB', nameEn: 'F&B', nameKo: '식음료', name: 'F&B' },
+  { id: 'FRONT', nameEn: 'Front Desk', nameKo: '프론트데스크', name: 'Front Desk' },
+  { id: 'CONCIERGE', nameEn: 'Concierge', nameKo: '컨시어지', name: 'Concierge' }
 ];
 
 const ENTITY_LABELS_KO: Record<string, string> = {
@@ -48,7 +42,6 @@ const ENTITY_LABELS_KO: Record<string, string> = {
   item: '대상 물품', time: '시간', special_requests: '추가 요청', count: '수량',
   type: '유형', target: '대상', special_notes: 'PMS 특이사항 노트',
   pms_allergen_warning: '⚠️ 알레르기 안전 경고 (고객 확인 완료)',
-  reasoning: '사유',
 };
 
 const ENTITY_LABELS_EN: Record<string, string> = {
@@ -59,22 +52,137 @@ const ENTITY_LABELS_EN: Record<string, string> = {
   item: 'Item', time: 'Time', special_requests: 'Special Requests', count: 'Quantity',
   type: 'Type', target: 'Target', special_notes: 'PMS Special Notes',
   pms_allergen_warning: '⚠️ Allergen Warning (Guest Confirmed)',
-  reasoning: 'Reason',
 };
 
-/** 직원에게 보여줄 필요 없는 내부 키 (섹션 표시 판단 + 순회에서 모두 제외) */
-const HIDDEN_ENTITY_KEYS = new Set(['intent', 'allergen_warning', 'item_requests', 'service_requests']);
+/** 직원에게 보여줄 필요 없는 내부 키 */
+const HIDDEN_ENTITY_KEYS = new Set([
+  'intent', 'allergen_warning', 'item_requests', 'service_requests',
+  'reasoning', 'target_time', 'tasks', 'task'
+]);
 
-/** 배열 타입 특수 렌더러가 필요한 키 (key-value 순회에서만 스킵, 섹션 표시 판단에서는 포함) */
-const ARRAY_KEYS = new Set(['items', 'tasks', 'menu_items']);
+/** 배열 타입 특수 렌더러가 필요한 키 */
+const ARRAY_KEYS = new Set(['items', 'menu_items']);
+
+interface TaskReasoningItem {
+  label: string;
+  content: string;
+}
+
+const cleanTitleSummary = (text?: string) => {
+  if (!text) return '';
+  return text
+    .replace(/\s+at\s+\d{1,2}:\d{2}(\s*(?:AM|PM|am|pm))?/gi, '')
+    .replace(/\s+at\s+\d{1,2}\s*(?:AM|PM|am|pm)/gi, '')
+    .trim();
+};
+
+const extractTaskReasoningItems = (
+  reasoningStr?: string | null,
+  entitiesReasoning?: any,
+  deptId?: string,
+  deptName?: string,
+  lang: string = 'en',
+  targetTime?: string
+): TaskReasoningItem[] => {
+  const raw = reasoningStr || entitiesReasoning || '';
+  if (!raw) return [];
+
+  const rawLines = String(raw)
+    .replace(/\\n/g, '\n')
+    .replace(/([^\n])\s*([•·\*\-])\s+/g, '$1\n$2 ')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line !== '' && !line.toLowerCase().includes('confidence:'));
+
+  const cleanedLines = rawLines.map(line => {
+    let clean = line.replace(/^[•·\*\-]\s*/, '').trim();
+    clean = clean.replace(/^What the guest requested:\s*/i, '').trim();
+    clean = clean.replace(/^Guest request:\s*/i, '').trim();
+    clean = clean.replace(/^Why this task belongs to [^:]+:\s*/i, '').trim();
+    clean = clean.replace(/^Operational context:\s*/i, '').trim();
+    clean = clean.replace(/^Special considerations:\s*/i, '').trim();
+    clean = clean.replace(/^고객 요청 내용:\s*/i, '').trim();
+    clean = clean.replace(/^고객 요청:\s*/i, '').trim();
+    clean = clean.replace(/^배정 사유:\s*/i, '').trim();
+    clean = clean.replace(/^특이사항:\s*/i, '').trim();
+    return clean;
+  }).filter(line => {
+    if (!line) return false;
+    const lower = line.toLowerCase();
+    // 1) 'Why this task belongs to [department]' 등 당연한 부서 배정 설명 제외
+    if (
+      lower.includes('falls under') ||
+      lower.includes('belongs to') ||
+      lower.includes('is handled by') ||
+      lower.includes('responsibilities') ||
+      lower.includes('responsibility') ||
+      lower.includes('배정 사유') ||
+      lower.includes('부서 업무')
+    ) {
+      return false;
+    }
+    // 2) 'The request is clear and does not require...' 등 무의미한 filler 문장 제외
+    if (
+      lower.includes('does not require additional') ||
+      lower.includes('no additional operational context') ||
+      lower.includes('no additional context') ||
+      lower.includes('standard operational procedure') ||
+      lower.includes('no special requirements') ||
+      lower.includes('no special operational') ||
+      lower === 'none' ||
+      lower === 'none.'
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  if (cleanedLines.length === 0) return [];
+
+  const items: TaskReasoningItem[] = [];
+
+  // 1st: Guest request (간결하게 정제)
+  if (cleanedLines[0]) {
+    let text = cleanedLines[0];
+    if (text.toLowerCase().startsWith('the guest requested')) {
+      text = text.replace(/^the guest requested (a |an |to |for )?/i, '').trim();
+      if (text.endsWith('.')) text = text.slice(0, -1).trim();
+      if (targetTime && text.toLowerCase().includes('at a specific time')) {
+        text = text.replace(/at a specific time/i, `at ${targetTime}`);
+      }
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+    }
+    items.push({
+      label: lang === 'ko' ? '고객 요청' : 'Guest request',
+      content: text,
+    });
+  }
+
+  // 2nd: Operational context (의미 있는 특이사항이 있을 때만 표시)
+  if (cleanedLines[1]) {
+    items.push({
+      label: lang === 'ko' ? '특이사항' : 'Operational context',
+      content: cleanedLines[1],
+    });
+  }
+
+  // 3rd+: Additional info
+  for (let i = 2; i < cleanedLines.length; i++) {
+    items.push({
+      label: lang === 'ko' ? `추가 정보 ${i - 1}` : `Additional info ${i - 1}`,
+      content: cleanedLines[i],
+    });
+  }
+
+  return items;
+};
 
 function renderEntities(entities: Record<string, any>, language: string): React.ReactNode {
   const rendered: React.ReactNode[] = [];
 
-  // 0) 정규화: item 키 단독 혹은 item+count 플랫 키 → items 배열로 통일 (AI 응답 형식 불일치 보정)
+  // 0) 정규화: item 키 단독 혹은 item+count 플랫 키 → items 배열로 통일
   if (entities.item && !entities.items?.length) {
     entities = { ...entities, items: [{ item: entities.item, count: entities.count || 1 }] };
-    // 플랫 키는 items로 흡수되었으므로 제거 (중복 표시 방지)
     delete entities.item;
     delete entities.count;
   }
@@ -82,80 +190,44 @@ function renderEntities(entities: Record<string, any>, language: string): React.
   // 1) 배열 타입 특수 렌더링
   if (entities.items?.length > 0) {
     rendered.push(
-      <div key="items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>{language === 'en' ? 'Item Request' : '물품 요청'}</span>
-        <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-          {entities.items.map((it: any, idx: number) => {
+      <div key="items" className={styles.reasoningItem}>
+        <span className={styles.secondaryLabel}>{language === 'en' ? 'Item Request' : '물품 요청'}</span>
+        <p className={styles.reasoningText}>
+          {entities.items.map((it: any) => {
             const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
-            return <li key={idx}>• {itemText} - {it.count}{language === 'en' ? ' ea' : '개'}</li>;
-          })}
-        </ul>
-      </div>
-    );
-  }
-  if (entities.tasks?.length > 0) {
-    rendered.push(
-      <div key="tasks" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>{language === 'en' ? 'Task Request' : '수행 업무'}</span>
-        <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-          {entities.tasks.map((t: string, idx: number) => (
-            <li key={idx}>• {t}</li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-  if (entities.menu_items?.length > 0) {
-    rendered.push(
-      <div key="menu_items" className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-        <span className={styles.label}>{language === 'en' ? 'Order Menu' : '주문 메뉴'}</span>
-        <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-          {entities.menu_items.map((mi: any, idx: number) => (
-            <li key={idx}>
-              • {mi.name} {mi.quantity}{language === 'en' ? ' ea' : '개'}
-              {mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'none' ? ` (${mi.selected_option})` : ''}
-            </li>
-          ))}
-        </ul>
+            return `${itemText} x${it.count}`;
+          }).join(', ')}
+        </p>
       </div>
     );
   }
 
-  // 2) 단순 key-value: 라벨 매핑에 있으면 언어별, 없으면 영문 키 그대로 (폴백)
+  if (entities.menu_items?.length > 0) {
+    rendered.push(
+      <div key="menu_items" className={styles.reasoningItem}>
+        <span className={styles.secondaryLabel}>{language === 'en' ? 'Order Menu' : '주문 메뉴'}</span>
+        <p className={styles.reasoningText}>
+          {entities.menu_items.map((mi: any) => {
+            const opt = mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'none' ? ` (${mi.selected_option})` : '';
+            return `${mi.name}${opt} x${mi.quantity}`;
+          }).join(', ')}
+        </p>
+      </div>
+    );
+  }
+
+  // 2) 단순 key-value
   for (const [key, value] of Object.entries(entities)) {
     if (HIDDEN_ENTITY_KEYS.has(key) || ARRAY_KEYS.has(key)) continue;
     if (value === null || value === undefined || value === '' || value === false || value === '없음' || value === 'none') continue;
 
     const label = language === 'en' ? (ENTITY_LABELS_EN[key] || key) : (ENTITY_LABELS_KO[key] || key);
 
-    if (key === 'reasoning') {
-      const rawVal = String(value);
-      const bulletLines = rawVal
-        .replace(/\\n/g, '\n')
-        .replace(/([^\n])\s*•/g, '$1\n•')
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line !== '')
-        .map(line => line.startsWith('•') ? line : `• ${line}`);
-
-      rendered.push(
-        <div key={key} className={styles.contentBlock} style={{ marginBottom: '12px' }}>
-          <span className={styles.label}>{label}</span>
-          <div className={styles.value} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {bulletLines.map((line, idx) => (
-              <div key={idx}>{line}</div>
-            ))}
-          </div>
-        </div>
-      );
-      continue;
-    }
-
-    // boolean 타입 (is_contactless 등) 은 뱃지로 표시
     if (value === true) {
       rendered.push(
-        <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
-          <span className={styles.label}>{label}</span>
+        <div key={key} className={styles.reasoningItem}>
+          <span className={styles.secondaryLabel}>{label}</span>
+          <p className={styles.reasoningText}>✓</p>
         </div>
       );
     } else {
@@ -164,15 +236,15 @@ function renderEntities(entities: Record<string, any>, language: string): React.
         : String(value);
 
       rendered.push(
-        <div key={key} className={styles.contentBlock} style={{ marginBottom: '8px' }}>
-          <span className={styles.label}>{label}</span>
-          <span className={styles.value}>{displayValue}</span>
+        <div key={key} className={styles.reasoningItem}>
+          <span className={styles.secondaryLabel}>{label}</span>
+          <p className={styles.reasoningText}>{displayValue}</p>
         </div>
       );
     }
   }
 
-  return rendered.length > 0 ? rendered : <span>{language === 'en' ? 'No analysis data' : '분석 데이터 없음'}</span>;
+  return rendered;
 }
 
 export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onComplete, onTransfer, onApproveCancellation, onRejectCancellation }: TaskDetailModalProps) {
@@ -182,7 +254,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
   const { showToast } = useUiStore();
   const isOnline = useNetworkStore((state) => state.isOnline);
   const { t, language } = useTranslation();
-  const { translatedText: translatedSummary, isLoading: isTranslating } = useTranslationApi(task?.summary, language);
+  const { translatedText: translatedSummary } = useTranslationApi(task?.summary, language);
 
   if (!isOpen || !task) return null;
 
@@ -198,7 +270,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
         await onAccept(task.id, task.version);
         handleClose();
       } catch (err) {
-        showToast(err instanceof Error ? err.message : '요청 수락 중 오류가 발생했습니다.', 'error');
+        showToast(err instanceof Error ? err.message : (language === 'en' ? 'An error occurred while accepting task.' : '요청 수락 중 오류가 발생했습니다.'), 'error');
         handleClose();
       } finally {
         setIsSubmitting(false);
@@ -254,131 +326,159 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
     }
   };
 
-  const d = new Date(task.createdAt);
-  const formattedDate = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  // 날짜/시간 포맷팅
+  const formatTimeDateOrder = (dateString: string | Date | undefined): string => {
+    if (!dateString) return '';
+    const d = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
+    if (isNaN(d.getTime())) return '';
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const paddedHours = String(hours).padStart(2, '0');
+    return `${paddedHours}:${minutes} ${ampm}, ${yyyy}.${mm}.${dd}`;
+  };
+
+  const getRelativeTimeString = (dateString: string | Date | undefined): string => {
+    if (!dateString) return '';
+    const date = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
+    if (isNaN(date.getTime())) return '';
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 0) {
+      return `${diffDays}${language === 'en' ? ' ' : ''}${language === 'ko' ? '일 전' : 'days ago'}`;
+    } else if (diffHours > 0) {
+      return `${diffHours}${language === 'en' ? ' ' : ''}${language === 'ko' ? '시간 전' : 'hrs ago'}`;
+    } else if (diffMins > 0) {
+      return `${diffMins}${language === 'en' ? ' ' : ''}${language === 'ko' ? '분 전' : 'mins ago'}`;
+    } else {
+      return language === 'ko' ? '방금 전' : 'Just now';
+    }
+  };
+
+  const formatModalDateTime = (dt: string | undefined, isCompleted: boolean) => {
+    if (!dt) return '';
+    if (isCompleted) {
+      return formatTimeDateOrder(dt);
+    }
+    return getRelativeTimeString(dt);
+  };
+
+  const STATUS_VARIANT_MAP: Record<string, 'red' | 'purple' | 'green' | 'gray'> = {
+    PENDING: 'red',
+    ASSIGNED: 'purple',
+    IN_PROGRESS: 'green',
+    COMPLETED: 'gray',
+    CANCELLED: 'gray',
+    ESCALATED: 'red',
+  };
+
+  // 상태 뱃지 매핑
+  const getStatusInfo = (status: string, priority: string) => {
+    if (priority === 'URGENT') return { variant: 'red' as const, text: language === 'en' ? 'URGENT' : '긴급' };
+    const variant = STATUS_VARIANT_MAP[status] || 'gray';
+    switch (status) {
+      case 'PENDING':
+        return { variant, text: language === 'en' ? 'Pending' : '대기중' };
+      case 'ASSIGNED':
+        return { variant, text: language === 'en' ? 'Assigned' : '배정됨' };
+      case 'IN_PROGRESS':
+        return { variant, text: language === 'en' ? 'In Progress' : '진행중' };
+      case 'COMPLETED':
+        return { variant, text: language === 'en' ? 'Completed' : '완료' };
+      case 'CANCELLED':
+        return { variant, text: language === 'en' ? 'Cancelled' : '취소' };
+      case 'ESCALATED':
+        return { variant, text: language === 'en' ? 'Escalated' : '에스컬레이션' };
+      default:
+        return { variant, text: status };
+    }
+  };
+
+  const statusInfo = getStatusInfo(task.status, task.priority);
+  const roomPrefix = language === 'ko' ? `${task.roomNumber}호` : `NO.${task.roomNumber}`;
+  const rawSummary = translatedSummary || task.summary;
+  const cleanSummary = cleanTitleSummary(rawSummary);
+  const modalTitle = cleanSummary ? `${roomPrefix} ${cleanSummary}` : roomPrefix;
 
   const rawTextParts = task.rawText ? task.rawText.split('\n|||TRANSFER_REASON|||') : [];
   const transferReasonText = rawTextParts.length > 1 ? rawTextParts.slice(1).join('\n').trim() : null;
-
-  const openChatHistory = () => {
-    setIsChatHistoryOpen(true);
-  };
 
   return (
     <>
       <ModalOverlay isOpen={isOpen && !isManualAssignOpen && !isChatHistoryOpen} onClose={handleClose}>
         <ModalCard size="md" overflowVisible={false} onClose={handleClose}>
           <div className={styles.container}>
+            {/* 1. 헤더 */}
             <div className={styles.header}>
-              <div className={styles.headerTitleRow}>
-                <span className={styles.roomBadge}>
-                  {language === 'ko' ? `${task.roomNumber}호` : `NO.${task.roomNumber}`}
-                </span>
-                <h2 className={styles.title}>{task.summary}</h2>
-                {task.priority === 'URGENT' && (
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
-                    <StatusBadge variant="red">{language === 'en' ? 'URGENT' : '긴급'}</StatusBadge>
-                  </div>
+              <div className={styles.headerTop}>
+                <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
+                {task.cancelRequested && (
+                  <StatusBadge variant="red">
+                    {language === 'en' ? 'Cancellation Requested' : '고객 취소 요청'}
+                  </StatusBadge>
                 )}
               </div>
-              
-              {task.cancelRequested && (
-                <div className={styles.cancelAlertBox}>
-                  <strong>{language === 'en' ? 'Guest Cancellation Request' : '고객 취소 요청'}</strong>
-                  <p>
-                    {language === 'en' 
-                      ? 'The guest has requested cancellation. Please review and respond.' 
-                      : '고객이 취소를 요청했습니다. 내용을 확인하고 승인/반려를 선택해주세요.'}
+              <h2 className={styles.title}>{modalTitle}</h2>
+            </div>
+
+            {/* 2. 본문 */}
+            <div className={styles.modalBody}>
+              {/* Created at 일시 */}
+              {task.createdAt && (
+                <div className={styles.reasoningItem}>
+                  <span className={styles.secondaryLabel}>
+                    {language === 'ko' ? '요청 일시' : 'Created at'}
+                  </span>
+                  <p className={styles.reasoningText}>
+                    {formatModalDateTime(task.createdAt, task.status === 'COMPLETED')}
                   </p>
                 </div>
               )}
-            </div>
 
-            <div className={styles.content}>
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>{language === 'en' ? 'Request Time' : '요청 시간'}</span>
-                <span className={styles.infoValue}>{formattedDate}</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>{language === 'en' ? 'Status' : '상태'}</span>
-                <span className={styles.infoValue}>
-                  {task.cancelRequested ? (language === 'en' ? 'Cancel Pending' : '취소 대기중') :
-                   task.status === 'PENDING' ? t.cardUI.status.pending :
-                   task.status === 'IN_PROGRESS' ? t.cardUI.status.inProgress :
-                   task.status === 'COMPLETED' ? t.cardUI.status.completedMark :
-                   task.status === 'CANCELLED' ? t.cardUI.status.cancelled : task.status}
-                </span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>{language === 'en' ? 'Department' : '부서'}</span>
-                <span className={styles.infoValue}>
-                  {(() => {
-                    const d = DEPARTMENTS.find(dept => dept.id === task.departmentId);
-                    if (!d) return task.departmentId;
-                    return language === 'en' ? d.nameEn : d.nameKo;
-                  })()}
-                </span>
-              </div>
+              {/* AI 분석 엔티티 (Item Requests, Order Menu 등) */}
+              {task.entities && renderEntities(task.entities, language)}
 
-              {/* AI 분석 상세 내역 — summary + entities + reasoning */}
-              {(task.entities && Object.keys(task.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k)).length > 0) || task.reasoning ? (
-                <div className={styles.descriptionSection}>
-                  <div className={styles.sectionHeader}>
-                    <h3 className={styles.descriptionTitle}>{language === 'en' ? 'AI Analysis Details' : 'AI 분석 상세 내역'}</h3>
-                    <button
-                      className={styles.chatHistoryIconButton}
-                      onClick={openChatHistory}
-                      title={language === 'en' ? 'View Chat History' : '대화 내역 보기'}
-                      aria-label={language === 'en' ? 'View Chat History' : '대화 내역 보기'}
-                    >
-                      <History size={20} />
-                    </button>
+              {/* Reasoning (Task Ticket 전용 구조화 렌더링) */}
+              {(() => {
+                const items = extractTaskReasoningItems(
+                  task.reasoning,
+                  task.entities?.reasoning,
+                  task.departmentId,
+                  undefined,
+                  language,
+                  task.entities?.target_time
+                );
+                if (items.length === 0) return null;
+                return items.map((item, idx) => (
+                  <div key={idx} className={styles.reasoningItem}>
+                    <span className={styles.secondaryLabel}>{item.label}</span>
+                    <p className={styles.reasoningText}>{item.content}</p>
                   </div>
-                  <div className={styles.descriptionBox}>
-                    {task.entities && Object.keys(task.entities).filter(k => !HIDDEN_ENTITY_KEYS.has(k)).length > 0 && (
-                      <div className={styles.entityList}>
-                        {renderEntities(task.entities, language)}
-                      </div>
-                    )}
-                    {task.reasoning && !task.entities?.reasoning && (() => {
-                      const bulletLines = task.reasoning
-                        .replace(/\\n/g, '\n')
-                        .replace(/([^\n])\s*•/g, '$1\n•')
-                        .split('\n')
-                        .map(line => line.trim())
-                        .filter(line => line !== '')
-                        .filter(line => !line.toLowerCase().includes('confidence:'))
-                        .map(line => line.startsWith('•') ? line : `• ${line}`);
-                      
-                      if (bulletLines.length === 0) return null;
-                      
-                      return (
-                        <div className={styles.contentBlock} style={{ marginTop: '12px' }}>
-                          <span className={styles.label}>{language === 'en' ? 'Reason' : '사유'}</span>
-                          <div className={styles.value} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {bulletLines.map((line, idx) => (
-                              <div key={idx}>{line}</div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-              ) : null}
+                ));
+              })()}
 
+              {/* 첨부 사진 */}
               {task.imageUrl && (
-                <div className={styles.descriptionSection}>
-                  <h3 className={styles.descriptionTitle}>{language === 'en' ? 'Attached Photo' : '첨부 사진'}</h3>
-                  <div className={styles.descriptionBox} style={{ textAlign: 'center' }}>
-                    <img src={task.imageUrl} alt={language === 'en' ? 'Attached Photo' : '첨부 사진'} style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', objectFit: 'contain' }} />
+                <div className={styles.photoSection}>
+                  <h3 className={styles.photoTitle}>{language === 'en' ? 'Attached Photo' : '첨부 사진'}</h3>
+                  <div className={styles.photoBox}>
+                    <img src={task.imageUrl} alt={language === 'en' ? 'Attached Photo' : '첨부 사진'} className={styles.photoImg} />
                   </div>
                 </div>
               )}
 
+              {/* 업무 전달 사유 */}
               {transferReasonText && (
-                <div className={styles.descriptionSection}>
-                  <h3 className={styles.descriptionTitle}>{language === 'en' ? 'Transfer Reason' : '업무 전달 사유'}</h3>
+                <div className={styles.reasoningItem}>
+                  <span className={styles.secondaryLabel}>{language === 'en' ? 'Transfer Reason' : '업무 전달 사유'}</span>
                   <div className={styles.transferReasonBox}>
                     {transferReasonText}
                   </div>
@@ -386,64 +486,76 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
               )}
             </div>
 
+            {/* 3. 푸터 버튼 */}
             <div className={styles.footer}>
-              {task.status === 'PENDING' && (
-                <>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setIsManualAssignOpen(true)}
-                    className={styles.actionButton}
-                    disabled={isSubmitting || !isOnline}
-                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                  >
-                    {language === 'en' ? 'Assign Task' : '업무 배정'}
-                  </Button>
+              <button
+                type="button"
+                className={styles.chatHistoryBtn}
+                onClick={() => setIsChatHistoryOpen(true)}
+              >
+                <History size={16} />
+                <span>{language === 'en' ? 'Chat History' : '대화 내역'}</span>
+              </button>
+
+              <div className={styles.footerRight}>
+                {task.status === 'PENDING' && (
+                  <>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setIsManualAssignOpen(true)}
+                      className={styles.actionButton}
+                      disabled={isSubmitting || !isOnline}
+                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                    >
+                      {language === 'en' ? 'Assign Task' : '업무 배정'}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={handleAccept}
+                      className={styles.actionButton}
+                      disabled={isSubmitting || !isOnline}
+                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                    >
+                      {language === 'en' ? 'Accept Task' : '업무 수락'}
+                    </Button>
+                  </>
+                )}
+
+                {task.status === 'IN_PROGRESS' && !task.cancelRequested && onComplete && (
                   <Button
                     variant="primary"
-                    onClick={handleAccept}
+                    onClick={handleComplete}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
                     title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    {language === 'en' ? 'Accept Task' : '업무 수락'}
+                    {language === 'en' ? 'Complete Task' : '업무 완료'}
                   </Button>
-                </>
-              )}
+                )}
 
-              {task.status === 'IN_PROGRESS' && !task.cancelRequested && onComplete && (
-                <Button
-                  variant="primary"
-                  onClick={handleComplete}
-                  className={styles.actionButton}
-                  disabled={isSubmitting || !isOnline}
-                  title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                >
-                  {language === 'en' ? 'Complete Task' : '업무 완료'}
-                </Button>
-              )}
-
-              {task.status === 'IN_PROGRESS' && task.cancelRequested && (
-                <>
-                  <Button
-                    variant="secondary"
-                    onClick={handleRejectCancellation}
-                    className={styles.actionButton}
-                    disabled={isSubmitting || !isOnline}
-                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                  >
-                    {language === 'en' ? 'Reject' : '취소 반려'}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={handleApproveCancellation}
-                    className={styles.actionButton}
-                    disabled={isSubmitting || !isOnline}
-                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                  >
-                    {language === 'en' ? 'Approve' : '취소 승인'}
-                  </Button>
-                </>
-              )}
+                {task.status === 'IN_PROGRESS' && task.cancelRequested && (
+                  <>
+                    <Button
+                      variant="secondary"
+                      onClick={handleRejectCancellation}
+                      className={styles.actionButton}
+                      disabled={isSubmitting || !isOnline}
+                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                    >
+                      {language === 'en' ? 'Reject' : '취소 반려'}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={handleApproveCancellation}
+                      className={styles.actionButton}
+                      disabled={isSubmitting || !isOnline}
+                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                    >
+                      {language === 'en' ? 'Approve' : '취소 승인'}
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </ModalCard>
@@ -480,11 +592,11 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
             try {
               const reason = `${editSummary || ''}${editDescription ? '\n' + editDescription : ''}`;
               await onTransfer(task.id, task.version, editDeptId, reason);
-              showToast('업무 배정이 완료되었습니다.', 'success');
+              showToast(language === 'en' ? 'Task reassigned successfully.' : '업무 배정이 완료되었습니다.', 'success');
               setIsManualAssignOpen(false);
               onClose();
             } catch (err) {
-              showToast(err instanceof Error ? err.message : '업무 배정 중 오류가 발생했습니다.', 'error');
+              showToast(err instanceof Error ? err.message : (language === 'en' ? 'An error occurred while reassigning task.' : '업무 배정 중 오류가 발생했습니다.'), 'error');
             } finally {
               setIsSubmitting(false);
             }

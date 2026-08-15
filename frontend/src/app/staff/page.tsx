@@ -10,6 +10,8 @@ import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import TaskDetailModal from './_components/TaskDetailModal/TaskDetailModal';
 import { useTasks, StaffTask } from './useTasks';
 import BoardSkeleton from './_components/BoardSkeleton/BoardSkeleton';
+import HeaderSearchSlot from '@/components/layout/HeaderSearchSlot';
+import { useUiStore } from '@/stores/useUiStore';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 
@@ -85,6 +87,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const view = searchParams.get('view');
   const { tasks, loading, error, acceptTask, completeTask, transferTask, approveCancellation, rejectCancellation } = useTasks(view === 'my' ? 'my' : 'dept');
+  const setHeaderTitle = useUiStore((s) => s.setHeaderTitle);
 
   // 필터 및 모달 상태 관리
   const [searchValue, setSearchValue] = useState('');
@@ -138,6 +141,13 @@ function DashboardContent() {
   const pageTitle = view === 'my'
     ? (staffDashboardT?.myTasks || '내 작업')
     : (staffDashboardT?.allTasks || '{{dept}} 전체 작업').replace('{{dept}}', currentDeptTitle);
+
+  useEffect(() => {
+    setHeaderTitle(pageTitle);
+    return () => {
+      setHeaderTitle(null);
+    };
+  }, [pageTitle, setHeaderTitle]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
@@ -208,48 +218,39 @@ function DashboardContent() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.headerContainer}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>
-            {pageTitle}
-          </h1>
-        </header>
-
-        <div className={styles.toolbar}>
-          <div className={styles.searchBarContainer}>
-          <SmartSearchBar
-            inputWrapperStyle={{ flex: 1 }}
-            value={searchValue}
-            onChange={(val) => {
-              setSearchValue(val);
-              setCurrentMatch(0);
-            }}
-            currentMatch={currentMatch}
-            totalMatches={searchValue ? filteredTasks.length : 0}
-            onPrev={() => {
-              const newIndex = Math.max(0, currentMatch - 1);
-              setCurrentMatch(newIndex);
-              scrollToMatch(newIndex);
-            }}
-            onNext={() => {
-              const newIndex = Math.min(filteredTasks.length - 1, currentMatch + 1);
-              setCurrentMatch(newIndex);
-              scrollToMatch(newIndex);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                if (filteredTasks.length > 0) {
-                  const newIndex = (currentMatch + 1) % filteredTasks.length;
-                  setCurrentMatch(newIndex);
-                  scrollToMatch(newIndex);
-                }
+      <HeaderSearchSlot>
+        <SmartSearchBar
+          inputWrapperStyle={{ width: 260 }}
+          value={searchValue}
+          onChange={(val) => {
+            setSearchValue(val);
+            setCurrentMatch(0);
+          }}
+          placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}
+          currentMatch={currentMatch}
+          totalMatches={searchValue ? filteredTasks.length : 0}
+          onPrev={() => {
+            const newIndex = Math.max(0, currentMatch - 1);
+            setCurrentMatch(newIndex);
+            scrollToMatch(newIndex);
+          }}
+          onNext={() => {
+            const newIndex = Math.min(filteredTasks.length - 1, currentMatch + 1);
+            setCurrentMatch(newIndex);
+            scrollToMatch(newIndex);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (filteredTasks.length > 0) {
+                const nextIndex = (currentMatch + 1) % filteredTasks.length;
+                setCurrentMatch(nextIndex);
+                scrollToMatch(nextIndex);
               }
-            }}
-          />
-        </div>
-        </div>
-      </div>
+            }
+          }}
+        />
+      </HeaderSearchSlot>
 
       {loading ? (
         <BoardSkeleton />

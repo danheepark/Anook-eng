@@ -16,12 +16,13 @@ interface HeaderProps {
 }
 
 export default function Header({ className = '', role = 'frontdesk' }: HeaderProps) {
-  const { toggleSidebar, openModal } = useUiStore();
+  const { toggleSidebar, openModal, headerTitle } = useUiStore();
   const { t } = useTranslation();
   const pathname = usePathname();
 
   // Dynamic Page Title
   const getPageTitle = () => {
+    if (headerTitle) return headerTitle;
     if (pathname === '/frontdesk/requests') return t.frontdeskPage?.sidebar?.menus?.frontDesk || 'Live Chat';
     if (pathname === '/frontdesk/housekeeping') return t.frontdeskPage?.taskBoard?.titles?.housekeeping || 'Housekeeping';
     if (pathname === '/frontdesk/fb') return t.frontdeskPage?.taskBoard?.titles?.fb || 'F&B';

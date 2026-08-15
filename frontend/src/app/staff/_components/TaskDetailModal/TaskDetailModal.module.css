@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-24);
+  gap: var(--space-20);
   width: 100%;
   position: relative;
   box-sizing: border-box;
@@ -11,87 +11,113 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
+  margin-bottom: var(--space-8);
 }
 
-.headerTitleRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.roomBadge {
-  font: var(--text-h2-bold);
-  color: var(--color-gray-900);
-}
-
-.title {
-  font: var(--text-h2-bold);
-  color: var(--color-gray-900);
-  margin: 0;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  padding: var(--space-16) 0;
-}
-
-.infoRow {
+.headerTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-8);
 }
 
-.infoLabel {
-  font: var(--text-body-medium);
+.headerBadges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.title {
+  font: var(--text-h2-bold) !important;
+  color: var(--color-gray-900);
+  margin: 0;
+  word-break: break-word;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: var(--space-12);
+  margin-bottom: var(--space-16);
+}
+
+.reasoningItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.secondaryLabel {
+  font: var(--text-caption-medium);
   color: var(--color-gray-500);
+  letter-spacing: -0.1px;
 }
 
-.infoValue {
-  font: var(--text-body-bold);
+.reasoningText {
+  font: var(--text-body-medium);
+  color: var(--color-gray-800);
+  line-height: 1.5;
+  letter-spacing: -0.1px;
+  margin: 0;
+}
+
+.entityList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: 0;
+  font: var(--text-body-medium);
   color: var(--color-gray-900);
 }
 
-.descriptionSection {
-  margin-top: var(--space-16);
-  padding-top: var(--space-16);
-  border-top: 1px solid var(--color-gray-200);
+.entityItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font: var(--text-body-medium);
+  color: var(--color-gray-800);
+}
+
+.entityItem ul {
+  margin: 0;
+  padding-left: var(--space-20);
+}
+
+.photoSection {
   display: flex;
   flex-direction: column;
   gap: var(--space-12);
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--color-gray-100);
 }
 
-.descriptionTitle {
+.photoTitle {
   font: var(--text-h3-bold);
   color: var(--color-gray-900);
   margin: 0;
 }
 
-.sectionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-12);
+.photoBox {
+  text-align: center;
+  background-color: var(--color-gray-50);
+  padding: var(--space-12);
+  border-radius: var(--radius-md);
 }
 
-.descriptionBox {
-  font: var(--text-body-regular);
-  color: var(--color-gray-800);
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-.orderDetailBox {
-  font: var(--text-body-regular);
-  color: var(--color-gray-800);
-  line-height: 1.5;
-  white-space: pre-wrap;
+.photoImg {
+  max-width: 100%;
+  max-height: 360px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
 }
 
 .transferReasonBox {
-  font: var(--text-body-regular);
+  padding: var(--space-12) var(--space-16);
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+  font: var(--text-body-medium);
   color: var(--color-gray-800);
   line-height: 1.5;
   white-space: pre-wrap;
@@ -99,207 +125,43 @@
 
 .footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: var(--space-12);
   margin-top: var(--space-8);
+  width: 100%;
 }
 
-.closeButton {
-  min-width: 100px;
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-left: auto;
 }
 
 .actionButton {
   min-width: 120px;
-}
-
-.transferForm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  margin-top: var(--space-24);
-  padding-top: var(--space-16);
-  border-top: 1px dashed var(--color-gray-300);
-}
-
-.transferFormGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.transferLabel {
-  font: var(--text-body-bold);
-  color: var(--color-gray-700);
-}
-
-.transferSelect,
-.transferTextarea {
-  width: 100%;
-  padding: var(--space-12);
-  border: 1px solid var(--color-gray-300);
-  border-radius: var(--radius-8, 8px);
-  font: var(--text-body-regular);
-  color: var(--color-gray-900);
-  background-color: white;
-}
-
-.transferSelect:focus,
-.transferTextarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-light, rgba(0, 0, 0, 0.1));
-}
-
-.transferTextarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.transferActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-12);
-  margin-top: var(--space-8);
-}
-
-.cancelAlertBox {
-  margin-top: var(--space-16);
-  padding: var(--space-12) var(--space-16);
-  background-color: var(--color-tag-background-orange, #FFF0E6);
-  border: 1px solid var(--color-tag-text-orange, #FF5F1F);
-  border-radius: var(--radius-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.cancelAlertBox strong {
-  font: var(--text-body-bold);
-  color: var(--color-tag-text-orange, #FF5F1F);
-}
-
-.cancelAlertBox p {
-  font: var(--text-caption-medium);
-  margin: 0;
+  justify-content: center;
 }
 
 .chatHistoryBtn {
-  width: 100%;
-  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: none;
-  border: 1px dashed var(--color-gray-200);
-  border-radius: 8px;
-  color: var(--color-gray-500);
-  font: var(--text-caption-medium);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font: var(--text-body-medium);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-600);
   cursor: pointer;
   transition: all 0.15s ease;
-  text-align: center;
 }
 
 .chatHistoryBtn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background-color: rgba(99, 102, 241, 0.04);
-}
-
-/* ── Inline Chat History View ── */
-.chatHistoryContainer {
-  display: flex;
-  flex-direction: column;
-}
-
-.chatHistoryHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-24);
-  border-bottom: 1px solid var(--color-gray-100);
-  flex-shrink: 0;
-}
-
-.chatHistoryTitle {
-  font: var(--text-body-bold);
+  background-color: var(--color-gray-50);
+  border-color: var(--color-gray-300);
   color: var(--color-gray-900);
 }
-
-.backBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  color: var(--color-gray-300);
-  transition: color 0.15s ease;
-}
-
-.backBtn:hover {
-  color: var(--color-gray-500);
-}
-
-.chatHistoryMessages {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-16) var(--space-24);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: linear-gradient(
-    180deg,
-    rgba(245, 243, 255, 0.6) 0%,
-    rgba(240, 244, 255, 0.4) 50%,
-    rgba(255, 248, 245, 0.3) 100%
-  );
-}
-
-.chatEmptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-gray-400);
-  font: var(--text-caption-medium);
-}
-
-.chatHistoryIconButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: var(--space-6);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-gray-600);
-  transition: all 0.15s ease;
-}
-
-.chatHistoryIconButton:hover {
-  background: var(--color-gray-100);
-  color: var(--color-primary);
-}
-
-.label {
-  font: var(--text-body-medium);
-  color: var(--color-gray-500);
-  display: block;
-}
-
-.value {
-  font: var(--text-body-medium);
-  color: var(--color-gray-900);
-}
-
-.entityList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-  font: var(--text-body-medium);
-  color: var(--color-gray-900);
-}
-
-.contentBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-

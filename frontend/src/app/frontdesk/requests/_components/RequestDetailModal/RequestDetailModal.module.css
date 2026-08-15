@@ -149,13 +149,15 @@
 
 .footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: var(--space-12);
+  width: 100%;
 }
 
 .footerRight {
   display: flex;
+  align-items: center;
   gap: var(--space-12);
   margin-left: auto;
 }
@@ -179,5 +181,27 @@
 .footerButton {
   min-width: 120px;
   justify-content: center;
+}
+
+.chatHistoryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font: var(--text-body-medium);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chatHistoryBtn:hover {
+  background-color: var(--color-gray-50);
+  border-color: var(--color-gray-300);
+  color: var(--color-gray-900);
 }
 

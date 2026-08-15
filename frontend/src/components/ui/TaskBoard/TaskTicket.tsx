@@ -333,9 +333,11 @@ export default function TaskTicket({
 
   let timeDisplay = '';
   if (status === 'DONE') {
-    timeDisplay = formatTimeOnly(updatedAt || createdAt) || formatTimeOnly(createdAt);
+    const doneTime = updatedAt || createdAt;
+    timeDisplay = doneTime ? formatTimeOnly(doneTime) : '';
   } else {
-    timeDisplay = getRelativeTime(createdAt || updatedAt, language, t.ticketUI.time);
+    const activeTime = createdAt || updatedAt;
+    timeDisplay = activeTime ? getRelativeTime(activeTime, language, t.ticketUI.time) : '';
   }
 
 
@@ -447,28 +449,36 @@ export default function TaskTicket({
           )}
         </div>
         <div className={styles.headerRight}>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {isCancelled && (
-              <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
-                {t.ticketUI.badge.cancelled}
-              </span>
-            )}
-            {isEscalated && (
-              <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
-                {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
-              </span>
-            )}
-            {cancelRequested && (
-              <span className={`${styles.textStatus} ${styles.textStatusCancelPending}`}>
-                {t.ticketUI.badge.cancelPending}
-              </span>
-            )}
-            {priority === 'URGENT' && (
-              <div className={`${styles.textStatus} ${styles.textStatusUrgent}`}>
-                {t.ticketUI.badge.urgent}
-                <span className={styles.redDot} />
-              </div>
-            )}
+          {(isCancelled || isEscalated || cancelRequested || priority === 'URGENT') && (
+            <div className={styles.statusRow}>
+              {isCancelled && (
+                <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
+                  {t.ticketUI.badge.cancelled}
+                </span>
+              )}
+              {isEscalated && (
+                <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
+                  {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
+                </span>
+              )}
+              {cancelRequested && (
+                <span className={`${styles.textStatus} ${styles.textStatusCancelPending}`}>
+                  {t.ticketUI.badge.cancelPending}
+                </span>
+              )}
+              {priority === 'URGENT' && (
+                <div className={`${styles.textStatus} ${styles.textStatusUrgent}`}>
+                  {t.ticketUI.badge.urgent}
+                  <span className={styles.redDot} />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className={styles.ticketMeta}>
+            {timeDisplay && <span className={styles.timeText}>{timeDisplay}</span>}
+            {timeDisplay && ticketId && <span className={styles.metaDot}>·</span>}
+            {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
           </div>
         </div>
       </div>
@@ -491,64 +501,60 @@ export default function TaskTicket({
         )}
       </div>
 
-      <div className={styles.footer}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {status === 'TODO' && onAccept && (
-            <Button
-              variant="primary"
-              onClick={onAccept}
-              style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
-              disabled={!isOnline}
-              title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
-            >
-              {t.ticketUI.button.accept}
-            </Button>
-          )}
-          {status === 'IN_PROGRESS' && !cancelRequested && onComplete && (
-            <Button
-              variant="primary"
-              onClick={onComplete}
-              style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
-              disabled={!isOnline}
-              title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
-            >
-              {t.ticketUI.button.complete}
-            </Button>
-          )}
-          {status === 'IN_PROGRESS' && cancelRequested && (
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {onRejectCancel && (
-                <Button
-                  variant="secondary"
-                  onClick={onRejectCancel}
-                  style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', backgroundColor: '#ffffff', border: '1px solid var(--color-gray-300)', minWidth: '76px', justifyContent: 'center' }}
-                  disabled={!isOnline}
-                  title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
-                >
-                  {language === 'en' ? 'Reject' : '취소 반려'}
-                </Button>
-              )}
-              {onApproveCancel && (
-                <Button
-                  variant="primary"
-                  onClick={onApproveCancel}
-                  style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
-                  disabled={!isOnline}
-                  title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
-                >
-                  {language === 'en' ? 'Approve' : '취소 승인'}
-                </Button>
-              )}
-            </div>
-          )}
+      {Boolean((status === 'TODO' && onAccept) || (status === 'IN_PROGRESS' && !cancelRequested && onComplete) || (status === 'IN_PROGRESS' && cancelRequested && (onRejectCancel || onApproveCancel))) && (
+        <div className={styles.footer}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {status === 'TODO' && onAccept && (
+              <Button
+                variant="primary"
+                onClick={onAccept}
+                style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
+                disabled={!isOnline}
+                title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
+              >
+                {t.ticketUI.button.accept}
+              </Button>
+            )}
+            {status === 'IN_PROGRESS' && !cancelRequested && onComplete && (
+              <Button
+                variant="primary"
+                onClick={onComplete}
+                style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
+                disabled={!isOnline}
+                title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
+              >
+                {t.ticketUI.button.complete}
+              </Button>
+            )}
+            {status === 'IN_PROGRESS' && cancelRequested && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {onRejectCancel && (
+                  <Button
+                    variant="secondary"
+                    onClick={onRejectCancel}
+                    style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', backgroundColor: '#ffffff', border: '1px solid var(--color-gray-300)', minWidth: '76px', justifyContent: 'center' }}
+                    disabled={!isOnline}
+                    title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
+                  >
+                    {language === 'en' ? 'Reject' : '취소 반려'}
+                  </Button>
+                )}
+                {onApproveCancel && (
+                  <Button
+                    variant="primary"
+                    onClick={onApproveCancel}
+                    style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
+                    disabled={!isOnline}
+                    title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
+                  >
+                    {language === 'en' ? 'Approve' : '취소 승인'}
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className={styles.ticketMeta}>
-          {timeDisplay && <span className={styles.timeText}>{timeDisplay}</span>}
-          {timeDisplay && ticketId && <span className={styles.metaDot}>·</span>}
-          {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
