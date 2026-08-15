@@ -2,12 +2,11 @@
 
 import React, { Suspense } from 'react';
 import Link from 'next/link';
-import { Menu } from 'lucide-react';
+import { Menu, Plus } from 'lucide-react';
 import { useUiStore } from '@/stores/useUiStore';
 import styles from './Header.module.css';
 import HeaderNotification from './HeaderNotification/HeaderNotification';
 import StaffNotification from './StaffNotification/StaffNotification';
-import Button from '@/components/ui/Button/Button';
 import { useTranslation } from '@/app/useTranslation';
 
 interface HeaderProps {
@@ -27,19 +26,25 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
         </button>
       </div>
 
-      <div className={styles.right} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-16)' }}>
+      <div className={styles.right}>
         {role === 'frontdesk' && (
           <>
-            <Button variant="secondary" onClick={() => openModal('createRequest')} style={{ padding: '6px 12px', fontSize: '13px' }}>
-              {t.frontdeskPage.frontDesk.createRequest}
-            </Button>
-            <Suspense fallback={<div style={{ width: 24, height: 24 }}></div>}>
+            <button
+              type="button"
+              className={styles.headerIconBtn}
+              onClick={() => openModal('createRequest')}
+              aria-label={t.frontdeskPage?.frontDesk?.createRequest || '새 요청 등록'}
+              title={t.frontdeskPage?.frontDesk?.createRequest || '새 요청 등록'}
+            >
+              <Plus size={18} />
+            </button>
+            <Suspense fallback={<div style={{ width: 36, height: 36 }}></div>}>
               <HeaderNotification />
             </Suspense>
           </>
         )}
         {role === 'staff' && (
-          <Suspense fallback={<div style={{ width: 24, height: 24 }}></div>}>
+          <Suspense fallback={<div style={{ width: 36, height: 36 }}></div>}>
             <StaffNotification />
           </Suspense>
         )}
@@ -78,24 +83,12 @@ function LanguageToggle() {
   return (
     <div ref={wrapperRef} style={{ position: 'relative' }}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-          background: 'var(--color-gray-100, #f3f4f6)',
-          color: 'var(--color-gray-700)',
-          border: '1px solid var(--color-gray-200, #e5e7eb)',
-          padding: '4px 12px',
-          borderRadius: '18px',
-          cursor: 'pointer',
-          fontWeight: 600,
-          fontSize: '0.875rem',
-          transition: 'all 0.2s ease-in-out',
-          height: '32px'
-        }}
+        className={styles.languageBtn}
+        aria-label="언어 변경"
       >
-        {currentLabel}
+        <span>{currentLabel}</span>
         <svg
           width="12"
           height="12"
@@ -118,13 +111,12 @@ function LanguageToggle() {
         <div
           style={{
             position: 'absolute',
-            top: '100%',
+            top: 'calc(100% + 4px)',
             right: 0,
-            marginTop: '4px',
             background: 'white',
             border: '1px solid var(--color-gray-200, #e5e7eb)',
             borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
             overflow: 'hidden',
             zIndex: 50,
             width: '80px',

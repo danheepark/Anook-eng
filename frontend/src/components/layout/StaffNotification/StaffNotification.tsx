@@ -134,9 +134,9 @@ export default function StaffNotification() {
   return (
     <div className={styles.container} ref={popupRef}>
       <button className={styles.bellButton} onClick={() => setIsOpen(!isOpen)} aria-label="부서 알림함">
-        <Bell size={24} color="var(--color-gray-600)" />
+        <Bell size={18} color="currentColor" />
         {totalNotifications > 0 && (
-          <span className={styles.badge}>{totalNotifications}</span>
+          <span className={styles.unreadDot} />
         )}
       </button>
 
