@@ -22,24 +22,29 @@ export default function PendingKnowledgeHeader({
 
   return (
     <div className={styles.headerContainer}>
-      <div className={styles.headerCheckbox}>
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={(e) => onSelectAll?.(e.target.checked)}
-          className={styles.checkboxInput}
-          aria-label={language === 'en' ? 'Select All' : '전체 선택'}
-        />
+      {/* 1. Left Section: Checkbox + Q&A Title */}
+      <div className={styles.leftSection}>
+        <div className={styles.headerCheckbox}>
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={(e) => onSelectAll?.(e.target.checked)}
+            className={styles.checkboxInput}
+            aria-label={language === 'en' ? 'Select All' : '전체 선택'}
+          />
+        </div>
+
+        <div className={styles.headerQA}>
+          <span>{title}</span>
+        </div>
       </div>
 
-      <div className={styles.headerQA}>
-        <span>{title}</span>
-      </div>
-
+      {/* 2. Department Header */}
       <div className={styles.headerDept}>
         <span>{defaultDeptLabel}</span>
       </div>
 
+      {/* 3. Actions Placeholder */}
       <div className={styles.headerActionsPlaceholder} />
     </div>
   );

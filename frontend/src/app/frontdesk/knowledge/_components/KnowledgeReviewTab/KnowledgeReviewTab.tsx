@@ -222,14 +222,27 @@ export default function KnowledgeReviewTab({
 
   return (
     <div className={styles.container}>
-      {/* Render Portal in the background when active */}
-      {mounted && typeof window !== 'undefined' && document.getElementById('knowledge-header-actions') && (
+      {/* Render Portal in the Top Section Header Actions */}
+      {mounted && typeof window !== 'undefined' && document.getElementById('pending-knowledge-header-actions') && (
         createPortal(
-          <div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {isAnalyzed ? (
-              <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-                {language === 'en' ? 'Back' : '뒤로가기'}
-              </Button>
+              <>
+                <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
+                  {t.common?.cancel || (language === 'en' ? 'Cancel' : '취소')}
+                </Button>
+                <Button 
+                  variant="primary" 
+                  onClick={handleBatchRegister} 
+                  disabled={registering || candidates.filter(c => c.selected).length === 0}
+                >
+                  {registering 
+                    ? (aiTraining?.registering || (language === 'en' ? 'Registering...' : '등록 중...')) 
+                    : (language === 'en'
+                        ? `Register Selected (${candidates.filter(c => c.selected).length})`
+                        : (aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`))}
+                </Button>
+              </>
             ) : (
               <Button
                 variant="primary"
@@ -240,7 +253,7 @@ export default function KnowledgeReviewTab({
               </Button>
             )}
           </div>,
-          document.getElementById('knowledge-header-actions')!
+          document.getElementById('pending-knowledge-header-actions')!
         )
       )}
 
@@ -293,21 +306,6 @@ export default function KnowledgeReviewTab({
               ))
             )}
           </div>
-
-          {candidates.length > 0 && (
-            <div className={styles.tableFooter}>
-              <div className={styles.analysisFooter}>
-                <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
-                  {t.common?.cancel || '취소'}
-                </Button>
-                <Button variant="primary" onClick={handleBatchRegister} disabled={registering}>
-                  {registering 
-                    ? (aiTraining?.registering || '등록 중...') 
-                    : (aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`)}
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       ) : (
         // 기본 대기 목록 (분석 전)

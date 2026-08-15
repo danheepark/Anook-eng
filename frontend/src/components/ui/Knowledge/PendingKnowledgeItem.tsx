@@ -107,40 +107,61 @@ export default function PendingKnowledgeItem({
   answerPlaceholder,
 }: PendingKnowledgeItemProps) {
   const { language } = useTranslation();
+  const answerTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustTextareaHeight = () => {
+    if (answerTextareaRef.current) {
+      answerTextareaRef.current.style.height = 'auto';
+      const scrollHeight = answerTextareaRef.current.scrollHeight;
+      if (scrollHeight > 140) {
+        answerTextareaRef.current.style.height = '140px';
+        answerTextareaRef.current.style.overflowY = 'auto';
+      } else {
+        answerTextareaRef.current.style.height = `${Math.max(scrollHeight, 52)}px`;
+        answerTextareaRef.current.style.overflowY = 'hidden';
+      }
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [answer]);
 
   return (
     <div id={`pending-knowledge-${id}`} className={styles.container}>
-      {/* 1. Checkbox */}
-      <div className={styles.checkboxWrapper} onClick={(e) => e.stopPropagation()}>
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={(e) => onSelect?.(e.target.checked)}
-          className={styles.checkboxInput}
-        />
+      {/* 1. Left Section: Checkbox + Editable Title and Subtitle Inputs */}
+      <div className={styles.leftSection}>
+        <div className={styles.checkboxWrapper} onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={(e) => onSelect?.(e.target.checked)}
+            className={styles.checkboxInput}
+          />
+        </div>
+
+        <div className={styles.mainInfo}>
+          <input
+            type="text"
+            value={question}
+            onChange={(e) => onQuestionChange?.(e.target.value)}
+            placeholder={questionPlaceholder || (language === 'en' ? 'Enter question...' : '질문을 입력하세요...')}
+            className={styles.editableTitle}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <textarea
+            ref={answerTextareaRef}
+            rows={2}
+            value={answer}
+            onChange={(e) => onAnswerChange?.(e.target.value)}
+            placeholder={answerPlaceholder || (language === 'en' ? 'Enter answer...' : '답변을 입력하세요...')}
+            className={styles.editableSubtitle}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       </div>
 
-      {/* 2. Editable Title (Question) and Subtitle (Answer) */}
-      <div className={styles.mainInfo}>
-        <input
-          type="text"
-          value={question}
-          onChange={(e) => onQuestionChange?.(e.target.value)}
-          placeholder={questionPlaceholder || (language === 'en' ? 'Enter question...' : '질문을 입력하세요...')}
-          className={styles.editableTitle}
-          onClick={(e) => e.stopPropagation()}
-        />
-        <input
-          type="text"
-          value={answer}
-          onChange={(e) => onAnswerChange?.(e.target.value)}
-          placeholder={answerPlaceholder || (language === 'en' ? 'Enter answer...' : '답변을 입력하세요...')}
-          className={styles.editableSubtitle}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
-
-      {/* 3. Department Dropdown */}
+      {/* 2. Department Dropdown */}
       <div className={styles.badgeWrapper} onClick={(e) => e.stopPropagation()}>
         {domainOptions && onDomainChange && (
           <DomainDropdown
@@ -151,7 +172,7 @@ export default function PendingKnowledgeItem({
         )}
       </div>
 
-      {/* 4. Delete Action Button */}
+      {/* 3. Delete Action Button */}
       <div className={styles.actions}>
         {onDelete && (
           <button

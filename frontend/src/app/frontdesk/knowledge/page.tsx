@@ -116,6 +116,7 @@ export default function KnowledgeManagementPage() {
               </>
             )}
           </h2>
+          <div id="pending-knowledge-header-actions" />
         </div>
         <div className={styles.sectionBody}>
           <KnowledgeReviewTab 
