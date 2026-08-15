@@ -1,118 +1,77 @@
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin-bottom: var(--space-8);
 }
 
-.headerLeft {
+.headerTop {
   display: flex;
   align-items: center;
-  gap: var(--space-12);
+  gap: var(--space-8);
 }
 
 .title {
-  font: var(--text-h2-bold);
+  font: var(--text-h2-bold) !important;
   color: var(--color-gray-900);
+  margin: 0;
+  word-break: break-word;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: var(--space-12);
+  margin-bottom: var(--space-16);
+}
+
+.reasoningItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.secondaryLabel {
+  font: var(--text-caption-medium);
+  color: var(--color-gray-500);
+  letter-spacing: -0.1px;
+}
+
+.reasoningText {
+  font: var(--text-body-medium);
+  color: var(--color-gray-800);
+  line-height: 1.5;
+  letter-spacing: -0.1px;
   margin: 0;
 }
 
-.closeButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-
-.closeButton:hover {
-  background: var(--color-gray-100);
-}
-
-.section {
+.photoSection {
   display: flex;
   flex-direction: column;
   gap: var(--space-12);
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--color-gray-100);
 }
 
-.sectionTitle {
+.photoTitle {
   font: var(--text-h3-bold);
   color: var(--color-gray-900);
   margin: 0;
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-gray-100);
 }
 
-.grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-}
-
-.gridItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-4) 0;
-}
-
-.label {
-  font: var(--text-body-medium);
-  color: var(--color-gray-500);
-}
-
-.value {
-  font: var(--text-body-bold);
-  color: var(--color-gray-900);
-}
-
-.contentBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.contentText {
-  font: var(--text-body-medium);
-  color: var(--color-gray-900);
-  margin: 0;
-}
-
-.rawText {
-  font: var(--text-body-medium);
-  color: var(--color-gray-900);
-  margin: 0;
-  white-space: pre-wrap;
-  text-align: left;
-}
-
-.orderDetail {
-  font: var(--text-body-medium);
-  color: var(--color-gray-800);
-  background: var(--color-primary-light, #f0f4ff);
-  padding: var(--space-12) var(--space-16);
+.photoBox {
+  text-align: center;
+  background-color: var(--color-gray-50);
+  padding: var(--space-12);
   border-radius: var(--radius-md);
-  margin: 0;
-  white-space: pre-wrap;
 }
 
-.transferReason {
-  font: var(--text-body-medium);
-  color: var(--color-gray-800);
-  background: #fef3c7;
-  padding: var(--space-12) var(--space-16);
+.photoImg {
+  max-width: 100%;
+  max-height: 360px;
   border-radius: var(--radius-md);
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.aiInfo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
+  object-fit: contain;
 }
 
 .jsonBlock {

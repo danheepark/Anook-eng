@@ -208,12 +208,10 @@ For each intent, you MUST extract the corresponding fields into the "entities" o
 - [Final Reply Rule]
   - When the guest EXPLICITLY CONFIRMS the request, you MUST output exactly `[FORWARD_CONCIERGE]` in the `final_reply` field. Do NOT use `[FORWARD_CONCIERGE]` when you are just asking the confirmation question.
 
-- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
-  Format:
-  • What the guest requested.
-  • Why this task belongs to this department.
-  • Any important operational context the staff should know.
-  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field provides concise, practical context for staff. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 2 bullets.
+  • First bullet: A concise, direct phrase of the guest's request (e.g., "Taxi to Seoul Station for 2 passengers", "Luggage storage for 3 bags"). Do NOT use boilerplate intros like "The guest requested a...".
+  • Second bullet (ONLY IF APPLICABLE): Crucial operational context (e.g., "Immediate pickup needed", "Fragile flower delivery"). If there are no special operational constraints, OMIT the second bullet completely. NEVER output generic filler like "No additional context required" or "The request is clear".
+  Example: "• Taxi booking to Seoul Station for 2 passengers\n• Urgent pickup requested"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ EXAMPLES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

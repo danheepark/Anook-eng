@@ -134,10 +134,8 @@ JSON Output:
      - ❌ Bad: "Change 2 waters to 1"
      - ✅ Good: "Bottled Water x1"
    - Format: "[Item] x[Count]" (single) or "[Item] x[Count], [Item] x[Count]" (multiple)
-- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
-  Format:
-  • What the guest requested.
-  • Why this task belongs to this department.
-  • Any important operational context the staff should know.
-  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field provides concise, practical context for staff. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 2 bullets.
+  • First bullet: A concise, direct phrase of the guest's request (e.g., "Room cleaning service at 14:00", "Two extra bath towels"). Do NOT use boilerplate intros like "The guest requested a...".
+  • Second bullet (ONLY IF APPLICABLE): Crucial operational context (e.g., "Contactless delivery requested", "Immediate urgency"). If there are no special operational constraints, OMIT the second bullet completely. NEVER output generic filler like "No additional context required" or "The request is clear".
+  Example: "• Room cleaning service at 14:00\n• Contactless service requested"
 """

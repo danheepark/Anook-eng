@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button/Button';
 import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import TaskTicket from '@/components/ui/TaskBoard/TaskTicket';
 import InputField from '@/components/ui/Inputfield/InputField';
+import { useTranslation } from '@/app/useTranslation';
 import styles from './ManualAssignModal.module.css';
 
 interface Department {
@@ -34,7 +35,7 @@ interface ManualAssignModalProps {
 }
 
 export default function ManualAssignModal({ isOpen, onClose, detail, departments, onSave, saving }: ManualAssignModalProps) {
-
+  const { language } = useTranslation();
   const [editDeptId, setEditDeptId] = useState(detail.departmentId);
   const [editSummary, setEditSummary] = useState(detail.summary || '');
   const [editDescription, setEditDescription] = useState(detail.description || '');
@@ -53,7 +54,7 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="md" overflowVisible={true} onClose={onClose} title="수동 배정">
+      <ModalCard size="md" overflowVisible={true} onClose={onClose} title={language === 'ko' ? '수동 배정' : 'Assign Task'}>
 
         <div className={styles.content}>
           {/* 미리보기 카드 — 실시간 반영 */}
@@ -64,7 +65,7 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
                 roomNo={detail.roomNo}
                 department={editDeptId}
                 priority={'NORMAL'}
-                title={editSummary || '배정할 업무 내용을 입력하세요'}
+                title={editSummary || (language === 'ko' ? '배정할 업무 내용을 입력하세요' : 'Enter task summary')}
                 description={editDescription}
                 status="TODO"
                 createdAt={detail.createdAt}
@@ -76,8 +77,8 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
           <div className={styles.formSection}>
             <div className={styles.editField}>
               <Dropdown
-                label="배정 부서"
-                placeholder="부서를 선택하세요"
+                label={language === 'ko' ? '배정 부서' : 'Department'}
+                placeholder={language === 'ko' ? '부서를 선택하세요' : 'Select department'}
                 options={departments.filter(d => d.id !== 'FRONT').map(d => ({ value: d.id, label: d.name }))}
                 value={editDeptId}
                 onChange={(val) => setEditDeptId(val)}
@@ -86,20 +87,20 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
 
             <div className={styles.editField}>
               <InputField
-                label="제목"
+                label={language === 'ko' ? '제목' : 'Title'}
                 value={editSummary}
                 onChange={(e) => setEditSummary(e.target.value)}
-                placeholder="배정할 업무 내용을 입력하세요"
+                placeholder={language === 'ko' ? '배정할 업무 내용을 입력하세요' : 'Enter task summary'}
               />
             </div>
 
             <div className={styles.editField}>
               <InputField
                 as="textarea"
-                label="상세 설명"
+                label={language === 'ko' ? '상세 설명' : 'Description'}
                 value={editDescription}
                 onChange={(e: any) => setEditDescription(e.target.value)}
-                placeholder="상세한 업무 내용을 입력하세요 (선택)"
+                placeholder={language === 'ko' ? '상세한 업무 내용을 입력하세요 (선택)' : 'Enter task description (optional)'}
                 rows={3}
               />
             </div>
@@ -109,9 +110,13 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
         </div>
 
         <div className={styles.footer}>
-          <Button variant="secondary" onClick={onClose}>취소</Button>
+          <Button variant="secondary" onClick={onClose}>
+            {language === 'ko' ? '취소' : 'Cancel'}
+          </Button>
           <Button variant="primary" disabled={!canSubmit || saving} onClick={() => onSave(editDeptId, 'NORMAL', editSummary, editDescription)}>
-            {saving ? '저장 중...' : '배정하기'}
+            {saving
+              ? (language === 'ko' ? '저장 중...' : 'Saving...')
+              : (language === 'ko' ? '배정하기' : 'Assign')}
           </Button>
         </div>
       </ModalCard>

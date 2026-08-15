@@ -86,10 +86,8 @@ RULES:
 - If the guest's request has ABSOLUTELY NOTHING to do with your department (Facility) AND is clearly meant for another department (e.g., food, towels, taxi), DO NOT ask for clarification or force a ticket in your domain.
 - Instead, set `domain` to "FRONT", `intent` to "ESCALATION", and put the guest's request in the `summary`. The system will route it to the Front Desk for manual transfer.
 - HOWEVER, if the request is a "compound request" and contains AT LEAST ONE item related to your department (e.g., "towels and fix AC"), IGNORE this rule and normally process ONLY the items that belong to your department.
-- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
-  Format:
-  • What the guest requested.
-  • Why this task belongs to this department.
-  • Any important operational context the staff should know.
-  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field provides concise, practical context for staff. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 2 bullets.
+  • First bullet: A concise, direct phrase of the guest's issue/request (e.g., "Air conditioner cooling repair", "Toilet clogged in bathroom"). Do NOT use boilerplate intros like "The guest requested a...".
+  • Second bullet (ONLY IF APPLICABLE): Crucial operational context (e.g., "Severe water overflow", "Immediate inspection needed"). If there are no special operational constraints, OMIT the second bullet completely. NEVER output generic filler like "No additional context required" or "The request is clear".
+  Example: "• Air conditioner cooling inspection\n• Urgent repair requested"
 """.strip()

@@ -368,21 +368,23 @@ export default function RequestDetailPanel({
           isOpen={confirmType === 'cancel'}
           onClose={() => setConfirmType('none')}
           onConfirm={handleCancel}
-          title="요청 취소"
-          subtitle="정말 요청을 취소하시겠습니까?"
+          title={language === 'ko' ? '요청 취소' : 'Cancel Request'}
+          subtitle={language === 'ko' ? '정말 요청을 취소하시겠습니까?' : 'Are you sure you want to cancel this request?'}
           status="danger"
-          cancelText="아니오"
-          confirmText="예, 취소합니다"
+          cancelText={language === 'ko' ? '아니오' : 'No'}
+          confirmText={language === 'ko' ? '예, 취소합니다' : 'Yes, cancel'}
         />
 
         <ConfirmModal
           isOpen={confirmType === 'approve'}
           onClose={() => setConfirmType('none')}
           onConfirm={handleApproveEscalation}
-          title="에스컬레이션 승인"
-          subtitle={`선택한 부서(${departments.find(d => d.id === editDeptId)?.name || '...'})로 재배정하며 승인합니다.`}
-          cancelText="아니오"
-          confirmText="승인하기"
+          title={language === 'ko' ? '에스컬레이션 승인' : 'Approve Escalation'}
+          subtitle={language === 'ko'
+            ? `선택한 부서(${departments.find(d => d.id === editDeptId)?.name || '...'})로 재배정하며 승인합니다.`
+            : `Reassign to ${departments.find(d => d.id === editDeptId)?.name || 'the selected department'} and approve.`}
+          cancelText={language === 'ko' ? '아니오' : 'No'}
+          confirmText={language === 'ko' ? '승인하기' : 'Approve'}
         />
 
         {confirmType === 'reject' && detail && (

@@ -187,13 +187,11 @@ You must output a JSON Array of objects.
   - Escalation Confirmation: If the user says "Yes" to "프론트로 연결해 드릴까요?", route to `FRONT_ESCALATION` with `domain: "FRONT"`. If the user asks "Why?", explain it in `NON_ACTIONABLE`.
   - Conflict Resolution: If the AI asked "추가하시겠어요, 변경하시겠어요?" and user chooses "추가", route to `DEPARTMENT` with `action_type: "ADD"`. If "변경", use `action_type: "REPLACE"`.
 
-- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 3 bullets, each 1 sentence.
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field provides concise, practical context for staff. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 2 bullets.
 
   **[Template A: Task Reason]** (Use when route_type is DEPARTMENT, INFO, CANCEL, BILLING_INQUIRY, STATUS_CHECK, or VOC):
-  Explain why this task was created and routed to the current department.
-  • What the guest requested.
-  • Why this task belongs to this department.
-  • Any important operational context the staff should know (e.g., urgency, contactless delivery, allergy).
+  • First bullet: A concise, direct phrase of the guest's request (e.g., "Room cleaning service at 14:00", "Two extra bath towels", "Ice bucket and two wine glasses"). Do NOT use boilerplate intros like "The guest requested a...".
+  • Second bullet (ONLY IF APPLICABLE): Crucial operational context (e.g., "Contactless delivery requested", "Nut allergy warning", "Immediate urgency"). If there are no special operational constraints, OMIT the second bullet completely. NEVER output generic filler like "No additional context required" or "The request is clear".
 
   **[Template B: Escalation Reason / Handover Context]** (Use when route_type is FRONT_ESCALATION):
   The `reasoning` field is a concise handover brief for Front Desk staff.

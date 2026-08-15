@@ -331,10 +331,8 @@ JSON Output:
     - NEVER set `needs_clarification: false` immediately after the guest provides missing options. You MUST STILL present the final price and ask "Shall I proceed?" with `needs_clarification: true`.
     - ONLY set `needs_clarification: false` and `final_reply: "[FORWARD_FB]"` if the guest explicitly says "Yes", "Confirm", or "Proceed" IN RESPONSE to your "Shall I proceed?" question!
 
-- **REASONING FORMAT (MANDATORY)**: The `reasoning` field explains the decision from an **operational perspective**. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points. Maximum 3 bullets, each 1 sentence.
-  Format:
-  • What the guest requested.
-  • Why this task belongs to this department.
-  • Any important operational context the staff should know.
-  Example: "• The guest requested two additional towels.\n• This request requires Housekeeping service.\n• The guest requested contactless delivery."
+- **REASONING FORMAT (MANDATORY)**: The `reasoning` field provides concise, practical context for staff. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 2 bullets.
+  • First bullet: A concise, direct phrase of the guest's request (e.g., "Two Iced Americanos and one Sandwich", "Ice bucket and wine glasses"). Do NOT use boilerplate intros like "The guest requested a...".
+  • Second bullet (ONLY IF APPLICABLE): Crucial operational context (e.g., "Nut allergy warning", "Urgent delivery"). If there are no special operational constraints, OMIT the second bullet completely. NEVER output generic filler like "No additional context required" or "The request is clear".
+  Example: "• Two Iced Americanos and one Club Sandwich\n• Peanut allergy noted in profile"
 """

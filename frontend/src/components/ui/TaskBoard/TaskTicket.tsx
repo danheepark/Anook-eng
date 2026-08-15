@@ -313,7 +313,7 @@ export default function TaskTicket({
 
   let displayTitle = toSentenceCase(getFixedTitle().trim());
 
-  const formatDateTime = (dateVal: string | Date | undefined) => {
+  const formatTimeOnly = (dateVal: string | Date | undefined) => {
     if (!dateVal) return '';
     let date: Date;
     if (dateVal instanceof Date) {
@@ -322,28 +322,20 @@ export default function TaskTicket({
       date = new Date(String(dateVal).replace(' ', 'T'));
     }
     if (isNaN(date.getTime())) return '';
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = date.getHours();
-    const mins = String(date.getMinutes()).padStart(2, '0');
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hr = hours % 12 || 12;
-    return `${year}.${month}.${day} ${String(hr).padStart(2, '0')}:${mins} ${ampm}`;
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const paddedHours = String(hours).padStart(2, '0');
+    return `${paddedHours}:${minutes} ${ampm}`;
   };
 
   let timeDisplay = '';
   if (status === 'DONE') {
-    timeDisplay = formatDateTime(updatedAt || createdAt) || formatDateTime(createdAt);
-  } else if (status === 'IN_PROGRESS' && updatedAt) {
-    const relTime = getRelativeTime(updatedAt, language, t.ticketUI.time);
-    if (relTime === t.ticketUI.time.justNow) {
-      timeDisplay = t.ticketUI.time.justStarted;
-    } else {
-      timeDisplay = relTime.replace(language === 'ko' ? ' 전' : ' ago', t.ticketUI.time.elapsed);
-    }
+    timeDisplay = formatTimeOnly(updatedAt || createdAt) || formatTimeOnly(createdAt);
   } else {
-    timeDisplay = getRelativeTime(updatedAt || createdAt, language, t.ticketUI.time);
+    timeDisplay = getRelativeTime(createdAt || updatedAt, language, t.ticketUI.time);
   }
 
 
@@ -552,9 +544,9 @@ export default function TaskTicket({
         </div>
 
         <div className={styles.ticketMeta}>
-          {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
-          {ticketId && timeDisplay && <span className={styles.metaDot}>·</span>}
           {timeDisplay && <span className={styles.timeText}>{timeDisplay}</span>}
+          {timeDisplay && ticketId && <span className={styles.metaDot}>·</span>}
+          {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
         </div>
       </div>
     </div>
@@ -570,16 +562,7 @@ function getRelativeTime(dateString: string | Date, language: string, timeTexts:
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffDays > 0) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const paddedHours = String(hours).padStart(2, '0');
-    return `${year}.${month}.${day} ${paddedHours}:${minutes} ${ampm}`;
+    return `${diffDays}${language === 'en' ? ' ' : ''}${timeTexts?.daysAgo || (language === 'ko' ? '일 전' : 'days ago')}`;
   } else if (diffHours > 0) {
     return `${diffHours}${language === 'en' ? ' ' : ''}${timeTexts.hoursAgo}`;
   } else if (diffMins > 0) {
