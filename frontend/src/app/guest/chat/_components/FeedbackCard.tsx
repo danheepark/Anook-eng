@@ -99,8 +99,17 @@ export default function FeedbackCard({
               </div>
             </div>
 
-            <div className={styles.subtitle}>
-              {systemSubtitle || t.feedbackCard?.systemCompletedSubtitle || '(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)'}
+            <div className={styles.systemSubtitle}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={styles.shieldIcon}>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+              <span>
+                {(systemSubtitle || t.feedbackCard?.systemCompletedSubtitle || (language === 'en' ? 'This is a system-only message for front desk operations, not visible to guests' : '고객에게 노출되지 않는 프론트 운영용 시스템 메시지입니다'))
+                  .replace(/^\(※?\s*/, '')
+                  .replace(/\)$/, '')
+                  .trim()}
+              </span>
             </div>
           </div>
         </div>

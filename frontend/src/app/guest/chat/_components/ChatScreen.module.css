@@ -31,7 +31,7 @@
   display: flex;
   flex-direction: column;
   padding: calc(var(--space-24) + 54px) var(--space-16) var(--space-24);
-  gap: var(--space-16);
+  gap: 0;
   overflow-y: auto;
   background-color: transparent;
   position: relative;

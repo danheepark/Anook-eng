@@ -60,21 +60,23 @@ RULES:
   3. Include a `"fallback_message"` key inside the `entities` object with the answer formulated naturally using the `[관련 지식 (RAG)]` in the SAME LANGUAGE as the guest's input.
   4. Set `summary` to English (e.g., "Checkout time inquiry").
 
-- **REASONING FORMAT (MANDATORY)**:
-The `reasoning` field explains why the request requires Front Desk involvement from an operational perspective.
+- **HANDOVER CONTEXT (MANDATORY)**:
+The `reasoning` field is a concise handover brief for Front Desk staff.
+Explain only the operational context they need before taking over the request.
 
-Do NOT repeat or summarize what the guest requested, since the request is already visible in the conversation and request summary.
-Do NOT describe the model's internal reasoning process.
-Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence".
+Do not:
+- instruct staff what action to take (e.g. do NOT write "Front Desk must do X")
+- explain the AI's internal reasoning, confidence, or classification
+- repeat information already obvious from the request title unless necessary for context
+- use labels such as "Intent detected", "Classification Logic", or "Context Usage"
 
-Write as a single English string with exactly 2 bullet points (•).
+Write as a single English string with a maximum of 2 bullet points (•).
 Each bullet must be one concise sentence.
 
 [Format]
-• Why the request cannot be completed automatically.
-• What information, authority, confirmation, or operational decision requires Front Desk involvement.
+• Handover reason: Why this request requires staff involvement rather than automatic handling.
+• Guest context: Any specific preference, condition, constraint, or nuance from the conversation that staff should know before taking over.
 
-The first bullet should explain the operational constraint, not the AI's limitation.
-The second bullet should make clear what Front Desk needs to verify, decide, or authorize.
-Example: "• Room availability and housekeeping cleaning schedules must be verified against current occupancy.\n• Front Desk must confirm eligibility in PMS and authorize the checkout extension fee."
+If there is no meaningful guest-specific context for the second bullet, omit it (output only 1 bullet point).
+Example: "• Paid late checkout inquiry requiring occupancy check and manual fee application.\n• Guest requested a 2-hour extension until 13:00."
 """.strip()

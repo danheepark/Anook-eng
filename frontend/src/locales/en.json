@@ -230,7 +230,7 @@
       "title": "Chat History",
       "emptyMessage": "No messages",
       "systemCompleted": "All previous requests and processing have been completed.",
-      "systemMessageNote": "(※ This is a system-only message for front desk operations, not visible to guests)",
+      "systemMessageNote": "This is a system-only message for front desk operations, not visible to guests",
       "roomConversation": "Room {{room}} Conversation",
       "roomChatRecord": "Room {{room}} Chat Record",
       "selectRoomPrompt": "Please select a room to view the conversation",
@@ -679,7 +679,7 @@
   },
   "feedbackCard": {
     "systemCompletedTitle": "All previous requests and processing have been completed.",
-    "systemCompletedSubtitle": "(※ Internal front desk message — not visible to guests)",
+    "systemCompletedSubtitle": "This is a system-only message for front desk operations, not visible to guests",
     "requestCompleted": "Request Completed",
     "consultationActive": "Active Chat",
     "consultationComplete": "End Conversation",

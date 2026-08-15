@@ -178,68 +178,89 @@ export default function RequestDetailPanel({
     }
   };
 
-  const formatTimeDisplay = (createdAt: string, status: string) => {
+  const formatExactDateTime = (createdAt?: string) => {
     if (!createdAt) return '';
     const createdDate = new Date(createdAt);
-    const isFinished = status === 'COMPLETED' || status === 'CANCELLED';
-
-    if (isFinished) {
-      if (language === 'ko') {
-        const yyyy = createdDate.getFullYear();
-        const m = createdDate.getMonth() + 1;
-        const d = createdDate.getDate();
-        let hours = createdDate.getHours();
-        const ampm = hours >= 12 ? '오후' : '오전';
-        hours = hours % 12 || 12;
-        const minutes = String(createdDate.getMinutes()).padStart(2, '0');
-        return `${yyyy}년 ${m}월 ${d}일 · ${ampm} ${hours}:${minutes}`;
-      }
-      return (
-        createdDate.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }) +
-        ' · ' +
-        createdDate.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        })
-      );
-    }
-
-    const now = new Date();
-    const diffMs = Math.max(0, now.getTime() - createdDate.getTime());
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+    if (isNaN(createdDate.getTime())) return createdAt;
 
     if (language === 'ko') {
-      if (diffMins < 1) return '방금 전 요청됨';
-      if (diffMins < 60) return `${diffMins}분 전 요청됨`;
-      if (diffHours < 24) return `${diffHours}시간 전 요청됨`;
-      return `${diffDays}일 전 요청됨`;
+      const m = createdDate.getMonth() + 1;
+      const d = createdDate.getDate();
+      let hours = createdDate.getHours();
+      const ampm = hours >= 12 ? '오후' : '오전';
+      hours = hours % 12 || 12;
+      const minutes = String(createdDate.getMinutes()).padStart(2, '0');
+      return `${ampm} ${hours}:${minutes} · ${m}월 ${d}일`;
     }
 
-    if (diffMins < 1) return 'Requested just now';
-    if (diffMins === 1) return 'Requested 1 min ago';
-    if (diffMins < 60) return `Requested ${diffMins} mins ago`;
-    if (diffHours === 1) return 'Requested 1 hr ago';
-    if (diffHours < 24) return `Requested ${diffHours} hrs ago`;
-    return `Requested ${diffDays} days ago`;
+    const timeStr = createdDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    const dateStr = createdDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+
+    return `${timeStr} · ${dateStr}`;
   };
 
-  const extractReasoningBullets = (reasoningStr?: string | null, entitiesReasoning?: any): string[] => {
+  interface ReasoningItem {
+    label: string;
+    content: string;
+  }
+
+  const extractReasoningItems = (reasoningStr?: string | null, entitiesReasoning?: any, lang: string = 'en'): ReasoningItem[] => {
     const raw = reasoningStr || entitiesReasoning || '';
     if (!raw) return [];
-    return String(raw)
+
+    const rawLines = String(raw)
       .replace(/\\n/g, '\n')
       .replace(/([^\n])\s*([•·\*\-])\s+/g, '$1\n$2 ')
       .split('\n')
       .map(line => line.trim())
-      .filter(line => line !== '' && !line.toLowerCase().includes('confidence:'))
-      .map(line => /^[•·\*\-]\s*/.test(line) ? line.replace(/^[·\*\-]\s*/, '• ') : `• ${line}`);
+      .filter(line => line !== '' && !line.toLowerCase().includes('confidence:'));
+
+    const cleanedLines = rawLines.map(line => {
+      let clean = line.replace(/^[•·\*\-]\s*/, '').trim();
+      clean = clean.replace(/^Handover\s*reason:\s*/i, '').trim();
+      clean = clean.replace(/^Guest\s*context:\s*/i, '').trim();
+      clean = clean.replace(/^이관\s*사유:\s*/i, '').trim();
+      clean = clean.replace(/^손님\s*특이사항:\s*/i, '').trim();
+      clean = clean.replace(/^고객\s*특이사항:\s*/i, '').trim();
+      return clean;
+    }).filter(line => line !== '');
+
+    if (cleanedLines.length === 0) return [];
+
+    const items: ReasoningItem[] = [];
+
+    // 1st: Handover reason (Always)
+    if (cleanedLines[0]) {
+      items.push({
+        label: lang === 'ko' ? '이관 사유' : (lang === 'ja' ? '引き継ぎ理由' : (lang === 'zh' ? '移交原因' : 'Why it was handed over')),
+        content: cleanedLines[0],
+      });
+    }
+
+    // 2nd: Guest context (Only if present)
+    if (cleanedLines[1]) {
+      items.push({
+        label: lang === 'ko' ? '고객 특이사항' : (lang === 'ja' ? 'お客様の特記事項' : (lang === 'zh' ? '客人特殊需求' : 'Guest context')),
+        content: cleanedLines[1],
+      });
+    }
+
+    for (let i = 2; i < cleanedLines.length; i++) {
+      items.push({
+        label: `${lang === 'ko' ? '추가 정보' : 'Additional info'} ${i - 1}`,
+        content: cleanedLines[i],
+      });
+    }
+
+    return items;
   };
 
   return (
@@ -260,31 +281,28 @@ export default function RequestDetailPanel({
       </div>
 
       <div className={styles.detailContent}>
-        {/* 1. 최상단 시간 표시 */}
-        <div className={styles.timeSection}>
-          <span className={styles.timeText}>
-            {formatTimeDisplay(detail.createdAt, detail.status)}
-          </span>
-        </div>
+        {/* 1. Created at 일시 */}
+        {detail.createdAt && (
+          <div className={styles.reasoningItem}>
+            <span className={styles.secondaryLabel}>
+              {language === 'ko' ? '요청 일시' : 'Created at'}
+            </span>
+            <p className={styles.reasoningText}>
+              {formatExactDateTime(detail.createdAt)}
+            </p>
+          </div>
+        )}
 
-        {/* 2. Review required 섹션 */}
+        {/* 2. Reasoning 섹션 (Why it was handed over / Guest context) */}
         {(() => {
-          const bullets = extractReasoningBullets(detail.reasoning, detail.entities?.reasoning);
-          if (bullets.length === 0) return null;
-          return (
-            <div className={styles.reviewSection}>
-              <h3 className={styles.reviewTitle}>
-                {language === 'en' ? 'Review required' : '검토 필요 사항'}
-              </h3>
-              <div className={styles.bulletList}>
-                {bullets.map((bullet, idx) => (
-                  <div key={idx} className={styles.bulletItem}>
-                    {bullet}
-                  </div>
-                ))}
-              </div>
+          const items = extractReasoningItems(detail.reasoning, detail.entities?.reasoning, language);
+          if (items.length === 0) return null;
+          return items.map((item, idx) => (
+            <div key={idx} className={styles.reasoningItem}>
+              <span className={styles.secondaryLabel}>{item.label}</span>
+              <p className={styles.reasoningText}>{item.content}</p>
             </div>
-          );
+          ));
         })()}
 
         {/* 3. 첨부 사진 */}
@@ -298,37 +316,52 @@ export default function RequestDetailPanel({
         )}
 
         <div className={styles.footer}>
-          <div className={styles.footerRight}>
-            {!showManualAssign && detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' && (
-              <Button variant="primary" onClick={() => setShowManualAssign(true)}>
-                {t.frontdeskPage?.requestDetailModal?.manualAssign || '수동 배정'}
-              </Button>
-            )}
-            {detail.status === 'ESCALATED' ? (
-              <Button variant="primary" onClick={() => setConfirmType('approve')} disabled={saving || loading}>
+          {!showManualAssign && detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' && (
+            <Button size="large" variant="primary" fullWidth onClick={() => setShowManualAssign(true)}>
+              {t.frontdeskPage?.requestDetailModal?.manualAssign || '수동 배정'}
+            </Button>
+          )}
+
+          {detail.status === 'ESCALATED' && (
+            <>
+              <Button size="large" variant="primary" fullWidth onClick={() => setConfirmType('approve')} disabled={saving || loading}>
                 {t.frontdeskPage?.requestDetailModal?.approveEscalation || '에스컬레이션 승인'}
               </Button>
-            ) : null}
-          </div>
-
-          {detail.status === 'ESCALATED' ? (
-            <Button variant="secondary" onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-              {t.frontdeskPage?.requestDetailModal?.rejectEscalation || '에스컬레이션 반려'}
-            </Button>
-          ) : detail.cancelRequested ? (
-            <>
-              <Button variant="secondary" onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
-                {t.frontdeskPage?.requestDetailModal?.rejectCancel || '취소 반려'}
-              </Button>
-              <Button variant="primary" onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
-                {t.frontdeskPage?.requestDetailModal?.approveCancel || '취소 승인'}
+              <Button size="large" variant="secondary" fullWidth onClick={() => setConfirmType('reject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+                {t.frontdeskPage?.requestDetailModal?.rejectEscalation || '에스컬레이션 반려'}
               </Button>
             </>
-          ) : detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' ? (
-            <Button variant="secondary" onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
-              {t.frontdeskPage?.requestDetailModal?.forceCancelRequest || '강제 요청 취소'}
-            </Button>
-          ) : null}
+          )}
+
+          {detail.cancelRequested && (
+            <>
+              <Button size="large" variant="primary" fullWidth onClick={() => setConfirmType('cancelApprove')} disabled={saving || loading}>
+                {t.frontdeskPage?.requestDetailModal?.approveCancel || '취소 승인'}
+              </Button>
+              <Button size="large" variant="secondary" fullWidth onClick={() => setConfirmType('cancelReject')} style={{ color: 'var(--color-error)' }} disabled={saving || loading}>
+                {t.frontdeskPage?.requestDetailModal?.rejectCancel || '취소 반려'}
+              </Button>
+            </>
+          )}
+
+          {!detail.cancelRequested && detail.status !== 'ESCALATED' && detail.status !== 'COMPLETED' && detail.status !== 'CANCELLED' && (
+            <div className={styles.cancelActionGroup}>
+              <Button size="large" variant="secondary" fullWidth onClick={() => setConfirmType('cancel')} style={{ color: 'var(--color-error)' }}>
+                {t.frontdeskPage?.requestDetailModal?.forceCancelRequest || '강제 요청 취소'}
+              </Button>
+              <div className={styles.cancelNote}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={styles.shieldIcon}>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+                <span>
+                  {language === 'en'
+                    ? 'Cancelling will notify the guest and close this request.'
+                    : '취소 시 고객에게 알림이 전송되고 요청이 종료됩니다.'}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <ConfirmModal

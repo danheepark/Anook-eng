@@ -68,6 +68,21 @@
   color: var(--color-gray-500);
 }
 
+.systemSubtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--text-caption-regular);
+  color: var(--color-gray-500);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.shieldIcon {
+  flex-shrink: 0;
+  color: var(--color-gray-400);
+}
+
 /* ── Star Rating (inline) ── */
 
 .stars {

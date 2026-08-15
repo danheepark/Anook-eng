@@ -157,27 +157,47 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
       >
         {!(messages.length === 1 && messages[0].type === 'WELCOME') && <div className={styles.spacer} />}
         {messages.map((msg, index) => {
-
           if (msg.type === 'AI_PROGRESS') {
             return null; // map 밖에서 독립 렌더링
           }
+
+          // 이전 메시지와의 관계를 기반으로 상단 여백 계산 (동일 화자: 4px, 턴 전환/카드: 16px)
+          const prevMsg = index > 0 ? messages[index - 1] : null;
+          const getSpeakerType = (m: ChatMessage | null) => {
+            if (!m) return null;
+            if (m.type === 'REQUEST_CARD' || m.type === 'STATUS_CARD' || m.type === 'FEEDBACK' || m.type === 'CHAT_END' || m.type === 'WELCOME') {
+              return 'CARD';
+            }
+            if (m.type === 'FALLBACK') {
+              return 'STAFF';
+            }
+            return m.variant; // 'sent' (GUEST) or 'received' (AI)
+          };
+
+          const currentSpeaker = getSpeakerType(msg);
+          const prevSpeaker = getSpeakerType(prevMsg);
+          const isSameSender = prevSpeaker !== null && currentSpeaker !== 'CARD' && prevSpeaker === currentSpeaker;
+          const itemMarginTop = index === 0 ? 0 : isSameSender ? 4 : 16;
+
           if (msg.type === 'FALLBACK') {
             return (
-              <ChatBubble key={msg.id} variant="received" bubbleStyle="sent" isFallback animate={index === messages.length - 1}>
-                {msg.content}
-              </ChatBubble>
+              <div key={msg.id} style={{ width: '100%', marginTop: `${itemMarginTop}px` }}>
+                <ChatBubble variant="received" bubbleStyle="sent" isFallback animate={index === messages.length - 1}>
+                  {msg.content}
+                </ChatBubble>
+              </div>
             );
           }
           if (msg.type === 'STATUS_CARD') {
             return (
-              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: `${itemMarginTop}px` }}>
                 {msg.content && <ChatBubble variant="received" animate={index === messages.length - 1}>{msg.content}</ChatBubble>}
               </div>
             );
           }
           if (msg.type === 'REQUEST_CARD') {
             return (
-              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-12)' }}>
+              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-12)', width: '100%', marginTop: `${itemMarginTop}px` }}>
                 {msg.content && msg.content.trim() !== '' && (
                   <ChatBubble variant="received" animate={index === messages.length - 1}>
                     {msg.content}
@@ -234,7 +254,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                 display: 'flex',
                 flexDirection: 'column',
                 flex: isWelcome ? 1 : undefined,
-                margin: isWelcome ? '0' : (isFirstChat ? 'auto 0 0 0' : '0')
+                margin: isWelcome ? '0' : (isFirstChat ? 'auto 0 0 0' : `${itemMarginTop}px 0 0 0`)
               }}>
                 {isWelcome ? (
                   <div style={{
@@ -311,39 +331,43 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           }
           if (msg.type === 'FEEDBACK') {
             return (
-              <ChatEndCard
-                key={msg.id}
-                summary={String(msg.meta?.summary || '')}
-                domainCode={String(msg.meta?.domainCode || 'UNKNOWN')}
-                completedAt={String(msg.meta?.completedAt || new Date().toISOString())}
-                onSubmitRating={(rating) => {
-                  const requestId = msg.meta?.requestId;
-                  if (requestId && onRateRequest) {
-                    onRateRequest(Number(requestId), rating);
-                  }
-                }}
-              />
+              <div key={msg.id} style={{ width: '100%', marginTop: `${itemMarginTop}px` }}>
+                <ChatEndCard
+                  summary={String(msg.meta?.summary || '')}
+                  domainCode={String(msg.meta?.domainCode || 'UNKNOWN')}
+                  completedAt={String(msg.meta?.completedAt || new Date().toISOString())}
+                  onSubmitRating={(rating) => {
+                    const requestId = msg.meta?.requestId;
+                    if (requestId && onRateRequest) {
+                      onRateRequest(Number(requestId), rating);
+                    }
+                  }}
+                />
+              </div>
             );
           }
           if (msg.type === 'CHAT_END') {
             return (
-              <FeedbackCard
-                key={msg.id}
-                completedAt={String(msg.meta?.completedAt || new Date().toISOString())}
-                onSubmit={(rating) => {
-                  const requestId = msg.meta?.requestId;
-                  if (requestId && onRateRequest) {
-                    onRateRequest(Number(requestId), rating);
-                  }
-                }}
-              />
+              <div key={msg.id} style={{ width: '100%', marginTop: `${itemMarginTop}px` }}>
+                <FeedbackCard
+                  completedAt={String(msg.meta?.completedAt || new Date().toISOString())}
+                  onSubmit={(rating) => {
+                    const requestId = msg.meta?.requestId;
+                    if (requestId && onRateRequest) {
+                      onRateRequest(Number(requestId), rating);
+                    }
+                  }}
+                />
+              </div>
             );
           }
 
           return (
-            <ChatBubble key={msg.id} variant={msg.variant} imageUrl={msg.imageUrl} animate={index === messages.length - 1 && msg.variant === 'received'}>
-              {msg.content}
-            </ChatBubble>
+            <div key={msg.id} style={{ width: '100%', marginTop: `${itemMarginTop}px` }}>
+              <ChatBubble variant={msg.variant} imageUrl={msg.imageUrl} animate={index === messages.length - 1 && msg.variant === 'received'}>
+                {msg.content}
+              </ChatBubble>
+            </div>
           );
         })}
         {progressMsg && (

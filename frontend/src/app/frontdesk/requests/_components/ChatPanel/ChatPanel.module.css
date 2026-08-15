@@ -132,13 +132,14 @@
 
   .requestCardWrapper {
     width: 100% !important;
+    max-width: 448px !important;
     min-width: unset !important;
   }
 }
 
 .requestCardWrapper {
-  width: 60%;
-  min-width: 300px;
+  width: 448px;
+  max-width: 100%;
 }
 
 .iconBtn {

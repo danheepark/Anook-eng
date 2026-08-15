@@ -175,19 +175,23 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHi
               <div className={styles.emptyState}>{t.frontdeskPage?.chatHistory?.emptyMessage || '대화 내역이 없습니다.'}</div>
             )}
             {!loading && !error && messages.map((msg, idx) => {
+              const isGuest = msg.senderType === 'GUEST';
+              const isStaff = msg.senderType === 'STAFF';
+              const isSystemMsg = msg.senderType === 'SYSTEM' || msg.content.includes('[SYSTEM]');
+
+              const prevMsg = idx > 0 ? messages[idx - 1] : null;
+              const isSameSender = prevMsg && !isSystemMsg && prevMsg.senderType !== 'SYSTEM' && !prevMsg.content.includes('[SYSTEM]') && prevMsg.senderType === msg.senderType;
+              const itemMarginTop = idx === 0 ? 0 : isSameSender ? 4 : 16;
+
               if (msg.type === 'REQUEST_CARD' && msg.meta) {
                 return (
-                  <div key={msg.id} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', margin: '4px 0' }}>
-                    <div style={{ maxWidth: '85%' }}>
+                  <div key={msg.id} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: `${itemMarginTop}px` }}>
+                    <div style={{ width: '448px', maxWidth: '100%' }}>
                       <GuestRequestCard {...msg.meta} isReadOnly />
                     </div>
                   </div>
                 );
               }
-
-              const isGuest = msg.senderType === 'GUEST';
-              const isStaff = msg.senderType === 'STAFF';
-              const isSystemMsg = msg.senderType === 'SYSTEM' || msg.content.includes('[SYSTEM]');
               
               if (isSystemMsg) {
                 let cleanContent = msg.content.replace(/^\[SYSTEM\]\s*/, '');
@@ -195,7 +199,7 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHi
                   cleanContent = t.frontdeskPage?.chatHistory?.systemCompleted || cleanContent;
                 }
                 return (
-                  <div key={msg.id} style={{ width: '100%', marginBottom: 'var(--space-8)' }}>
+                  <div key={msg.id} style={{ width: '100%', marginTop: `${itemMarginTop}px` }}>
                     <FeedbackCard
                       isSystemMessage
                       systemContent={cleanContent}
@@ -210,8 +214,8 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHi
               let displayContent = msg.content;
 
               return (
-                <div key={msg.id} style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ padding: '4px', borderRadius: '16px' }}>
+                <div key={msg.id} style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: `${itemMarginTop}px` }}>
+                  <div style={{ borderRadius: '16px' }}>
                     <ChatBubble
                       variant={variant}
                       bubbleStyle={bubbleStyle}

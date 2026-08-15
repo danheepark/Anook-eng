@@ -223,7 +223,7 @@
       "title": "채팅 히스토리",
       "emptyMessage": "메시지 없음",
       "systemCompleted": "상담 및 처리가 모두 완료되었습니다.",
-      "systemMessageNote": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
+      "systemMessageNote": "고객에게 노출되지 않는 프론트 운영용 시스템 메시지입니다",
       "roomConversation": "{{room}}호 대화",
       "roomChatRecord": "{{room}}호 채팅 기록",
       "selectRoomPrompt": "대화를 확인할 객실을 선택해주세요",
@@ -672,7 +672,7 @@
   },
   "feedbackCard": {
     "systemCompletedTitle": "상담 및 처리가 모두 완료되었습니다.",
-    "systemCompletedSubtitle": "(※ 고객에게 노출되지 않는 프론트 운영용 메시지입니다)",
+    "systemCompletedSubtitle": "고객에게 노출되지 않는 프론트 운영용 시스템 메시지입니다",
     "requestCompleted": "요청 완료",
     "consultationCompleted": "상담이 완료되었습니다",
     "satisfactionQuestion": "서비스가 만족스러우셨나요?",

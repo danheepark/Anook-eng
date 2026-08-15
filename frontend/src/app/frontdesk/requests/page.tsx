@@ -457,7 +457,7 @@ export default function FrontDeskPage() {
               />
           </div>
           {/* Tabs inside left pane */}
-          <div style={{ marginBottom: 'var(--space-16)' }}>
+          <div style={{ marginBottom: 'var(--space-4)' }}>
             <Tabs
               options={[
                 { label: t.chatPanel?.inProgressTab || '진행 중', value: 'active', count: activeCount },

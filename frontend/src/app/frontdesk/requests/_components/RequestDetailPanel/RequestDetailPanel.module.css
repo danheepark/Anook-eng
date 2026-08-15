@@ -15,7 +15,7 @@
   padding: var(--space-16);
   display: flex;
   flex-direction: column;
-  gap: var(--space-16);
+  gap: 20px;
 }
 
 .header {
@@ -63,43 +63,30 @@
   background: var(--color-gray-200);
 }
 
-.timeSection {
+.reasoningGroup {
   display: flex;
-  align-items: center;
-  padding: var(--space-8) 0;
+  flex-direction: column;
+  gap: var(--space-16);
 }
 
-.timeText {
-  font: var(--text-body-medium);
+.reasoningItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.secondaryLabel {
+  font: var(--text-caption-medium);
   color: var(--color-gray-500);
-  letter-spacing: -0.2px;
+  letter-spacing: -0.1px;
 }
 
-.reviewSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-  padding: var(--space-16) 0;
-  border-top: 1px solid var(--color-gray-100);
-}
-
-.reviewTitle {
-  font: var(--text-h3-bold);
-  color: var(--color-gray-900);
-  margin: 0;
-}
-
-.bulletList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.bulletItem {
+.reasoningText {
   font: var(--text-body-medium);
   color: var(--color-gray-800);
-  line-height: 1.55;
+  line-height: 1.5;
   letter-spacing: -0.1px;
+  margin: 0;
 }
 
 .photoSection {
@@ -258,6 +245,31 @@
   padding-bottom: var(--space-16);
   /* 화면 바닥과의 최소 여백 */
   z-index: 10;
+}
+
+.cancelActionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  align-items: center;
+  width: 100%;
+}
+
+.cancelNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: var(--text-caption-regular);
+  color: var(--color-gray-500);
+  line-height: 1.4;
+  text-align: center;
+  padding: 0 4px;
+}
+
+.shieldIcon {
+  flex-shrink: 0;
+  color: var(--color-gray-400);
 }
 
 .footerRight {
