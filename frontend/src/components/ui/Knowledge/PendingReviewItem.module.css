@@ -1,0 +1,44 @@
+.card {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 220px;
+  padding: 16px 20px;
+  background-color: var(--color-gray-100, #f3f4f6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg, 10px);
+  cursor: pointer;
+  transition: all var(--transition, 0.15s ease);
+  box-sizing: border-box;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.card:hover {
+  background-color: var(--color-gray-200, #e5e7eb);
+  border-color: var(--color-gray-300, #d1d5db);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+  font: var(--text-body-bold);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.35;
+}
+
+.time {
+  font: var(--text-caption-regular);
+  font-size: 13px;
+  color: var(--color-gray-500);
+  margin: 0;
+  line-height: 1.35;
+}

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import Button from '@/components/ui/Button/Button';
-import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
+import PendingReviewItem from '@/components/ui/Knowledge/PendingReviewItem';
 import PendingKnowledgeItem from '@/components/ui/Knowledge/PendingKnowledgeItem';
 import PendingKnowledgeHeader from '@/components/ui/Knowledge/PendingKnowledgeHeader';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
@@ -89,7 +89,7 @@ export default function KnowledgeReviewTab({
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
   // 채팅 히스토리 모달
-  const [chatHistoryRoomNo, setChatHistoryRoomNo] = useState<string | null>(null);
+  const [selectedChatHistory, setSelectedChatHistory] = useState<{ roomNo: string; title?: string } | null>(null);
 
   // 후보 항목 수정 모달
   const [editCandidateIndex, setEditCandidateIndex] = useState<number | null>(null);
@@ -308,42 +308,28 @@ export default function KnowledgeReviewTab({
           </div>
         </div>
       ) : (
-        // 기본 대기 목록 (분석 전)
-        <div className={styles.cardList}>
+        // 기본 대기 목록 (분석 전 - 간결한 카드 그리드)
+        <div className={styles.pendingGrid}>
           {filteredItems.length === 0 ? (
             <div className={styles.emptyState}>
               {aiTraining?.empty || '검토 대기 중인 항목이 없습니다.'}
             </div>
           ) : (
             filteredItems.map(item => (
-              <KnowledgeItem
+              <PendingReviewItem
                 key={item.id}
                 id={item.id}
-                domainCode={(!item.domainCode || item.domainCode === 'COMMON' || item.domainCode === 'UNKNOWN') ? 'UNKNOWN' : item.domainCode}
-                question={item.question}
-                answer={item.answer || '대화 내용 요약: ' + item.question}
-                updatedAt={(() => {
-                  const d = new Date(item.updatedAt);
-                  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-                    d.getDate()
-                  ).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(
-                    d.getMinutes()
-                  ).padStart(2, '0')}`;
-                })()}
+                title={item.question}
+                updatedAt={item.updatedAt}
                 onClick={() => {
                   if (item.roomNo) {
-                    setChatHistoryRoomNo(item.roomNo);
+                    setSelectedChatHistory({
+                      roomNo: item.roomNo,
+                      title: item.question || undefined,
+                    });
                   } else {
                     alert('대화 내역 정보가 없는 항목입니다.');
                   }
-                }}
-                onEdit={(e) => {
-                  e.stopPropagation();
-                  setDeleteTargetId(item.id);
-                }}
-                onDelete={(e) => {
-                  e.stopPropagation();
-                  setDeleteTargetId(item.id);
                 }}
                 isActiveMatch={activeMatchId === item.id}
                 highlightQuery={searchValue}
@@ -389,11 +375,12 @@ export default function KnowledgeReviewTab({
       )}
 
       {/* 채팅 히스토리 모달 */}
-      {chatHistoryRoomNo && (
+      {selectedChatHistory && (
         <ChatHistoryModal
-          isOpen={!!chatHistoryRoomNo}
-          roomNumber={chatHistoryRoomNo}
-          onClose={() => setChatHistoryRoomNo(null)}
+          isOpen={!!selectedChatHistory}
+          roomNumber={selectedChatHistory.roomNo}
+          title={selectedChatHistory.title}
+          onClose={() => setSelectedChatHistory(null)}
         />
       )}
     </div>

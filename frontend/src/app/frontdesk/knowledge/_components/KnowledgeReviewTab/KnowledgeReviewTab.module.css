@@ -36,6 +36,14 @@
   margin-top: 0;
 }
 
+.pendingGrid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-12, 12px);
+  padding: var(--space-8, 8px) 0;
+}
+
 .emptyState {
   text-align: center;
   padding: 60px 0;

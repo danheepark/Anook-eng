@@ -142,23 +142,18 @@ export default function KnowledgeManagementPage() {
         </div>
       </section>
 
-      {/* 2. Bottom Section: AI Knowledge Management */}
+      {/* 2. Bottom Section: AI Knowledge Library */}
       <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>
-            {language === 'en' ? 'AI Knowledge Management' : (t.frontdeskPage?.taskBoard?.titles?.rag || 'AI 지식 관리')}
-            <span className={styles.countBadge}>{approvedCount}</span>
-          </h2>
-          <div id="knowledge-header-actions" />
-        </div>
-
-        <div className={styles.subTabs}>
-          <Tabs 
-            options={SUB_TAB_OPTIONS}
-            activeValue={subTab}
-            onChange={handleSubTabChange}
-            variant="line"
-          />
+        <div className={styles.tabRow}>
+          <div className={styles.subTabs}>
+            <Tabs 
+              options={SUB_TAB_OPTIONS}
+              activeValue={subTab}
+              onChange={handleSubTabChange}
+              variant="line"
+            />
+          </div>
+          <div id="knowledge-header-actions" className={styles.tabActions} />
         </div>
 
         <div className={styles.sectionBody}>

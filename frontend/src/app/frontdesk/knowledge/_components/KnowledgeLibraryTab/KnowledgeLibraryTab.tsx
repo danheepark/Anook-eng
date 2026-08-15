@@ -7,6 +7,7 @@ import KnowledgeModal from '@/components/ui/Knowledge/KnowledgeModal';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
 import ConfirmModal from '@/components/ui/Modal/ConfirmModal';
 import Button from '@/components/ui/Button/Button';
+import { Plus } from 'lucide-react';
 import { useKnowledge, KnowledgeEntry } from '../../useKnowledge';
 import styles from './KnowledgeLibraryTab.module.css';
 import { useTranslation } from '@/app/useTranslation';
@@ -85,15 +86,18 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
         <div className={styles.headerArea}>
           <div className={styles.headerTitle} />
           <div>
-            <Button 
-              variant="primary" 
+            <button 
+              type="button"
+              className={styles.addBtn}
               onClick={() => {
                 setIsCreatingNew(true);
                 setIsEditModalOpen(true);
               }}
+              title={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
+              aria-label={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
             >
-              {language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
-            </Button>
+              <Plus size={20} />
+            </button>
           </div>
         </div>
       )}
@@ -101,15 +105,18 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
       {/* Render Portal in the background when active */}
       {mounted && typeof window !== 'undefined' && document.getElementById('knowledge-header-actions') && (
         createPortal(
-          <Button 
-            variant="primary" 
+          <button 
+            type="button"
+            className={styles.addBtn}
             onClick={() => {
               setIsCreatingNew(true);
               setIsEditModalOpen(true);
             }}
+            title={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
+            aria-label={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
           >
-            {language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
-          </Button>,
+            <Plus size={20} />
+          </button>,
           document.getElementById('knowledge-header-actions')!
         )
       )}

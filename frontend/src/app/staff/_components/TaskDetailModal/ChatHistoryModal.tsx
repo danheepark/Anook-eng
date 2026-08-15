@@ -27,9 +27,10 @@ interface ChatHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   roomNumber: string;
+  title?: string;
 }
 
-export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHistoryModalProps) {
+export default function ChatHistoryModal({ isOpen, onClose, roomNumber, title }: ChatHistoryModalProps) {
   const { t } = useTranslation();
 
   const translateContent = (content: string) => {
@@ -160,7 +161,9 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHi
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
       <ModalCard size="md" onClose={onClose}>
         <div className={styles.header}>
-          <h2 className={styles.title}>{t.frontdeskPage?.chatHistory?.roomChatRecord?.replace('{{room}}', roomNumber) || `${roomNumber}호 대화 내역`}</h2>
+          <h2 className={styles.title}>
+            {title || (t.frontdeskPage?.chatHistory?.roomChatRecord?.replace('{{room}}', roomNumber) || `${roomNumber}호 대화 내역`)}
+          </h2>
         </div>
         
         <div className={styles.container}>

@@ -36,6 +36,7 @@ import Toast from '@/components/ui/Modal/Toast';
 
 import ChatHistory from '@/components/ui/ChatHistory/ChatHistory';
 import KnowledgeItem from '@/components/ui/Knowledge/KnowledgeItem';
+import PendingReviewItem from '@/components/ui/Knowledge/PendingReviewItem';
 import PendingKnowledgeItem from '@/components/ui/Knowledge/PendingKnowledgeItem';
 import PendingKnowledgeHeader from '@/components/ui/Knowledge/PendingKnowledgeHeader';
 import KnowledgeModal from '@/components/ui/Knowledge/KnowledgeModal';
@@ -859,6 +860,34 @@ export default function ComponentShowcasePage() {
             <Button variant="outlined" onClick={() => setSelectedKnowledge(sampleKnowledges[0])}>
               Knowledge Modal 열기
             </Button>
+          </div>
+        </section>
+
+        {/* Pending Review Item (분석 전 대기 목록 아이템) 섹션 */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-16)', marginBottom: 'var(--space-32)' }}>
+          <h2 style={{ font: 'var(--text-h2-bold)', color: 'var(--color-gray-900)' }}>
+            Pending Review Item (분석 전 대기 중인 지식 - 간결한 카드)
+          </h2>
+          <ComponentLabel path="components/ui/Knowledge/PendingReviewItem.tsx" />
+          <div style={{ background: 'var(--color-bg)', padding: 'var(--space-20) var(--space-32)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            <PendingReviewItem
+              id={201}
+              title="Wi-Fi issue"
+              time="2 hrs ago"
+              onClick={() => alert('대화 내역 확인')}
+            />
+            <PendingReviewItem
+              id={202}
+              title="Manager request"
+              time="5 hrs ago"
+              onClick={() => alert('대화 내역 확인')}
+            />
+            <PendingReviewItem
+              id={203}
+              title="Late checkout"
+              time="8 hrs ago"
+              onClick={() => alert('대화 내역 확인')}
+            />
           </div>
         </section>
 
