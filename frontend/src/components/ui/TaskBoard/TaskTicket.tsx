@@ -23,6 +23,7 @@ export interface TaskTicketProps {
   onRejectCancel?: (e: React.MouseEvent) => void;
   isCancelled?: boolean;
   isEscalated?: boolean;
+  assigneeName?: string | null;
   entities?: {
     is_contactless?: boolean;
     target_time?: string;
@@ -78,6 +79,7 @@ export default function TaskTicket({
   onRejectCancel,
   isCancelled = false,
   isEscalated = false,
+  assigneeName,
   entities,
   highlightSearch,
   isActiveMatch = false
@@ -501,8 +503,13 @@ export default function TaskTicket({
         )}
       </div>
 
-      {Boolean((status === 'TODO' && onAccept) || (status === 'IN_PROGRESS' && !cancelRequested && onComplete) || (status === 'IN_PROGRESS' && cancelRequested && (onRejectCancel || onApproveCancel))) && (
+      {(assigneeName || Boolean((status === 'TODO' && onAccept) || (status === 'IN_PROGRESS' && !cancelRequested && onComplete) || (status === 'IN_PROGRESS' && cancelRequested && (onRejectCancel || onApproveCancel)))) && (
         <div className={styles.footer}>
+          {assigneeName && (
+            <span className={styles.assigneeText}>
+              {language === 'en' ? `Accepted by ${assigneeName}` : `${assigneeName} 담당`}
+            </span>
+          )}
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {status === 'TODO' && onAccept && (
               <Button

@@ -12,8 +12,26 @@ import { useTasks, StaffTask } from './useTasks';
 import BoardSkeleton from './_components/BoardSkeleton/BoardSkeleton';
 import HeaderSearchSlot from '@/components/layout/HeaderSearchSlot';
 import { useUiStore } from '@/stores/useUiStore';
+import DateFilterDropdown, { DateFilterType, DateRange } from '../frontdesk/requests/_components/DateFilterDropdown';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
+
+const getTodayYMD = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const getYesterdayYMD = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
 
 const PRIORITY_OPTIONS = [
   { label: '전체 우선순위', value: 'ALL' },
@@ -95,6 +113,11 @@ function DashboardContent() {
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [selectedTask, setSelectedTask] = useState<StaffTask | null>(null);
   const [activeTab, setActiveTab] = useState<'TODO' | 'IN_PROGRESS' | 'DONE'>('TODO');
+  const [dateFilterType, setDateFilterType] = useState<DateFilterType>('today');
+  const [customRange, setCustomRange] = useState<DateRange>(() => {
+    const today = getTodayYMD();
+    return { startDate: today, endDate: today };
+  });
 
   const [departmentId, setDepartmentId] = useState<string>('');
   const [departmentName, setDepartmentName] = useState('');
@@ -202,10 +225,41 @@ function DashboardContent() {
       return isNaN(time) ? 0 : time;
     };
 
+    const allDoneTasks = filteredTasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED');
+    const todayYMD = getTodayYMD();
+    const yestYMD = getYesterdayYMD();
+
+    const filteredDoneTasks = allDoneTasks.filter(task => {
+      if (dateFilterType === 'all') return true;
+
+      const getLocalYMD = (dateStr?: string | null) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr.replace(' ', 'T'));
+        if (isNaN(d.getTime())) return '';
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      const taskYMD = getLocalYMD(task.updatedAt || task.cancelRequestedAt || task.createdAt);
+      if (!taskYMD) return true;
+
+      if (dateFilterType === 'today') return taskYMD === todayYMD;
+      if (dateFilterType === 'yesterday') return taskYMD === yestYMD;
+      if (dateFilterType === 'custom') {
+        const { startDate, endDate } = customRange;
+        if (startDate && endDate) return taskYMD >= startDate && taskYMD <= endDate;
+        if (startDate) return taskYMD >= startDate;
+        if (endDate) return taskYMD <= endDate;
+      }
+      return true;
+    });
+
     return {
       TODO: filteredTasks.filter(t => (t.status === 'PENDING' || t.status === 'ESCALATED') && !t.cancelRequested),
       IN_PROGRESS: sortByCancelRequested(filteredTasks.filter(t => t.status === 'IN_PROGRESS')),
-      DONE: [...filteredTasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED')].sort((a, b) => {
+      DONE: filteredDoneTasks.sort((a, b) => {
         const timeA = safeParseTime(a.updatedAt || a.cancelRequestedAt || a.createdAt);
         const timeB = safeParseTime(b.updatedAt || b.cancelRequestedAt || b.createdAt);
         if (timeA !== timeB) {
@@ -214,7 +268,7 @@ function DashboardContent() {
         return b.id - a.id;
       }),
     };
-  }, [filteredTasks]);
+  }, [filteredTasks, dateFilterType, customRange]);
 
   return (
     <div className={styles.container}>
@@ -282,6 +336,16 @@ function DashboardContent() {
                     title={col.title}
                     count={columnTasks.length}
                     status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
+                    headerRight={col.status === 'DONE' ? (
+                      <DateFilterDropdown
+                        filterType={dateFilterType}
+                        customRange={customRange}
+                        onChange={(type, range) => {
+                          setDateFilterType(type);
+                          if (range) setCustomRange(range);
+                        }}
+                      />
+                    ) : undefined}
                   >
                     <div className={styles.columnContent}>
                       {columnTasks.map(task => (
@@ -320,6 +384,7 @@ function DashboardContent() {
                               rejectCancellation(task.id, task.version);
                             } : undefined}
                             entities={task.entities}
+                            assigneeName={task.assignedStaffName}
                             highlightSearch={searchValue}
                             isActiveMatch={searchValue ? filteredTasks[currentMatch]?.id === task.id : false}
                           />

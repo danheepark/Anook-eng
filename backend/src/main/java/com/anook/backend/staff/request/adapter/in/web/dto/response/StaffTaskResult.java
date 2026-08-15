@@ -11,6 +11,7 @@ public record StaffTaskResult(
         String rawText,
         String roomNumber,
         Long assignedStaffId,
+        String assignedStaffName,
         Float confidence,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,

@@ -28,7 +28,7 @@ public class GetStaffRequestsService implements GetStaffRequestsUseCase {
                             : base64Image;
                     return new StaffTaskResult(
                             r.id(), r.status(), r.priority(), r.departmentId(), r.summary(),
-                            r.rawText(), r.roomNumber(), r.assignedStaffId(), r.confidence(),
+                            r.rawText(), r.roomNumber(), r.assignedStaffId(), r.assignedStaffName(), r.confidence(),
                             r.createdAt(), r.updatedAt(), r.version(), r.cancelRequested(), r.cancelRequestedAt(), r.entities(), imageUrl, r.reasoning()
                     );
                 })

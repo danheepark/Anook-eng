@@ -21,8 +21,10 @@ public class StaffRequestQueryAdapter implements RequestQueryPort {
     @Override
     public List<StaffTaskResult> findRequests(String departmentId, String status, String priority) {
         StringBuilder sql = new StringBuilder(
-                "SELECT r.id, r.status, r.priority, r.department_id, r.summary, r.raw_text, r.room_no, r.assigned_staff_id, r.confidence, r.created_at, r.updated_at, r.version, r.cancel_requested, r.cancel_requested_at, r.entities, r.reasoning " +
-                "FROM request r WHERE 1=1"
+                "SELECT r.id, r.status, r.priority, r.department_id, r.summary, r.raw_text, r.room_no, r.assigned_staff_id, s.name AS assigned_staff_name, r.confidence, r.created_at, r.updated_at, r.version, r.cancel_requested, r.cancel_requested_at, r.entities, r.reasoning " +
+                "FROM request r " +
+                "LEFT JOIN staff s ON r.assigned_staff_id = s.id " +
+                "WHERE 1=1"
         );
         List<Object> params = new ArrayList<>();
 
@@ -53,6 +55,7 @@ public class StaffRequestQueryAdapter implements RequestQueryPort {
             String rRawText = rs.getString("raw_text");
             String rRoomNo = rs.getString("room_no");
             Long rAssignedStaffId = rs.getObject("assigned_staff_id") != null ? rs.getLong("assigned_staff_id") : null;
+            String rAssignedStaffName = rs.getString("assigned_staff_name");
             Float rConfidence = rs.getObject("confidence") != null ? rs.getFloat("confidence") : null;
             LocalDateTime rCreatedAt = rs.getTimestamp("created_at").toLocalDateTime();
             LocalDateTime rUpdatedAt = rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : rCreatedAt;
@@ -82,6 +85,7 @@ public class StaffRequestQueryAdapter implements RequestQueryPort {
                 rRawText,
                 rRoomNo,
                 rAssignedStaffId,
+                rAssignedStaffName,
                 rConfidence,
                 rCreatedAt,
                 rUpdatedAt,

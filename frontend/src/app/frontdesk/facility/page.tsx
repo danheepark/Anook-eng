@@ -201,6 +201,7 @@ export default function FacilityPage() {
                     cancelRequested={req.cancelRequested}
                     createdAt={req.createdAt}
                     entities={req.entities}
+                    assigneeName={req.assignedStaffName}
                     highlightSearch={searchValue}
                     isActiveMatch={matches[currentMatchIndex]?.id === req.id}
                   />
@@ -227,6 +228,7 @@ export default function FacilityPage() {
                     createdAt={req.createdAt}
                     updatedAt={req.updatedAt}
                     entities={req.entities}
+                    assigneeName={req.assignedStaffName}
                     highlightSearch={searchValue}
                     isActiveMatch={matches[currentMatchIndex]?.id === req.id}
                   />
@@ -267,6 +269,7 @@ export default function FacilityPage() {
                     createdAt={req.createdAt}
                     updatedAt={req.updatedAt}
                     entities={req.entities}
+                    assigneeName={req.assignedStaffName}
                     highlightSearch={searchValue}
                     isActiveMatch={matches[currentMatchIndex]?.id === req.id}
                   />
