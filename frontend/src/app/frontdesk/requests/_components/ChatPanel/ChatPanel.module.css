@@ -11,8 +11,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
-  padding: 0 var(--space-24);
+  height: 64px;
+  padding: 0 var(--space-16);
   border-bottom: 1px solid var(--color-gray-200);
   background-color: var(--color-white);
   flex-shrink: 0;
@@ -70,14 +70,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: var(--space-24);
-  gap: var(--space-16);
+  padding: var(--space-16);
+  gap: 0;
   overflow-y: auto;
   background-color: var(--color-white);
 }
 
 .footer {
-  padding: 0 var(--space-24) var(--space-24) var(--space-24);
+  padding: 0 var(--space-16) var(--space-16) var(--space-16);
   background-color: var(--color-white);
   border-top: none;
   flex-shrink: 0;
@@ -140,3 +140,80 @@
   width: 60%;
   min-width: 300px;
 }
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  color: var(--color-gray-600);
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.iconBtn:hover {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-900);
+  border-color: var(--color-gray-300);
+}
+
+.iconBtnActive {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-900);
+  border-color: var(--color-gray-400);
+}
+
+.searchWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.floatingSearchContainer {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  width: 320px;
+  animation: fadeIn 0.15s ease-out;
+  border-radius: var(--radius-md);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.unreadDivider {
+  display: flex;
+  align-items: center;
+  margin: var(--space-16) 0;
+  width: 100%;
+}
+
+.unreadDivider::before,
+.unreadDivider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.unreadText {
+  padding: 0 var(--space-12);
+  font: var(--text-caption-medium);
+  color: var(--color-gray-400);
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+}
+

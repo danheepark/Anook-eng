@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, MoreVertical } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Search } from 'lucide-react';
 import styles from './ChatPanel.module.css';
 import ChatBubble from '@/app/guest/chat/_components/ChatBubble';
 import ChatInput from '@/app/guest/chat/_components/ChatInput';
@@ -88,6 +88,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
   const [isRagConfirmOpen, setIsRagConfirmOpen] = useState(false);
 
   // 내부 검색 상태
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [internalSearch, setInternalSearch] = useState('');
   const [matchIndices, setMatchIndices] = useState<number[]>([]);
   const [currentMatch, setCurrentMatch] = useState(0);
@@ -125,12 +126,29 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
   // AI 특수 코드 매핑 함수 (다국어 언어팩 연동)
   const translateContent = (content: string) => {
     if (!content) return content;
-    if (content.includes('[FORWARD_FB]')) return '네, 식음료 팀으로 주문 내용을 바로 전달해 드릴게요!';
-    if (content.includes('[FORWARD_HK]')) return '네, 알겠습니다! 하우스키핑 팀으로 요청 내용을 신속하게 전달해 드릴게요.';
-    if (content.includes('[FORWARD_FACILITY]')) return '불편을 드려 죄송합니다. 🥲 시설 관리 팀으로 내용을 전달하여 최대한 빠르게 조치해 드릴게요! 🛠️';
-    if (content.includes('[FORWARD_FRONT]')) return '지금 바로 프론트 데스크 직원에게 연결하여 도움을 드리겠습니다.';
-    if (content.includes('[INFO_NOT_FOUND]')) return '그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏';
-    return content;
+    let newContent = content;
+    if (newContent.includes('[FORWARD_FB]') || newContent.includes('식음료 팀으로 주문 내용을 바로 전달')) {
+      return t.aiReplies?.forwardFb || "Sure! I'll send your order over to the F&B team right away!";
+    }
+    if (newContent.includes('[FORWARD_HK]') || newContent.includes('하우스키핑 팀으로 요청 내용을 신속하게 전달')) {
+      return t.aiReplies?.forwardHk || "Got it! Sending your request to the Housekeeping team now.";
+    }
+    if (newContent.includes('[FORWARD_FACILITY]') || newContent.includes('시설 관리 팀으로 내용을 전달')) {
+      return t.aiReplies?.forwardFacility || "So sorry about the inconvenience! I'm forwarding this to the Facility team to get it sorted as quickly as possible.";
+    }
+    if (newContent.includes('[FORWARD_CONCIERGE]')) {
+      return (t.aiReplies as any)?.forwardConcierge || "Got it! I'll pass this along to the Concierge team right away.";
+    }
+    if (newContent.includes('[FORWARD_FRONT]') || newContent.includes('프론트 데스크 직원에게 연결하여 도움을 드리겠습니다') || newContent.includes('프론트데스크 직원이 곧 확인 후 안내')) {
+      return t.aiReplies?.forwardFront || "Let me connect you to the front desk right now.";
+    }
+    if (newContent.includes('[INFO_NOT_FOUND]') || newContent.includes('프론트 데스크로 즉시 전달해 두었습니다') || newContent.includes('제가 바로 답변드리기 어려워')) {
+      return t.aiReplies?.infoNotFound || "I'm not quite sure about that one. I've passed your question along to the front desk — they'll get back to you here shortly.";
+    }
+    if (newContent.includes('[PII_GUARD]')) {
+      return t.aiReplies?.piiGuard || "To keep your personal info safe, we can't accept sensitive details through chat.";
+    }
+    return newContent;
   };
 
   // 모달 열릴 때 실제 대화 내역 로드
@@ -435,6 +453,45 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     };
   };
 
+  // 첫 번째 읽지 않은 메시지(Unread) 구분선 위치 계산
+  const firstUnreadIndex = React.useMemo(() => {
+    if (messages.length === 0) return -1;
+    if (status === 'COMPLETED' || status === 'CANCELLED') return -1;
+
+    // 1. 마지막 [SYSTEM] 상담 완료 메시지 이후의 첫 번째 메시지 찾기
+    let lastSystemIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (
+        msg.senderType === 'SYSTEM' ||
+        msg.content?.includes('[SYSTEM]') ||
+        msg.content?.includes('상담 및 처리가 모두 완료되었습니다') ||
+        msg.content?.includes('이전 상담 및 처리가 모두 완료되었습니다')
+      ) {
+        lastSystemIdx = i;
+        break;
+      }
+    }
+
+    const startIndex = lastSystemIdx !== -1 ? lastSystemIdx + 1 : 0;
+    if (startIndex >= messages.length) return -1;
+
+    // 2. 직원이 마지막으로 전송한 메시지 위치 찾기
+    let lastStaffIdx = -1;
+    for (let i = messages.length - 1; i >= startIndex; i--) {
+      if (messages[i].senderType === 'STAFF') {
+        lastStaffIdx = i;
+        break;
+      }
+    }
+
+    const unreadStart = lastStaffIdx !== -1 ? lastStaffIdx + 1 : startIndex;
+    if (unreadStart < messages.length && (unreadStart > 0 || lastSystemIdx !== -1)) {
+      return unreadStart;
+    }
+    return -1;
+  }, [messages, status]);
+
   const isReadOnly = status === 'COMPLETED' || status === 'CANCELLED';
 
   return (
@@ -452,16 +509,37 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
           </div>
           <div className={styles.headerRight} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {showSearch && (
-              <SmartSearchBar
-                className={styles.chatSearchContainer}
-                inputWrapperStyle={{ width: '240px' }}
-                value={internalSearch}
-                onChange={(val) => setInternalSearch(val)}
-                currentMatch={currentMatch}
-                totalMatches={matchIndices.length}
-                onPrev={() => setCurrentMatch(p => Math.max(0, p - 1))}
-                onNext={() => setCurrentMatch(p => Math.min(matchIndices.length - 1, p + 1))}
-              />
+              <div className={styles.searchWrapper}>
+                <button
+                  type="button"
+                  className={`${styles.iconBtn} ${isSearchOpen ? styles.iconBtnActive : ''}`}
+                  onClick={() => {
+                    setIsSearchOpen(prev => !prev);
+                    if (isSearchOpen) {
+                      setInternalSearch('');
+                    }
+                  }}
+                  aria-label="Search messages"
+                >
+                  <Search size={18} />
+                </button>
+
+                {isSearchOpen && (
+                  <div className={styles.floatingSearchContainer}>
+                    <SmartSearchBar
+                      autoFocus
+                      inputWrapperStyle={{ width: '320px' }}
+                      placeholder={t.frontdeskPage?.chatHistory?.searchPlaceholder || '대화 내용 검색...'}
+                      value={internalSearch}
+                      onChange={(val) => setInternalSearch(val)}
+                      currentMatch={currentMatch}
+                      totalMatches={matchIndices.length}
+                      onPrev={() => setCurrentMatch(p => Math.max(0, p - 1))}
+                      onNext={() => setCurrentMatch(p => Math.min(matchIndices.length - 1, p + 1))}
+                    />
+                  </div>
+                )}
+              </div>
             )}
 
             {headerRightContent ? headerRightContent : (
@@ -499,23 +577,28 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 }
               }
 
+              const isUnreadStart = idx === firstUnreadIndex;
+              const prevMsg = idx > 0 ? messages[idx - 1] : null;
+              const isSameSender = prevMsg && !isSystemMsg && prevMsg.senderType !== 'SYSTEM' && prevMsg.variant === msg.variant;
+              const itemMarginTop = idx === 0 ? 0 : isSameSender ? 4 : 16;
+
+              let renderedItem = null;
+
               if (msg.type === 'REQUEST_CARD' && msg.meta) {
-                return (
-                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', margin: '4px 0' }}>
+                renderedItem = (
+                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: `${itemMarginTop}px` }}>
                     <div className={styles.requestCardWrapper}>
                       <GuestRequestCard {...msg.meta} isReadOnly />
                     </div>
                   </div>
                 );
-              }
-
-              if (isSystemMsg) {
+              } else if (isSystemMsg) {
                 let cleanContent = msg.content.replace(/^\[SYSTEM\]\s*/, '');
                 if (cleanContent === '상담 및 처리가 모두 완료되었습니다.' || cleanContent === '이전 상담 및 처리가 모두 완료되었습니다.') {
                   cleanContent = t.frontdeskPage?.chatHistory?.systemCompleted || cleanContent;
                 }
-                return (
-                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%' }}>
+                renderedItem = (
+                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', marginTop: `${itemMarginTop}px` }}>
                     <FeedbackCard
                       isSystemMessage
                       systemContent={cleanContent}
@@ -523,41 +606,49 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                     />
                   </div>
                 );
+              } else {
+                const isAutoMsg = msg.content.includes('프론트 데스크 직원이 메시지를 확인했습니다') ||
+                  msg.content.includes('The front desk staff has checked your message') ||
+                  msg.content.includes('A front desk team member has received your message') ||
+                  msg.content.includes('긴급 대응팀이 배정되었습니다') ||
+                  msg.content.includes('An emergency response team has been assigned');
+
+                const isManualStaffMsg = msg.senderType === 'STAFF';
+                const bubbleStyle = msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const;
+                const isTargetMatch = !!(internalSearch && matchIndices.length > 0 && matchIndices[currentMatch] === idx);
+
+                renderedItem = (
+                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: `${itemMarginTop}px` }}>
+                    <div style={{
+                      transition: 'all 0.3s',
+                      borderRadius: '16px',
+                    }}>
+                      <ChatBubble
+                        variant={msg.variant}
+                        bubbleStyle={bubbleStyle}
+                        isFallback={isManualStaffMsg}
+                      >
+                        {renderHighlightedText(msg.content, internalSearch, isTargetMatch)}
+                      </ChatBubble>
+                    </div>
+                  </div>
+                );
               }
 
-              const isAutoMsg = msg.content.includes('프론트 데스크 직원이 메시지를 확인했습니다') ||
-                msg.content.includes('The front desk staff has checked your message') ||
-                msg.content.includes('긴급 대응팀이 배정되었습니다') ||
-                msg.content.includes('An emergency response team has been assigned');
+              if (isUnreadStart) {
+                return (
+                  <React.Fragment key={`unread-container-${msg.id}`}>
+                    <div className={styles.unreadDivider}>
+                      <span className={styles.unreadText}>
+                        {t.chatPanel?.unread || (language === 'en' ? 'Unread' : '읽지 않은 메시지')}
+                      </span>
+                    </div>
+                    {renderedItem}
+                  </React.Fragment>
+                );
+              }
 
-              // 관리자 패널 기준:
-              // - GUEST → 왼쪽(received) + surface color 스타일(sent)
-              // - AI → 오른쪽(sent) + AI 텍스트 스타일(received)
-              // - STAFF → 오른쪽(sent) + fallback 스타일
-              const isManualStaffMsg = msg.senderType === 'STAFF';
-
-              // 위치(variant)와 버블 스타일(bubbleStyle)을 독립적으로 지정
-              const bubbleStyle = msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const;
-
-              const isTargetMatch = !!(internalSearch && matchIndices.length > 0 && matchIndices[currentMatch] === idx);
-
-              return (
-                <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{
-                    transition: 'all 0.3s',
-                    padding: '4px',
-                    borderRadius: '16px',
-                  }}>
-                    <ChatBubble
-                      variant={msg.variant}
-                      bubbleStyle={bubbleStyle}
-                      isFallback={isManualStaffMsg}
-                    >
-                      {renderHighlightedText(msg.content, internalSearch, isTargetMatch)}
-                    </ChatBubble>
-                  </div>
-                </div>
-              );
+              return renderedItem;
             })
           )}
         </div>
@@ -574,7 +665,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                   if (isEmergency) {
                     await handleSend(t.chatPanel?.autoReplyEmergency || 'An emergency response team has been assigned. We will take prompt action. Please wait in a safe place.');
                   } else {
-                    await handleSend(t.chatPanel?.autoReplyStaffChecked || 'The front desk staff has checked your message. We will assist you shortly.');
+                    await handleSend(t.chatPanel?.autoReplyStaffChecked || 'A front desk team member has received your message and will assist you shortly.');
                   }
                 }
               }}

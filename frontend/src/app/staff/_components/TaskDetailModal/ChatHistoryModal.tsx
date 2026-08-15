@@ -29,18 +29,35 @@ interface ChatHistoryModalProps {
   roomNumber: string;
 }
 
-const translateContent = (content: string) => {
-  if (!content) return content;
-  if (content.includes('[FORWARD_FB]')) return '네, 식음료 팀으로 주문 내용을 바로 전달해 드릴게요!';
-  if (content.includes('[FORWARD_HK]')) return '네, 알겠습니다! 하우스키핑 팀으로 요청 내용을 신속하게 전달해 드릴게요.';
-  if (content.includes('[FORWARD_FACILITY]')) return '불편을 드려 죄송합니다. 🥲 시설 관리 팀으로 내용을 전달하여 최대한 빠르게 조치해 드릴게요! 🛠️';
-  if (content.includes('[FORWARD_FRONT]')) return '지금 바로 프론트 데스크 직원에게 연결하여 도움을 드리겠습니다.';
-  if (content.includes('[INFO_NOT_FOUND]')) return '그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏';
-  return content;
-};
-
 export default function ChatHistoryModal({ isOpen, onClose, roomNumber }: ChatHistoryModalProps) {
   const { t } = useTranslation();
+
+  const translateContent = (content: string) => {
+    if (!content) return content;
+    let newContent = content;
+    if (newContent.includes('[FORWARD_FB]') || newContent.includes('식음료 팀으로 주문 내용을 바로 전달')) {
+      return t.aiReplies?.forwardFb || "Sure! I'll send your order over to the F&B team right away!";
+    }
+    if (newContent.includes('[FORWARD_HK]') || newContent.includes('하우스키핑 팀으로 요청 내용을 신속하게 전달')) {
+      return t.aiReplies?.forwardHk || "Got it! Sending your request to the Housekeeping team now.";
+    }
+    if (newContent.includes('[FORWARD_FACILITY]') || newContent.includes('시설 관리 팀으로 내용을 전달')) {
+      return t.aiReplies?.forwardFacility || "So sorry about the inconvenience! I'm forwarding this to the Facility team to get it sorted as quickly as possible.";
+    }
+    if (newContent.includes('[FORWARD_CONCIERGE]')) {
+      return (t.aiReplies as any)?.forwardConcierge || "Got it! I'll pass this along to the Concierge team right away.";
+    }
+    if (newContent.includes('[FORWARD_FRONT]') || newContent.includes('프론트 데스크 직원에게 연결하여 도움을 드리겠습니다') || newContent.includes('프론트데스크 직원이 곧 확인 후 안내')) {
+      return t.aiReplies?.forwardFront || "Let me connect you to the front desk right now.";
+    }
+    if (newContent.includes('[INFO_NOT_FOUND]') || newContent.includes('프론트 데스크로 즉시 전달해 두었습니다') || newContent.includes('제가 바로 답변드리기 어려워')) {
+      return t.aiReplies?.infoNotFound || "I'm not quite sure about that one. I've passed your question along to the front desk — they'll get back to you here shortly.";
+    }
+    if (newContent.includes('[PII_GUARD]')) {
+      return t.aiReplies?.piiGuard || "To keep your personal info safe, we can't accept sensitive details through chat.";
+    }
+    return newContent;
+  };
   const [messages, setMessages] = useState<ChatHistoryMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

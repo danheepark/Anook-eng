@@ -686,6 +686,7 @@
     }
   },
   "chatPanel": {
+    "unread": "읽지 않은 메시지",
     "consultationComplete": "상담 완료",
     "startConsultation": "상담 시작하기",
     "startEmergency": "긴급 대응 시작",

@@ -47,8 +47,8 @@ export default function SmartSearchBar({
   const showMatches = totalMatches !== undefined && currentMatch !== undefined && onPrev && onNext;
 
   return (
-    <div className={className} style={{ display: 'flex', alignItems: 'center', gap: '8px', ...style }}>
-      <div style={inputWrapperStyle}>
+    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', ...style }}>
+      <div style={{ width: '100%', ...inputWrapperStyle }}>
         <div className={styles.searchContainer}>
           <div className={styles.searchIconWrapper}>
             <SearchIcon width={18} height={18} />
@@ -75,29 +75,31 @@ export default function SmartSearchBar({
         </div>
       </div>
       {value && showMatches && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--color-gray-600)', whiteSpace: 'nowrap' }}>
+        <div className={styles.matchControlsRow}>
           {totalMatches > 0 ? (
             <>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span className={styles.matchCount}>{currentMatch + 1} / {totalMatches}</span>
+              <div className={styles.arrowButtons}>
                 <button 
+                  type="button"
                   onClick={onPrev}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
+                  className={styles.arrowBtn}
                   aria-label="Previous match"
                 >
-                  <ArrowUpIcon width={16} height={16} color="var(--color-gray-600)" />
+                  <ArrowUpIcon width={12} height={12} color="var(--color-gray-600)" />
                 </button>
                 <button 
+                  type="button"
                   onClick={onNext}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
+                  className={styles.arrowBtn}
                   aria-label="Next match"
                 >
-                  <ArrowDownIcon width={16} height={16} color="var(--color-gray-600)" />
+                  <ArrowDownIcon width={12} height={12} color="var(--color-gray-600)" />
                 </button>
               </div>
-              <span>{currentMatch + 1} / {totalMatches}</span>
             </>
           ) : (
-            <span>0 / 0</span>
+            <span className={styles.matchCount}>0 / 0</span>
           )}
         </div>
       )}

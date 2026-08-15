@@ -107,7 +107,8 @@ export default function FrontDeskPage() {
         }
         if (msgs.length > 0) {
           const lastMsg = msgs[msgs.length - 1];
-          setLastMessageTimes(prev => ({ ...prev, [roomNo]: new Date(lastMsg.createdAt).getTime() }));
+          const lastTime = lastMsg.createdAt ? new Date(String(lastMsg.createdAt).replace(' ', 'T')).getTime() : Date.now();
+          setLastMessageTimes(prev => ({ ...prev, [String(roomNo)]: lastTime }));
         }
       } catch { /* ignore */ }
     });
@@ -126,7 +127,7 @@ export default function FrontDeskPage() {
       const type = payload.type as string;
       const roomNo = payload.roomNo as string;
       
-      if ((type === 'GUEST_MESSAGE' || type === 'AI_RESPONSE' || type === 'STAFF_MESSAGE') && roomNo) {
+      if ((type === 'GUEST_MESSAGE' || type === 'AI_RESPONSE' || type === 'STAFF_MESSAGE' || type === 'NEW_REQUEST') && roomNo) {
         setLastMessageTimes(prev => ({ ...prev, [String(roomNo)]: Date.now() }));
       }
 
@@ -483,7 +484,7 @@ export default function FrontDeskPage() {
                   description={lastGuestMessages[String(room.roomNo)] || room.rawText || t.chatPanel?.dummyGuest || '요청 내용이 없습니다.'}
                   statusText={mapStatusText(room.repStatus, room)}
                   statusVariant={mapStatusVariant(room.repStatus, room)}
-                  createdAt={room.createdAt}
+                  createdAt={lastMessageTimes[String(room.roomNo)] ? new Date(lastMessageTimes[String(room.roomNo)]) : room.createdAt}
                   isSelected={activeChatRoom?.roomNumber === room.roomNo}
                   isActiveMatch={roomSearchValue ? filteredGroupedRooms[roomCurrentMatch]?.roomNo === room.roomNo : false}
                   highlightSearch={roomSearchValue}

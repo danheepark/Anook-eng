@@ -49,7 +49,7 @@
 .leftPaneContent {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-24);
+  padding: 0 var(--space-16) var(--space-16);
   display: flex;
   flex-direction: column;
 }
@@ -58,9 +58,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
-  padding: 0 var(--space-24);
-  border-bottom: 1px solid var(--color-gray-200);
+  height: 64px;
+  padding: 0 var(--space-16);
   background-color: var(--color-white);
   flex-shrink: 0;
   box-sizing: border-box;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './RequestCard.module.css';
 import Button from '@/components/ui/Button/Button';
 import Tag from '@/components/ui/StatusBadge/StatusBadge';
@@ -59,6 +59,13 @@ export default function RequestCard({
   const isWarning = variant === 'warning';
   const { t, language } = useTranslation();
 
+  // 30초마다 상대 시간(1 min ago 등) 자동 갱신
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
   const { translatedText: translatedTitle } = useTranslationApi(title, language);
   const displayTitle = translatedTitle || title;
 
@@ -74,9 +81,12 @@ export default function RequestCard({
     }
   };
 
+  const needsAttention = status === 'PENDING' || !!hasNewMessage;
+
   return (
     <>
       <div className={`${styles.requestCard} ${isWarning ? styles.requestCardWarning : ''} ${isEmergency ? styles.requestCardEmergency : ''} ${isSelected ? styles.requestCardSelected : ''} ${isActiveMatch ? styles.requestCardActiveMatch : ''} ${status === 'CANCELLED' ? styles.isCancelled : ''} ${status === 'ESCALATED' ? styles.isEscalated : ''} ${onCardClick ? styles.clickable : ''}`} onClick={onCardClick}>
+        {needsAttention && <span className={styles.unreadDot} />}
         <div className={styles.roomBox}>
           <span className={styles.roomNumber}>
             {highlightSearch ? (
@@ -143,25 +153,27 @@ export default function RequestCard({
           <span className={styles.timeText}>
             {getRelativeTime(createdAt, language, t.ticketUI?.time)}
           </span>
-          {isEmergency && (
-            <Tag variant="red">EMERGENCY</Tag>
-          )}
-          {status === 'PENDING' && !isEmergency && (
-            <Tag variant="red">NEW</Tag>
-          )}
-          {status === 'CANCELLED' && (
-            <Tag variant="gray">{t.status?.cancelled || '취소됨'}</Tag>
-          )}
-          {status === 'ESCALATED' && (
-            <Tag variant="gray">
-              {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
-            </Tag>
-          )}
-          {(status === 'IN_PROGRESS' || status === 'ASSIGNED') && hasNewMessage && (
-            <div className={styles.messageBadge}>
-              {newMessageCount && newMessageCount > 0 ? (newMessageCount > 99 ? '99+' : newMessageCount) : ''}
-            </div>
-          )}
+          <div className={styles.badgeWrapper}>
+            {isEmergency && (
+              <Tag variant="red">EMERGENCY</Tag>
+            )}
+            {status === 'PENDING' && !isEmergency && (
+              <Tag variant="red">NEW</Tag>
+            )}
+            {status === 'CANCELLED' && (
+              <Tag variant="gray">{t.status?.cancelled || '취소됨'}</Tag>
+            )}
+            {status === 'ESCALATED' && (
+              <Tag variant="gray">
+                {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
+              </Tag>
+            )}
+            {(status === 'IN_PROGRESS' || status === 'ASSIGNED') && hasNewMessage && (
+              <div className={styles.messageBadge}>
+                {newMessageCount && newMessageCount > 0 ? (newMessageCount > 99 ? '99+' : newMessageCount) : ''}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
@@ -169,11 +181,10 @@ export default function RequestCard({
 }
 
 function getRelativeTime(dateString: string | Date, language: string = 'ko', timeTexts?: any): string {
-  let parsedString = dateString;
-  if (typeof dateString === 'string' && !dateString.endsWith('Z') && !dateString.includes('+')) {
-    parsedString = dateString + 'Z';
-  }
-  const date = new Date(parsedString);
+  if (!dateString) return '';
+  const date = typeof dateString === 'string' ? new Date(dateString.replace(' ', 'T')) : new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / (1000 * 60));
@@ -192,16 +203,16 @@ function getRelativeTime(dateString: string | Date, language: string = 'ko', tim
     const paddedHours = String(hours).padStart(2, '0');
     return `${year}.${month}.${day} ${paddedHours}:${minutes} ${ampm}`;
   } else if (diffHours > 0) {
-    return timeTexts
+    return timeTexts?.hoursAgo
       ? `${diffHours}${language === 'en' ? ' ' : ''}${timeTexts.hoursAgo}`
-      : `${diffHours}시간 전`;
+      : `${diffHours}${language === 'en' ? ' hrs ago' : '시간 전'}`;
   } else if (diffMins > 0) {
-    return timeTexts
+    return timeTexts?.minsAgo
       ? `${diffMins}${language === 'en' ? ' ' : ''}${timeTexts.minsAgo}`
-      : `${diffMins}분 전`;
+      : `${diffMins}${language === 'en' ? ' mins ago' : '분 전'}`;
   } else {
-    return timeTexts
+    return timeTexts?.justNow
       ? timeTexts.justNow
-      : '방금 전';
+      : (language === 'en' ? 'Just now' : '방금 전');
   }
 }

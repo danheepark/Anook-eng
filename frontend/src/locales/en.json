@@ -695,10 +695,11 @@
     }
   },
   "chatPanel": {
+    "unread": "Unread",
     "consultationComplete": "End Conversation",
     "startConsultation": "Start Chat",
     "startEmergency": "Start Emergency Response",
-    "autoReplyStaffChecked": "A front desk staff member has seen your message — we'll be with you shortly.",
+    "autoReplyStaffChecked": "A front desk team member has received your message and will assist you shortly.",
     "autoReplyEmergency": "An emergency response team is on the way. Please stay somewhere safe.",
     "backToList": "Back to list",
     "viewRequestDetail": "View request details",

@@ -19,8 +19,25 @@
   background-color: var(--color-gray-100);
 }
 
+.requestCardSelected .roomBox {
+  background-color: var(--color-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
 .requestCard.clickable {
   cursor: pointer;
+}
+
+.unreadDot {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-error);
+  flex-shrink: 0;
 }
 
 .roomBox {
@@ -126,10 +143,18 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: space-between;
   flex-shrink: 0;
   padding-left: var(--space-8);
-  gap: var(--space-4);
-  padding-top: var(--space-2);
+  min-height: 44px;
+}
+
+.badgeWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: var(--space-4);
 }
 
 .redDot {
