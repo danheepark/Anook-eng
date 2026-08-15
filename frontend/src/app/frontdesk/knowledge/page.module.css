@@ -51,20 +51,19 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  border-bottom: 1px solid var(--color-gray-200);
   gap: var(--space-16, 16px);
+  margin-top: -4px;
+  margin-bottom: 8px;
 }
 
 .subTabs {
   flex: 1;
   min-width: 0;
-  margin-bottom: -1px;
 }
 
 .tabActions {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
 }
 
 .sectionBody {

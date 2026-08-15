@@ -86,18 +86,15 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
         <div className={styles.headerArea}>
           <div className={styles.headerTitle} />
           <div>
-            <button 
-              type="button"
-              className={styles.addBtn}
+            <Button 
+              variant="secondary" 
               onClick={() => {
                 setIsCreatingNew(true);
                 setIsEditModalOpen(true);
               }}
-              title={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
-              aria-label={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
             >
-              <Plus size={20} />
-            </button>
+              {language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
+            </Button>
           </div>
         </div>
       )}
@@ -105,18 +102,15 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
       {/* Render Portal in the background when active */}
       {mounted && typeof window !== 'undefined' && document.getElementById('knowledge-header-actions') && (
         createPortal(
-          <button 
-            type="button"
-            className={styles.addBtn}
+          <Button 
+            variant="secondary" 
             onClick={() => {
               setIsCreatingNew(true);
               setIsEditModalOpen(true);
             }}
-            title={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
-            aria-label={language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
           >
-            <Plus size={20} />
-          </button>,
+            {language === 'en' ? 'Add Knowledge' : (t.frontdeskPage?.rag?.addKnowledge?.replace(/^\+\s*/, '') || '지식 추가')}
+          </Button>,
           document.getElementById('knowledge-header-actions')!
         )
       )}
