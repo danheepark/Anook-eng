@@ -260,6 +260,11 @@ function DashboardContent() {
       TODO: filteredTasks.filter(t => (t.status === 'PENDING' || t.status === 'ESCALATED') && !t.cancelRequested),
       IN_PROGRESS: sortByCancelRequested(filteredTasks.filter(t => t.status === 'IN_PROGRESS')),
       DONE: filteredDoneTasks.sort((a, b) => {
+        const aIsCancelled = a.status === 'CANCELLED';
+        const bIsCancelled = b.status === 'CANCELLED';
+        if (!aIsCancelled && bIsCancelled) return -1;
+        if (aIsCancelled && !bIsCancelled) return 1;
+
         const timeA = safeParseTime(a.updatedAt || a.cancelRequestedAt || a.createdAt);
         const timeB = safeParseTime(b.updatedAt || b.cancelRequestedAt || b.createdAt);
         if (timeA !== timeB) {

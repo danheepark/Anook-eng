@@ -101,20 +101,12 @@ export default function KnowledgeManagementPage() {
       </HeaderSearchSlot>
 
       {/* 1. Top Section: Pending Knowledge / Knowledge Candidates */}
-      <section className={styles.section}>
+      <section className={styles.pendingBox}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>
-            {candidateState.isAnalyzed ? (
-              <>
-                {language === 'en' ? 'Knowledge Candidates' : '지식 후보'}
-                <span className={styles.countBadge}>{candidateState.count}</span>
-              </>
-            ) : (
-              <>
-                {language === 'en' ? 'Pending Knowledge' : (t.frontdeskPage?.taskBoard?.titles?.aiTraining || '대기 중인 지식')}
-                <span className={styles.countBadge}>{pendingCount}</span>
-              </>
-            )}
+            {candidateState.isAnalyzed 
+              ? (language === 'en' ? 'Knowledge Candidates' : '지식 후보')
+              : (language === 'en' ? 'Pending Knowledge' : (t.frontdeskPage?.taskBoard?.titles?.aiTraining || '대기 중인 지식'))}
           </h2>
           <div id="pending-knowledge-header-actions" />
         </div>

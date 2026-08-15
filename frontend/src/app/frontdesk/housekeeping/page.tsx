@@ -53,8 +53,6 @@ export default function HousekeepingPage() {
   const { pending, inProgress, completed, loading, error, refetch } = useFrontdeskRequests('HK', searchValue, 'all');
 
   const filteredCompleted = React.useMemo(() => {
-    if (dateFilterType === 'all') return completed;
-
     const getLocalYMD = (dateStr: string) => {
       if (!dateStr) return '';
       const d = new Date(dateStr.replace(' ', 'T'));
@@ -68,19 +66,30 @@ export default function HousekeepingPage() {
     const todayYMD = getTodayYMD();
     const yestYMD = getYesterdayYMD();
 
-    return completed.filter(req => {
-      const reqYMD = getLocalYMD(req.updatedAt || req.createdAt);
-      if (!reqYMD) return true;
+    let list = completed;
+    if (dateFilterType !== 'all') {
+      list = completed.filter(req => {
+        const reqYMD = getLocalYMD(req.updatedAt || req.createdAt);
+        if (!reqYMD) return true;
 
-      if (dateFilterType === 'today') return reqYMD === todayYMD;
-      if (dateFilterType === 'yesterday') return reqYMD === yestYMD;
-      if (dateFilterType === 'custom') {
-        const { startDate, endDate } = customRange;
-        if (startDate && endDate) return reqYMD >= startDate && reqYMD <= endDate;
-        if (startDate) return reqYMD >= startDate;
-        if (endDate) return reqYMD <= endDate;
-      }
-      return true;
+        if (dateFilterType === 'today') return reqYMD === todayYMD;
+        if (dateFilterType === 'yesterday') return reqYMD === yestYMD;
+        if (dateFilterType === 'custom') {
+          const { startDate, endDate } = customRange;
+          if (startDate && endDate) return reqYMD >= startDate && reqYMD <= endDate;
+          if (startDate) return reqYMD >= startDate;
+          if (endDate) return reqYMD <= endDate;
+        }
+        return true;
+      });
+    }
+
+    return [...list].sort((a, b) => {
+      const aIsCancelled = a.status === 'CANCELLED';
+      const bIsCancelled = b.status === 'CANCELLED';
+      if (!aIsCancelled && bIsCancelled) return -1;
+      if (aIsCancelled && !bIsCancelled) return 1;
+      return 0;
     });
   }, [completed, dateFilterType, customRange]);
 

@@ -14,33 +14,29 @@ export interface PendingReviewItemProps {
   highlightQuery?: string;
 }
 
-function formatRelativeTime(dateString?: string, language: string = 'en') {
-  if (!dateString) return '';
-  // If already formatted like "2 hrs ago"
-  if (dateString.includes('ago') || dateString.includes('전')) return dateString;
+function formatDateTime(dateVal?: string | Date, language: string = 'en') {
+  if (!dateVal) return '';
+  let date: Date;
+  if (dateVal instanceof Date) {
+    date = dateVal;
+  } else {
+    date = new Date(String(dateVal).replace(' ', 'T'));
+  }
+  if (isNaN(date.getTime())) return String(dateVal);
 
-  const now = new Date();
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString;
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const paddedHours = String(hours).padStart(2, '0');
 
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffMins < 1) {
-    return language === 'en' ? 'Just now' : '방금 전';
+  const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  if (language === 'en') {
+    return `${paddedHours}:${minutes} ${ampm}, ${monthsEn[date.getMonth()]} ${date.getDate()}`;
+  } else {
+    return `${paddedHours}:${minutes} ${ampm}, ${date.getMonth() + 1}월 ${date.getDate()}일`;
   }
-  if (diffMins < 60) {
-    return language === 'en' ? `${diffMins} min${diffMins > 1 ? 's' : ''} ago` : `${diffMins}분 전`;
-  }
-  if (diffHours < 24) {
-    return language === 'en' ? `${diffHours} hr${diffHours > 1 ? 's' : ''} ago` : `${diffHours}시간 전`;
-  }
-  if (diffDays < 7) {
-    return language === 'en' ? `${diffDays} day${diffDays > 1 ? 's' : ''} ago` : `${diffDays}일 전`;
-  }
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 const renderHighlightedText = (text: string, search: string, isActive: boolean) => {
@@ -80,7 +76,7 @@ export default function PendingReviewItem({
   highlightQuery = '',
 }: PendingReviewItemProps) {
   const { language } = useTranslation();
-  const displayTime = time || formatRelativeTime(updatedAt, language);
+  const displayTime = time || formatDateTime(updatedAt, language);
 
   return (
     <div 

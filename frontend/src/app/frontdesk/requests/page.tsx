@@ -62,9 +62,14 @@ export default function FrontDeskPage() {
 
   const pending = sortByPriority(mergedRequests.filter(r => r.status === 'PENDING' || r.status === 'ESCALATED'));
   const inProgress = sortByPriority(mergedRequests.filter(r => (r.status === 'ASSIGNED' || r.status === 'IN_PROGRESS') && !r.cancelRequested));
-  // 모든 부서의 취소 대기 건 (프론트 데스크가 대신 처리)
   const cancelPending = allRequests.filter(r => r.cancelRequested);
-  const completed = sortByPriority(mergedRequests.filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED'));
+  const completed = sortByPriority(mergedRequests.filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED')).sort((a, b) => {
+    const aIsCancelled = a.status === 'CANCELLED';
+    const bIsCancelled = b.status === 'CANCELLED';
+    if (!aIsCancelled && bIsCancelled) return -1;
+    if (aIsCancelled && !bIsCancelled) return 1;
+    return 0;
+  });
 
   const { escalations } = useEscalations();
   const nonEmergencyEscalations = escalations.filter(r => r.priority !== 'EMERGENCY');
@@ -311,6 +316,13 @@ export default function FrontDeskPage() {
     });
 
     groupedRooms.sort((a, b) => {
+      if (activeTab === 'completed') {
+        const aCancelled = a.repStatus === 'CANCELLED';
+        const bCancelled = b.repStatus === 'CANCELLED';
+        if (!aCancelled && bCancelled) return -1;
+        if (aCancelled && !bCancelled) return 1;
+      }
+
       const pwA = priorityWeight(a.highestPriority);
       const pwB = priorityWeight(b.highestPriority);
       if (pwA !== pwB) return pwA - pwB; // 0 for EMERGENCY, 1 for URGENT, 2 for NORMAL

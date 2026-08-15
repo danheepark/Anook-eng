@@ -91,6 +91,29 @@ export default function KnowledgeReviewTab({
   // 채팅 히스토리 모달
   const [selectedChatHistory, setSelectedChatHistory] = useState<{ roomNo: string; title?: string } | null>(null);
 
+  // 반응형 컬럼 기준: ≥1440px(5), 1200~1439px(4), 960~1199px(3), <960px(2)
+  const [maxCols, setMaxCols] = useState(5);
+
+  useEffect(() => {
+    const updateMaxCols = () => {
+      if (typeof window === 'undefined') return;
+      const w = window.innerWidth;
+      if (w >= 1440) setMaxCols(5);
+      else if (w >= 1200) setMaxCols(4);
+      else if (w >= 960) setMaxCols(3);
+      else setMaxCols(2);
+    };
+
+    updateMaxCols();
+    window.addEventListener('resize', updateMaxCols);
+    return () => window.removeEventListener('resize', updateMaxCols);
+  }, []);
+
+  // 대기 목록 확장/축소 상태 (카드가 많을 때 View all)
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasOverflow = filteredItems.length > maxCols;
+  const displayedItems = isExpanded || !hasOverflow ? filteredItems : filteredItems.slice(0, maxCols);
+
   // 후보 항목 수정 모달
   const [editCandidateIndex, setEditCandidateIndex] = useState<number | null>(null);
   const [isCandidateModalOpen, setIsCandidateModalOpen] = useState(false);
@@ -231,16 +254,16 @@ export default function KnowledgeReviewTab({
                 <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
                   {t.common?.cancel || (language === 'en' ? 'Cancel' : '취소')}
                 </Button>
-                <Button 
-                  variant="primary" 
-                  onClick={handleBatchRegister} 
+                <Button
+                  variant="primary"
+                  onClick={handleBatchRegister}
                   disabled={registering || candidates.filter(c => c.selected).length === 0}
                 >
-                  {registering 
-                    ? (aiTraining?.registering || (language === 'en' ? 'Registering...' : '등록 중...')) 
+                  {registering
+                    ? (aiTraining?.registering || (language === 'en' ? 'Registering...' : '등록 중...'))
                     : (language === 'en'
-                        ? `Register Selected (${candidates.filter(c => c.selected).length})`
-                        : (aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`))}
+                      ? `Register Selected (${candidates.filter(c => c.selected).length})`
+                      : (aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`))}
                 </Button>
               </>
             ) : (
@@ -249,7 +272,9 @@ export default function KnowledgeReviewTab({
                 onClick={handleAnalyze}
                 disabled={analyzing || filteredItems.length === 0}
               >
-                {analyzing ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') : (language === 'en' ? 'Add Knowledge' : '지식 추가')}
+                {analyzing
+                  ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...')
+                  : (language === 'en' ? `Add ${filteredItems.length} to Knowledge` : `지식 ${filteredItems.length}개 추가`)}
               </Button>
             )}
           </div>,
@@ -309,33 +334,53 @@ export default function KnowledgeReviewTab({
         </div>
       ) : (
         // 기본 대기 목록 (분석 전 - 간결한 카드 그리드)
-        <div className={styles.pendingGrid}>
-          {filteredItems.length === 0 ? (
-            <div className={styles.emptyState}>
-              {aiTraining?.empty || '검토 대기 중인 항목이 없습니다.'}
-            </div>
-          ) : (
-            filteredItems.map(item => (
-              <PendingReviewItem
-                key={item.id}
-                id={item.id}
-                title={item.question}
-                updatedAt={item.updatedAt}
-                onClick={() => {
-                  if (item.roomNo) {
-                    setSelectedChatHistory({
-                      roomNo: item.roomNo,
-                      title: item.question || undefined,
-                    });
-                  } else {
-                    alert('대화 내역 정보가 없는 항목입니다.');
-                  }
-                }}
-                isActiveMatch={activeMatchId === item.id}
-                highlightQuery={searchValue}
-              />
-            ))
-          )}
+        <div className={styles.pendingGridWrapper}>
+          <div className={styles.pendingGrid}>
+            {filteredItems.length === 0 ? (
+              <div className={styles.emptyState}>
+                {aiTraining?.empty || '검토 대기 중인 항목이 없습니다.'}
+              </div>
+            ) : (
+              displayedItems.map(item => (
+                <PendingReviewItem
+                  key={item.id}
+                  id={item.id}
+                  title={item.question}
+                  updatedAt={item.updatedAt}
+                  onClick={() => {
+                    if (item.roomNo) {
+                      setSelectedChatHistory({
+                        roomNo: item.roomNo,
+                        title: item.question || undefined,
+                      });
+                    } else {
+                      alert('대화 내역 정보가 없는 항목입니다.');
+                    }
+                  }}
+                  isActiveMatch={activeMatchId === item.id}
+                  highlightQuery={searchValue}
+                />
+              ))
+            )}
+          </div>
+          <div
+            className={styles.viewAllWrapper}
+            style={{
+              visibility: hasOverflow ? 'visible' : 'hidden',
+              pointerEvents: hasOverflow ? 'auto' : 'none',
+            }}
+          >
+            <button
+              type="button"
+              className={styles.viewAllBtn}
+              onClick={() => setIsExpanded(prev => !prev)}
+              tabIndex={hasOverflow ? 0 : -1}
+            >
+              {isExpanded
+                ? (language === 'en' ? 'Show less' : '접기')
+                : (language === 'en' ? `View all (${filteredItems.length})` : `전체 보기 (${filteredItems.length}개)`)}
+            </button>
+          </div>
         </div>
       )}
 

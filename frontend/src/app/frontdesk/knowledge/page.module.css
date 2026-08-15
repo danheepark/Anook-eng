@@ -16,12 +16,26 @@
   gap: 0;
 }
 
+.pendingBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16, 16px);
+  padding: 16px;
+  background-color: var(--color-gray-100, #f3f4f6);
+  border-radius: var(--radius-lg, 12px);
+  box-sizing: border-box;
+}
+
 .sectionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-16);
   margin-bottom: var(--space-16, 16px);
+}
+
+.pendingBox .sectionHeader {
+  margin-bottom: 0;
 }
 
 .sectionTitle {

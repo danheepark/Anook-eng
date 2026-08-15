@@ -115,6 +115,15 @@ export default function useFrontdeskRequests(dept?: string, searchQuery: string 
 
   const cancelPending = filteredRequests.filter(r => r.cancelRequested);
   const completed = filteredRequests.filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED');
+  
+  // completed 배열 내에서 CANCELLED 항목을 항상 제일 뒤로 정렬
+  completed.sort((a, b) => {
+    const aIsCancelled = a.status === 'CANCELLED';
+    const bIsCancelled = b.status === 'CANCELLED';
+    if (!aIsCancelled && bIsCancelled) return -1;
+    if (aIsCancelled && !bIsCancelled) return 1;
+    return 0;
+  });
 
   return { requests: filteredRequests, pending, inProgress, cancelPending, completed, loading, error, refetch: fetchRequests };
 }

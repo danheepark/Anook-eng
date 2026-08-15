@@ -315,7 +315,7 @@ export default function TaskTicket({
 
   let displayTitle = toSentenceCase(getFixedTitle().trim());
 
-  const formatTimeOnly = (dateVal: string | Date | undefined) => {
+  const formatDoneDateTime = (dateVal: string | Date | undefined) => {
     if (!dateVal) return '';
     let date: Date;
     if (dateVal instanceof Date) {
@@ -330,13 +330,19 @@ export default function TaskTicket({
     hours = hours % 12;
     hours = hours ? hours : 12;
     const paddedHours = String(hours).padStart(2, '0');
-    return `${paddedHours}:${minutes} ${ampm}`;
+
+    const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    if (language === 'en') {
+      return `${paddedHours}:${minutes} ${ampm}, ${monthsEn[date.getMonth()]} ${date.getDate()}`;
+    } else {
+      return `${paddedHours}:${minutes} ${ampm}, ${date.getMonth() + 1}월 ${date.getDate()}일`;
+    }
   };
 
   let timeDisplay = '';
   if (status === 'DONE') {
     const doneTime = updatedAt || createdAt;
-    timeDisplay = doneTime ? formatTimeOnly(doneTime) : '';
+    timeDisplay = doneTime ? formatDoneDateTime(doneTime) : '';
   } else {
     const activeTime = createdAt || updatedAt;
     timeDisplay = activeTime ? getRelativeTime(activeTime, language, t.ticketUI.time) : '';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 
@@ -102,6 +102,38 @@ export default function ComponentShowcasePage() {
     answer: 'The Caesar Salad contains dairy and egg ingredients.',
     selected: true,
   });
+
+  const [isTestPendingExpanded, setIsTestPendingExpanded] = useState(false);
+  const [testMaxCols, setTestMaxCols] = useState(5);
+
+  useEffect(() => {
+    const updateCols = () => {
+      if (typeof window === 'undefined') return;
+      const w = window.innerWidth;
+      if (w >= 1440) setTestMaxCols(5);
+      else if (w >= 1200) setTestMaxCols(4);
+      else if (w >= 960) setTestMaxCols(3);
+      else setTestMaxCols(2);
+    };
+    updateCols();
+    window.addEventListener('resize', updateCols);
+    return () => window.removeEventListener('resize', updateCols);
+  }, []);
+
+  const samplePendingReview12Items = [
+    { id: 201, title: 'Wi-Fi connection issue in room', time: '12:39 AM, Aug 15' },
+    { id: 202, title: 'Duty Manager consultation request', time: '11:20 PM, Aug 14' },
+    { id: 203, title: 'Late checkout inquiry (until 2 PM)', time: '09:15 PM, Aug 14' },
+    { id: 204, title: 'Extra towel & amenity set delivery', time: '06:40 PM, Aug 14' },
+    { id: 205, title: 'Swimming pool operating hours & rules', time: '04:10 PM, Aug 14' },
+    { id: 206, title: 'Airport shuttle bus timetable inquiry', time: '02:30 PM, Aug 14' },
+    { id: 207, title: 'Breakfast buffet pricing & location', time: '10:15 AM, Aug 14' },
+    { id: 208, title: 'Luggage storage service after checkout', time: '08:50 AM, Aug 14' },
+    { id: 209, title: 'Room temperature / AC control issue', time: '11:45 PM, Aug 13' },
+    { id: 210, title: 'Fitness center & sauna availability', time: '07:20 PM, Aug 13' },
+    { id: 211, title: 'Valet parking fee & location info', time: '03:15 PM, Aug 13' },
+    { id: 212, title: 'In-room dining wine glass request', time: '01:05 PM, Aug 13' },
+  ];
 
   const sampleRooms = [
     { id: '1001', roomNumber: '1001', statusText: '보관됨' },
@@ -866,28 +898,163 @@ export default function ComponentShowcasePage() {
         {/* Pending Review Item (분석 전 대기 목록 아이템) 섹션 */}
         <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-16)', marginBottom: 'var(--space-32)' }}>
           <h2 style={{ font: 'var(--text-h2-bold)', color: 'var(--color-gray-900)' }}>
-            Pending Review Item (분석 전 대기 중인 지식 - 간결한 카드)
+            Pending Review Item (대기 중인 지식 - 12개 많은 버전 & View all 동작 테스트)
           </h2>
           <ComponentLabel path="components/ui/Knowledge/PendingReviewItem.tsx" />
-          <div style={{ background: 'var(--color-bg)', padding: 'var(--space-20) var(--space-32)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            <PendingReviewItem
-              id={201}
-              title="Wi-Fi issue"
-              time="2 hrs ago"
-              onClick={() => alert('대화 내역 확인')}
-            />
-            <PendingReviewItem
-              id={202}
-              title="Manager request"
-              time="5 hrs ago"
-              onClick={() => alert('대화 내역 확인')}
-            />
-            <PendingReviewItem
-              id={203}
-              title="Late checkout"
-              time="8 hrs ago"
-              onClick={() => alert('대화 내역 확인')}
-            />
+
+          {/* 1. 2개일 때 컨테이너 (12개일 때와 높이 100% 동일) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)' }}>
+              ▼ 2개일 때 (12개일 때와 컨테이너 높이 동일 유지)
+            </span>
+            <div style={{
+              background: 'var(--color-gray-100)',
+              padding: '16px',
+              borderRadius: 'var(--radius-lg)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ font: 'var(--text-h3-bold)', color: 'var(--color-gray-900)', margin: 0 }}>
+                  Pending Knowledge
+                </h3>
+                <Button variant="primary">
+                  Add 2 to Knowledge
+                </Button>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${testMaxCols}, minmax(0, 1fr))`,
+                gap: '12px',
+                width: '100%',
+              }}>
+                {samplePendingReview12Items.slice(0, 2).map(item => (
+                  <PendingReviewItem
+                    key={`two-${item.id}`}
+                    id={item.id}
+                    title={item.title}
+                    time={item.time}
+                    onClick={() => alert(`[${item.title}] 대화 내역 확인`)}
+                  />
+                ))}
+              </div>
+
+              {/* 2개일 때는 visibility: hidden으로 높이 공간만 동일하게 예약 */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '-8px',
+                marginBottom: '-4px',
+                visibility: 'hidden',
+                pointerEvents: 'none'
+              }}>
+                <button
+                  type="button"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    font: 'var(--text-body-medium)',
+                    fontSize: '13px',
+                    padding: '4px 8px',
+                  }}
+                >
+                  Placeholder
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. 12개일 때 컨테이너 (접기/펼치기 View all 동작) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'var(--space-8)' }}>
+            <span style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)' }}>
+              ▼ 12개일 때 (기본 1줄 노출 + View all 버튼 노출)
+            </span>
+            <div style={{
+              background: 'var(--color-gray-100)',
+              padding: '16px',
+              borderRadius: 'var(--radius-lg)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ font: 'var(--text-h3-bold)', color: 'var(--color-gray-900)', margin: 0 }}>
+                  Pending Knowledge
+                </h3>
+                <Button variant="primary">
+                  Add {samplePendingReview12Items.length} to Knowledge
+                </Button>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${testMaxCols}, minmax(0, 1fr))`,
+                gap: '12px',
+                width: '100%',
+              }}>
+                {(isTestPendingExpanded ? samplePendingReview12Items : samplePendingReview12Items.slice(0, testMaxCols)).map(item => (
+                  <PendingReviewItem
+                    key={item.id}
+                    id={item.id}
+                    title={item.title}
+                    time={item.time}
+                    onClick={() => alert(`[${item.title}] 대화 내역 확인`)}
+                  />
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-8px', marginBottom: '-4px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsTestPendingExpanded(prev => !prev)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--color-gray-600)',
+                    font: 'var(--text-body-medium)',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    padding: '4px 8px',
+                    borderRadius: 'var(--radius-sm, 4px)',
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '3px',
+                  }}
+                >
+                  {isTestPendingExpanded
+                    ? 'Show less'
+                    : `View all (${samplePendingReview12Items.length})`}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. 12개 전체가 한 번에 펼쳐진 전체 그리드 뷰 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'var(--space-8)' }}>
+            <span style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)' }}>
+              ▼ 12개 전체 펼침(Full Expanded) 상태 뷰 (현재 너비 기준 {testMaxCols}열)
+            </span>
+            <div style={{
+              background: 'var(--color-gray-100)',
+              padding: '16px',
+              borderRadius: 'var(--radius-lg)',
+              display: 'grid',
+              gridTemplateColumns: `repeat(${testMaxCols}, minmax(0, 1fr))`,
+              gap: '12px',
+              width: '100%',
+            }}>
+              {samplePendingReview12Items.map(item => (
+                <PendingReviewItem
+                  key={`full-${item.id}`}
+                  id={item.id}
+                  title={item.title}
+                  time={item.time}
+                  onClick={() => alert(`[${item.title}] 대화 내역 확인`)}
+                />
+              ))}
+            </div>
           </div>
         </section>
 

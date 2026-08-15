@@ -36,12 +36,73 @@
   margin-top: 0;
 }
 
-.pendingGrid {
+.pendingGridWrapper {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--space-8, 8px);
+  width: 100%;
+}
+
+.pendingGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--space-12, 12px);
-  padding: var(--space-8, 8px) 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  background-color: transparent;
+}
+
+@media (max-width: 1439px) {
+  .pendingGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1199px) {
+  .pendingGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 959px) {
+  .pendingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .pendingGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.viewAllWrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: -8px;
+  margin-bottom: -4px;
+}
+
+.viewAllBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-600);
+  font: var(--text-body-medium);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm, 4px);
+  transition: all var(--transition, 0.15s ease);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.viewAllBtn:hover {
+  color: var(--color-gray-900);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .emptyState {
