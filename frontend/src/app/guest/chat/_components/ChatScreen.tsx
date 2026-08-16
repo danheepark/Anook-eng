@@ -216,13 +216,19 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           const formatNoticeContent = (content: string) => {
             if (!content) return '';
             let formatted = content
-              .replace(/has received your message/gi, 'has reviewed your message')
+              .replace(/A front desk team member\s+/gi, 'Front desk ')
+              .replace(/A front desk staff member\s+/gi, 'Front desk ')
+              .replace(/has reviewed your message/gi, 'reviewed your message')
+              .replace(/has received your message/gi, 'reviewed your message')
+              .replace(/has seen your message/gi, 'reviewed your message')
+              .replace(/\s*—\s*we'll be with you shortly\.?/gi, '.')
               .replace(/\s*and will assist you shortly\.?/gi, '.')
               .replace(/\s*and will assist you\.?/gi, '.')
               .replace(/\s*곧 안내\s*드리겠습니다\.?/g, '')
               .replace(/\s*곧 안내해\s*드리겠습니다\.?/g, '')
               .replace(/\s*すぐにご案内いたします。?/g, '')
               .replace(/\s*我们将很快为您提供帮助。?/g, '')
+              .replace(/\n\s*/g, ' ')
               .trim();
             if (/^[A-Za-z]/.test(formatted) && !/[.!?]$/.test(formatted)) {
               formatted += '.';

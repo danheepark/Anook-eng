@@ -628,7 +628,12 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 const formatNoticeContent = (content: string) => {
                   if (!content) return '';
                   let formatted = content
-                    .replace(/has received your message/gi, 'has reviewed your message')
+                    .replace(/A front desk team member\s+/gi, 'Front desk ')
+                    .replace(/A front desk staff member\s+/gi, 'Front desk ')
+                    .replace(/has reviewed your message/gi, 'reviewed your message')
+                    .replace(/has received your message/gi, 'reviewed your message')
+                    .replace(/has seen your message/gi, 'reviewed your message')
+                    .replace(/\s*—\s*we'll be with you shortly\.?/gi, '.')
                     .replace(/\s*and will assist you shortly\.?/gi, '.')
                     .replace(/\s*and will assist you\.?/gi, '.')
                     .replace(/\s*곧 안내\s*드리겠습니다\.?/g, '')
