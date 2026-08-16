@@ -198,24 +198,31 @@
 
 .unreadDivider {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: center;
   margin: var(--space-16) 0;
   width: 100%;
+  gap: var(--space-12);
 }
 
 .unreadDivider::before,
 .unreadDivider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid var(--color-gray-200);
+  border-bottom: 1px solid var(--color-gray-400, #9ca3af);
+  margin-top: 9px;
 }
 
 .unreadText {
-  padding: 0 var(--space-12);
-  font: var(--text-caption-medium);
-  color: var(--color-gray-400);
-  letter-spacing: 0.3px;
-  text-transform: capitalize;
+  padding: 0 var(--space-8);
+  font: var(--text-caption-regular);
+  font-size: 13px;
+  color: var(--color-gray-500);
+  text-align: center;
+  line-height: 1.45;
+  letter-spacing: -0.1px;
+  white-space: pre-wrap;
+  flex-shrink: 0;
 }
 
 .systemDivider {

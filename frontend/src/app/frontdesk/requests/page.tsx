@@ -233,17 +233,34 @@ export default function FrontDeskPage() {
       if (allRefetch) allRefetch();
       
       if (newStatus === 'COMPLETED') {
-        setActiveTab('completed');
-      }
+        const remainingActive = [...pending, ...inProgress].filter(r => !ids.includes(r.id));
+        const remainingActiveRooms = new Set(remainingActive.map(r => String(r.roomNo)));
 
-      if (activeChatRoom && ids.includes(activeChatRoom.representativeId)) {
-        // COMPLETED일 때도 ChatPanel을 유지 (RAG 등록 모달 플로우를 위해)
-        // ChatPanel의 onClose 콜백에서 setActiveChatRoom(null)이 호출됨
-        setActiveChatRoom(prev => prev ? { ...prev, status: newStatus } : null);
+        if (remainingActiveRooms.size > 0) {
+          setActiveTab('active');
+        } else {
+          setActiveTab('completed');
+        }
+        setActiveChatRoom(null);
+        setDetailTarget(null);
+      } else {
+        if (activeChatRoom && ids.includes(activeChatRoom.representativeId)) {
+          setActiveChatRoom(prev => prev ? { ...prev, status: newStatus } : null);
+        }
       }
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const getLocalYMD = (dateStr: string | Date | undefined) => {
+    if (!dateStr) return '';
+    const d = typeof dateStr === 'string' ? new Date(dateStr.replace(' ', 'T')) : new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   };
 
   const activeRoomSet = React.useMemo(() => {
@@ -255,8 +272,49 @@ export default function FrontDeskPage() {
 
   const completedCount = React.useMemo(() => {
     const filteredCompleted = completed.filter(r => !activeRoomSet.has(String(r.roomNo)));
-    return new Set(filteredCompleted.map(r => String(r.roomNo))).size;
-  }, [completed, activeRoomSet]);
+    
+    // Group completed requests by room first
+    const roomMap = new Map<string, typeof filteredCompleted>();
+    for (const req of filteredCompleted) {
+      const roomStr = String(req.roomNo);
+      if (!roomMap.has(roomStr)) roomMap.set(roomStr, []);
+      roomMap.get(roomStr)!.push(req);
+    }
+
+    if (dateFilterType === 'all') {
+      return roomMap.size;
+    }
+
+    const now = new Date();
+    const todayYMD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    
+    const yest = new Date();
+    yest.setDate(yest.getDate() - 1);
+    const yestYMD = `${yest.getFullYear()}-${String(yest.getMonth() + 1).padStart(2, '0')}-${String(yest.getDate()).padStart(2, '0')}`;
+
+    let count = 0;
+    for (const [, reqs] of roomMap.entries()) {
+      const sortedReqs = [...reqs].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const roomYMD = getLocalYMD(sortedReqs[0].createdAt);
+      if (!roomYMD) continue;
+
+      if (dateFilterType === 'today' && roomYMD === todayYMD) {
+        count++;
+      } else if (dateFilterType === 'yesterday' && roomYMD === yestYMD) {
+        count++;
+      } else if (dateFilterType === 'custom') {
+        const { startDate, endDate } = customDateRange;
+        if (startDate && endDate && roomYMD >= startDate && roomYMD <= endDate) {
+          count++;
+        } else if (startDate && !endDate && roomYMD >= startDate) {
+          count++;
+        } else if (!startDate && endDate && roomYMD <= endDate) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }, [completed, activeRoomSet, dateFilterType, customDateRange]);
 
   const groupedRooms = React.useMemo(() => {
     const activeList = [...pending, ...inProgress];
@@ -333,16 +391,6 @@ export default function FrontDeskPage() {
 
     // Apply date filter when activeTab === 'completed'
     if (activeTab === 'completed' && dateFilterType !== 'all') {
-      const getLocalYMD = (dateStr: string) => {
-        if (!dateStr) return '';
-        const d = new Date(dateStr.replace(' ', 'T'));
-        if (isNaN(d.getTime())) return '';
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      };
-
       const now = new Date();
       const todayYMD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       
@@ -403,10 +451,10 @@ export default function FrontDeskPage() {
   useEffect(() => {
     // RAG 등록 플로우 진행 중에는 자동 카드 선택을 건너뜀 (모달이 닫힌 후 onClose에서 처리)
     if (isRagFlowActive) return;
-    if (groupedRooms.length > 0) {
-      const exists = activeChatRoom && groupedRooms.some(room => room.roomNo === activeChatRoom.roomNumber);
+    if (filteredGroupedRooms.length > 0) {
+      const exists = activeChatRoom && filteredGroupedRooms.some(room => room.roomNo === activeChatRoom.roomNumber);
       if (!exists) {
-        const room = groupedRooms[0];
+        const room = filteredGroupedRooms[0];
         setActiveChatRoom({
           roomNumber: room.roomNo,
           requestIds: room.allIds,
@@ -420,7 +468,7 @@ export default function FrontDeskPage() {
     } else if (activeChatRoom) {
       setActiveChatRoom(null);
     }
-  }, [groupedRooms, activeChatRoom, isRagFlowActive]);
+  }, [filteredGroupedRooms, activeChatRoom, isRagFlowActive]);
 
 
   const handleCardClick = (requestId: number) => {
@@ -515,6 +563,8 @@ export default function FrontDeskPage() {
                   onChange={(type, range) => {
                     setDateFilterType(type);
                     if (range) setCustomDateRange(range);
+                    setActiveChatRoom(null);
+                    setDetailTarget(null);
                   }}
                 />
               )}
@@ -527,7 +577,12 @@ export default function FrontDeskPage() {
                 { label: t.chatPanel?.completedTab || '상담 완료', value: 'completed', count: completedCount }
               ]}
               activeValue={activeTab}
-              onChange={(val) => setActiveTab(val || 'active')}
+              onChange={(val) => {
+                const next = val || 'active';
+                setActiveTab(next);
+                setActiveChatRoom(null);
+                setDetailTarget(null);
+              }}
             />
           </div>
 
@@ -701,7 +756,19 @@ export default function FrontDeskPage() {
 
       <RegisterTrainingModal
         isOpen={trainingTarget !== null}
-        onClose={() => setTrainingTarget(null)}
+        onClose={() => {
+          setTrainingTarget(null);
+          setIsRagFlowActive(false);
+          const activeList = [...pending, ...inProgress];
+          const activeRooms = new Set(activeList.map(r => String(r.roomNo)));
+          if (activeRooms.size > 0) {
+            setActiveTab('active');
+          } else {
+            setActiveTab('completed');
+          }
+          setActiveChatRoom(null);
+          setDetailTarget(null);
+        }}
         departmentId={trainingTarget?.departmentId}
         summary={trainingTarget?.summary}
         roomNo={trainingTarget?.roomNo?.toString()}
