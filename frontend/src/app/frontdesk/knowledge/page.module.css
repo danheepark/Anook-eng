@@ -57,18 +57,16 @@
   border-radius: 9999px;
 }
 
-.tabRow {
+.libraryHeader {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-16, 16px);
-  margin-top: -4px;
-  margin-bottom: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: var(--space-12, 12px);
 }
 
 .subTabs {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .tabActions {
