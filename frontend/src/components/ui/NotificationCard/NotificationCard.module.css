@@ -1,17 +1,18 @@
 .card {
   display: flex;
-  align-items: flex-start;
-  /* 상단 정렬로 세로 찌그러짐 방지 및 정갈한 레이아웃 */
-  padding: var(--space-24) var(--space-16) var(--space-16) var(--space-16);
-  gap: var(--space-12);
-  border: none;
-  border-bottom: 1px solid var(--color-gray-200);
-  border-radius: 0;
-  background: transparent;
-  transition: background-color 0.15s;
+  flex-direction: column;
+  padding: 14px 16px;
+  gap: 8px;
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-100);
+  transition: all 0.15s ease;
   position: relative;
   width: 100%;
   box-sizing: border-box;
+}
+
+.card:last-child {
+  border-bottom: none;
 }
 
 .card:hover {
@@ -22,56 +23,130 @@
   cursor: pointer;
 }
 
-.titleRow {
+/* 1. Header Row (Title + Badges + Right Chevron) */
+.headerRow {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin: var(--space-4) 0 var(--space-2) 0;
-}
-
-.roomNumber {
-  font: var(--text-h3-bold);
-  color: var(--color-primary);
-}
-
-/* 중단 컨텐츠 영역 */
-.contentSection {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  min-width: 0;
-  gap: var(--space-2);
-  box-sizing: border-box;
 }
 
-.tagsRow {
+.titleAndBadges {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-6);
-  line-height: 1;
-  padding-right: 110px;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
 }
 
-.department {
+.titleWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.roomPrefix {
   font: var(--text-caption-medium);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  white-space: nowrap;
+}
+
+.titleDivider {
   color: var(--color-gray-400);
+  font-size: 11px;
 }
 
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-caption-medium);
+  font-size: 13px;
+  font-weight: 700;
   color: var(--color-gray-900);
   margin: 0;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
+.badgesWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.timeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 6px;
+  background-color: #FEF3C7;
+  color: #92400E;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 6px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.transferBadge {
+  background-color: #EFF6FF;
+  color: #1D4ED8;
+}
+
+.cancelBadge {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+}
+
+.urgentBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  background-color: #FFEDD5;
+  color: #C2410C;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.chevronWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-400);
+  flex-shrink: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.card:hover .chevronIcon {
+  color: var(--color-gray-700);
+  transform: translateX(2px);
+}
+
+/* 2. Middle Row: Description */
 .description {
   font: var(--text-caption-regular);
+  font-size: 12.5px;
   color: var(--color-gray-500);
-  margin: 0 0 var(--space-8) 0;
+  margin: 0;
   line-height: 1.4;
   word-break: break-word;
   display: -webkit-box;
@@ -80,42 +155,85 @@
   overflow: hidden;
 }
 
-/* 액션 버튼 영역 */
-.actions {
+/* 3. Footer Row: Meta Info & Action Buttons */
+.footerRow {
   display: flex;
-  gap: var(--space-8);
-  margin-top: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
   width: 100%;
 }
 
-.actionButton {
-  flex: 1;
-  width: 100%;
-  height: 32px;
-  font-size: 13px;
+.metaInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.deptInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--text-caption-medium);
+  font-size: 12px;
+  color: var(--color-gray-500);
+  white-space: nowrap;
+}
+
+.deptDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-gray-400);
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.secondaryBtn {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
   font-weight: 600;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 6px;
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md, 6px);
+  transition: all 0.15s ease;
 }
 
-/* 우측 시간 섹션 */
-.rightSection {
-  position: absolute;
-  top: var(--space-24);
-  right: var(--space-16);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex-shrink: 0;
-  gap: var(--space-4);
-  height: 0;
+.secondaryBtn:hover {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-400);
+  color: var(--color-gray-900);
 }
 
-.timeText {
-  font: var(--text-caption-medium);
-  color: var(--color-gray-400);
-  white-space: nowrap;
-  flex-shrink: 0;
+.primaryBtn {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.primaryBtn:hover {
+  background-color: var(--color-primary-hover);
 }

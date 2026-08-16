@@ -118,6 +118,16 @@ export default function HeaderNotification() {
     return codeOrName;
   };
 
+  const [filter, setFilter] = useState<'all' | 'escalation' | 'cancel'>('all');
+
+  const cancelCount = delayedCancelRequests.length;
+  const escalationCount = nonEmergencyEscalations.length;
+
+  const filteredNotifications = allNotifications.filter(item => {
+    if (filter === 'all') return true;
+    return item.type === filter;
+  });
+
   return (
     <>
     <div className={styles.container} ref={popupRef}>
@@ -133,22 +143,52 @@ export default function HeaderNotification() {
       {isOpen && (
         <div className={styles.popup}>
           <div className={styles.header}>
-            <h3 className={styles.title}>
-              {language === 'en' ? 'Pending Approvals' : '타 부서 이관/취소 승인 대기함'}
-            </h3>
+            <div className={styles.headerTitleRow}>
+              <h3 className={styles.title}>
+                {language === 'en' ? 'Pending Approvals' : '승인 대기함'}
+              </h3>
+              {totalNotifications > 0 && (
+                <span className={styles.countBadge}>{totalNotifications}</span>
+              )}
+            </div>
             <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label={language === 'en' ? 'Close' : '닫기'}>
-              <X size={20} />
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Filter Chips Row */}
+          <div className={styles.filterRow}>
+            <button
+              type="button"
+              className={`${styles.filterChip} ${filter === 'all' ? styles.filterChipActive : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              {language === 'en' ? `All: ${totalNotifications}` : `전체: ${totalNotifications}`}
+            </button>
+            <button
+              type="button"
+              className={`${styles.filterChip} ${filter === 'escalation' ? styles.filterChipActive : ''}`}
+              onClick={() => setFilter('escalation')}
+            >
+              {language === 'en' ? `Transfer: ${escalationCount}` : `이관: ${escalationCount}`}
+            </button>
+            <button
+              type="button"
+              className={`${styles.filterChip} ${filter === 'cancel' ? styles.filterChipActive : ''}`}
+              onClick={() => setFilter('cancel')}
+            >
+              {language === 'en' ? `Cancel: ${cancelCount}` : `취소: ${cancelCount}`}
             </button>
           </div>
 
           <div className={styles.content}>
-            {totalNotifications === 0 ? (
+            {filteredNotifications.length === 0 ? (
               <div className={styles.empty}>
                 {language === 'en' ? 'No pending requests.' : '대기 중인 요청이 없습니다.'}
               </div>
             ) : (
               <div className={styles.list}>
-                {allNotifications.map(({ type, data: req, time }) => {
+                {filteredNotifications.map(({ type, data: req, time }) => {
                   if (type === 'cancel') {
                     const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
                     let cleanDesc = rawParts[0] || '';

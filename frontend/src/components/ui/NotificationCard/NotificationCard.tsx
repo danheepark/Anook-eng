@@ -1,6 +1,5 @@
 import React from 'react';
-import Button from '@/components/ui/Button/Button';
-import Tag from '@/components/ui/StatusBadge/StatusBadge';
+import { ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/app/useTranslation';
 import styles from './NotificationCard.module.css';
 
@@ -50,11 +49,11 @@ function formatRelativeTime(isoStr?: string, language?: string): string {
   }
 
   if (diffInMins < 1) return 'Just now';
-  if (diffInMins === 1) return '1 min ago';
-  if (diffInMins < 60) return `${diffInMins} mins ago`;
+  if (diffInMins === 1) return '1m ago';
+  if (diffInMins < 60) return `${diffInMins}m ago`;
   const diffInHours = Math.floor(diffInMins / 60);
-  if (diffInHours === 1) return '1 hr ago';
-  if (diffInHours < 24) return `${diffInHours} hrs ago`;
+  if (diffInHours === 1) return '1h ago';
+  if (diffInHours < 24) return `${diffInHours}h ago`;
   const diffInDays = Math.floor(diffInHours / 24);
   return `${diffInDays}d ago`;
 }
@@ -75,60 +74,82 @@ export default function NotificationCard({
 }: NotificationCardProps) {
   const { language } = useTranslation();
   const isUrgent = priority === 'URGENT';
+  const timeText = createdAt ? formatRelativeTime(createdAt, language) : '';
 
   const badgeText = variant === 'cancel'
-    ? (language === 'en' ? 'Cancel Request' : '취소 요청')
-    : (language === 'en' ? 'Transfer Request' : '이관 요청');
+    ? (language === 'en' ? 'Cancel' : '취소 요청')
+    : (language === 'en' ? 'Transfer' : '이관 요청');
 
-  const badgeVariant = variant === 'cancel' ? 'red' : 'purple';
   const roomDisplay = language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`;
-
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+  const cleanTitle = toSentenceCase(title);
 
   return (
     <div
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
       onClick={onClick}
     >
-      {/* 컨텐츠 섹션 (Left & Middle) */}
-      <div className={styles.contentSection}>
-        <div className={styles.tagsRow}>
-          <Tag variant={badgeVariant}>{badgeText}</Tag>
-          {isUrgent && <Tag variant="red">{language === 'en' ? 'Urgent' : '긴급'}</Tag>}
+      {/* 1. Header Row: Title + Inline Badges (Time, Type, Urgent) + Right Chevron */}
+      <div className={styles.headerRow}>
+        <div className={styles.titleAndBadges}>
+          <div className={styles.titleWrapper}>
+            <span className={styles.roomPrefix}>{roomDisplay}</span>
+            <span className={styles.titleDivider}>•</span>
+            <h4 className={styles.title}>{cleanTitle}</h4>
+          </div>
+
+          <div className={styles.badgesWrapper}>
+            {timeText && (
+              <span className={styles.timeBadge}>{timeText}</span>
+            )}
+            <span className={`${styles.statusBadge} ${variant === 'cancel' ? styles.cancelBadge : styles.transferBadge}`}>
+              {badgeText}
+            </span>
+            {isUrgent && (
+              <span className={styles.urgentBadge}>
+                {language === 'en' ? 'Urgent' : '긴급'}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className={styles.titleRow}>
-          <span className={styles.roomNumber}>{roomDisplay}</span>
-          <h3 className={styles.title}>{toSentenceCase(title)}</h3>
-        </div>
-
-        {description && <p className={styles.description}>{description}</p>}
-
-        <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
-          <Button
-            variant="secondary"
-            className={styles.actionButton}
-            onClick={onSecondaryClick}
-          >
-            {secondaryLabel}
-          </Button>
-          <Button
-            variant="primary"
-            className={styles.actionButton}
-            onClick={onPrimaryClick}
-          >
-            {primaryLabel}
-          </Button>
+        <div className={styles.chevronWrapper}>
+          <ChevronRight size={16} className={styles.chevronIcon} />
         </div>
       </div>
 
-      {/* 오른쪽 섹션 (Right - 시간 표시) */}
-      <div className={styles.rightSection}>
-        <span className={styles.timeText}>
-          {[departmentName, createdAt ? formatRelativeTime(createdAt, language) : null]
-            .filter(Boolean)
-            .join(' • ')}
-        </span>
+      {/* 2. Middle Row: Description Preview */}
+      {description && (
+        <p className={styles.description}>{description}</p>
+      )}
+
+      {/* 3. Footer Row: Department Info & Action Buttons */}
+      <div className={styles.footerRow}>
+        <div className={styles.metaInfo}>
+          {departmentName && (
+            <div className={styles.deptInfo}>
+              <span className={styles.deptDot} />
+              <span className={styles.deptLabel}>{departmentName}</span>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={onSecondaryClick}
+          >
+            {secondaryLabel}
+          </button>
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            onClick={onPrimaryClick}
+          >
+            {primaryLabel}
+          </button>
+        </div>
       </div>
     </div>
   );
