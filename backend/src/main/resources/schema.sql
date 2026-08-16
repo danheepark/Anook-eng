@@ -283,7 +283,9 @@ ALTER TABLE pms_menu ADD COLUMN IF NOT EXISTS price_usd DOUBLE PRECISION;
 ALTER TABLE knowledge_entry ADD COLUMN IF NOT EXISTS room_no VARCHAR(10);
 
 -- [2026-05-22] UNIQUE 인덱스를 APPROVED 상태에만 적용 (PENDING 중복 허용)
+ALTER TABLE knowledge_entry DROP CONSTRAINT IF EXISTS unique_domain_question CASCADE;
 DROP INDEX IF EXISTS idx_knowledge_entry_unique_domain_question;
+DROP INDEX IF EXISTS unique_domain_question;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_knowledge_entry_unique_domain_question
 ON knowledge_entry(domain_code, question) WHERE status = 'APPROVED';
 
