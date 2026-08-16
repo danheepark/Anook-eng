@@ -3,7 +3,7 @@
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   width: 260px;
   min-width: 260px;
   max-width: 260px;

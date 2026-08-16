@@ -42,7 +42,7 @@
   padding: 8px 16px;
   font: var(--text-body-md-medium);
   line-height: 1.35;
-  word-break: keep-all;
+  word-break: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
 }
@@ -67,7 +67,8 @@
 }
 
 .fallback {
-  max-width: 100%;
+  max-width: 85%;
+  width: fit-content;
   padding: 8px 16px;
   border-radius: 20px;
   line-height: 1.35;
@@ -122,6 +123,11 @@
   align-items: flex-end;
   gap: var(--space-4);
   max-width: 85%;
+  width: fit-content;
+}
+
+.sentContainer .bubble {
+  max-width: 100%;
 }
 
 /* ── 첨부 이미지 썸네일 ── */

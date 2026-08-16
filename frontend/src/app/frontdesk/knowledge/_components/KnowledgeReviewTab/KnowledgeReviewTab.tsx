@@ -317,15 +317,17 @@ export default function KnowledgeReviewTab({
             <div className={styles.cardList}>
               <div className={styles.skeletonRow}>
                 <div className={styles.skeletonLeftSection}>
-                  <div className={styles.skeletonCheckbox} />
+                  <div className={styles.skeletonCheckboxWrapper}>
+                    <div className={styles.skeletonCheckbox} />
+                  </div>
                   <div className={styles.skeletonMainInfo}>
                     <div 
                       className={styles.skeletonTitle} 
-                      style={{ width: '75%' }} 
+                      style={{ width: '65%' }} 
                     />
                     <div 
                       className={styles.skeletonSubtitle} 
-                      style={{ width: '95%' }} 
+                      style={{ width: '98%' }} 
                     />
                   </div>
                 </div>

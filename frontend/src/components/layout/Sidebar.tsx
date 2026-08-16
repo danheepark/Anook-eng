@@ -211,7 +211,7 @@ export default function Sidebar({ role = 'frontdesk', className = '', fakePathna
         </button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, paddingTop: 'var(--space-8)' }}>
+      <div className={styles.menuContainer}>
         {menus.map((group, groupIdx) => (
           <div key={groupIdx} style={{ marginBottom: group.category ? 'var(--space-8)' : '0' }}>
             {group.category && (

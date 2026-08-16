@@ -29,7 +29,7 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
      Compare the guest's requested quantity with the REMAINING free daily allowance:
      - REMAINING = allowance - used (e.g., if free_water_allowance is 2 and free_water_used is 2, then REMAINING is 0).
      - If REMAINING <= 0: The guest has ALREADY exhausted their free daily limit. ALL requested items of this type in this turn will incur extra charges.
-       -> You MUST set 'needs_clarification' to true and ask for the guest's agreement to the extra charge (e.g., "You've used up your complimentary water for today. Additional bottles are $1.50 each — would you like to go ahead?").
+       -> You MUST set 'needs_clarification' to true and ask for the guest's agreement to the extra charge (e.g., "You've used up your complimentary water for today. Additional bottles are $1.50 each. Would you like to go ahead?").
        -> [IMPORTANT] When asking for this confirmation, you MUST set `"missing_fields": []` and include `"has_extra_charge": true` inside the `entities` object.
      - If REMAINING > 0 but REMAINING < requested count: PARTIAL overage.
        -> You MUST set 'needs_clarification' to true and ask for the guest's agreement to the extra charge for the overage portion (e.g., if 3 requested and REMAINING is 1, then 1 is free but the other 2 will cost extra_charge each).

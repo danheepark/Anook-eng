@@ -52,7 +52,7 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber, title }:
       return t.aiReplies?.forwardFront || "Let me connect you to the front desk right now.";
     }
     if (newContent.includes('[INFO_NOT_FOUND]') || newContent.includes('프론트 데스크로 즉시 전달해 두었습니다') || newContent.includes('제가 바로 답변드리기 어려워')) {
-      return t.aiReplies?.infoNotFound || "I'm not quite sure about that one. I've passed your question along to the front desk — they'll get back to you here shortly.";
+      return t.aiReplies?.infoNotFound || "I'm not quite sure about that one. I've passed your question along to the front desk, and they'll get back to you here shortly.";
     }
     if (newContent.includes('[PII_GUARD]')) {
       return t.aiReplies?.piiGuard || "To keep your personal info safe, we can't accept sensitive details through chat.";

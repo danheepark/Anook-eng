@@ -143,7 +143,7 @@ export default function FeedbackCard({
 
           <div className={styles.subtitle}>
             {submitted
-              ? `${ratingLabels[rating]} — ${t.feedbackCard?.thankYou || '감사합니다!'}`
+              ? `${ratingLabels[rating]} · ${t.feedbackCard?.thankYou || '감사합니다!'}`
               : (t.feedbackCard?.satisfactionQuestion || '서비스가 만족스러우셨나요?')}
           </div>
 

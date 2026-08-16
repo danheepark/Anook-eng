@@ -569,11 +569,11 @@
       "emergencyCompleted": "Your emergency has been resolved."
     },
     "message": {
-      "cancelPending": "🔄 Cancellation received — checking with the team",
+      "cancelPending": "🔄 Cancellation received. Checking with the team...",
       "escalated": "A staff member will be with you shortly",
       "forwarded": "Sent to the {team} team",
       "cancelledCard": "Request Cancelled",
-      "autoAcceptGuide": "Please check your request — it'll be forwarded shortly.",
+      "autoAcceptGuide": "Please check your request. It will be forwarded shortly.",
       "confirmGuide": "Tap the proceed button to confirm.",
       "cancelPendingShort": "Checking cancellation",
       "translating": "Translating...",
@@ -673,10 +673,10 @@
     "forwardFacility": "So sorry about the inconvenience! I'm forwarding this to the Facility team to get it sorted as quickly as possible.",
     "forwardConcierge": "Got it! I'll pass this along to the Concierge team right away.",
     "forwardFront": "Let me connect you to the front desk right now.",
-    "infoNotFound": "I'm not quite sure about that one. I've passed your question along to the front desk — they'll get back to you here shortly.",
+    "infoNotFound": "I'm not quite sure about that one. I've passed your question along to the front desk, and they'll get back to you here shortly.",
     "cancelSuccess": "Done! Your request has been cancelled. Let me know if there's anything else I can help with!",
     "cancelPending": "Your request is already being worked on, so I've sent a cancellation request to the team. \n I'll let you know as soon as it's confirmed!",
-    "piiGuard": "To keep your personal info safe, we can't accept sensitive details through chat. For anything like that, please call the front desk (dial 0) from your room phone — they'll be happy to help!"
+    "piiGuard": "To keep your personal info safe, we can't accept sensitive details through chat. For anything like that, please call the front desk (dial 0) from your room phone, and they'll be happy to help!"
   },
   "feedbackCard": {
     "systemCompletedTitle": "All previous requests and processing have been completed.",
@@ -700,7 +700,7 @@
     "consultationComplete": "End Conversation",
     "startConsultation": "Start Chat",
     "startEmergency": "Start Emergency Response",
-    "autoReplyStaffChecked": "A front desk team member has received your message and will assist you shortly.",
+    "autoReplyStaffChecked": "A front desk team member has reviewed your message and will assist you shortly.",
     "autoReplyEmergency": "An emergency response team is on the way. Please stay somewhere safe.",
     "backToList": "Back to list",
     "viewRequestDetail": "View request details",

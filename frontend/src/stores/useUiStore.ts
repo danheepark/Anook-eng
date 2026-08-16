@@ -19,7 +19,7 @@ interface UiState {
   isToastOpen: boolean;
   toastMessage: string;
   toastSubtitle?: string;
-  toastType: 'success' | 'error';
+  toastType: 'success' | 'error' | 'warning' | 'info';
 
   toggleSidebar: () => void;
   toggleCollapse: () => void;
@@ -28,7 +28,7 @@ interface UiState {
   setActiveTab: (tab: string) => void;
 
   // Toast actions
-  showToast: (message: string, type?: 'success' | 'error', subtitle?: string) => void;
+  showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info', subtitle?: string) => void;
   hideToast: () => void;
 
   // i18n

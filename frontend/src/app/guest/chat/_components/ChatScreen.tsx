@@ -178,6 +178,43 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           const prevSpeaker = getSpeakerType(prevMsg);
           const isSameSender = prevSpeaker !== null && currentSpeaker !== 'CARD' && prevSpeaker === currentSpeaker;
           const itemMarginTop = index === 0 ? 0 : isSameSender ? 4 : 16;
+          const isAutoNotice = (content: string) => {
+            if (!content) return false;
+            return content.includes('직원이 메시지를 확인했습니다') ||
+              (content.includes('프론트') && content.includes('확인했습니다')) ||
+              (content.toLowerCase().includes('front desk') && (
+                content.toLowerCase().includes('reviewed') ||
+                content.toLowerCase().includes('received') ||
+                content.toLowerCase().includes('checked') ||
+                content.toLowerCase().includes('assist you')
+              )) ||
+              content.includes('フロントデスク') ||
+              content.includes('前台工作人员') ||
+              content.includes('긴급 대응팀') ||
+              content.toLowerCase().includes('emergency response team');
+          };
+
+          const formatNoticeContent = (content: string) => {
+            if (!content) return '';
+            let formatted = content.replace(/has received your message/gi, 'has reviewed your message');
+            if (formatted.includes('and will assist you') && !formatted.includes('\nand will assist you')) {
+              formatted = formatted.replace(/\s*and will assist you/g, '\nand will assist you');
+            }
+            if (formatted.includes('곧 안내해') && !formatted.includes('\n곧 안내해')) {
+              formatted = formatted.replace(/\s*곧 안내해/g, '\n곧 안내해');
+            }
+            return formatted;
+          };
+
+          if (isAutoNotice(msg.content)) {
+            return (
+              <div key={msg.id} className={styles.systemDivider}>
+                <span className={styles.systemDividerText}>
+                  {formatNoticeContent(msg.content)}
+                </span>
+              </div>
+            );
+          }
 
           if (msg.type === 'FALLBACK') {
             return (
@@ -296,7 +333,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                 {isWelcome ? (
                   <div style={{
                     width: '100%',
-                    marginBottom: '-16px',
+                    marginBottom: '0',
                     display: 'flex',
                     justifyContent: 'center'
                   }}>

@@ -89,7 +89,7 @@ export default function EmergencyBanner({ alert, onDismiss, onClick }: Emergency
 
       <div className={styles.textArea}>
         <p className={styles.title}>
-          {categoryLabel} — {alert.roomNo}호
+          {categoryLabel} · {alert.roomNo}호
         </p>
         <p className={styles.detail}>{alert.summary}</p>
       </div>

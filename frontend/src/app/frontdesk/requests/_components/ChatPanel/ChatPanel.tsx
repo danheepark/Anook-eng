@@ -143,7 +143,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
       return t.aiReplies?.forwardFront || "Let me connect you to the front desk right now.";
     }
     if (newContent.includes('[INFO_NOT_FOUND]') || newContent.includes('프론트 데스크로 즉시 전달해 두었습니다') || newContent.includes('제가 바로 답변드리기 어려워')) {
-      return t.aiReplies?.infoNotFound || "I'm not quite sure about that one. I've passed your question along to the front desk — they'll get back to you here shortly.";
+      return t.aiReplies?.infoNotFound || "I'm not quite sure about that one. I've passed your question along to the front desk, and they'll get back to you here shortly.";
     }
     if (newContent.includes('[PII_GUARD]')) {
       return t.aiReplies?.piiGuard || "To keep your personal info safe, we can't accept sensitive details through chat.";
@@ -609,32 +609,57 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                   </div>
                 );
               } else {
-                const isAutoMsg = msg.content.includes('프론트 데스크 직원이 메시지를 확인했습니다') ||
-                  msg.content.includes('The front desk staff has checked your message') ||
-                  msg.content.includes('A front desk team member has received your message') ||
-                  msg.content.includes('긴급 대응팀이 배정되었습니다') ||
-                  msg.content.includes('An emergency response team has been assigned');
+                const isAutoMsg = 
+                  msg.content.includes('직원이 메시지를 확인했습니다') ||
+                  (msg.content.includes('프론트') && msg.content.includes('확인했습니다')) ||
+                  (msg.content.toLowerCase().includes('front desk') && (
+                    msg.content.toLowerCase().includes('reviewed') ||
+                    msg.content.toLowerCase().includes('received') ||
+                    msg.content.toLowerCase().includes('checked') ||
+                    msg.content.toLowerCase().includes('assist you')
+                  )) ||
+                  msg.content.includes('フロントデスク') ||
+                  msg.content.includes('前台工作人员') ||
+                  msg.content.includes('긴급 대응팀') ||
+                  msg.content.toLowerCase().includes('emergency response team');
 
-                const isManualStaffMsg = msg.senderType === 'STAFF';
-                const bubbleStyle = msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const;
                 const isTargetMatch = !!(internalSearch && matchIndices.length > 0 && matchIndices[currentMatch] === idx);
 
-                renderedItem = (
-                  <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: `${itemMarginTop}px` }}>
-                    <div style={{
-                      transition: 'all 0.3s',
-                      borderRadius: '16px',
-                    }}>
-                      <ChatBubble
-                        variant={msg.variant}
-                        bubbleStyle={bubbleStyle}
-                        isFallback={isManualStaffMsg}
-                      >
-                        {renderHighlightedText(msg.content, internalSearch, isTargetMatch)}
-                      </ChatBubble>
+                const formatNoticeContent = (content: string) => {
+                  if (!content) return '';
+                  let formatted = content.replace(/has received your message/gi, 'has reviewed your message');
+                  return formatted.replace(/\n\s*/g, ' ');
+                };
+
+                if (isAutoMsg) {
+                  renderedItem = (
+                    <div key={msg.id} id={`chat-msg-${msg.id}`} className={styles.systemDivider}>
+                      <span className={styles.systemDividerText}>
+                        {renderHighlightedText(formatNoticeContent(msg.content), internalSearch, isTargetMatch)}
+                      </span>
                     </div>
-                  </div>
-                );
+                  );
+                } else {
+                  const isManualStaffMsg = msg.senderType === 'STAFF';
+                  const bubbleStyle = msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const;
+
+                  renderedItem = (
+                    <div key={msg.id} id={`chat-msg-${msg.id}`} style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: `${itemMarginTop}px` }}>
+                      <div style={{
+                        transition: 'all 0.3s',
+                        borderRadius: '16px',
+                      }}>
+                        <ChatBubble
+                          variant={msg.variant}
+                          bubbleStyle={bubbleStyle}
+                          isFallback={isManualStaffMsg}
+                        >
+                          {renderHighlightedText(msg.content, internalSearch, isTargetMatch)}
+                        </ChatBubble>
+                      </div>
+                    </div>
+                  );
+                }
               }
 
               if (isUnreadStart) {
@@ -667,7 +692,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                   if (isEmergency) {
                     await handleSend(t.chatPanel?.autoReplyEmergency || 'An emergency response team has been assigned. We will take prompt action. Please wait in a safe place.');
                   } else {
-                    await handleSend(t.chatPanel?.autoReplyStaffChecked || 'A front desk team member has received your message and will assist you shortly.');
+                    await handleSend(t.chatPanel?.autoReplyStaffChecked || 'A front desk team member has reviewed your message and will assist you shortly.');
                   }
                 }
               }}

@@ -431,8 +431,9 @@ export default function ComponentShowcasePage() {
 
                 <div style={{ marginTop: 'var(--space-32)', paddingTop: 'var(--space-24)', borderTop: '1px solid var(--color-surface)' }}>
                   <h3 style={{ font: 'var(--text-h3-bold)', marginBottom: 'var(--space-12)' }}>Toast Notifications</h3>
-                  <div style={{ display: 'flex', gap: 'var(--space-16)' }}>
+                  <div style={{ display: 'flex', gap: 'var(--space-16)', flexWrap: 'wrap' }}>
                     <Button variant="primary" onClick={() => showToast('Saved successfully.', 'success')}>Show Success Toast</Button>
+                    <Button variant="secondary" onClick={() => showToast('Please check your network connection.', 'warning')}>Show Warning Toast</Button>
                     <Button variant="danger" onClick={() => showToast('An error occurred.', 'error', 'Please try again in a moment.')}>Show Error Toast</Button>
                   </div>
                 </div>

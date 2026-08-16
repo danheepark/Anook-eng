@@ -75,7 +75,7 @@ export default function ChatEndCard({ summary, domainCode, completedAt, onSubmit
 
           <div className={styles.subtitle}>
             {submitted
-              ? `${RATING_LABELS[rating]} — 감사합니다!`
+              ? `${RATING_LABELS[rating]} · 감사합니다!`
               : '서비스가 만족스러우셨나요?'}
           </div>
 
