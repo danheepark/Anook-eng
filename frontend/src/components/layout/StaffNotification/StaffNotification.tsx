@@ -64,6 +64,20 @@ export default function StaffNotification() {
     }
   }, [departmentId, fetchRequests]);
 
+  // 바깥 영역 클릭 시 알림 팝업 자동 닫기
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   // 3. 실시간 WebSocket(SSE) 구독
   useEffect(() => {
     if (!departmentId) return;

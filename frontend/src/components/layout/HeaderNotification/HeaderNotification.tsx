@@ -36,6 +36,20 @@ export default function HeaderNotification() {
     return () => clearInterval(timer);
   }, []);
 
+  // 바깥 영역 클릭 시 알림 팝업 자동 닫기
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   // 1분 30초 초과된 취소 요청 필터링
   const delayedCancelRequests = allRequests.filter(r => {
     if (!r.cancelRequested || !r.cancelRequestedAt) return false;
