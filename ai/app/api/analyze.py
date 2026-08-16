@@ -369,50 +369,6 @@ def _summarize_from_context(current_text: str, chat_history: list, fallback: str
         print(f"[Analyze] ⚠️ 맥락 요약 생성 실패 (폴백 사용): {e}")
     return fallback
 
-def _generate_clean_inquiry_summary(text: str, language: str = "en") -> str:
-    """
-    고객의 질문이나 미학습 문의를 업무 티켓에 적합한 간결한 명사형 요약(예: 'Stroller rental inquiry', '유모차 대여 문의')으로 변환합니다.
-    절대 질문 형식('?')이나 불필요한 태그/접미사('(프론트 이관)', '...')를 붙이지 않습니다.
-    """
-    if not text:
-        return "Information inquiry"
-    
-    text_clean = text.strip()
-    
-    try:
-        raw = call_gemini(
-            prompt=(
-                f"You are a hotel front desk ticketing system.\n"
-                f"Convert the following guest question/inquiry into a concise 2-4 word noun-phrase task summary (e.g., 'Stroller rental inquiry', 'Pool hours inquiry', 'Late checkout policy', '유모차 대여 문의', '수영장 이용시간 문의').\n"
-                f"- CRITICAL: Do NOT write in question format (NO question marks '?').\n"
-                f"- CRITICAL: Do NOT append any brackets, ellipsis, or transfer notes like '(프론트 이관)' or '...'.\n"
-                f"- Keep it strictly under 25 characters.\n"
-                f"- Language: Use English if input is English or non-Korean, use Korean if input is Korean.\n\n"
-                f"Guest Input: \"{text_clean}\""
-            ),
-            system_instruction='Output ONLY a JSON object: {"summary": "concise noun phrase"}. No other text.'
-        )
-        if isinstance(raw, dict) and "summary" in raw:
-            summary = str(raw["summary"]).strip()
-            summary = re.sub(r'[\?\.!]+$', '', summary).strip()
-            summary = re.sub(r'\s*\([^\)]*\)', '', summary).strip()
-            if summary:
-                print(f"[Analyze] 📝 프론트 이관 티켓 요약 생성: '{summary}'")
-                return summary
-    except Exception as e:
-        print(f"[Analyze] ⚠️ Inquiry summary generation error: {e}")
-
-    # Fallback heuristic
-    cleaned = re.sub(r'^(is|are|can|do|does|what|where|when|how|why|could|would)\s+(there\s+|i\s+|we\s+|you\s+)?', '', text_clean, flags=re.IGNORECASE)
-    cleaned = re.sub(r'[\?\.!]+', '', cleaned).strip()
-    words = cleaned.split()
-    if len(words) > 4:
-        cleaned = " ".join(words[:4])
-    
-    if any('\uac00' <= char <= '\ud7a3' for char in text_clean):
-        return f"{cleaned} 문의" if cleaned else "정보 문의"
-    return f"{cleaned.capitalize()} inquiry" if cleaned else "Information inquiry"
-
 def _fallback_response(guest_reply: str) -> dict:
     return {
         "guest_reply": guest_reply,
@@ -1373,10 +1329,10 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             if guest_reply == info_not_found_msg or "[INFO_NOT_FOUND]" in guest_reply or (info_not_found_msg and info_not_found_msg in guest_reply):
                 # ── [원칙 1: AI가 답을 못하고, 해결 주체가 명확함 → 바로 FRONT Handoff] ──
                 print(f"[Analyze] 🚨 지식 부재(INFO_NOT_FOUND) → 프론트 데스크 즉시 Handoff 티켓 발행")
-                inquiry_summary = _generate_clean_inquiry_summary(request.text, request.language)
+                summary_val = getattr(primary, 'summary', None) or "Information inquiry"
                 response = {
                     "guest_reply": _get_static_reply("INFO_NOT_FOUND", request.language),
-                    "summary": inquiry_summary,
+                    "summary": summary_val,
                     "domain_code": "FRONT",
                     "priority": "NORMAL",
                     "entities": {"intent": "ESCALATION", "reason": "LACK_OF_KNOWLEDGE"},
