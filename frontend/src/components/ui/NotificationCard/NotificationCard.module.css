@@ -21,7 +21,7 @@
   cursor: pointer;
 }
 
-/* 1. Header Row (Title + Badges + Right Chevron) */
+/* 1. Header Row (Decision Title + Badges + Right Department Name) */
 .headerRow {
   display: flex;
   align-items: center;
@@ -39,32 +39,11 @@
   flex: 1;
 }
 
-.titleWrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-4);
-  min-width: 0;
-}
-
-.roomPrefix {
-  font: var(--text-body-bold);
-  color: var(--color-gray-900);
-  white-space: nowrap;
-}
-
-.titleDivider {
-  color: var(--color-gray-400);
-  font: var(--text-caption-medium);
-}
-
-.title {
+.decisionTitle {
   font: var(--text-body-bold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
 }
 
 .badgesWrapper {
@@ -105,17 +84,18 @@
   color: var(--color-dept-emergency-text);
 }
 
-/* 2. Middle Row: Description */
-.description {
-  font: var(--text-caption-regular);
-  color: var(--color-gray-500);
-  margin: 0;
-  line-height: var(--main-line-height);
+/* 2. Middle Row: Target of the decision (e.g. Room 402 · Shampoo x1) */
+.targetRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.targetText {
+  font: var(--text-caption-medium);
+  color: var(--color-gray-700);
   word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  line-height: var(--main-line-height);
 }
 
 /* 3. Footer Row: Action Buttons */

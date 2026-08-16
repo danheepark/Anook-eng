@@ -74,7 +74,6 @@ function getDeptClass(deptName?: string): string {
 export default function NotificationCard({
   variant,
   title,
-  description,
   roomNumber,
   departmentName,
   createdAt,
@@ -89,34 +88,31 @@ export default function NotificationCard({
   const isUrgent = priority === 'URGENT';
   const timeText = createdAt ? formatRelativeTime(createdAt, language) : '';
 
-  const badgeText = variant === 'cancel'
-    ? (language === 'en' ? 'Cancel' : '취소 요청')
-    : (language === 'en' ? 'Transfer' : '이관 요청');
+  // 1. 첫 줄: Front Desk가 해야 할 판단
+  const decisionText = variant === 'cancel'
+    ? (language === 'en' ? 'Cancel request' : '취소 승인 요청')
+    : (language === 'en' ? 'Transfer request' : '이관 승인 요청');
 
-  const badgeVariant = variant === 'cancel' ? 'red' : 'purple';
+  // 2. 둘째 줄: 그 판단의 대상 (객실 · 요청 항목)
   const roomDisplay = language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanTitle = toSentenceCase(title);
+  const targetDisplay = cleanTitle ? `${roomDisplay} · ${cleanTitle}` : roomDisplay;
 
   return (
     <div
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
       onClick={onClick}
     >
-      {/* 1. Header Row: Title + Inline Badges (Time, Type, Urgent) + Top-Right Colored Dept Name */}
+      {/* 1. 첫 줄: Front Desk가 해야 할 판단 + 배지들 + 우측 부서명 */}
       <div className={styles.headerRow}>
         <div className={styles.titleAndBadges}>
-          <div className={styles.titleWrapper}>
-            <span className={styles.roomPrefix}>{roomDisplay}</span>
-            <span className={styles.titleDivider}>•</span>
-            <h4 className={styles.title}>{cleanTitle}</h4>
-          </div>
+          <h4 className={styles.decisionTitle}>{decisionText}</h4>
 
           <div className={styles.badgesWrapper}>
             {timeText && (
               <StatusBadge variant="gray">{timeText}</StatusBadge>
             )}
-            <StatusBadge variant={badgeVariant}>{badgeText}</StatusBadge>
             {isUrgent && (
               <StatusBadge variant="red">
                 {language === 'en' ? 'Urgent' : '긴급'}
@@ -132,12 +128,12 @@ export default function NotificationCard({
         )}
       </div>
 
-      {/* 2. Middle Row: Description Preview */}
-      {description && (
-        <p className={styles.description}>{description}</p>
-      )}
+      {/* 2. 둘째 줄: 그 판단의 대상 (Room 402 · Shampoo x1) */}
+      <div className={styles.targetRow}>
+        <span className={styles.targetText}>{targetDisplay}</span>
+      </div>
 
-      {/* 3. Footer Row: Action Buttons */}
+      {/* 3. 셋째 줄: 액션 버튼 */}
       <div className={styles.footerRow}>
         <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
           <Button
