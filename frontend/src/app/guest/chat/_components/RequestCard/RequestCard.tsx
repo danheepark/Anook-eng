@@ -203,44 +203,34 @@ export default function RequestCard({
   const [timeLeft, setTimeLeft] = useState(graceRemaining);
 
   // Format summary to hide internal notes from guest
-  const baseSummary = translatedSummary || summary;
+  const baseSummary = translatedSummary || summary || '';
   
   let displaySummary = '';
-  if (isTranslating) {
-    displaySummary = t.cardUI?.message?.translating || 'Translating...';
+  // 내부 관리용 말머리([프론트 연결] 등)만 제거하고 AI가 작성한 실제 summary를 표시합니다.
+  let cleaned = baseSummary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '');
+  
+  // 단, 요약문이 비어있거나 '미학습 정보'처럼 고객에게 노출하기 부적절한 경우에만 기본 안내 문구 사용
+  if (!cleaned || cleaned.includes('미학습 정보') || cleaned.includes('답변 불가')) {
+    displaySummary = targetLang === 'en' ? 'Connecting to Front Desk' : (t.cardUI?.message?.escalationRequest || '프론트 데스크 연결 중');
   } else {
-    // 내부 관리용 말머리([프론트 연결] 등)만 제거하고 AI가 작성한 실제 summary를 표시합니다.
-    let cleaned = baseSummary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '');
-    
-    // 단, 요약문이 비어있거나 '미학습 정보'처럼 고객에게 노출하기 부적절한 경우에만 기본 안내 문구 사용
-    if (!cleaned || cleaned.includes('미학습 정보')) {
-      displaySummary = t.cardUI?.message?.escalationRequest || 'Front desk staff connection request';
-    } else {
-      displaySummary = cleaned;
-    }
+    displaySummary = cleaned;
   }
   
   const getFixedTitle = () => {
     // FRONT 도메인이거나 이관(ESCALATION) 건인 경우 항상 고정 타이틀 표시
     if (domainCode === 'FRONT' || isEscalatedChat || entities?.intent === 'ESCALATION' || baseSummary.includes('프론트 연결')) {
-      return language === 'en' ? 'Connecting to Front Desk' : (t.cardUI?.message?.escalationRequest || '프론트 데스크 연결 중');
+      return targetLang === 'en' ? 'Connecting to Front Desk' : (t.cardUI?.message?.escalationRequest || '프론트 데스크 연결 중');
     }
 
-    if (isTranslating) {
-      return displaySummary;
-    }
-    
     if (rawDynamicTitle) {
       return displaySummary;
     }
     
     const intent = entities?.intent as string | undefined;
     
-    // Fallback: intent 기반 번역 매핑 (요약문이 빈 문자열일 때만 사용)
-    if (!summary && domainCode !== 'HK' && domainCode !== 'FACILITY') {
-      if (intent && (t.intents as any)?.[intent]) {
-        return (t.intents as any)[intent];
-      }
+    // Fallback: intent 기반 번역 매핑
+    if (intent && (t.intents as any)?.[intent]) {
+      return (t.intents as any)[intent];
     }
     
     if (!domainCode) {
@@ -427,17 +417,11 @@ export default function RequestCard({
           <div className={styles.content}>
             <div className={styles.summaryRow} style={{ position: 'relative', paddingRight: '50px' }}>
               <div className={styles.summary} style={{ display: 'flex', alignItems: 'center' }}>
-                {isTranslating ? (
-                  <span className={styles.translatingText}>{t.cardUI?.message?.translating || 'Translating...'}</span>
-                ) : (
-                  <>
-                    <span>{finalTitle}</span>
-                    {isCancelPending && (
-                      <span className={styles.cancelPendingBadge}>
-                        {targetLang === 'ko' ? '취소 대기중' : 'Cancel Pending'}
-                      </span>
-                    )}
-                  </>
+                <span>{finalTitle}</span>
+                {isCancelPending && (
+                  <span className={styles.cancelPendingBadge}>
+                    {targetLang === 'ko' ? '취소 대기중' : 'Cancel Pending'}
+                  </span>
                 )}
               </div>
               <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
@@ -451,27 +435,23 @@ export default function RequestCard({
 
           {rawDetails && (
             <div className={styles.detailsText}>
-              {isTranslatingDetails ? (
-                <span className={styles.translatingText}>{t.cardUI?.message?.translating || 'Translating...'}</span>
-              ) : (
-                (() => {
-                  const finalStr = translatedDetails || rawDetails;
-                  const rawLines = rawDetails.split('\n');
-                  const highlightItems = (entities?.highlight_items as string[]) || [];
+              {(() => {
+                const finalStr = translatedDetails || rawDetails;
+                const rawLines = rawDetails.split('\n');
+                const highlightItems = (entities?.highlight_items as string[]) || [];
+                
+                return finalStr.split('\n').map((line, idx) => {
+                  const rawLine = rawLines[idx] || '';
+                  const isMod = highlightItems.some(hi => rawLine.includes(hi));
                   
-                  return finalStr.split('\n').map((line, idx) => {
-                    const rawLine = rawLines[idx] || '';
-                    const isMod = highlightItems.some(hi => rawLine.includes(hi));
-                    
-                    return (
-                      <div key={idx} className={isMod ? styles.modifiedLine : ''}>
-                        {line}
-                        {isMod && <span className={styles.modifiedBadge}>Modified</span>}
-                      </div>
-                    );
-                  });
-                })()
-              )}
+                  return (
+                    <div key={idx} className={isMod ? styles.modifiedLine : ''}>
+                      {line}
+                      {isMod && <span className={styles.modifiedBadge}>Modified</span>}
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
 

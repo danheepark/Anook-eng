@@ -28,6 +28,7 @@ export function useTranslationApi(text: string | null | undefined, targetLanguag
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       setTranslatedText(cached);
+      setIsLoading(false);
       return;
     }
 

@@ -123,19 +123,15 @@ export default function RequestStatusCard({
   const translatedSummary = isTranslationRequired ? translatedSummaryRaw : sourceTextForTranslation;
 
   // Format summary to hide internal notes from guest
-  const baseSummary = translatedSummary || summary;
+  const baseSummary = translatedSummary || summary || '';
   
   let displaySummary = '';
-  if (isTranslating) {
-    displaySummary = t.cardUI?.message?.translating || 'Translating...';
-  } else {
-    displaySummary = baseSummary.includes('[직원 인수인계]') || baseSummary.includes('[프론트 연결]') || baseSummary.includes('미학습 정보') || isEscalatedChat
-      ? (t.cardUI?.message?.escalationRequest || 'Front desk staff connection request')
-      : baseSummary;
-  }
+  displaySummary = baseSummary.includes('[직원 인수인계]') || baseSummary.includes('[프론트 연결]') || baseSummary.includes('미학습 정보') || isEscalatedChat
+    ? (targetLang === 'en' ? 'Connecting to Front Desk' : (t.cardUI?.message?.escalationRequest || '프론트 데스크 연결 중'))
+    : baseSummary;
   
   const getFixedTitle = () => {
-    if (isTranslating || isEscalatedChat || baseSummary.includes('프론트 연결')) {
+    if (isEscalatedChat || baseSummary.includes('프론트 연결')) {
       return displaySummary;
     }
     
@@ -173,11 +169,7 @@ export default function RequestStatusCard({
         <div className={styles.titleGroup}>
           <span className={styles.department}>{deptName}</span>
           <h3 className={styles.title}>
-            {isTranslating ? (
-              <span className={styles.translatingText}>{t.cardUI?.message?.translating || 'Translating...'}</span>
-            ) : (
-              finalTitle
-            )}
+            {finalTitle}
           </h3>
         </div>
         <div className={styles.timeInfo}>
