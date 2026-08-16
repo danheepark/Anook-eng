@@ -1,22 +1,20 @@
 .card {
   display: flex;
   flex-direction: column;
-  padding: 14px 16px;
-  gap: 8px;
-  background-color: var(--color-white);
-  border-bottom: 1px solid var(--color-gray-100);
-  transition: all 0.15s ease;
+  padding: var(--space-12) var(--space-16);
+  gap: var(--space-8);
+  background-color: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition), border-color var(--transition);
   position: relative;
   width: 100%;
   box-sizing: border-box;
 }
 
-.card:last-child {
-  border-bottom: none;
-}
-
 .card:hover {
-  background-color: var(--color-gray-50);
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-300);
 }
 
 .card.clickable {
@@ -28,7 +26,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-8);
   width: 100%;
 }
 
@@ -36,7 +34,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-8);
   min-width: 0;
   flex: 1;
 }
@@ -44,87 +42,36 @@
 .titleWrapper {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-4);
   min-width: 0;
 }
 
 .roomPrefix {
-  font: var(--text-caption-medium);
-  font-size: 13px;
-  font-weight: 700;
+  font: var(--text-body-bold);
   color: var(--color-gray-900);
   white-space: nowrap;
 }
 
 .titleDivider {
   color: var(--color-gray-400);
-  font-size: 11px;
+  font: var(--text-caption-medium);
 }
 
 .title {
-  font: var(--text-caption-medium);
-  font-size: 13px;
-  font-weight: 700;
+  font: var(--text-body-bold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 220px;
 }
 
 .badgesWrapper {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-4);
   flex-shrink: 0;
-}
-
-.timeBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: 6px;
-  background-color: #FEF3C7;
-  color: #92400E;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: 6px;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.transferBadge {
-  background-color: #EFF6FF;
-  color: #1D4ED8;
-}
-
-.cancelBadge {
-  background-color: #FEE2E2;
-  color: #B91C1C;
-}
-
-.urgentBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 6px;
-  background-color: #FFEDD5;
-  color: #C2410C;
-  line-height: 1.2;
-  white-space: nowrap;
 }
 
 .chevronWrapper {
@@ -133,7 +80,7 @@
   justify-content: center;
   color: var(--color-gray-400);
   flex-shrink: 0;
-  transition: transform 0.15s ease, color 0.15s ease;
+  transition: transform var(--transition), color var(--transition);
 }
 
 .card:hover .chevronIcon {
@@ -144,10 +91,9 @@
 /* 2. Middle Row: Description */
 .description {
   font: var(--text-caption-regular);
-  font-size: 12.5px;
   color: var(--color-gray-500);
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--main-line-height);
   word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -160,24 +106,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 4px;
+  gap: var(--space-12);
+  margin-top: var(--space-4);
   width: 100%;
 }
 
 .metaInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-8);
   min-width: 0;
 }
 
 .deptInfo {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-6, 6px);
   font: var(--text-caption-medium);
-  font-size: 12px;
   color: var(--color-gray-500);
   white-space: nowrap;
 }
@@ -192,48 +137,13 @@
 .actions {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-8);
   flex-shrink: 0;
 }
 
-.secondaryBtn {
-  height: 28px;
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid var(--color-gray-300);
-  border-radius: 6px;
-  background-color: var(--color-white);
-  color: var(--color-gray-700);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.secondaryBtn:hover {
-  background-color: var(--color-gray-100);
-  border-color: var(--color-gray-400);
-  color: var(--color-gray-900);
-}
-
-.primaryBtn {
-  height: 28px;
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  border: none;
-  border-radius: 6px;
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.primaryBtn:hover {
-  background-color: var(--color-primary-hover);
+.actionBtn {
+  height: 28px !important;
+  padding: 0 var(--space-12) !important;
+  font: var(--text-caption-medium) !important;
+  border-radius: var(--radius-md) !important;
 }

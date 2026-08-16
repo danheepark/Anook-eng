@@ -1,5 +1,7 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
+import Button from '@/components/ui/Button/Button';
 import { useTranslation } from '@/app/useTranslation';
 import styles from './NotificationCard.module.css';
 
@@ -80,6 +82,7 @@ export default function NotificationCard({
     ? (language === 'en' ? 'Cancel' : '취소 요청')
     : (language === 'en' ? 'Transfer' : '이관 요청');
 
+  const badgeVariant = variant === 'cancel' ? 'red' : 'purple';
   const roomDisplay = language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanTitle = toSentenceCase(title);
@@ -100,15 +103,13 @@ export default function NotificationCard({
 
           <div className={styles.badgesWrapper}>
             {timeText && (
-              <span className={styles.timeBadge}>{timeText}</span>
+              <StatusBadge variant="gray">{timeText}</StatusBadge>
             )}
-            <span className={`${styles.statusBadge} ${variant === 'cancel' ? styles.cancelBadge : styles.transferBadge}`}>
-              {badgeText}
-            </span>
+            <StatusBadge variant={badgeVariant}>{badgeText}</StatusBadge>
             {isUrgent && (
-              <span className={styles.urgentBadge}>
+              <StatusBadge variant="red">
                 {language === 'en' ? 'Urgent' : '긴급'}
-              </span>
+              </StatusBadge>
             )}
           </div>
         </div>
@@ -135,20 +136,20 @@ export default function NotificationCard({
         </div>
 
         <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            className={styles.secondaryBtn}
+          <Button
+            variant="secondary"
+            className={styles.actionBtn}
             onClick={onSecondaryClick}
           >
             {secondaryLabel}
-          </button>
-          <button
-            type="button"
-            className={styles.primaryBtn}
+          </Button>
+          <Button
+            variant="primary"
+            className={styles.actionBtn}
             onClick={onPrimaryClick}
           >
             {primaryLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
