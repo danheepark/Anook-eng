@@ -166,15 +166,12 @@ export default function StaffNotification() {
                     key={`cancel-${req.id}`}
                     variant="cancel"
                     title={req.summary}
-                    description={cleanDesc}
                     roomNumber={req.roomNumber}
                     departmentName={req.departmentName}
                     createdAt={req.createdAt}
                     priority={req.priority}
-                    primaryLabel="취소 승인"
-                    secondaryLabel="반려"
+                    primaryLabel="승인"
                     onPrimaryClick={() => handleApproveCancel(req.id, req.version)}
-                    onSecondaryClick={() => handleRejectCancel(req.id, req.version)}
                   />
                   );
                 })}

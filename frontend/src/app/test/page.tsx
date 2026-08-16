@@ -13,6 +13,7 @@ import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import Tabs from '@/components/ui/Tab/Tabs';
 import Pagination from '@/components/ui/Pagenation/Pagination';
 import RequestCard from '@/components/ui/Card/RequestCard';
+import NotificationCard from '@/components/ui/NotificationCard/NotificationCard';
 import GuestRequestCard from '@/app/guest/chat/_components/RequestCard/RequestCard';
 import RequestStatusBar from '@/app/guest/chat/_components/RequestStatusBar/RequestStatusBar';
 import ChatBubble from '@/app/guest/chat/_components/ChatBubble';
@@ -770,6 +771,35 @@ export default function ComponentShowcasePage() {
                 <h4 style={{ font: 'var(--text-body-bold)', marginBottom: 'var(--space-12)' }}>Cards (Request, Summary, Task Ticket)</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
+                    <div style={{ flex: 1 }}>
+                      <h5 style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)', marginBottom: 'var(--space-8)' }}>Notification Card (알림 패널 카드)</h5>
+                      <ComponentLabel path="components/ui/NotificationCard/NotificationCard.tsx" />
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-12)', maxWidth: '900px' }}>
+                        <NotificationCard
+                          variant="cancel"
+                          title="Shampoo x1"
+                          roomNumber="402"
+                          departmentName="Housekeeping"
+                          createdAt={new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString()}
+                          priority="NORMAL"
+                          primaryLabel="Approve"
+                          onPrimaryClick={() => alert('취소 요청 승인')}
+                          onClick={() => alert('카드 클릭 - 상세 모달 오픈')}
+                        />
+                        <NotificationCard
+                          variant="escalation"
+                          title="Jogging route"
+                          roomNumber="101"
+                          departmentName="Concierge"
+                          createdAt={new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()}
+                          priority="URGENT"
+                          primaryLabel="Approve"
+                          onPrimaryClick={() => alert('이관 요청 승인')}
+                          onClick={() => alert('카드 클릭 - 상세 모달 오픈')}
+                        />
+                      </div>
+                    </div>
+
                     <div style={{ flex: 1 }}>
                       <h5 style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)', marginBottom: 'var(--space-8)' }}>Request Card</h5>
                       <ComponentLabel path="components/ui/Card/RequestCard.tsx" />

@@ -4,9 +4,9 @@
   padding: var(--space-12) var(--space-16);
   gap: var(--space-8);
   background-color: var(--color-gray-50);
-  border: 1px solid var(--color-gray-200);
+  border: none;
   border-radius: var(--radius-md);
-  transition: background-color var(--transition), border-color var(--transition);
+  transition: background-color var(--transition);
   position: relative;
   width: 100%;
   box-sizing: border-box;
@@ -14,7 +14,6 @@
 
 .card:hover {
   background-color: var(--color-gray-100);
-  border-color: var(--color-gray-300);
 }
 
 .card.clickable {
@@ -98,14 +97,21 @@
   line-height: var(--main-line-height);
 }
 
-/* 3. Footer Row: Action Buttons */
+/* 3. Footer Row: Left Time Text & Right Action Buttons */
 .footerRow {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: var(--space-8);
   margin-top: var(--space-4);
   width: 100%;
+}
+
+.timeText {
+  font: var(--text-caption-regular);
+  color: var(--color-gray-400);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .actions {

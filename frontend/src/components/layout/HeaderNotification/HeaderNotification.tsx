@@ -165,15 +165,12 @@ export default function HeaderNotification() {
                       key={`cancel-${req.id}`}
                       variant="cancel"
                       title={req.summary}
-                      description={cleanDesc}
                       roomNumber={req.roomNo}
                       departmentName={formatDeptName(req.departmentName)}
                       createdAt={time}
                       priority={req.priority}
-                      primaryLabel={language === 'en' ? 'Approve Cancel' : '취소 승인'}
-                      secondaryLabel={language === 'en' ? 'Reject' : '반려'}
+                      primaryLabel={language === 'en' ? 'Approve' : '승인'}
                       onPrimaryClick={() => handleApproveCancel(req.id)}
-                      onSecondaryClick={() => handleRejectCancel(req.id)}
                       onClick={() => setDetailTarget(req.id)}
                     />
                     );
@@ -201,15 +198,12 @@ export default function HeaderNotification() {
                       key={`esc-${req.id}`}
                       variant="escalation"
                       title={req.summary}
-                      description={transferReason}
                       roomNumber={req.roomNo}
                       departmentName={formatDeptName(senderDeptName)}
                       createdAt={time}
                       priority={req.priority}
-                      primaryLabel={language === 'en' ? 'Accept (Assign)' : '수락 (배정)'}
-                      secondaryLabel={language === 'en' ? 'Reject' : '반려'}
+                      primaryLabel={language === 'en' ? 'Approve' : '승인'}
                       onPrimaryClick={() => handleApproveEscalation(req.id)}
-                      onSecondaryClick={() => handleRejectEscalation(req.id)}
                       onClick={() => setDetailTarget(req.id)}
                     />
                     );

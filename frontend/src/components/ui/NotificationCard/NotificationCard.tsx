@@ -24,11 +24,11 @@ interface NotificationCardProps {
   /** 좌측(Primary) 버튼 텍스트 */
   primaryLabel: string;
   /** 우측(Secondary) 버튼 텍스트 */
-  secondaryLabel: string;
+  secondaryLabel?: string;
   /** Primary 버튼 클릭 핸들러 */
   onPrimaryClick: () => void;
   /** Secondary 버튼 클릭 핸들러 */
-  onSecondaryClick: () => void;
+  onSecondaryClick?: () => void;
   /** 카드 자체 클릭 핸들러 (상세 모달 등) */
   onClick?: () => void;
 }
@@ -104,15 +104,12 @@ export default function NotificationCard({
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
       onClick={onClick}
     >
-      {/* 1. 첫 줄: Front Desk가 해야 할 판단 + 배지들 + 우측 부서명 */}
+      {/* 1. 첫 줄: Front Desk가 해야 할 판단 + 긴급 배지 + 우측 부서명 */}
       <div className={styles.headerRow}>
         <div className={styles.titleAndBadges}>
           <h4 className={styles.decisionTitle}>{decisionText}</h4>
 
           <div className={styles.badgesWrapper}>
-            {timeText && (
-              <StatusBadge variant="gray">{timeText}</StatusBadge>
-            )}
             {isUrgent && (
               <StatusBadge variant="red">
                 {language === 'en' ? 'Urgent' : '긴급'}
@@ -133,16 +130,11 @@ export default function NotificationCard({
         <span className={styles.targetText}>{targetDisplay}</span>
       </div>
 
-      {/* 3. 셋째 줄: 액션 버튼 */}
+      {/* 3. 셋째 줄: 좌측 시간 텍스트 & 우측 승인 버튼 */}
       <div className={styles.footerRow}>
+        <span className={styles.timeText}>{timeText}</span>
+
         <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
-          <Button
-            variant="secondary"
-            size="medium"
-            onClick={onSecondaryClick}
-          >
-            {secondaryLabel}
-          </Button>
           <Button
             variant="primary"
             size="medium"
