@@ -31,6 +31,10 @@ export default function Header({ className = '', role = 'frontdesk' }: HeaderPro
     if (pathname === '/frontdesk/all-requests') return t.frontdeskPage?.taskBoard?.titles?.allRequests || 'All Requests';
     if (pathname === '/frontdesk/chat-history') return t.frontdeskPage?.sidebar?.menus?.chatHistory || 'Chat History';
     if (pathname === '/frontdesk/knowledge') return t.frontdeskPage?.sidebar?.menus?.rag || 'Knowledge Base';
+    if (pathname === '/frontdesk/staff-management') return t.frontdeskPage?.sidebar?.menus?.staffManagement || t.frontdeskPage?.staffManagement?.title || 'Staff Management';
+    if (pathname === '/frontdesk/voc') return t.frontdeskPage?.sidebar?.menus?.voc || 'VOC Management';
+    if (pathname === '/frontdesk/handover') return t.frontdeskPage?.sidebar?.menus?.handover || 'Shift Handover';
+    if (pathname === '/frontdesk/dashboard') return t.frontdeskPage?.sidebar?.menus?.dashboard || 'Dashboard';
     return null;
   };
 

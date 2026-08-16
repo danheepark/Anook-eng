@@ -17,10 +17,6 @@ export default function SettingsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>{t.frontdeskPage.staffManagement.title}</h1>
-      </div>
-
       <div className={styles.tabSection}>
         <Tabs
           options={tabsOptions}

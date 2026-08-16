@@ -13,6 +13,8 @@ import { useUiStore } from '@/stores/useUiStore';
 import EditIcon from '@/components/icons/EditIcon';
 import DeleteIcon from '@/components/icons/DeleteIcon';
 
+import HeaderSearchSlot from '@/components/layout/HeaderSearchSlot';
+
 const deptVariantMap: Record<string, "gray" | "red" | "purple" | "green"> = {
   HK: 'green',
   FB: 'purple',
@@ -120,39 +122,42 @@ export default function StaffTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ width: '320px' }}>
-          <SmartSearchBar
-            inputWrapperStyle={{ flex: 1 }}
-            value={searchTerm}
-            onChange={(val) => {
-              setSearchTerm(val);
-              setCurrentMatch(0);
-            }}
-            currentMatch={currentMatch}
-            totalMatches={searchTerm ? filteredStaff.length : 0}
-            onPrev={() => {
-              const newIndex = Math.max(0, currentMatch - 1);
-              setCurrentMatch(newIndex);
-              scrollToMatch(newIndex);
-            }}
-            onNext={() => {
-              const newIndex = Math.min(filteredStaff.length - 1, currentMatch + 1);
-              setCurrentMatch(newIndex);
-              scrollToMatch(newIndex);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                if (filteredStaff.length > 0) {
-                  const newIndex = (currentMatch + 1) % filteredStaff.length;
-                  setCurrentMatch(newIndex);
-                  scrollToMatch(newIndex);
-                }
+      {/* Teleport Search Bar to Header */}
+      <HeaderSearchSlot>
+        <SmartSearchBar
+          inputWrapperStyle={{ width: 240 }}
+          value={searchTerm}
+          onChange={(val) => {
+            setSearchTerm(val);
+            setCurrentMatch(0);
+          }}
+          placeholder={t.frontdeskPage.taskBoard.searchPlaceholder || '검색어 입력...'}
+          currentMatch={currentMatch}
+          totalMatches={searchTerm ? filteredStaff.length : 0}
+          onPrev={() => {
+            const newIndex = Math.max(0, currentMatch - 1);
+            setCurrentMatch(newIndex);
+            scrollToMatch(newIndex);
+          }}
+          onNext={() => {
+            const newIndex = Math.min(filteredStaff.length - 1, currentMatch + 1);
+            setCurrentMatch(newIndex);
+            scrollToMatch(newIndex);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (filteredStaff.length > 0) {
+                const newIndex = (currentMatch + 1) % filteredStaff.length;
+                setCurrentMatch(newIndex);
+                scrollToMatch(newIndex);
               }
-            }}
-          />
-        </div>
+            }
+          }}
+        />
+      </HeaderSearchSlot>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <Button variant="primary" onClick={handleAddClick}>
           {t.frontdeskPage.staffManagement.staffTab.addStaff}
         </Button>

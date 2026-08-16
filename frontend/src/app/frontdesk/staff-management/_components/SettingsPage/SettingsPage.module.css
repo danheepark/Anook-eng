@@ -1,24 +1,11 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-32);
   flex: 1;
   min-height: 0;
   box-sizing: border-box;
   padding: var(--space-24);
   overflow-y: auto;
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.title {
-  font: var(--text-h2-bold);
-  color: var(--color-gray-900);
-  margin: 0;
 }
 
 .tabSection {
