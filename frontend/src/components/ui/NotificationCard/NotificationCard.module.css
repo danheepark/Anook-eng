@@ -134,10 +134,3 @@
   gap: var(--space-8);
   flex-shrink: 0;
 }
-
-.actionBtn {
-  height: 28px !important;
-  padding: 0 var(--space-12) !important;
-  font: var(--text-caption-medium) !important;
-  border-radius: var(--radius-md) !important;
-}

@@ -118,16 +118,6 @@ export default function HeaderNotification() {
     return codeOrName;
   };
 
-  const [filter, setFilter] = useState<'all' | 'escalation' | 'cancel'>('all');
-
-  const cancelCount = delayedCancelRequests.length;
-  const escalationCount = nonEmergencyEscalations.length;
-
-  const filteredNotifications = allNotifications.filter(item => {
-    if (filter === 'all') return true;
-    return item.type === filter;
-  });
-
   return (
     <>
     <div className={styles.container} ref={popupRef}>
@@ -156,39 +146,14 @@ export default function HeaderNotification() {
             </button>
           </div>
 
-          {/* Filter Chips Row */}
-          <div className={styles.filterRow}>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filter === 'all' ? styles.filterChipActive : ''}`}
-              onClick={() => setFilter('all')}
-            >
-              {language === 'en' ? `All: ${totalNotifications}` : `전체: ${totalNotifications}`}
-            </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filter === 'escalation' ? styles.filterChipActive : ''}`}
-              onClick={() => setFilter('escalation')}
-            >
-              {language === 'en' ? `Transfer: ${escalationCount}` : `이관: ${escalationCount}`}
-            </button>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${filter === 'cancel' ? styles.filterChipActive : ''}`}
-              onClick={() => setFilter('cancel')}
-            >
-              {language === 'en' ? `Cancel: ${cancelCount}` : `취소: ${cancelCount}`}
-            </button>
-          </div>
-
           <div className={styles.content}>
-            {filteredNotifications.length === 0 ? (
+            {totalNotifications === 0 ? (
               <div className={styles.empty}>
                 {language === 'en' ? 'No pending requests.' : '대기 중인 요청이 없습니다.'}
               </div>
             ) : (
               <div className={styles.list}>
-                {filteredNotifications.map(({ type, data: req, time }) => {
+                {allNotifications.map(({ type, data: req, time }) => {
                   if (type === 'cancel') {
                     const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
                     let cleanDesc = rawParts[0] || '';
