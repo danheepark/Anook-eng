@@ -389,35 +389,14 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
   // "나중에 하기" → PENDING 상태로 저장 후 완료 처리
   const handleRagLater = async () => {
-    const { question, answer } = extractInitialContent();
-    const cleanSummary = summary ? summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '').trim() : '';
-    
-    // generic 요약(Front Desk Assistance, 고객 직접 문의 등)인 경우 실제 고객 질문 첫 줄을 제목으로 사용
-    const isGeneric = !cleanSummary || [
-      'front desk assistance',
-      '고객 직접 문의',
-      '고객 직접 요청',
-      '프론트 연결',
-      '직원 인수인계',
-      '미분류 상담',
-      '직원 연결'
-    ].includes(cleanSummary.toLowerCase());
-
-    let displayTitle = cleanSummary;
-    if (isGeneric && question && question.trim()) {
-      const firstLine = question.split('\n')[0].trim();
-      displayTitle = firstLine.length > 50 ? `${firstLine.slice(0, 50)}...` : firstLine;
-    }
-    if (!displayTitle) {
-      displayTitle = cleanSummary || 'Front Desk Inquiry';
-    }
-
+    const { answer } = extractInitialContent();
+    const cleanSummary = summary ? summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '') : '미분류 상담';
     try {
       const res = await fetch('/api/staff/knowledge/register-from-answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: displayTitle,
+          question: cleanSummary,
           answer,
           domainCode: 'COMMON',
           roomNo: roomNumber,
