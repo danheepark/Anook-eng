@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import Button from '@/components/ui/Button/Button';
 import { useTranslation } from '@/app/useTranslation';
@@ -12,7 +13,6 @@ import { ConfirmModal } from '@/components/ui/Modal';
 import { useUiStore } from '@/stores/useUiStore';
 import EditIcon from '@/components/icons/EditIcon';
 import DeleteIcon from '@/components/icons/DeleteIcon';
-
 import HeaderSearchSlot from '@/components/layout/HeaderSearchSlot';
 
 const deptVariantMap: Record<string, "gray" | "red" | "purple" | "green"> = {
@@ -29,6 +29,7 @@ export default function StaffTab() {
   
   const { showToast } = useUiStore();
 
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentMatch, setCurrentMatch] = useState(0);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -38,6 +39,7 @@ export default function StaffTab() {
   const [staffToDelete, setStaffToDelete] = useState<Staff | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     fetchStaffList();
     fetchRoles();
     fetchDepartments();
@@ -121,7 +123,7 @@ export default function StaffTab() {
   const isLoading = staffLoading || rolesLoading || deptsLoading;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Teleport Search Bar to Header */}
       <HeaderSearchSlot>
         <SmartSearchBar
@@ -157,11 +159,15 @@ export default function StaffTab() {
         />
       </HeaderSearchSlot>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <Button variant="primary" onClick={handleAddClick}>
-          {t.frontdeskPage.staffManagement.staffTab.addStaff}
-        </Button>
-      </div>
+      {/* Teleport Add Button to Tab Row */}
+      {mounted && typeof window !== 'undefined' && document.getElementById('staff-tab-actions') && (
+        createPortal(
+          <Button variant="primary" onClick={handleAddClick}>
+            {t.frontdeskPage.staffManagement.staffTab.addStaff}
+          </Button>,
+          document.getElementById('staff-tab-actions')!
+        )
+      )}
 
       {isLoading && staffList.length === 0 ? (
         <div style={{ padding: 'var(--space-24)', textAlign: 'center', color: 'var(--color-gray-500)' }}>

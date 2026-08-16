@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Table, TableHeader, TableRow, TableCell } from '@/components/ui/Table/Table';
 import Button from '@/components/ui/Button/Button';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
@@ -10,7 +11,6 @@ import { ConfirmModal } from '@/components/ui/Modal';
 import { useUiStore } from '@/stores/useUiStore';
 import EditIcon from '@/components/icons/EditIcon';
 import DeleteIcon from '@/components/icons/DeleteIcon';
-
 import HeaderSearchSlot from '@/components/layout/HeaderSearchSlot';
 
 export default function RoleTab() {
@@ -19,6 +19,7 @@ export default function RoleTab() {
   const { departments, loading: deptsLoading, fetchDepartments } = useDepartmentManagement();
   const { showToast } = useUiStore();
 
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentMatch, setCurrentMatch] = useState(0);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -28,6 +29,7 @@ export default function RoleTab() {
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     fetchRoles();
     fetchDepartments();
   }, [fetchRoles, fetchDepartments]);
@@ -102,7 +104,7 @@ export default function RoleTab() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Teleport Search Bar to Header */}
       <HeaderSearchSlot>
         <SmartSearchBar
@@ -138,11 +140,15 @@ export default function RoleTab() {
         />
       </HeaderSearchSlot>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <Button variant="primary" onClick={handleAddClick}>
-          {t.frontdeskPage.staffManagement.roleTab.addRole}
-        </Button>
-      </div>
+      {/* Teleport Add Button to Tab Row */}
+      {mounted && typeof window !== 'undefined' && document.getElementById('staff-tab-actions') && (
+        createPortal(
+          <Button variant="primary" onClick={handleAddClick}>
+            {t.frontdeskPage.staffManagement.roleTab.addRole}
+          </Button>,
+          document.getElementById('staff-tab-actions')!
+        )
+      )}
 
       {rolesLoading && roles.length === 0 ? (
         <div style={{ padding: 'var(--space-24)', textAlign: 'center', color: 'var(--color-gray-500)' }}>

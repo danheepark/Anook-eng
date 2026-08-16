@@ -61,9 +61,31 @@ INSERT INTO staff (name, pin, role_id, department_id) VALUES
     ('James Carter', '000000', 2, 'FRONT')
 ON CONFLICT (pin) DO NOTHING;
 
--- 일반 직원 계정 (PIN: 111111)
+-- 하우스키핑 (HK)
 INSERT INTO staff (name, pin, role_id, department_id) VALUES
-    ('Sarah Williams', '111111', 1, 'HK')
+    ('Sarah Williams', '111111', 8, 'HK'),
+    ('Elena Rostova', '111112', 8, 'HK'),
+    ('Min-woo Park', '111113', 8, 'HK'),
+    ('Olivia Chen', '111114', 4, 'HK'),
+    ('Hannah Schmidt', '111115', 8, 'HK')
+ON CONFLICT (pin) DO NOTHING;
+
+-- 식음료 (FB)
+INSERT INTO staff (name, pin, role_id, department_id) VALUES
+    ('Michael Smith', '724145', 9, 'FB'),
+    ('Lucas Dubois', '724146', 5, 'FB'),
+    ('Ji-hoon Lee', '724147', 9, 'FB'),
+    ('Sophia Martinez', '724148', 9, 'FB'),
+    ('Marco Rossi', '724149', 5, 'FB')
+ON CONFLICT (pin) DO NOTHING;
+
+-- 시설관리 (FACILITY)
+INSERT INTO staff (name, pin, role_id, department_id) VALUES
+    ('David Johnson', '903096', 7, 'FACILITY'),
+    ('Alexander Wright', '903097', 3, 'FACILITY'),
+    ('Dong-hyun Kim', '903098', 7, 'FACILITY'),
+    ('Carlos Santos', '903099', 7, 'FACILITY'),
+    ('Liam O''Connor', '903100', 7, 'FACILITY')
 ON CONFLICT (pin) DO NOTHING;
 -- PMS 객실 (6개 타입 · 총 23실)
 INSERT INTO pms_room (number, type) VALUES

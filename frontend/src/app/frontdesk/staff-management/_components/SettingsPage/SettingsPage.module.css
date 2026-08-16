@@ -8,10 +8,25 @@
   overflow-y: auto;
 }
 
-.tabSection {
-  margin-bottom: var(--space-24);
+.tabRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+
+.subTabs {
+  flex: 1;
+  min-width: 0;
+}
+
+.tabActions {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
 }
 
 .contentContainer {
-  min-height: 500px;
+  flex: 1;
 }

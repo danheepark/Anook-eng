@@ -17,12 +17,15 @@ export default function SettingsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.tabSection}>
-        <Tabs
-          options={tabsOptions}
-          activeValue={activeTab}
-          onChange={setActiveTab}
-        />
+      <div className={styles.tabRow}>
+        <div className={styles.subTabs}>
+          <Tabs
+            options={tabsOptions}
+            activeValue={activeTab}
+            onChange={setActiveTab}
+          />
+        </div>
+        <div id="staff-tab-actions" className={styles.tabActions} />
       </div>
 
       <div className={styles.contentContainer}>
