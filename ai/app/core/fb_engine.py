@@ -290,13 +290,12 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
     if is_menu_inquiry:
         result.needs_clarification = True
         default_menu_intro = {
-            "ko": "룸서비스 메뉴를 안내해 드립니다.",
-            "en": "I'd be happy to help with that! Here is our current room service menu:",
-            "ja": "ルームサービスのメニューをご案内いたします。",
-            "zh": "为您提供客房送餐菜单："
+            "ko": "룸서비스 메뉴를 안내해 드립니다. [MENU_CARD]",
+            "en": "I'd be happy to help with that! Here is our current room service menu: [MENU_CARD]",
+            "ja": "ルームサービスのメニューをご案内いたします。 [MENU_CARD]",
+            "zh": "为您提供客房送餐菜单： [MENU_CARD]"
         }
-        if not result.clarification_question or len(result.clarification_question.split("\n")) > 2 or "-" in result.clarification_question:
-            result.clarification_question = default_menu_intro.get(system_language, default_menu_intro["en"])
+        result.clarification_question = default_menu_intro.get(system_language, default_menu_intro["en"])
 
     # 6.6. ROOM_SERVICE (메뉴 미지정 단순 주문 의사) → "What would you like to order?" 직접 질문
     menu_items = result.entities.get("menu_items") or []

@@ -332,6 +332,19 @@ public class SendMessageService implements SendMessageUseCase {
                 payload.put("options", options);
             }
 
+            String uiType = null;
+            for (MessageAiResult analysis : analyses) {
+                if (analysis.entities() != null && "MENU_INQUIRY".equals(analysis.entities().get("intent"))) {
+                    uiType = "MENU_CARD";
+                }
+            }
+            if (combinedReply != null && combinedReply.contains("[MENU_CARD]")) {
+                uiType = "MENU_CARD";
+            }
+            if (uiType != null) {
+                payload.put("uiType", uiType);
+            }
+
             dispatchPort.sendToRoom(roomNo, payload);
             dispatchPort.sendToFrontdesk(payload);
 

@@ -141,8 +141,11 @@ export function useChat() {
             if (
               displayContent.includes('[MENU_CARD]') ||
               displayContent.includes('current room service menu') ||
-              displayContent.includes('룸서비스 메뉴를 안내해 드립니다') ||
-              displayContent.includes('Here is our current menu:')
+              displayContent.includes('룸서비스 메뉴를 안내') ||
+              displayContent.includes('룸서비스 메뉴입니다') ||
+              displayContent.includes('Here is our current menu') ||
+              displayContent.includes('ルームサービスのメニューをご案内') ||
+              displayContent.includes('为您提供客房送餐菜单')
             ) {
               isMenuCard = true;
               displayContent = displayContent.replace(/\[MENU_CARD\]/g, '').trim();
@@ -329,13 +332,20 @@ export function useChat() {
           // AI 특수 코드 매핑 (다국어 언어팩 연동, AI 할루시네이션 대비 includes 사용)
           content = translateContent(content);
 
-          const isMenuInquiry = payload.uiType === 'MENU_CARD'
-            || payload.meta?.ui_type === 'MENU_CARD'
-            || payload.meta?.intent === 'MENU_INQUIRY'
-            || payload.meta?.entities?.intent === 'MENU_INQUIRY'
-            || (content && content.includes('[MENU_CARD]'))
-            || (payload.meta?.domainCode === 'FB' && content && content.includes('current room service menu'))
-            || (payload.meta?.domainCode === 'FB' && content && content.includes('룸서비스 메뉴를 안내해 드립니다'));
+          const isMenuInquiry =
+            payload.uiType === 'MENU_CARD' ||
+            payload.meta?.ui_type === 'MENU_CARD' ||
+            payload.meta?.intent === 'MENU_INQUIRY' ||
+            payload.meta?.entities?.intent === 'MENU_INQUIRY' ||
+            (content && content.includes('[MENU_CARD]')) ||
+            (content && (
+              content.includes('current room service menu') ||
+              content.includes('룸서비스 메뉴를 안내') ||
+              content.includes('룸서비스 메뉴입니다') ||
+              content.includes('Here is our current menu') ||
+              content.includes('ルームサービスのメニューをご案内') ||
+              content.includes('为您提供客房送餐菜单')
+            ));
 
           if (isMenuInquiry && content) {
             content = content.replace(/\[MENU_CARD\]/g, '').trim();
