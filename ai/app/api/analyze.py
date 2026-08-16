@@ -1787,6 +1787,11 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 response["target_request_id"] = agent_result["target_request_id"]
             elif hasattr(primary, 'target_request_id') and getattr(primary, 'target_request_id', None):
                 response["target_request_id"] = getattr(primary, 'target_request_id', None)
+
+            if agent_result.get("ui_type"):
+                response["ui_type"] = agent_result["ui_type"]
+                if isinstance(response.get("entities"), dict):
+                    response["entities"]["ui_type"] = agent_result["ui_type"]
                 
             print(f"[Analyze] ✅ {domain} agent parallel processing complete")
             print(f"[Analyze] Response: {response}\n")

@@ -11,6 +11,7 @@ import FeedbackCard from './FeedbackCard';
 import RequestCard from './RequestCard/RequestCard';
 import RequestStatusBar from './RequestStatusBar/RequestStatusBar';
 import ProgressIndicator from './ProgressIndicator/ProgressIndicator';
+import MenuCard from './MenuCard';
 import { ActiveRequest } from '../useChat';
 import { ArrowDownIcon } from '@/components/icons';
 import { useTranslation } from '@/app/useTranslation';
@@ -18,7 +19,7 @@ import { useTranslation } from '@/app/useTranslation';
 export interface ChatMessage {
   id: string;
   variant: 'sent' | 'received';
-  type?: 'TEXT' | 'REQUEST_CARD' | 'AI_PROGRESS' | 'QUICK_REPLY' | 'FEEDBACK' | 'CHAT_END' | 'WELCOME' | 'FALLBACK' | 'STATUS_CARD';
+  type?: 'TEXT' | 'REQUEST_CARD' | 'AI_PROGRESS' | 'QUICK_REPLY' | 'FEEDBACK' | 'CHAT_END' | 'WELCOME' | 'FALLBACK' | 'STATUS_CARD' | 'MENU_CARD';
   content: string;
   imageUrl?: string;
   meta?: Record<string, any>;
@@ -41,6 +42,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isUserTyping, setIsUserTyping] = useState(false);
   const [isRequestsExpanded, setIsRequestsExpanded] = useState(true);
+  const [injectedItem, setInjectedItem] = useState<{ text: string; ts: number } | null>(null);
   const { t } = useTranslation();
   const statusBarRef = useRef<HTMLDivElement>(null);
 
@@ -184,7 +186,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           const prevMsg = index > 0 ? messages[index - 1] : null;
           const getSpeakerType = (m: ChatMessage | null) => {
             if (!m) return null;
-            if (m.type === 'REQUEST_CARD' || m.type === 'STATUS_CARD' || m.type === 'FEEDBACK' || m.type === 'CHAT_END' || m.type === 'WELCOME') {
+            if (m.type === 'REQUEST_CARD' || m.type === 'STATUS_CARD' || m.type === 'FEEDBACK' || m.type === 'CHAT_END' || m.type === 'WELCOME' || m.type === 'MENU_CARD') {
               return 'CARD';
             }
             if (m.type === 'FALLBACK') {
@@ -427,6 +429,19 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
             );
           }
 
+          if (msg.type === 'MENU_CARD') {
+            return (
+              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-12)', width: '100%', marginTop: `${itemMarginTop}px` }}>
+                {msg.content && msg.content.trim() !== '' && (
+                  <ChatBubble variant="received" animate={index === messages.length - 1}>
+                    {msg.content}
+                  </ChatBubble>
+                )}
+                <MenuCard onAddItem={(itemName) => setInjectedItem({ text: itemName, ts: Date.now() })} />
+              </div>
+            );
+          }
+
           return (
             <div key={msg.id} style={{ width: '100%', marginTop: `${itemMarginTop}px` }}>
               <ChatBubble variant={msg.variant} imageUrl={msg.imageUrl} animate={index === messages.length - 1 && msg.variant === 'received'}>
@@ -453,6 +468,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           onStop={onStopMessage}
           onUserTyping={setIsUserTyping}
           onFocus={() => setIsRequestsExpanded(false)}
+          injectedItem={injectedItem}
         />
       </div>
     </div>

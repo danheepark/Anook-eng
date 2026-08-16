@@ -16,9 +16,10 @@ export interface ChatInputProps {
   onUserTyping?: (isTyping: boolean) => void;
   isStaff?: boolean;
   onFocus?: () => void;
+  injectedItem?: { text: string; ts: number } | null;
 }
 
-export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isStaff, onFocus, placeholder }: ChatInputProps) {
+export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isStaff, onFocus, placeholder, injectedItem }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -38,6 +39,25 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
   const showToast = useUiStore((state) => state.showToast);
   const { t } = useTranslation();
   const l = t.chatInput;
+
+  useEffect(() => {
+    if (injectedItem && injectedItem.text) {
+      setValue((prev) => {
+        const item = injectedItem.text.trim();
+        if (!prev || prev.trim() === '') {
+          return `${item} 1`;
+        }
+        return `${prev}, ${item} 1`;
+      });
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.selectionStart = textareaRef.current.value.length;
+          textareaRef.current.selectionEnd = textareaRef.current.value.length;
+        }
+      }, 50);
+    }
+  }, [injectedItem]);
 
   React.useEffect(() => {
     if (onUserTyping) {

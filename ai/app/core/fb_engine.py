@@ -285,6 +285,19 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
             "confidence": result.confidence,
         }
 
+    # 6.5. MENU_INQUIRY → 정제된 메뉴 안내 인트로 및 MENU_CARD UI 반환
+    is_menu_inquiry = result.entities.get("intent") == "MENU_INQUIRY"
+    if is_menu_inquiry:
+        result.needs_clarification = True
+        default_menu_intro = {
+            "ko": "룸서비스 메뉴를 안내해 드립니다.",
+            "en": "I'd be happy to help with that! Here is our current room service menu:",
+            "ja": "ルームサービスのメニューをご案内いたします。",
+            "zh": "为您提供客房送餐菜单："
+        }
+        if not result.clarification_question or len(result.clarification_question.split("\n")) > 2 or "-" in result.clarification_question:
+            result.clarification_question = default_menu_intro.get(system_language, default_menu_intro["en"])
+
     # 7. 자연스러운 응답 생성
     if result.needs_clarification:
         guest_reply = result.clarification_question
@@ -337,6 +350,7 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
         "action_type": action_type,
         "target_keyword": target_keyword,
         "target_request_id": target_request_id,
+        "ui_type": "MENU_CARD" if is_menu_inquiry else None,
     }
 
 

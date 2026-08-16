@@ -135,8 +135,18 @@ export function useChat() {
         // 텍스트 메시지 변환
         const chatMessages: (ChatMessage & { _ts: number })[] = msgData.map(msg => {
           let displayContent = msg.content;
+          let isMenuCard = false;
           if (msg.senderType === 'AI') {
             displayContent = translateContent(msg.content);
+            if (
+              displayContent.includes('[MENU_CARD]') ||
+              displayContent.includes('current room service menu') ||
+              displayContent.includes('룸서비스 메뉴를 안내해 드립니다') ||
+              displayContent.includes('Here is our current menu:')
+            ) {
+              isMenuCard = true;
+              displayContent = displayContent.replace(/\[MENU_CARD\]/g, '').trim();
+            }
           } else if (msg.senderType === 'STAFF' && msg.translatedContent) {
             // 직원 메시지: 고객 언어로 번역된 내용 표시 (새로고침 시에도 번역본 유지)
             displayContent = msg.translatedContent;
@@ -145,7 +155,7 @@ export function useChat() {
             id: msg.id.toString(),
             variant: msg.senderType === 'GUEST' ? 'sent' as const : 'received' as const,
             content: displayContent,
-            type: msg.senderType === 'STAFF' ? 'FALLBACK' : 'TEXT',
+            type: isMenuCard ? ('MENU_CARD' as const) : (msg.senderType === 'STAFF' ? 'FALLBACK' as const : 'TEXT' as const),
             _ts: new Date(msg.createdAt).getTime(),
           };
         });
@@ -319,7 +329,21 @@ export function useChat() {
           // AI 특수 코드 매핑 (다국어 언어팩 연동, AI 할루시네이션 대비 includes 사용)
           content = translateContent(content);
 
-          const msgType = payload.uiType ? payload.uiType : (payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : 'TEXT');
+          const isMenuInquiry = payload.uiType === 'MENU_CARD'
+            || payload.meta?.ui_type === 'MENU_CARD'
+            || payload.meta?.intent === 'MENU_INQUIRY'
+            || payload.meta?.entities?.intent === 'MENU_INQUIRY'
+            || (content && content.includes('[MENU_CARD]'))
+            || (payload.meta?.domainCode === 'FB' && content && content.includes('current room service menu'))
+            || (payload.meta?.domainCode === 'FB' && content && content.includes('룸서비스 메뉴를 안내해 드립니다'));
+
+          if (isMenuInquiry && content) {
+            content = content.replace(/\[MENU_CARD\]/g, '').trim();
+          }
+
+          const msgType = isMenuInquiry
+            ? 'MENU_CARD'
+            : (payload.uiType ? payload.uiType : (payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : 'TEXT'));
           const msgsToAppend: ChatMessage[] = [];
 
           if (msgType === 'REQUEST_CARD') {
