@@ -4,5 +4,6 @@ import java.util.List;
 
 public record ExtractKnowledgeFromChatCommand(
     String roomNo,
-    List<Long> pendingIds
+    List<Long> pendingIds,
+    String language
 ) {}

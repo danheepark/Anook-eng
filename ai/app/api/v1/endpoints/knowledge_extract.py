@@ -11,6 +11,7 @@ class ChatMessage(BaseModel):
 
 class ExtractRequest(BaseModel):
     messages: List[ChatMessage]
+    language: str = "en"
 
 class KnowledgeCandidate(BaseModel):
     question: str
@@ -29,7 +30,7 @@ async def extract_from_chat_endpoint(request: ExtractRequest):
     try:
         # ChatMessage Pydantic 모델을 dict 리스트로 변환
         messages_dict = [{"sender_type": msg.sender_type, "content": msg.content} for msg in request.messages]
-        result = await extract_rag_candidates(messages_dict)
+        result = await extract_rag_candidates(messages_dict, language=request.language or "en")
         return ExtractResponse(candidates=result.get("candidates", []))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to extract knowledge: {str(e)}")

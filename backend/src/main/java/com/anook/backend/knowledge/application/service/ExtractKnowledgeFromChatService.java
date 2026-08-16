@@ -35,15 +35,15 @@ public class ExtractKnowledgeFromChatService implements ExtractKnowledgeFromChat
         List<KnowledgeCandidateResult> allCandidates = new ArrayList<>();
 
         if (command.roomNo() != null && !command.roomNo().isBlank()) {
-            log.info("[RAG Extract] Extracting candidates for roomNo: {}", command.roomNo());
+            log.info("[RAG Extract] Extracting candidates for roomNo: {}, lang: {}", command.roomNo(), command.language());
             List<ChatMessageDto> messages = messageQueryPort.findByRoomNo(command.roomNo());
             List<ChatMessageDto> latestMessages = filterLatestSessionMessages(messages);
             if (!latestMessages.isEmpty()) {
-                List<KnowledgeCandidateResult> candidates = knowledgeExtractPort.extractFromChat(latestMessages);
+                List<KnowledgeCandidateResult> candidates = knowledgeExtractPort.extractFromChat(latestMessages, command.language());
                 allCandidates.addAll(candidates);
             }
         } else if (command.pendingIds() != null && !command.pendingIds().isEmpty()) {
-            log.info("[RAG Extract] Extracting candidates for pendingIds: {}", command.pendingIds());
+            log.info("[RAG Extract] Extracting candidates for pendingIds: {}, lang: {}", command.pendingIds(), command.language());
             
             for (Long id : command.pendingIds()) {
                 knowledgeRepositoryPort.findById(id).ifPresent(entry -> {
@@ -64,7 +64,7 @@ public class ExtractKnowledgeFromChatService implements ExtractKnowledgeFromChat
                         );
                     }
 
-                    List<KnowledgeCandidateResult> candidates = knowledgeExtractPort.extractFromChat(sessionMessages);
+                    List<KnowledgeCandidateResult> candidates = knowledgeExtractPort.extractFromChat(sessionMessages, command.language());
                     if (candidates != null && !candidates.isEmpty()) {
                         allCandidates.addAll(candidates);
                     }

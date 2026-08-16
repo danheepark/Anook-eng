@@ -6,5 +6,5 @@ import com.anook.backend.knowledge.application.dto.response.KnowledgeCandidateRe
 import java.util.List;
 
 public interface KnowledgeExtractPort {
-    List<KnowledgeCandidateResult> extractFromChat(List<ChatMessageDto> messages);
+    List<KnowledgeCandidateResult> extractFromChat(List<ChatMessageDto> messages, String language);
 }

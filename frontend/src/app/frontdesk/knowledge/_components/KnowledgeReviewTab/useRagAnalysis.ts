@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { handleResponse } from '@/lib/api';
+import { useTranslation } from '@/app/useTranslation';
 
 export interface KnowledgeCandidate {
   question: string;
@@ -9,6 +10,7 @@ export interface KnowledgeCandidate {
 }
 
 export function useRagAnalysis() {
+  const { language } = useTranslation();
   const [analyzing, setAnalyzing] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export function useRagAnalysis() {
       const res = await fetch('/api/frontdesk/knowledge/extract-from-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pendingIds }),
+        body: JSON.stringify({ pendingIds, language: language || 'en' }),
       });
       if (!res.ok) {
         console.warn('[useRagAnalysis] extract-from-chat HTTP error:', res.status);

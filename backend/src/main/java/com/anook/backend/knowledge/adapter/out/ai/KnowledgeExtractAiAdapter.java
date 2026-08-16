@@ -39,7 +39,7 @@ public class KnowledgeExtractAiAdapter implements KnowledgeExtractPort {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<KnowledgeCandidateResult> extractFromChat(List<ChatMessageDto> messages) {
+    public List<KnowledgeCandidateResult> extractFromChat(List<ChatMessageDto> messages, String language) {
         try {
             List<Map<String, String>> messagesList = new ArrayList<>();
             for (ChatMessageDto msg : messages) {
@@ -53,7 +53,11 @@ public class KnowledgeExtractAiAdapter implements KnowledgeExtractPort {
                 ));
             }
 
-            Map<String, Object> requestBody = Map.of("messages", messagesList);
+            String targetLang = (language != null && !language.isBlank()) ? language : "en";
+            Map<String, Object> requestBody = Map.of(
+                    "messages", messagesList,
+                    "language", targetLang
+            );
 
             Map<String, Object> response = webClient.post()
                     .uri("/api/v1/rag/extract-from-chat")

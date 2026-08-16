@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { handleResponse } from '@/lib/api';
+import { useTranslation } from '@/app/useTranslation';
 
 export interface KnowledgeCandidate {
   question: string;
@@ -10,6 +11,7 @@ export interface KnowledgeCandidate {
 }
 
 export function useExtractKnowledge() {
+  const { language } = useTranslation();
   const [extracting, setExtracting] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function useExtractKnowledge() {
       const res = await fetch('/api/staff/knowledge/extract-from-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomNo }),
+        body: JSON.stringify({ roomNo, language: language || 'en' }),
       });
       const data = await handleResponse(res) as KnowledgeCandidate[];
       setCandidates(data || []);
