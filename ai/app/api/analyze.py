@@ -243,6 +243,61 @@ def _get_static_reply(key: str, lang: str) -> str:
     return STATIC_REPLIES.get(key, {}).get(lang, STATIC_REPLIES.get(key, {}).get("en", "Working on your request — one moment!"))
 
 
+def _clean_clarification_reply(reply: str, options: list, lang: str = "en") -> str:
+    """
+    선택지(clarification_options)가 제공될 때, 본문 텍스트에서 선택지 내용을 중복 나열하지 않고
+    친절하고 간결한 리드 문장으로 정리합니다.
+    """
+    if not reply or not options:
+        return reply
+
+    # 특수 시스템 응답 코드([FORWARD_FRONT], [INFO_NOT_FOUND] 등)는 건드리지 않음
+    if reply.startswith("[") and reply.endswith("]"):
+        return reply
+
+    reply_lower = reply.lower()
+    
+    # 중복 나열 패턴 검사:
+    # 1) 옵션 단어들이 본문 텍스트에 포함되어 있거나
+    # 2) 'would you like to ... or would you prefer ...', '~하시겠습니까 아니면 ~' 패턴
+    is_redundant = False
+    matched_count = 0
+    for opt in options:
+        opt_clean = re.sub(r'[\(\)]', '', opt.lower()).strip()
+        words = [w for w in opt_clean.split() if len(w) > 3]
+        if any(w in reply_lower for w in words):
+            matched_count += 1
+            
+    if matched_count >= 2 or ("would you like" in reply_lower and "or would you" in reply_lower) or ("하시겠습니까" in reply and "아니면" in reply):
+        is_redundant = True
+
+    if is_redundant:
+        # 감정 공감이나 첫 문장 보존 (예: "I understand you're hungry." or "I'd be happy to help!")
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', reply) if s.strip()]
+        empathy_prefix = ""
+        for s in sentences:
+            s_low = s.lower()
+            if any(emp in s_low for emp in ["sorry", "understand", "hungry", "thirsty", "noisy", "happy to help", "assist you", "죄송", "이해", "도움"]):
+                # 해당 문장에 옵션 나열이 없으면 공감 문장으로 채택
+                if not any(opt.lower() in s_low for opt in options if len(opt) > 3):
+                    empathy_prefix = s + " "
+                    break
+
+        lang = (lang or "en").lower()
+        if lang == "ko" or re.search(r'[가-힣]', reply):
+            lead = "도움이 필요하신 서비스를 선택해 주세요."
+        elif lang == "ja":
+            lead = "ご希望のサービスをお選びください。"
+        elif lang == "zh":
+            lead = "请选择您需要的服务。"
+        else:
+            lead = "Which option do you prefer?" if not empathy_prefix else "How would you like to proceed?"
+
+        return f"{empathy_prefix}{lead}".strip()
+
+    return reply
+
+
 # ── Guest Intent Classification (LLM-based) ──
 # Replaces hardcoded pattern matching with natural language understanding.
 # Used by the anti-infinite-loop guardrail to distinguish:
@@ -590,7 +645,15 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
         final_responses[0]["clarification_options"] = all_options
         for resp in final_responses[1:]:
             resp["clarification_options"] = []
-            
+
+    # ── [선택지 중복 방지 및 본문 간결화 (Anti-Redundancy)] ──
+    for resp in final_responses:
+        opts = resp.get("clarification_options")
+        if opts and isinstance(opts, list) and len(opts) > 0:
+            original_reply = resp.get("guest_reply", "")
+            if original_reply:
+                resp["guest_reply"] = _clean_clarification_reply(original_reply, opts, request.language)
+
     return final_responses
 
 

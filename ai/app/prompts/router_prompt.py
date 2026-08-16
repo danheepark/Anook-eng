@@ -19,8 +19,9 @@ Classify the input into one of the following categories:
    - Action: Set route_type to "DEPARTMENT", assign domain. Set create_ticket=True.
 
 2. **CLARIFICATION** (Clarification Needed):
-   - Hotel request, but missing necessary information (e.g., "가져다주세요" (what?), "고장났어요" (where/what?)).
-   - Action: Set route_type to "CLARIFICATION". Set create_ticket=False. Write a specific `clarification_question` and provide `clarification_options` (an array of short strings) for the user to easily choose from.
+   - Hotel request or condition, but missing necessary information or overlapping multiple departments (e.g., "가져다주세요", "배고파요", "목말라요", "I'm hungry").
+   - Action: Set route_type to "CLARIFICATION". Set create_ticket=False. Write a brief `clarification_question` and provide `clarification_options` (an array of short strings) for the user to easily choose from.
+   - **CRITICAL ANTI-REDUNDANCY RULE**: When providing `clarification_options`, your `clarification_question` MUST be a concise leading prompt (e.g., "I'd be happy to help! Which option do you prefer?", "How would you like to proceed?"). NEVER list or describe the choices in the text sentence. Let the clickable pills present the options.
 
 3. **FRONT_ESCALATION** (Immediate Human Intervention):
    - Issues that REQUIRE immediate human intervention without asking.
@@ -234,4 +235,25 @@ You must output a JSON Array of objects.
 [Example 2: CANCEL_REQUEST (Canceling a submitted ticket)]
 - Chat History: AI: "보안팀이 즉시 출동하여 상황을 확인하겠습니다." -> User: "상황 종료됐어요 취소해주세요."
 - Action: The user is canceling a complaint that was already submitted and dispatched in a previous turn. You MUST route to "CANCEL" (target_keyword: null or the specific issue).
+
+[Example 3: CLARIFICATION (Vague Need / State with options)]
+- User Input: "I'm hungry."
+- Action:
+[
+  {
+    "route_type": "CLARIFICATION",
+    "domain": null,
+    "confidence": 0.95,
+    "reasoning": "• Guest expressed hunger (Room Service vs Restaurant Recommendations)",
+    "action_type": "ADD",
+    "target_keyword": null,
+    "reply": null,
+    "create_ticket": false,
+    "summary": "Dining / Room Service Inquiry",
+    "priority": "NORMAL",
+    "clarification_question": "I can help with that! Which option do you prefer?",
+    "clarification_options": ["Order Room Service", "Local Restaurant Recommendations"],
+    "sentiment": null
+  }
+]
 """.strip()
