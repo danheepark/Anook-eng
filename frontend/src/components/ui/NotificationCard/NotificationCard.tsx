@@ -87,7 +87,7 @@ export default function NotificationCard({
     ? (language === 'en' ? 'Cancel request' : '취소 승인 요청')
     : (language === 'en' ? 'Transfer request' : '이관 승인 요청');
 
-  // 2. 둘째 줄: 그 판단의 대상 (객실 · 요청 항목)
+  // 2. 둘째 줄: 그 판단의 대상 (객실 · 요청 항목) - RequestCard subtitle 스타일
   const roomDisplay = language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanTitle = toSentenceCase(title);
@@ -101,7 +101,6 @@ export default function NotificationCard({
       {/* 1. 첫 줄: Front Desk가 해야 할 판단 + 긴급 배지 + 우측 부서명 */}
       <div className={styles.headerRow}>
         <div className={styles.titleAndBadges}>
-          <span className={styles.unreadDot} />
           <h4 className={styles.decisionTitle}>{decisionText}</h4>
 
           <div className={styles.badgesWrapper}>
@@ -120,25 +119,36 @@ export default function NotificationCard({
         )}
       </div>
 
-      {/* 2. 둘째 줄: 그 판단의 대상 및 시간 */}
+      {/* 2. 둘째 줄: 그 판단의 대상 (객실 · 요청 항목) */}
       <div className={styles.targetRow}>
-        <span className={styles.targetText}>{targetDisplay}</span>
-        {timeText && <span className={styles.metaDot}>·</span>}
-        {timeText && <span className={styles.timeText}>{timeText}</span>}
+        <p className={styles.targetText}>{targetDisplay}</p>
       </div>
 
-      {/* 3. 셋째 줄: small 승인 버튼 */}
-      {primaryLabel && (
-        <div className={styles.actionRow} onClick={(e) => e.stopPropagation()}>
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={onPrimaryClick}
-          >
-            {primaryLabel}
-          </Button>
+      {/* 3. 셋째 줄: 좌측 시간 표기 + 우측 Approve 버튼 */}
+      <div className={styles.bottomRow}>
+        <span className={styles.timeText}>{timeText}</span>
+
+        <div className={styles.actionSection} onClick={(e) => e.stopPropagation()}>
+          {secondaryLabel && onSecondaryClick && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={onSecondaryClick}
+            >
+              {secondaryLabel}
+            </Button>
+          )}
+          {primaryLabel && (
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={onPrimaryClick}
+            >
+              {primaryLabel}
+            </Button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

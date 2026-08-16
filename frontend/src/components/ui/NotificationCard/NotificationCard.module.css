@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   padding: var(--space-16);
-  gap: var(--space-6);
+  gap: var(--space-2);
   background-color: var(--color-white);
   border: none;
   border-bottom: 1px solid var(--color-gray-100);
@@ -36,14 +36,6 @@
   gap: var(--space-6);
   min-width: 0;
   flex: 1;
-}
-
-.unreadDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--color-info, #3B82F6);
-  flex-shrink: 0;
 }
 
 .decisionTitle {
@@ -91,41 +83,43 @@
   color: var(--color-dept-emergency-text);
 }
 
-/* 2. Middle Row: Target of the decision (e.g. Room 402 · Shampoo x1) + Time */
+/* 2. Middle Row: Target of the decision (e.g. Room 402 · Shampoo x1) */
 .targetRow {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
   width: 100%;
-  padding-left: 12px;
+  padding-left: 0;
+  margin: 0;
 }
 
 .targetText {
   font: var(--text-body-regular);
-  color: var(--color-gray-600);
+  color: var(--color-gray-500);
+  margin: 0;
   word-break: break-word;
   line-height: var(--main-line-height);
 }
 
-.metaDot {
-  color: var(--color-gray-400);
-  font-size: 13px;
-  line-height: 1;
-  user-select: none;
+/* 3. Bottom Row: Left Time Display + Right Approve Button */
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: var(--space-8);
+  gap: var(--space-8);
 }
 
 .timeText {
-  font: var(--text-caption-regular);
+  font: var(--text-caption-medium);
   color: var(--color-gray-400);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* 3. Action Row: Small button */
-.actionRow {
+.actionSection {
   display: flex;
   align-items: center;
   gap: var(--space-8);
-  padding-left: 12px;
-  margin-top: var(--space-2);
+  margin-left: auto;
 }
