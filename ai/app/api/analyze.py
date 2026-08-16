@@ -646,13 +646,20 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
         for resp in final_responses[1:]:
             resp["clarification_options"] = []
 
-    # ── [선택지 중복 방지 및 본문 간결화 (Anti-Redundancy)] ──
+    # ── [선택지 정제: 불필요한 부서명 괄호 제거 & 본문 간결화 (Anti-Redundancy)] ──
     for resp in final_responses:
         opts = resp.get("clarification_options")
         if opts and isinstance(opts, list) and len(opts) > 0:
+            cleaned_opts = []
+            for opt in opts:
+                # e.g. "Order Room Service (Food & Beverage)" -> "Order Room Service"
+                c_opt = re.sub(r'\s*\((?:Food\s*&\s*Beverage|Concierge|Front\s*Desk|Housekeeping|Facility|Emergency|FB|HK|FRONT|FACILITY|식음료|컨시어지|프론트|하우스키핑|시설관리|응급)\)', '', opt, flags=re.IGNORECASE).strip()
+                cleaned_opts.append(c_opt if c_opt else opt)
+            resp["clarification_options"] = cleaned_opts
+
             original_reply = resp.get("guest_reply", "")
             if original_reply:
-                resp["guest_reply"] = _clean_clarification_reply(original_reply, opts, request.language)
+                resp["guest_reply"] = _clean_clarification_reply(original_reply, cleaned_opts, request.language)
 
     return final_responses
 
