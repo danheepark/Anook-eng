@@ -262,8 +262,8 @@ export default function TaskTicket({
     if (isManuallyReassigned && desc) {
       const lines = desc.split('\n').filter(l => l.trim());
       desc = lines[lines.length - 1] || '';
-    } else if (desc && desc.includes('[주문 상세]')) {
-      desc = desc.split('[주문 상세]')[0].trim();
+    } else if (desc && /\[(?:주문 상세|Order Details)\]/i.test(desc)) {
+      desc = desc.split(/\[(?:주문 상세|Order Details)\]/i)[0].trim();
     }
     return desc;
   }, [description, isManuallyReassigned]);

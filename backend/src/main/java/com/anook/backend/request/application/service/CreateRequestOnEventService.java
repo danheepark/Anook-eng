@@ -295,21 +295,21 @@ public class CreateRequestOnEventService {
     private String formatEntities(Map<String, Object> entities) {
         if (entities == null || entities.isEmpty())
             return "";
-        StringBuilder sb = new StringBuilder("[주문 상세]");
+        StringBuilder sb = new StringBuilder("[Order Details]");
 
         // 특별 취급: FB 메뉴 (menu_items 배열 구조)
         if (entities.containsKey("menu_items")) {
             Object menuItems = entities.get("menu_items");
             if (menuItems instanceof List<?> items) {
-                sb.append("\n- 메뉴: ");
+                sb.append("\n- Menu: ");
                 List<String> menuStrs = new ArrayList<>();
                 for (Object itemObj : items) {
                     if (itemObj instanceof Map<?, ?> item) {
                         String name = (String) item.get("name");
                         Object qty = item.get("quantity");
                         String opt = (String) item.get("selected_option");
-                        String menuStr = name + " " + qty + "개";
-                        if (opt != null && !opt.isBlank() && !"없음".equals(opt)) {
+                        String menuStr = name + " x" + qty;
+                        if (opt != null && !opt.isBlank() && !"none".equalsIgnoreCase(opt) && !"없음".equals(opt)) {
                             menuStr += "(" + opt + ")";
                         }
                         menuStrs.add(menuStr);
@@ -334,8 +334,8 @@ public class CreateRequestOnEventService {
         // 추가 요청 사항이 있으면 표시
         if (entities.containsKey("special_requests")) {
             Object specialReq = entities.get("special_requests");
-            if (specialReq != null && !specialReq.toString().isBlank() && !"없음".equals(specialReq.toString())) {
-                sb.append("\n- 추가 요청: ").append(specialReq);
+            if (specialReq != null && !specialReq.toString().isBlank() && !"없음".equals(specialReq.toString()) && !"none".equalsIgnoreCase(specialReq.toString())) {
+                sb.append("\n- Special Requests: ").append(specialReq);
             }
         }
 

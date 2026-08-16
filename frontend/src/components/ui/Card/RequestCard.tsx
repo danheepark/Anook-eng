@@ -71,11 +71,16 @@ export default function RequestCard({
   const { translatedText: translatedTitle } = useTranslationApi(title, language);
   const displayTitle = translatedTitle || title;
 
+  const cleanDescription = React.useMemo(() => {
+    if (!description) return '';
+    return description.split(/\[(?:주문 상세|Order Details)\]/i)[0].trim();
+  }, [description]);
+
   const { translatedText: translatedDesc } = useTranslationApi(
-    language !== 'ko' && description ? description : undefined,
+    language !== 'ko' && cleanDescription ? cleanDescription : undefined,
     language
   );
-  const displayDesc = language !== 'ko' && translatedDesc ? translatedDesc : description;
+  const displayDesc = language !== 'ko' && translatedDesc ? translatedDesc : cleanDescription;
 
   const handlePrimaryClick = () => {
     if (onPrimaryAction) {
