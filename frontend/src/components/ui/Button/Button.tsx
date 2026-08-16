@@ -3,7 +3,7 @@ import styles from './Button.module.css';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'outlined' | 'ghost';
-  size?: 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large';
   fullWidth?: boolean;
 }
 
@@ -25,7 +25,7 @@ export default function Button({
         : variant === 'ghost'
           ? styles.ghost
           : styles.danger;
-  const sizeClass = size === 'large' ? styles.large : styles.medium;
+  const sizeClass = size === 'large' ? styles.large : size === 'small' ? styles.small : styles.medium;
   const fullWidthClass = fullWidth ? styles.fullWidth : '';
 
 

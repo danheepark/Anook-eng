@@ -91,7 +91,7 @@ export default function AllRequestsPage() {
 
   const matches = React.useMemo(() => {
     if (!searchValue) return [];
-    return allVisibleTickets.filter(req => 
+    return allVisibleTickets.filter(req =>
       req.roomNo?.toString().includes(searchValue) ||
       req.summary?.toLowerCase().includes(searchValue.toLowerCase()) ||
       (req.rawText || '').toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -192,23 +192,23 @@ export default function AllRequestsPage() {
               <TaskColumn title={t.frontdeskPage.taskBoard.columns.pending} count={pending.length} status="TODO">
                 {pending.map(req => (
                   <div key={req.id} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                  <TaskTicket 
-                    ticketId={req.id}
-                    roomNo={req.roomNo}
-                    department={req.departmentName}
-                    priority={mapPriority(req.priority)}
-                    title={req.summary}
-                    description={req.rawText || ''}
-                    status={mapStatus(req.status)}
-                    isCancelled={req.status === 'CANCELLED'}
-                    isEscalated={req.status === 'ESCALATED'}
-                    cancelRequested={req.cancelRequested}
-                    createdAt={req.createdAt}
-                    entities={req.entities}
-                    assigneeName={req.assignedStaffName}
-                    highlightSearch={searchValue}
-                    isActiveMatch={matches[currentMatchIndex]?.id === req.id}
-                  />
+                    <TaskTicket
+                      ticketId={req.id}
+                      roomNo={req.roomNo}
+                      department={req.departmentName}
+                      priority={mapPriority(req.priority)}
+                      title={req.summary}
+                      description={req.rawText || ''}
+                      status={mapStatus(req.status)}
+                      isCancelled={req.status === 'CANCELLED'}
+                      isEscalated={req.status === 'ESCALATED'}
+                      cancelRequested={req.cancelRequested}
+                      createdAt={req.createdAt}
+                      entities={req.entities}
+                      assigneeName={req.assignedStaffName}
+                      highlightSearch={searchValue}
+                      isActiveMatch={matches[currentMatchIndex]?.id === req.id}
+                    />
                   </div>
                 ))}
               </TaskColumn>
@@ -219,24 +219,24 @@ export default function AllRequestsPage() {
               <TaskColumn title={t.frontdeskPage.taskBoard.columns.inProgress} count={inProgress.length} status="IN_PROGRESS">
                 {inProgress.map(req => (
                   <div key={req.id} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                  <TaskTicket 
-                    ticketId={req.id}
-                    roomNo={req.roomNo}
-                    department={req.departmentName}
-                    priority={mapPriority(req.priority)}
-                    title={req.summary}
-                    description={req.rawText || ''}
-                    status={mapStatus(req.status)}
-                    isCancelled={req.status === 'CANCELLED'}
-                    isEscalated={req.status === 'ESCALATED'}
-                    cancelRequested={req.cancelRequested}
-                    createdAt={req.createdAt}
-                    updatedAt={req.updatedAt}
-                    entities={req.entities}
-                    assigneeName={req.assignedStaffName}
-                    highlightSearch={searchValue}
-                    isActiveMatch={matches[currentMatchIndex]?.id === req.id}
-                  />
+                    <TaskTicket
+                      ticketId={req.id}
+                      roomNo={req.roomNo}
+                      department={req.departmentName}
+                      priority={mapPriority(req.priority)}
+                      title={req.summary}
+                      description={req.rawText || ''}
+                      status={mapStatus(req.status)}
+                      isCancelled={req.status === 'CANCELLED'}
+                      isEscalated={req.status === 'ESCALATED'}
+                      cancelRequested={req.cancelRequested}
+                      createdAt={req.createdAt}
+                      updatedAt={req.updatedAt}
+                      entities={req.entities}
+                      assigneeName={req.assignedStaffName}
+                      highlightSearch={searchValue}
+                      isActiveMatch={matches[currentMatchIndex]?.id === req.id}
+                    />
                   </div>
                 ))}
               </TaskColumn>
@@ -244,9 +244,9 @@ export default function AllRequestsPage() {
 
             {/* Column 3: 완료 */}
             <div className={`${styles.columnWrapper} ${activeTab !== 'completed' ? styles.mobileHidden : ''}`}>
-              <TaskColumn 
-                title={t.frontdeskPage.taskBoard.columns.completed} 
-                count={filteredCompleted.length} 
+              <TaskColumn
+                title={t.frontdeskPage.taskBoard.columns.completed}
+                count={filteredCompleted.length}
                 status="DONE"
                 headerRight={
                   <DateFilterDropdown
@@ -261,24 +261,24 @@ export default function AllRequestsPage() {
               >
                 {filteredCompleted.map(req => (
                   <div key={req.id} onClick={() => setDetailTarget(req.id)} style={{ cursor: 'pointer' }}>
-                  <TaskTicket 
-                    ticketId={req.id}
-                    roomNo={req.roomNo}
-                    department={req.departmentName}
-                    priority={mapPriority(req.priority)}
-                    title={req.summary}
-                    description={req.rawText || ''}
-                    status={mapStatus(req.status)}
-                    isCancelled={req.status === 'CANCELLED'}
-                    isEscalated={req.status === 'ESCALATED'}
-                    cancelRequested={req.cancelRequested}
-                    createdAt={req.createdAt}
-                    updatedAt={req.updatedAt}
-                    entities={req.entities}
-                    assigneeName={req.assignedStaffName}
-                    highlightSearch={searchValue}
-                    isActiveMatch={matches[currentMatchIndex]?.id === req.id}
-                  />
+                    <TaskTicket
+                      ticketId={req.id}
+                      roomNo={req.roomNo}
+                      department={req.departmentName}
+                      priority={mapPriority(req.priority)}
+                      title={req.summary}
+                      description={req.rawText || ''}
+                      status={mapStatus(req.status)}
+                      isCancelled={req.status === 'CANCELLED'}
+                      isEscalated={req.status === 'ESCALATED'}
+                      cancelRequested={req.cancelRequested}
+                      createdAt={req.createdAt}
+                      updatedAt={req.updatedAt}
+                      entities={req.entities}
+                      assigneeName={req.assignedStaffName}
+                      highlightSearch={searchValue}
+                      isActiveMatch={matches[currentMatchIndex]?.id === req.id}
+                    />
                   </div>
                 ))}
               </TaskColumn>

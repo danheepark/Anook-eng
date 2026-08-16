@@ -29,6 +29,13 @@
   height: var(--space-36);
 }
 
+.small {
+  padding: 0 var(--space-12);
+  border-radius: var(--radius-sm);
+  height: 28px;
+  font: var(--text-caption-medium);
+}
+
 .primary {
   background-color: var(--color-primary);
   color: var(--color-white);

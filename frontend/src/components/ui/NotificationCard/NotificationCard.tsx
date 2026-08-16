@@ -101,6 +101,7 @@ export default function NotificationCard({
       {/* 1. 첫 줄: Front Desk가 해야 할 판단 + 긴급 배지 + 우측 부서명 */}
       <div className={styles.headerRow}>
         <div className={styles.titleAndBadges}>
+          <span className={styles.unreadDot} />
           <h4 className={styles.decisionTitle}>{decisionText}</h4>
 
           <div className={styles.badgesWrapper}>
@@ -119,25 +120,25 @@ export default function NotificationCard({
         )}
       </div>
 
-      {/* 2. 둘째 줄: 그 판단의 대상 (Room 402 · Shampoo x1) */}
+      {/* 2. 둘째 줄: 그 판단의 대상 및 시간 */}
       <div className={styles.targetRow}>
         <span className={styles.targetText}>{targetDisplay}</span>
+        {timeText && <span className={styles.metaDot}>·</span>}
+        {timeText && <span className={styles.timeText}>{timeText}</span>}
       </div>
 
-      {/* 3. 셋째 줄: 좌측 시간 텍스트 & 우측 승인 버튼 */}
-      <div className={styles.footerRow}>
-        <span className={styles.timeText}>{timeText}</span>
-
-        <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
+      {/* 3. 셋째 줄: small 승인 버튼 */}
+      {primaryLabel && (
+        <div className={styles.actionRow} onClick={(e) => e.stopPropagation()}>
           <Button
             variant="secondary"
-            size="medium"
+            size="small"
             onClick={onPrimaryClick}
           >
             {primaryLabel}
           </Button>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -773,8 +773,7 @@ export default function ComponentShowcasePage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-24)' }}>
                     <div style={{ flex: 1 }}>
                       <h5 style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)', marginBottom: 'var(--space-8)' }}>Notification Card (알림 패널 카드)</h5>
-                      <ComponentLabel path="components/ui/NotificationCard/NotificationCard.tsx" />
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-12)', maxWidth: '900px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '440px', background: '#ffffff', border: '1px solid var(--color-gray-200)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
                         <NotificationCard
                           variant="cancel"
                           title="Shampoo x1"

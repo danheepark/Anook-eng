@@ -8,11 +8,13 @@ import RequestDetailModal from '@/app/frontdesk/requests/_components/RequestDeta
 import { useUiStore } from '@/stores/useUiStore';
 import { useTranslation } from '@/app/useTranslation';
 import NotificationCard from '@/components/ui/NotificationCard/NotificationCard';
+import Tabs from '@/components/ui/Tab/Tabs';
 import styles from './HeaderNotification.module.css';
 
 export default function HeaderNotification() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [activeTab, setActiveTab] = useState<'all' | 'cancel' | 'escalation'>('all');
   const popupRef = useRef<HTMLDivElement>(null);
   const { showToast } = useUiStore();
   const { language } = useTranslation();
@@ -50,6 +52,12 @@ export default function HeaderNotification() {
   ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
   const totalNotifications = allNotifications.length;
+
+  const filteredNotifications = allNotifications.filter(item => {
+    if (activeTab === 'cancel') return item.type === 'cancel';
+    if (activeTab === 'escalation') return item.type === 'escalation';
+    return true;
+  });
 
   const handleApproveCancel = async (id: number) => {
     try {
@@ -135,25 +143,35 @@ export default function HeaderNotification() {
           <div className={styles.header}>
             <div className={styles.headerTitleRow}>
               <h3 className={styles.title}>
-                {language === 'en' ? 'Pending Approvals' : '승인 대기함'}
+                {language === 'en' ? 'Notifications' : '알림'}
               </h3>
-              {totalNotifications > 0 && (
-                <span className={styles.countBadge}>{totalNotifications}</span>
-              )}
             </div>
             <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label={language === 'en' ? 'Close' : '닫기'}>
               <X size={18} />
             </button>
           </div>
 
+          <div className={styles.tabWrapper}>
+            <Tabs
+              variant="line"
+              options={[
+                { label: language === 'en' ? 'All' : '전체', value: 'all', count: totalNotifications },
+                { label: language === 'en' ? 'Cancel' : '취소', value: 'cancel', count: delayedCancelRequests.length },
+                { label: language === 'en' ? 'Transfer' : '이관', value: 'escalation', count: nonEmergencyEscalations.length },
+              ]}
+              activeValue={activeTab}
+              onChange={(val) => setActiveTab(val as any)}
+            />
+          </div>
+
           <div className={styles.content}>
-            {totalNotifications === 0 ? (
+            {filteredNotifications.length === 0 ? (
               <div className={styles.empty}>
                 {language === 'en' ? 'No pending requests.' : '대기 중인 요청이 없습니다.'}
               </div>
             ) : (
               <div className={styles.list}>
-                {allNotifications.map(({ type, data: req, time }) => {
+                {filteredNotifications.map(({ type, data: req, time }) => {
                   if (type === 'cancel') {
                     const rawParts = req.rawText ? req.rawText.split('\n|||TRANSFER_REASON|||') : [];
                     let cleanDesc = rawParts[0] || '';
