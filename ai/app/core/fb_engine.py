@@ -298,6 +298,21 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
         if not result.clarification_question or len(result.clarification_question.split("\n")) > 2 or "-" in result.clarification_question:
             result.clarification_question = default_menu_intro.get(system_language, default_menu_intro["en"])
 
+    # 6.6. ROOM_SERVICE (메뉴 미지정 단순 주문 의사) → "What would you like to order?" 직접 질문
+    menu_items = result.entities.get("menu_items") or []
+    if result.entities.get("intent") == "ROOM_SERVICE" and not menu_items:
+        result.needs_clarification = True
+        if not getattr(result, "missing_fields", []):
+            result.missing_fields = ["menu_items"]
+        default_order_ask = {
+            "ko": "어떤 메뉴를 주문하시겠습니까?",
+            "en": "What would you like to order?",
+            "ja": "何をご注文されますか？",
+            "zh": "请问您想点些什么？"
+        }
+        if not result.clarification_question or "Here is our current" in result.clarification_question or "메뉴를 안내" in result.clarification_question:
+            result.clarification_question = default_order_ask.get(system_language, default_order_ask["en"])
+
     # 7. 자연스러운 응답 생성
     if result.needs_clarification:
         guest_reply = result.clarification_question
