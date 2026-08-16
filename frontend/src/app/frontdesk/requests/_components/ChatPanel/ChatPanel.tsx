@@ -389,15 +389,14 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
   // "나중에 하기" → PENDING 상태로 저장 후 완료 처리
   const handleRagLater = async () => {
-    const { question, answer } = extractInitialContent();
+    const { answer } = extractInitialContent();
     const cleanSummary = summary ? summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '') : '미분류 상담';
-    const finalQuestion = question && question.trim() ? question : cleanSummary;
     try {
       const res = await fetch('/api/staff/knowledge/register-from-answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: finalQuestion,
+          question: cleanSummary,
           answer,
           domainCode: 'COMMON',
           roomNo: roomNumber,
