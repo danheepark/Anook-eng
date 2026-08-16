@@ -33,30 +33,24 @@ interface NotificationCardProps {
   onClick?: () => void;
 }
 
-function formatRelativeTime(isoStr?: string, language?: string): string {
-  if (!isoStr) return '';
-  const d = new Date(isoStr);
+function getRelativeTime(dateString?: string | Date, language: string = 'en', timeTexts?: any): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
   const now = new Date();
-  const diffInMs = Math.max(0, now.getTime() - d.getTime());
-  const diffInMins = Math.floor(diffInMs / (1000 * 60));
-  
-  if (language === 'ko') {
-    if (diffInMins < 1) return '방금 전';
-    if (diffInMins < 60) return `${diffInMins}분 전`;
-    const diffInHours = Math.floor(diffInMins / 60);
-    if (diffInHours < 24) return `${diffInHours}시간 전`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}일 전`;
-  }
+  const diffMs = Math.max(0, now.getTime() - date.getTime());
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffInMins < 1) return 'Just now';
-  if (diffInMins === 1) return '1m ago';
-  if (diffInMins < 60) return `${diffInMins}m ago`;
-  const diffInHours = Math.floor(diffInMins / 60);
-  if (diffInHours === 1) return '1h ago';
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-  const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays}d ago`;
+  if (diffDays > 0) {
+    return `${diffDays}${language === 'en' ? ' ' : ''}${timeTexts?.daysAgo || (language === 'ko' ? '일 전' : 'days ago')}`;
+  } else if (diffHours > 0) {
+    return `${diffHours}${language === 'en' ? ' ' : ''}${timeTexts?.hoursAgo || (language === 'ko' ? '시간 전' : 'hrs ago')}`;
+  } else if (diffMins > 0) {
+    return `${diffMins}${language === 'en' ? ' ' : ''}${timeTexts?.minsAgo || (language === 'ko' ? '분 전' : 'mins ago')}`;
+  } else {
+    return timeTexts?.justNow || (language === 'ko' ? '방금 전' : 'Just now');
+  }
 }
 
 function getDeptClass(deptName?: string): string {
@@ -84,9 +78,9 @@ export default function NotificationCard({
   onSecondaryClick,
   onClick,
 }: NotificationCardProps) {
-  const { language } = useTranslation();
+  const { t, language } = useTranslation();
   const isUrgent = priority === 'URGENT';
-  const timeText = createdAt ? formatRelativeTime(createdAt, language) : '';
+  const timeText = createdAt ? getRelativeTime(createdAt, language, t.ticketUI?.time) : '';
 
   // 1. 첫 줄: Front Desk가 해야 할 판단
   const decisionText = variant === 'cancel'
