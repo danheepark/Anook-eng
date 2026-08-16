@@ -130,7 +130,7 @@ export default function NotificationCard({
 
         <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
           <Button
-            variant="primary"
+            variant="secondary"
             size="medium"
             onClick={onPrimaryClick}
           >

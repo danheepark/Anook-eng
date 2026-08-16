@@ -39,7 +39,7 @@
 }
 
 .decisionTitle {
-  font: var(--text-body-bold);
+  font: var(--text-h3-bold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
@@ -54,7 +54,7 @@
 
 .deptName {
   font: var(--text-caption-medium);
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -91,7 +91,7 @@
 }
 
 .targetText {
-  font: var(--text-caption-medium);
+  font: var(--text-body-regular);
   color: var(--color-gray-700);
   word-break: break-word;
   line-height: var(--main-line-height);
