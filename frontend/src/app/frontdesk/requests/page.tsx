@@ -143,10 +143,17 @@ export default function FrontDeskPage() {
         setLastMessageTimes(prev => ({ ...prev, [String(roomNo)]: Date.now() }));
       }
 
+      // 번역 완료 시 프리뷰 텍스트 업데이트
+      if ((type === 'MESSAGE_TRANSLATED' || type === 'GUEST_MESSAGE_TRANSLATED') && roomNo && payload.translatedContent) {
+        setLastGuestMessages(prev => ({ ...prev, [String(roomNo)]: String(payload.translatedContent) }));
+      }
+
       // 고객 메시지 또는 새로운 요청 생성인 경우 레드닷 갱신
       if ((type === 'GUEST_MESSAGE' || type === 'NEW_REQUEST') && roomNo) {
         if (type === 'GUEST_MESSAGE' && payload.content) {
-          setLastGuestMessages(prev => ({ ...prev, [String(roomNo)]: String(payload.content) }));
+          const contentStr = String(payload.content);
+          const isNonEnglish = /[\uAC00-\uD7A3\u3040-\u30FF\u4E00-\u9FFF]/.test(contentStr);
+          setLastGuestMessages(prev => ({ ...prev, [String(roomNo)]: isNonEnglish ? '...' : contentStr }));
         }
         
         // 현재 열린 채팅방이면 레드닷 표시하지 않음

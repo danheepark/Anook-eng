@@ -14,12 +14,13 @@ import FeedbackCard from '@/app/guest/chat/_components/FeedbackCard';
 import GuestRequestCard from '@/app/guest/chat/_components/RequestCard/RequestCard';
 
 export interface ChatMessage {
-  id: number | string;
-  variant: 'sent' | 'received';
-  senderType?: string;
+  id: string;
+  variant: 'received' | 'sent';
+  senderType?: 'GUEST' | 'AI' | 'STAFF' | 'SYSTEM';
   content: string;
   type?: 'REQUEST_CARD';
   meta?: any;
+  isTranslating?: boolean;
 }
 
 export interface ChatPanelProps {
@@ -280,23 +281,37 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
           }];
         });
       } else if (type === 'GUEST_MESSAGE') {
+        const isNonEnglish = /[\uAC00-\uD7A3\u3040-\u30FF\u4E00-\u9FFF]/.test(content);
+        const newMsgId = messageId ? String(messageId) : Date.now().toString();
         setMessages(prev => {
           if (messageId && prev.some(m => m.id === String(messageId))) return prev;
           return [...prev, {
-            id: messageId ? String(messageId) : Date.now().toString(),
+            id: newMsgId,
             variant: 'received',
             senderType: 'GUEST',
             content,
+            isTranslating: isNonEnglish,
           }];
         });
+
+        // 3.5초 안전 타임아웃 (번역 이벤트 유실 시 원본 노출)
+        if (isNonEnglish) {
+          setTimeout(() => {
+            setMessages(prev => prev.map(m =>
+              m.id === newMsgId && m.isTranslating
+                ? { ...m, isTranslating: false }
+                : m
+            ));
+          }, 3500);
+        }
       } else if (type === 'GUEST_MESSAGE_TRANSLATED' || type === 'MESSAGE_TRANSLATED') {
-        // 고객 또는 AI 메시지 번역 완료 → 기존 메시지의 content를 번역본으로 교체
+        // 고객 또는 AI 메시지 번역 완료 → 기존 메시지의 content를 번역본으로 교체하고 번역 로딩 해제
         const translatedContent = payload.translatedContent as string;
         const targetMsgId = payload.messageId as number;
         if (translatedContent && targetMsgId) {
           setMessages(prev => prev.map(m =>
             m.id === String(targetMsgId) && (m.senderType === 'GUEST' || m.senderType === 'AI')
-              ? { ...m, content: m.senderType === 'AI' ? translateContent(translatedContent) : translatedContent }
+              ? { ...m, content: m.senderType === 'AI' ? translateContent(translatedContent) : translatedContent, isTranslating: false }
               : m
           ));
         }
@@ -669,7 +684,15 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                           bubbleStyle={bubbleStyle}
                           isFallback={isManualStaffMsg}
                         >
-                          {renderHighlightedText(msg.content, internalSearch, isTargetMatch)}
+                          {msg.isTranslating ? (
+                            <span className={styles.typingDots}>
+                              <span className={styles.dot} />
+                              <span className={styles.dot} />
+                              <span className={styles.dot} />
+                            </span>
+                          ) : (
+                            renderHighlightedText(msg.content, internalSearch, isTargetMatch)
+                          )}
                         </ChatBubble>
                       </div>
                     </div>

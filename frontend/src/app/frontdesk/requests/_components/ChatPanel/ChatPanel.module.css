@@ -198,7 +198,7 @@
 
 .unreadDivider {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   margin: var(--space-16) 0;
   width: 100%;
@@ -210,18 +210,17 @@
   content: '';
   flex: 1;
   border-bottom: 1px solid var(--color-gray-400, #9ca3af);
-  margin-top: 9px;
 }
 
 .unreadText {
   padding: 0 var(--space-8);
   font: var(--text-caption-regular);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-gray-500);
   text-align: center;
-  line-height: 1.45;
+  line-height: 1.4;
   letter-spacing: -0.1px;
-  white-space: pre-wrap;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
@@ -250,5 +249,47 @@
   line-height: 1.4;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* Translating / Typing Indicator Dots */
+.typingDots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 6px;
+  min-height: 18px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--color-gray-400);
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
