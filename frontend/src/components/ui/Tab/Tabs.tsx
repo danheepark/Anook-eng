@@ -18,6 +18,7 @@ export interface TabsProps {
   className?: string;
   variant?: 'line' | 'pill' | 'segmented';
   size?: 'sm' | 'md' | 'lg' | 'h2';
+  fullWidth?: boolean;
 }
 
 export default function Tabs({
@@ -26,7 +27,8 @@ export default function Tabs({
   onChange,
   className = '',
   variant = 'line',
-  size
+  size,
+  fullWidth = false,
 }: TabsProps) {
   const isPill = variant === 'pill';
   const isSegmented = variant === 'segmented';
@@ -34,6 +36,7 @@ export default function Tabs({
   let containerClass = styles.variantLine;
   if (isPill) containerClass = styles.variantPill;
   if (isSegmented) containerClass = styles.variantSegmented;
+  if (fullWidth) containerClass += ` ${styles.fullWidth}`;
 
   return (
     <div className={`${styles.container} ${containerClass} ${className}`.trim()} role="tablist">
@@ -58,7 +61,7 @@ export default function Tabs({
             className={tabClass.trim()}
             onClick={() => onChange(option.value)}
           >
-            {option.label}
+            <span className={styles.tabLabel}>{option.label}</span>
             {option.count !== undefined && (
               <span className={styles.countBadge}>{option.count}</span>
             )}

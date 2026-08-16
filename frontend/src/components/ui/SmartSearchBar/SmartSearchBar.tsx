@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ArrowUpIcon, ArrowDownIcon, SearchIcon, CancelIcon } from '@/components/icons';
 import { useTranslation } from '@/app/useTranslation';
 import styles from './SmartSearchBar.module.css';
@@ -14,6 +14,7 @@ export interface SmartSearchBarProps extends Omit<React.InputHTMLAttributes<HTML
   onNext?: () => void;
   inputWrapperStyle?: React.CSSProperties;
   onClear?: () => void;
+  collapsibleOnMobile?: boolean;
 }
 
 export default function SmartSearchBar({
@@ -28,10 +29,36 @@ export default function SmartSearchBar({
   inputWrapperStyle,
   onClear,
   disabled,
+  collapsibleOnMobile = true,
   ...props
 }: SmartSearchBarProps) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { t } = useTranslation();
+
+  const shouldExpand = isExpanded || Boolean(value);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        if (!value) {
+          setIsExpanded(false);
+        }
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [value]);
+
+  const handleContainerClick = () => {
+    if (!shouldExpand) {
+      setIsExpanded(true);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
+    }
+  };
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -46,9 +73,21 @@ export default function SmartSearchBar({
 
   const showMatches = totalMatches !== undefined && currentMatch !== undefined && onPrev && onNext;
 
+  const mobileClass = collapsibleOnMobile 
+    ? (shouldExpand ? styles.mobileExpanded : styles.mobileCollapsed)
+    : '';
+
   return (
-    <div className={`${styles.root} ${className}`.trim()} style={{ width: '100%', ...style }}>
-      <div style={{ width: '100%', ...inputWrapperStyle }}>
+    <div 
+      ref={containerRef}
+      className={`${styles.root} ${mobileClass} ${className}`.trim()} 
+      style={{ ...style }}
+    >
+      <div 
+        className={styles.wrapper}
+        style={{ ...inputWrapperStyle }}
+        onClick={handleContainerClick}
+      >
         <div className={styles.searchContainer}>
           <div className={styles.searchIconWrapper}>
             <SearchIcon width={18} height={18} />
@@ -60,6 +99,7 @@ export default function SmartSearchBar({
             placeholder={props.placeholder || t.common?.searchPlaceholder || '검색어를 입력하세요...'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            onFocus={() => setIsExpanded(true)}
             {...props}
           />
           {value && showMatches && (

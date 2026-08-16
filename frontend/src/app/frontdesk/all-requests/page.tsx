@@ -174,6 +174,8 @@ export default function AllRequestsPage() {
         <>
           <div className={styles.mobileTabs}>
             <Tabs
+              fullWidth
+              variant="line"
               options={[
                 { label: t.frontdeskPage.taskBoard.columns.pending, value: 'pending', count: pending.length },
                 { label: t.frontdeskPage.taskBoard.columns.inProgress, value: 'inProgress', count: inProgress.length },

@@ -314,6 +314,8 @@ function DashboardContent() {
         <>
           <div className={styles.mobileTabs}>
             <Tabs
+              fullWidth
+              variant="line"
               options={[
                 { label: t.frontdeskPage.taskBoard.columns.pending, value: 'TODO', count: boardData.TODO.length },
                 { label: t.frontdeskPage.taskBoard.columns.inProgress, value: 'IN_PROGRESS', count: boardData.IN_PROGRESS.length },

@@ -80,7 +80,9 @@
   }
 
   .mobileTabs {
-    display: block !important;
+    display: flex !important;
+    width: 100% !important;
+    margin-bottom: var(--space-8);
   }
 
   .mobileHidden {
