@@ -75,6 +75,7 @@ RULES:
     - You MUST identify the existing request ID from `[고객의 현재 활성 요청(주문) 목록]` and set it in `"target_request_id"` at the top level of the JSON output.
     - If the guest replies "ADD" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD"`. (For duplicate adds, just treat it as ADD).
     - If the guest replies "REPLACE", you MUST set `action_type` to `"REPLACE"`.
+    - **ANTI-REDUNDANCY RULE (CRITICAL UX)**: Whenever you provide `clarification_options`, keep the text in `clarification_question` brief and conversational without repeating option pill names in the body text. Let the clickable pills present the choices.
 
 [Final Reply Rule]
 - If `needs_clarification` is false (the request is successfully accepted), you must provide a confirmation in `final_reply`.

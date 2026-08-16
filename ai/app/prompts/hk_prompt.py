@@ -50,6 +50,7 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
     - You MUST identify the existing request ID from `[고객의 현재 활성 요청(주문) 목록]` and set it in `"target_request_id"`.
     - If the guest replies "ADD" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD"`. (For duplicate adds, just treat it as ADD).
     - If the guest replies "REPLACE", you MUST set `action_type` to `"REPLACE"`.
+    - **ANTI-REDUNDANCY RULE (CRITICAL UX)**: Whenever you provide `clarification_options`, keep the text in `clarification_question` brief and conversational without repeating option pill names in the body text. Let the clickable pills present the choices.
 13. SUMMARY FORMAT (CRITICAL): Your `summary` MUST be a specific 1-3 word noun phrase of what the guest wants in English (e.g., 'Towel x2', 'Room Cleaning'). DO NOT use generic phrases like 'Housekeeping request'. This applies to ALL requests, including ADD_DUPLICATE.
 14. ORDER MODIFICATION & PARTIAL CANCELLATION RULE (CRITICAL!):
     - If the guest wants to modify or partially cancel an existing request (e.g., "change to", "remove", "cancel" for a specific item), you MUST output `action_type: "REPLACE"` and set `target_keyword` to the name of the item being removed or changed.
