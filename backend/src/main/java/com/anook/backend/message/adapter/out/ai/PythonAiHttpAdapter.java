@@ -156,7 +156,7 @@ public class PythonAiHttpAdapter implements MessageAiPort {
                 "I'm having a little trouble with this request. I'll connect you to the front desk right away. Please wait a moment.",
                 "Front Desk Assistance", 
                 "FRONT", 
-                "URGENT", 
+                "NORMAL", 
                 Collections.emptyMap(), 
                 0.0, 
                 "ADD", 

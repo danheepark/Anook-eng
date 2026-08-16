@@ -155,60 +155,76 @@ export function useChat() {
           'CREATED': 5, 'PENDING': 10, 'ESCALATED': 10, 'ASSIGNED': 50, 'IN_PROGRESS': 50, 'COMPLETED': 100, 'CANCELLED': 0
         };
 
-        // FRONT 도메인 CHAT_END 카드는 방 단위로 1개만 복원 (중복 방지)
-        let frontChatEndAdded = false;
+        // FRONT 도메인 상담 완료 카드는 세션당 최신 1개만 생성 (여러 건의 프론트 연결이 묶여 완료되어도 종료 카드는 1개)
+        let latestFrontCompleted: any = null;
 
-        const requestCards: (ChatMessage & { _ts: number })[] = reqData.flatMap((r: any) => {
-          const cards: (ChatMessage & { _ts: number })[] = [];
+        const requestCards: (ChatMessage & { _ts: number })[] = [];
 
+        reqData.forEach((r: any) => {
+          // 1. 요청 생성 시점에 생성된 RequestCard는 불변 운영 기록으로 항상 보존
+          requestCards.push({
+            id: `request-${r.id}`,
+            variant: 'received',
+            type: 'REQUEST_CARD',
+            content: '',
+            meta: {
+              requestId: r.id,
+              domainCode: r.domainCode || 'UNKNOWN',
+              summary: r.summary,
+              status: r.status,
+              entities: r.entities,
+              progress: progressMap[r.status] || 0,
+              graceRemaining: 0,
+              priority: r.priority || 'NORMAL',
+              createdAt: r.createdAt,
+              cancelReason: r.cancelReason,
+              cancelledAt: r.status === 'CANCELLED' ? (r.updatedAt || r.createdAt) : undefined,
+            },
+            _ts: new Date(r.createdAt).getTime(),
+          });
+
+          // 2. 만약 COMPLETED 상태라면 피드백 카드 복원
           if (r.status === 'COMPLETED') {
-            // 완료된 요청 → FeedbackCard(일반) / ChatEndCard(FRONT 상담)로 복원
-            const isFrontConsultation = r.domainCode === 'FRONT';
-
-            // FRONT 상담은 가장 최근 1건만 CHAT_END로 복원
-            if (isFrontConsultation && frontChatEndAdded) {
-              return cards; // 이미 CHAT_END가 추가되었으면 건너뜀
+            if (r.domainCode === 'FRONT') {
+              // FRONT 상담은 가장 최신 완료건 1개만 기록해두고 나중에 1장만 추가
+              if (!latestFrontCompleted || new Date(r.updatedAt || r.createdAt).getTime() >= new Date(latestFrontCompleted.updatedAt || latestFrontCompleted.createdAt).getTime()) {
+                latestFrontCompleted = r;
+              }
+            } else {
+              // 기타 일반 서비스 요청(HK, FB 등)은 요청별 개별 완료 카드 복원
+              requestCards.push({
+                id: `system-feedback-${r.id}`,
+                variant: 'received',
+                type: 'FEEDBACK',
+                content: '',
+                meta: {
+                  requestId: r.id,
+                  summary: r.summary || '',
+                  domainCode: r.domainCode || '',
+                  completedAt: r.updatedAt || r.createdAt,
+                },
+                _ts: new Date(r.updatedAt || r.createdAt).getTime(),
+              });
             }
-            if (isFrontConsultation) frontChatEndAdded = true;
-
-            cards.push({
-              id: `system-feedback-${r.id}`,
-              variant: 'received',
-              type: isFrontConsultation ? 'CHAT_END' : 'FEEDBACK',
-              content: '',
-              meta: {
-                requestId: r.id,
-                summary: r.summary || '',
-                domainCode: r.domainCode || '',
-                completedAt: r.updatedAt || r.createdAt,
-              },
-              _ts: new Date(r.updatedAt || r.createdAt).getTime(),
-            });
-          } else {
-            // 진행 중이거나 취소된 요청은 RequestCard로 표시
-            cards.push({
-              id: `request-${r.id}`,
-              variant: 'received',
-              type: 'REQUEST_CARD',
-              content: '',
-              meta: {
-                requestId: r.id,
-                domainCode: r.domainCode || 'UNKNOWN',
-                summary: r.summary,
-                status: r.status,
-                entities: r.entities,
-                progress: progressMap[r.status] || 0,
-                graceRemaining: 0,
-                priority: r.priority || 'NORMAL',
-                createdAt: r.createdAt,
-                cancelReason: r.cancelReason,
-                cancelledAt: r.status === 'CANCELLED' ? (r.updatedAt || r.createdAt) : undefined,
-              },
-              _ts: new Date(r.createdAt).getTime(),
-            });
           }
-          return cards;
         });
+
+        // 최신 FRONT 상담 완료 카드가 있으면 1개만 추가
+        if (latestFrontCompleted) {
+          requestCards.push({
+            id: `system-chatend-${latestFrontCompleted.id}`,
+            variant: 'received',
+            type: 'CHAT_END',
+            content: '',
+            meta: {
+              requestId: latestFrontCompleted.id,
+              summary: latestFrontCompleted.summary || '',
+              domainCode: 'FRONT',
+              completedAt: latestFrontCompleted.updatedAt || latestFrontCompleted.createdAt,
+            },
+            _ts: new Date(latestFrontCompleted.updatedAt || latestFrontCompleted.createdAt).getTime(),
+          });
+        }
 
         // 시간순 정렬 후 _ts 제거
         const merged = [...chatMessages, ...requestCards]
@@ -307,6 +323,9 @@ export function useChat() {
           const msgsToAppend: ChatMessage[] = [];
 
           if (msgType === 'REQUEST_CARD') {
+            if (payload.meta?.requestId) {
+              knownRequestIds.current.add(payload.meta.requestId);
+            }
             if (content && content.trim() !== '') {
               msgsToAppend.push({
                 id: payload.messageId ? `${payload.messageId}-text` : `text-${Date.now()}`,
@@ -324,6 +343,9 @@ export function useChat() {
               meta: { ...(payload.meta || {}), options: payload.options },
             });
           } else {
+            if (payload.meta?.requestId) {
+              knownRequestIds.current.add(payload.meta.requestId);
+            }
             msgsToAppend.push({
               id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
               variant: 'received',
@@ -362,11 +384,7 @@ export function useChat() {
           }];
         });
       } else if (['NEW_REQUEST', 'STATUS_CHANGED', 'CANCEL_APPROVED', 'CANCEL_REJECTED', 'CANCEL_REQUEST_RECEIVED'].includes(payload.type)) {
-        // 🔥 BUG FIX: 이전 투숙객의 잔여 요청 상태 변경 이벤트 차단
-        if (payload.type !== 'NEW_REQUEST' && !knownRequestIds.current.has(payload.requestId)) {
-          return;
-        }
-        if (payload.type === 'NEW_REQUEST') {
+        if (payload.requestId) {
           knownRequestIds.current.add(payload.requestId);
         }
 
@@ -579,7 +597,7 @@ export function useChat() {
                   }
                 }];
               });
-            }, 800);
+            }, 300);
           } else {
             // 기타 도메인 (HK, FB 등): 요청별 개별 피드백 카드
             setMessages(prev => {
@@ -659,34 +677,6 @@ export function useChat() {
               }];
             });
           }, 600); // 모든 카드가 도착한 후 렌더링되게 보장
-        }
-
-        if (payload.status === 'COMPLETED') {
-          // FRONT 도메인은 배치 debounce에서 이미 처리되므로 건너뜀
-          if (payload.domainCode !== 'FRONT') {
-            setTimeout(() => {
-              setMessages(prev => {
-                const msgId = `system-feedback-${payload.requestId}`;
-                if (prev.some(m => m.id === msgId)) return prev;
-                // Remove the original RequestCard for this requestId
-                const filtered = prev.filter(m =>
-                  !(m.type === 'REQUEST_CARD' && m.meta?.requestId === payload.requestId)
-                );
-                return [...filtered, {
-                  id: msgId,
-                  variant: 'received',
-                  type: 'FEEDBACK',
-                  content: '',
-                  meta: {
-                    requestId: payload.requestId,
-                    summary: payload.summary || '',
-                    domainCode: payload.domainCode || '',
-                    completedAt: new Date().toISOString()
-                  }
-                }];
-              });
-            }, 1000);
-          }
         }
 
         // CANCEL_REJECTED 처리: 제네릭 메시지 대신 관리자가 입력한 반려 사유가

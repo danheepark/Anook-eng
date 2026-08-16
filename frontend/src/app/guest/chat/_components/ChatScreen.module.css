@@ -49,7 +49,6 @@
   display: flex;
   flex-direction: column;
   z-index: 9999;
-  cursor: pointer;
   padding-top: 54px;
 }
 

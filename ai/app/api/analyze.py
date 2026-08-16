@@ -66,7 +66,7 @@ DOMAIN_AGENTS: Dict[str, Callable[..., Awaitable[Dict[str, Any]]]] = {
 
 import inspect
 
-def invoke_domain_agent(domain: str, **kwargs) -> Awaitable[Dict[str, Any]]:
+async def invoke_domain_agent(domain: str, **kwargs) -> Dict[str, Any]:
     """
     Dynamically calls the domain agent function with only the arguments it accepts in its signature.
     """
@@ -80,6 +80,13 @@ def invoke_domain_agent(domain: str, **kwargs) -> Awaitable[Dict[str, Any]]:
     filtered_kwargs = {}
     for k, v in kwargs.items():
         param_name = k
+        if param_name == "active_requests" and "active_requests" not in sig.parameters and "user_requests" in sig.parameters:
+            param_name = "user_requests"
+        if has_var_keyword or param_name in sig.parameters:
+            filtered_kwargs[param_name] = v
+            
+    return await agent_func(**filtered_kwargs)
+
 STATIC_REPLIES = {
     "ESCALATION": {
         "ko": "제가 바로 답변드리기 어려운 부분이라, 프론트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
@@ -174,89 +181,6 @@ STATIC_REPLIES = {
     "FALLBACK_FAILURE": {
         "ko": "제가 정확한 의미를 파악하기 조금 어렵네요. 🥲 직원분의 도움이 필요하시다면 제가 연결해드릴까요?",
         "en": "I'm having a bit of trouble understanding. Would you like me to connect you to the front desk? 🥲",
-        "ja": "リクエストを理解できませんでした. フロントデスクのサポートが必要な場合は, フロントデスクにお繋ぎいたしましょうか？ 🥲",
-        "zh": "我无法理解您的请求. 如果您需要前台的帮助, 需要我为您连接前台吗？ 🥲"
-    },
-    "NEED_MORE_INFO": {
-        "ko": "조금 더 상세한 안내가 필요하시다면 프론트 데스크로 바로 연결해 드릴까요?",
-        "en": "Would you like me to connect you to the front desk for more details? 😊",
-        "ja": "より詳細な情報をご希望の場合は、フロントデスクにお繋ぎいたしましょうか？ 😊",
-        "zh": "您需要我将您连接到前台以获取更详细的信息吗？ 😊"
-    },
-    "EMERGENCY_REPLY": {
-        "ko": "🚨 응급 상황을 인지하였습니다. 즉시 호텔 보안팀을 호출하고 직원을 파견하겠습니다. 부디 안전한 곳에 머물러 주십시오.",
-        "en": "🚨 Emergency noted. We're dispatching hotel security right away. Please stay somewhere safe.",
-        "ja": "🚨 緊急事態を認識しました. 直ちにホテルのセキュリティチームを呼び, スタッフを派遣します. 安全な場所にとどまってください.",
-        "zh": "🚨 我们已经确认了紧急情况. 将立即呼叫酒店安保团队, 并派遣员工. 请待在安全的地方."
-    },
-    "OPTION_YES": {
-        "ko": "네",
-        "en": "Yes",
-        "ja": "はい",
-        "zh": "是的"
-    },
-    "OPTION_NO": {
-        "ko": "아니요",
-        "en": "No",
-        "ja": "いいえ",
-        "zh": "不是"
-    },
-    "OPTION_ADD": {
-        "ko": "추가",
-        "en": "Add",
-        "ja": "追加",
-        "zh": "追加"
-    },
-    "OPTION_REPLACE": {
-        "ko": "변경",
-        "en": "Replace",
-        "ja": "変更",
-        "zh": "修改"
-    },
-    "DUPLICATE_CONFIRM": {
-        "ko": "이미 '{summary}'을(를) 요청하셨는데, 이번 요청을 추가로 접수할까요? 아니면 기존 요청을 변경하시겠어요?",
-        "en": "You already have an active request for '{summary}'. Would you like to add this as a new one, or replace the existing request?",
-        "ja": "すでに「{summary}」をリクエストされていますが、追加でリクエストしますか？それとも既存のリクエストを変更しますか？",
-        "zh": "您已经请求了「{summary}」，您想追加请求还是修改现有请求？"
-    }
-}
-
-def _get_static_reply(key: str, lang: str) -> str:
-    # ── [프론트엔드 다국어 언어팩 연동 코드 맵핑] ──
-    # 프론트엔드가 [FORWARD_FRONT] 또는 [INFO_NOT_FOUND] 코드를 감지하고
-    # 각 언어팩(locale)에서 동적으로 번역된 멘트를 표시하도록 수정되었습니다.
-    if key in ["COMPLAINT", "ESCALATION"]:
-        return "[FORWARD_FRONT]"
-    if key in ["INFO_NOT_FOUND", "ESCALATION_INFO"]:
-        return "[INFO_NOT_FOUND]"
-
-    lang = lang.lower()
-    if lang not in ["ko", "en", "ja", "zh"]:
-        lang = "en"
-    return STATIC_REPLIES.get(key, {}).get(lang, STATIC_REPLIES.get(key, {}).get("en", "Working on your request. One moment!"))�いたしかねます。フロントデスクのスタッフに質問を転送いたしましたので、確認後すぐにこちらでご返答させていただきます. 🥲🙏",
-        "zh": "抱歉，关于这个问题我不太确定！我已经将您的问题转交给了前台员工。他们会核实后尽快在这里回复您。🥲🙏"
-    },
-    "ERROR": {
-        "ko": "잠시 통신이 원활하지 않았나 봐요. 🥲 번거로우시겠지만 조금만 이따가 다시 한 번 말씀해 주시겠어요? 🙏",
-        "en": "Looks like we hit a small hiccup. Could you try again in just a moment? 🥲🙏",
-        "ja": "システムに一時的な問題が発生しているようです. 少し経ってからもう一度お試しいただけますか？ 🥲🙏",
-        "zh": "系统似乎出现了暂时的故障。您能稍后再试一次吗？ 🥲🙏"
-    },
-    "CONVERSATION_END": {
-        "ko": "네, 알겠습니다! 😊 필요하신 건이 생기시면 언제든 편하게 말씀해 주세요.",
-        "en": "No worries! 😊 Feel free to reach out anytime you need help.",
-        "ja": "かしこまりました！😊 何かございましたら、いつでもお気軽にお申し付けください。",
-        "zh": "好的，没问题！😊 如果有需要，请随时告诉我。"
-    },
-    "COMPLAINT": {
-        "ko": "불편을 드려 대단히 죄송합니다. 🥲 지금 바로 프론트 직원과 직접 연결하여 도움을 드리겠습니다.",
-        "en": "I'm so sorry about the trouble. Let me connect you to the front desk right now. 🥲",
-        "ja": "ご不便をおかけして大変申し訳ございません。ただいまフロントデスクに直接お繋ぎいたします。🥲",
-        "zh": "给您带来不便，我们深表歉意。现在立刻为您直接连接到前台。🥲"
-    },
-    "FALLBACK_FAILURE": {
-        "ko": "제가 정확한 의미를 파악하기 조금 어렵네요. 🥲 직원분의 도움이 필요하시다면 제가 연결해드릴까요?",
-        "en": "I'm having a bit of trouble understanding — would you like me to connect you to the front desk? 🥲",
         "ja": "リクエストを理解できませんでした. フロントデスクのサポートが必要な場合は, フロントデスクにお繋ぎいたしましょうか？ 🥲",
         "zh": "我无法理解您的请求. 如果您需要前台的帮助, 需要我为您连接前台吗？ 🥲"
     },
@@ -707,7 +631,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "guest_reply": "제가 바로 답변드리기 어려운 부분이라, 프론트 데스크 직원에게 바로 연결해 드릴게요. 잠시만 기다려 주세요!",
                     "summary": "프론트 연결 요청 (고객 확인)",
                     "domain_code": "FRONT",
-                    "priority": "URGENT",
+                    "priority": "NORMAL",
                     "entities": {"intent": "ESCALATION"},
                     "confidence": 1.0
                 }]
@@ -1339,7 +1263,7 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                     "guest_reply": _get_static_reply("INFO_NOT_FOUND", request.language),
                     "summary": f"{request.text[:20]}... (프론트 이관)",
                     "domain_code": "FRONT",
-                    "priority": "URGENT",
+                    "priority": "NORMAL",
                     "entities": {"intent": "ESCALATION", "reason": "LACK_OF_KNOWLEDGE"},
                     "confidence": 1.0,
                     "missing_fields": [],

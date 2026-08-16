@@ -17,15 +17,19 @@ export function useRagAnalysis() {
     setAnalyzing(true);
     setError(null);
     try {
-      const res = await fetch('/api/staff/knowledge/extract-from-chat', {
+      const res = await fetch('/api/frontdesk/knowledge/extract-from-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pendingIds }),
       });
-      const data = await handleResponse(res);
-      return data as KnowledgeCandidate[];
+      if (!res.ok) {
+        console.warn('[useRagAnalysis] extract-from-chat HTTP error:', res.status);
+        return null;
+      }
+      const data = await res.json();
+      return Array.isArray(data) ? (data as KnowledgeCandidate[]) : [];
     } catch (err: any) {
-      console.error(err);
+      console.error('[useRagAnalysis] Analysis error:', err);
       setError(err.message || '상담 데이터 RAG 자동 분석에 실패했습니다.');
       return null;
     } finally {
@@ -37,7 +41,7 @@ export function useRagAnalysis() {
     setRegistering(true);
     setError(null);
     try {
-      const res = await fetch('/api/staff/knowledge/batch-register', {
+      const res = await fetch('/api/frontdesk/knowledge/batch-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -76,6 +76,21 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping, isStaffTyping]);
 
+  // 상태바 높이에 따른 채팅 메시지 패딩 오프셋 실시간 동기화
+  useEffect(() => {
+    if (!statusBarRef.current) return;
+    const updateOffset = () => {
+      if (statusBarRef.current) {
+        const height = statusBarRef.current.offsetHeight - 54;
+        document.documentElement.style.setProperty('--status-bar-offset', `${Math.max(0, height)}px`);
+      }
+    };
+    updateOffset();
+    const observer = new ResizeObserver(updateOffset);
+    observer.observe(statusBarRef.current);
+    return () => observer.disconnect();
+  }, [filteredRequests, isRequestsExpanded]);
+
   const hasInteracted = messages.some(msg => msg.variant === 'sent');
   // AI가 타이핑 중일 때는 화려한 애니메이션이 선명하게 보이도록 흰색 장막을 걷어냅니다.
   const showTypingBackground = !isTyping && (isUserTyping || hasInteracted);
@@ -92,7 +107,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           ref={statusBarRef}
           className={styles.statusBarContainer}
           onClick={() => {
-            if (!isRequestsExpanded) {
+            if (filteredRequests.length > 1 && !isRequestsExpanded) {
               setIsRequestsExpanded(true);
             }
           }}
@@ -103,6 +118,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
             borderBottom: '1px solid rgba(255, 255, 255, 0.8)',
             boxShadow: '0 8px 32px rgba(31, 38, 135, 0.05)',
             transform: 'translateZ(0)',
+            cursor: filteredRequests.length > 1 ? 'pointer' : 'default',
           }}
         >
           <div className={styles.requestList}>
@@ -117,7 +133,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
                   status={req.status}
                   entities={req.entities}
                   progress={req.progress}
-                  isMini={isLatest ? !isRequestsExpanded : false}
+                  isMini={false}
                 />
               );
 
@@ -137,18 +153,21 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
               );
             })}
           </div>
-          <div 
-            className={styles.multiRequestToggle}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsRequestsExpanded(!isRequestsExpanded);
-            }}
-          >
-            <span>{t.guestChat?.activeRequestsCount?.replace('{count}', String(filteredRequests.length)) || `${filteredRequests.length}개의 진행 중인 요청`}</span>
-            <span className={`${styles.arrow} ${isRequestsExpanded ? styles.arrowOpen : ''}`}>
-              <ArrowDownIcon width={20} height={20} strokeWidth={1} color="var(--color-gray-400)" />
-            </span>
-          </div>
+
+          {filteredRequests.length > 1 && (
+            <div 
+              className={styles.multiRequestToggle}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsRequestsExpanded(!isRequestsExpanded);
+              }}
+            >
+              <span>{t.guestChat?.activeRequestsCount?.replace('{count}', String(filteredRequests.length)) || `${filteredRequests.length}개의 진행 중인 요청`}</span>
+              <span className={`${styles.arrow} ${isRequestsExpanded ? styles.arrowOpen : ''}`}>
+                <ArrowDownIcon width={20} height={20} strokeWidth={1} color="var(--color-gray-400)" />
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -196,12 +215,17 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
 
           const formatNoticeContent = (content: string) => {
             if (!content) return '';
-            let formatted = content.replace(/has received your message/gi, 'has reviewed your message');
-            if (formatted.includes('and will assist you') && !formatted.includes('\nand will assist you')) {
-              formatted = formatted.replace(/\s*and will assist you/g, '\nand will assist you');
-            }
-            if (formatted.includes('곧 안내해') && !formatted.includes('\n곧 안내해')) {
-              formatted = formatted.replace(/\s*곧 안내해/g, '\n곧 안내해');
+            let formatted = content
+              .replace(/has received your message/gi, 'has reviewed your message')
+              .replace(/\s*and will assist you shortly\.?/gi, '.')
+              .replace(/\s*and will assist you\.?/gi, '.')
+              .replace(/\s*곧 안내\s*드리겠습니다\.?/g, '')
+              .replace(/\s*곧 안내해\s*드리겠습니다\.?/g, '')
+              .replace(/\s*すぐにご案内いたします。?/g, '')
+              .replace(/\s*我们将很快为您提供帮助。?/g, '')
+              .trim();
+            if (/^[A-Za-z]/.test(formatted) && !/[.!?]$/.test(formatted)) {
+              formatted += '.';
             }
             return formatted;
           };

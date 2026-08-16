@@ -215,8 +215,15 @@
   width: 18px;
   height: 18px;
   border-radius: 4px;
-  border: 1px solid var(--color-gray-300, #d1d5db);
-  background: var(--color-gray-100, #f3f4f6);
+  border: none;
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-100, #f3f4f6) 25%,
+    var(--color-gray-200, #e5e7eb) 37%,
+    var(--color-gray-100, #f3f4f6) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
   flex-shrink: 0;
   margin: 0;
 }
@@ -291,7 +298,15 @@
   width: 34px;
   height: 34px;
   border-radius: 6px;
-  background: var(--color-gray-100, #f3f4f6);
+  border: none;
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-100, #f3f4f6) 25%,
+    var(--color-gray-200, #e5e7eb) 37%,
+    var(--color-gray-100, #f3f4f6) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 
 .errorBox {

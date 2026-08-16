@@ -700,7 +700,7 @@
     "consultationComplete": "End Conversation",
     "startConsultation": "Start Chat",
     "startEmergency": "Start Emergency Response",
-    "autoReplyStaffChecked": "A front desk team member has reviewed your message and will assist you shortly.",
+    "autoReplyStaffChecked": "A front desk team member has reviewed your message.",
     "autoReplyEmergency": "An emergency response team is on the way. Please stay somewhere safe.",
     "backToList": "Back to list",
     "viewRequestDetail": "View request details",

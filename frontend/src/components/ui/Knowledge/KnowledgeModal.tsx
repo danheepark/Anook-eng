@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ModalOverlay, ModalCard } from '@/components/ui/Modal';
-import { Clock, Edit2 } from 'lucide-react';
+import { Edit2 } from 'lucide-react';
 import Button from '@/components/ui/Button/Button';
 import styles from './KnowledgeModal.module.css';
 import { useTranslation } from '@/app/useTranslation';
@@ -73,9 +73,7 @@ export default function KnowledgeModal({
         {/* Footer */}
         <div className={styles.footer}>
           <div className={styles.dateInfo}>
-            <Clock size={16} className={styles.clockIcon} />
             <span className={styles.dateText}>
-              {(t.common as any)?.lastUpdated || (language === 'en' ? 'Last updated: ' : '최종 업데이트: ')}
               {formatKnowledgeDateTime(updatedAt, language)}
             </span>
           </div>

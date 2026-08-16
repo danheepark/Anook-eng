@@ -70,7 +70,7 @@
 
 .systemSubtitle {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   font: var(--text-caption-regular);
   color: var(--color-gray-500);
@@ -81,6 +81,7 @@
 .shieldIcon {
   flex-shrink: 0;
   color: var(--color-gray-400);
+  margin-top: 2px;
 }
 
 /* ── Star Rating (inline) ── */

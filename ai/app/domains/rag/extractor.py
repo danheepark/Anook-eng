@@ -1,40 +1,43 @@
 from typing import List, Dict, Any
 from app.infrastructure.gemini.client import call_gemini_async
 
-SYSTEM_INSTRUCTION = """You are a specialized AI assistant that automatically extracts and categorizes useful knowledge (Q&A pairs) from chat histories to be registered in a hotel RAG (Retrieval-Augmented Generation) system.
+SYSTEM_INSTRUCTION = """You are a specialized hotel knowledge engineer that extracts NEW hotel knowledge (Q&A pairs) from conversations where human hotel staff (STAFF) assisted guests.
+
+[Core Mission]
+Extract knowledge ONLY from the direct answers, explanations, and service information provided by human STAFF to GUEST.
+Do NOT extract anything answered by AI, because whatever AI already answered is already part of the existing knowledge base.
 
 [Analysis & Extraction Rules]
-1. You MUST extract Q&A candidates ONLY from the direct answers provided by STAFF to GUEST. The useful information and explanations provided by the staff are the core sources for RAG.
-2. Exclude AI automated responses (sender_type: AI) as they are already known to the system. Extract ONLY from the information manually inputted by STAFF.
-3. Exclude simple greetings (e.g., "Hello", "Thank you"), unrelated small talk, simple complaints, and personal information (specific personal details like names, phone numbers, card numbers, reservation numbers, etc.).
-4. The extracted question (`question`) MUST be rewritten into a polite, standard question format that a typical guest might ask.
-   - Example: "When does the pool open?" -> "What are the operating hours for the swimming pool?"
-   - Example: "Give me some towels" -> "Can I request additional towels for my room?"
-5. The extracted answer (`answer`) MUST be organized into clear, kind, and standardized sentences based on the actual information provided by the staff in the chat. Remove situational phrases from the chat (e.g., "I will be there now", "You are in room 301, right?") and refine it to focus purely on the information.
-6. Categorize the domain (`domain_code`) accurately based on the subject of the question into one of the following:
-   - HK: Room cleaning, extra towels, amenities provision, housekeeping related.
-   - FB: Food and beverage, breakfast, room service, restaurant related.
-   - FACILITY: Swimming pool, fitness center, spa, parking lot, and other facilities related.
-   - CONCIERGE: Nearby attractions, shuttle bus, external reservations, activities related.
-   - FRONT: Check-in, check-out, late check-out, payment, room change, and front desk related.
-   - EMERGENCY: Emergency situations, lost items, medical requests, and urgent matters related.
-   - COMMON: General inquiries that apply to multiple departments or do not fit the above categories.
-7. Assign a confidence score (`confidence`) to each extracted Q&A pair as a float between 0.0 and 1.0. (Higher score for more useful, certain, and reliable knowledge).
-8. (IMPORTANT) Do not miss any **distinct topics or questions** covered in the chat history. Extract EACH of them as a separate Q&A pair. For example, if a guest asked about both 'umbrella rental' and 'bicycle rental' in one conversation, you MUST include 2 Q&A candidates (umbrella, bicycle) in the list.
+1. [HUMAN STAFF ONLY]: You MUST extract Q&A candidates ONLY from the inquiries that required human STAFF intervention and where human STAFF provided the specific resolution or answer.
+2. [IGNORE AI ANSWERS]: STRICTLY IGNORE any questions/answers that were handled by automated AI (`[AI]`). The AI bot's answers already exist in the database and must NEVER be re-extracted.
+3. [IGNORE SYSTEM GREETINGS & NOTICES]: Ignore generic greetings, acknowledgement notices (e.g., "A front desk staff has seen your message", "We will assist you shortly", "프론트 데스크 직원이 메시지를 확인했습니다"), simple complaints without resolution, and closing system notices.
+4. [REWRITE QUESTION]: The extracted question (`question`) MUST be rewritten into a polite, standard hotel inquiry that a future guest would ask.
+   - Example: "Could I stay until 2 PM tomorrow? is there an extra charge?" -> "Can I request a late checkout until 2 PM, and is there an additional fee?"
+5. [STANDARDIZE ANSWER]: The extracted answer (`answer`) MUST capture the actual policy, fee, rule, or resolution provided by the STAFF in clear, polite, and standardized language. Strip out conversational filler (e.g., "Hi there", "I updated your checkout time").
+   - Example: STAFF says "We can offer late checkout until 2 PM for an additional $30." -> "Late checkout until 2:00 PM is available for an additional fee of $30."
+6. [DOMAIN CATEGORIZATION]: Categorize each extracted item into:
+   - HK: Housekeeping, extra amenities, cleaning, linen
+   - FB: Food & Beverage, breakfast, room service, dining
+   - FACILITY: Swimming pool, gym, spa, parking, facilities
+   - CONCIERGE: Local attractions, transport, tours, shuttle
+   - FRONT: Check-in, check-out, late check-out, billing, room moves
+   - EMERGENCY: Medical, lost & found, urgent safety
+   - COMMON: General inquiries that span multiple departments
+7. [LANGUAGE RULE]: Match the language of the conversation. If the guest/staff spoke in Korean, output in Korean. If in English, output in English.
 
 [Response Format]
-You MUST respond in JSON format that satisfies the following JSON schema.
+You MUST respond in JSON format that satisfies the following JSON schema:
 {
   "candidates": [
     {
-      "question": "Extracted standard question (English)",
-      "answer": "Extracted and refined answer (English)",
+      "question": "Polite standard question",
+      "answer": "Clear, informative standard answer based on human staff information",
       "domain_code": "One of HK | FB | FACILITY | CONCIERGE | FRONT | EMERGENCY | COMMON",
-      "confidence": 0.95
+      "confidence": 1.0
     }
   ]
 }
-If there is absolutely no useful knowledge information to extract from the chat history, return an empty list for "candidates":
+If no new human staff knowledge is found, return an empty list:
 {
   "candidates": []
 }

@@ -47,14 +47,27 @@ public class ExtractKnowledgeFromChatService implements ExtractKnowledgeFromChat
             
             for (Long id : command.pendingIds()) {
                 knowledgeRepositoryPort.findById(id).ifPresent(entry -> {
-                    // PENDING 항목의 경우, 저장된 대화 청크(질문/답변) 자체를 AI에게 전달하여 분석하게 합니다.
-                    // 이렇게 하면 우산/자전거 등 각기 다른 세션에서 등록된 PENDING 항목들이 개별적으로 정확히 분석됩니다.
-                    List<ChatMessageDto> messages = List.of(
-                        new ChatMessageDto("GUEST", entry.getQuestion() != null ? entry.getQuestion() : "대화 내용 요약"),
-                        new ChatMessageDto("STAFF", entry.getAnswer() != null ? entry.getAnswer() : "")
-                    );
-                    List<KnowledgeCandidateResult> candidates = knowledgeExtractPort.extractFromChat(messages);
-                    allCandidates.addAll(candidates);
+                    List<ChatMessageDto> sessionMessages = null;
+                    if (entry.getRoomNo() != null && !entry.getRoomNo().isBlank()) {
+                        List<ChatMessageDto> fullChat = messageQueryPort.findByRoomNo(entry.getRoomNo());
+                        sessionMessages = filterLatestSessionMessages(fullChat);
+                    }
+
+                    if (sessionMessages == null || sessionMessages.isEmpty()) {
+                        String guestQuestion = entry.getQuestion() != null && !entry.getQuestion().isBlank()
+                                ? entry.getQuestion()
+                                : "대화 내용 요약";
+                        String staffAnswer = entry.getAnswer() != null ? entry.getAnswer() : "";
+                        sessionMessages = List.of(
+                            new ChatMessageDto("GUEST", guestQuestion),
+                            new ChatMessageDto("STAFF", staffAnswer)
+                        );
+                    }
+
+                    List<KnowledgeCandidateResult> candidates = knowledgeExtractPort.extractFromChat(sessionMessages);
+                    if (candidates != null && !candidates.isEmpty()) {
+                        allCandidates.addAll(candidates);
+                    }
                 });
             }
         }

@@ -12,6 +12,11 @@ import com.anook.backend.knowledge.application.port.in.GetKnowledgeListUseCase;
 import com.anook.backend.knowledge.application.port.in.UpdateKnowledgeUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import com.anook.backend.knowledge.application.dto.request.ExtractKnowledgeFromChatCommand;
+import com.anook.backend.knowledge.application.dto.request.BatchRegisterKnowledgeCommand;
+import com.anook.backend.knowledge.application.dto.response.KnowledgeCandidateResult;
+import com.anook.backend.knowledge.application.port.in.ExtractKnowledgeFromChatUseCase;
+import com.anook.backend.knowledge.application.port.in.BatchRegisterKnowledgeUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +32,26 @@ public class FrontdeskKnowledgeController {
     private final GetKnowledgeDetailUseCase getKnowledgeDetailUseCase;
     private final UpdateKnowledgeUseCase updateKnowledgeUseCase;
     private final DeleteKnowledgeUseCase deleteKnowledgeUseCase;
+    private final ExtractKnowledgeFromChatUseCase extractKnowledgeFromChatUseCase;
+    private final BatchRegisterKnowledgeUseCase batchRegisterKnowledgeUseCase;
 
     @PostMapping
     public ResponseEntity<CreateKnowledgeResult> createKnowledge(@RequestBody CreateKnowledgeCommand command) {
         CreateKnowledgeResult result = createKnowledgeUseCase.create(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @PostMapping("/extract-from-chat")
+    public ResponseEntity<List<KnowledgeCandidateResult>> extractFromChat(
+            @RequestBody ExtractKnowledgeFromChatCommand command) {
+        List<KnowledgeCandidateResult> result = extractKnowledgeFromChatUseCase.extract(command);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/batch-register")
+    public ResponseEntity<List<CreateKnowledgeResult>> batchRegister(
+            @RequestBody BatchRegisterKnowledgeCommand command) {
+        List<CreateKnowledgeResult> result = batchRegisterKnowledgeUseCase.registerBatch(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 

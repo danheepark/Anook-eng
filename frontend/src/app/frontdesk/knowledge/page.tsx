@@ -100,50 +100,52 @@ export default function KnowledgeManagementPage() {
       </HeaderSearchSlot>
 
       {/* 1. Top Section: Pending Knowledge / Knowledge Candidates */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>
-            {candidateState.isAnalyzed ? (
-              <>
-                {language === 'en' ? 'Knowledge Candidates' : '지식 후보'}
-                <span className={styles.countBadge}>{candidateState.count}</span>
-              </>
-            ) : (
-              <>
-                {language === 'en' ? 'Pending Knowledge' : (t.frontdeskPage?.taskBoard?.titles?.aiTraining || '대기 중인 지식')}
-              </>
-            )}
-          </h2>
-          <div id="pending-knowledge-header-actions" />
-        </div>
-        <div className={styles.sectionBody}>
-          <KnowledgeReviewTab 
-            domainCode="ALL" 
-            searchValue={searchValue} 
-            data={data}
-            loading={loading}
-            error={error}
-            deleteEntry={deleteEntry}
-            onRefresh={refresh}
-            onCandidateStateChange={(isAnalyzed, count) => {
-              setCandidateState({ isAnalyzed, count });
-            }}
-            onMatchesChange={(m) => {
-              setMatches(m);
-              if (m.length === 0) {
-                setCurrentMatchIndex(0);
-                setActiveMatchId(null);
-              } else if (currentMatchIndex >= m.length) {
-                setCurrentMatchIndex(0);
-                setActiveMatchId(m[0]);
-              } else if (activeMatchId === null) {
-                setActiveMatchId(m[currentMatchIndex]);
-              }
-            }}
-            activeMatchId={activeMatchId}
-          />
-        </div>
-      </section>
+      {(pendingCount > 0 || candidateState.isAnalyzed) && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              {candidateState.isAnalyzed ? (
+                <>
+                  {language === 'en' ? 'Knowledge Candidates' : '지식 후보'}
+                  <span className={styles.countBadge}>{candidateState.count}</span>
+                </>
+              ) : (
+                <>
+                  {language === 'en' ? 'Pending Knowledge' : (t.frontdeskPage?.taskBoard?.titles?.aiTraining || '대기 중인 지식')}
+                </>
+              )}
+            </h2>
+            <div id="pending-knowledge-header-actions" />
+          </div>
+          <div className={styles.sectionBody}>
+            <KnowledgeReviewTab 
+              domainCode="ALL" 
+              searchValue={searchValue} 
+              data={data}
+              loading={loading}
+              error={error}
+              deleteEntry={deleteEntry}
+              onRefresh={refresh}
+              onCandidateStateChange={(isAnalyzed, count) => {
+                setCandidateState({ isAnalyzed, count });
+              }}
+              onMatchesChange={(m) => {
+                setMatches(m);
+                if (m.length === 0) {
+                  setCurrentMatchIndex(0);
+                  setActiveMatchId(null);
+                } else if (currentMatchIndex >= m.length) {
+                  setCurrentMatchIndex(0);
+                  setActiveMatchId(m[0]);
+                } else if (activeMatchId === null) {
+                  setActiveMatchId(m[currentMatchIndex]);
+                }
+              }}
+              activeMatchId={activeMatchId}
+            />
+          </div>
+        </section>
+      )}
 
       {/* 2. Bottom Section: AI Knowledge Library */}
       <section className={styles.section}>

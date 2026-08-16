@@ -78,8 +78,8 @@ public class KnowledgeExtractAiAdapter implements KnowledgeExtractPort {
             }
             return candidates;
         } catch (Exception e) {
-            log.error("Failed to extract knowledge candidates from AI service", e);
-            throw new RuntimeException("Failed to extract knowledge: " + e.getMessage());
+            log.error("Failed to extract knowledge candidates from AI service: {}", e.getMessage());
+            return new ArrayList<>();
         }
     }
 }

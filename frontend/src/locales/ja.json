@@ -652,7 +652,7 @@
     "consultationComplete": "相談完了",
     "startConsultation": "相談を開始する",
     "startEmergency": "緊急対応を開始",
-    "autoReplyStaffChecked": "フロントデスクのスタッフがメッセージを確認しました。すぐにご案内いたします。",
+    "autoReplyStaffChecked": "フロントデスクのスタッフがメッセージを確認しました。",
     "autoReplyEmergency": "緊急対応チームが派遣されました。安全な場所でお待ちください。",
     "backToList": "リストに戻る",
     "viewRequestDetail": "リクエスト詳細を見る",

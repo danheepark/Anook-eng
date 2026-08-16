@@ -691,7 +691,7 @@
     "consultationComplete": "상담 완료",
     "startConsultation": "상담 시작하기",
     "startEmergency": "긴급 대응 시작",
-    "autoReplyStaffChecked": "프론트 데스크 직원이 메시지를 확인했습니다. 곧 안내 드리겠습니다.",
+    "autoReplyStaffChecked": "프론트 데스크 직원이 메시지를 확인했습니다.",
     "autoReplyEmergency": "긴급 대응팀이 배정되었습니다. 신속히 조치하겠습니다. 안전한 곳에서 대기해 주시기 바랍니다.",
     "backToList": "목록으로 가기",
     "viewRequestDetail": "요청 상세 보기",
