@@ -65,7 +65,7 @@ ON CONFLICT (pin) DO NOTHING;
 INSERT INTO staff (name, pin, role_id, department_id) VALUES
     ('Sarah Williams', '111111', 8, 'HK'),
     ('Elena Rostova', '111112', 8, 'HK'),
-    ('Min-woo Park', '111113', 8, 'HK'),
+    ('Amina Al-Mansoor', '111113', 8, 'HK'),
     ('Olivia Chen', '111114', 4, 'HK'),
     ('Hannah Schmidt', '111115', 8, 'HK')
 ON CONFLICT (pin) DO NOTHING;
@@ -74,7 +74,7 @@ ON CONFLICT (pin) DO NOTHING;
 INSERT INTO staff (name, pin, role_id, department_id) VALUES
     ('Michael Smith', '724145', 9, 'FB'),
     ('Lucas Dubois', '724146', 5, 'FB'),
-    ('Ji-hoon Lee', '724147', 9, 'FB'),
+    ('Kenji Takahashi', '724147', 9, 'FB'),
     ('Sophia Martinez', '724148', 9, 'FB'),
     ('Marco Rossi', '724149', 5, 'FB')
 ON CONFLICT (pin) DO NOTHING;
@@ -83,7 +83,7 @@ ON CONFLICT (pin) DO NOTHING;
 INSERT INTO staff (name, pin, role_id, department_id) VALUES
     ('David Johnson', '903096', 7, 'FACILITY'),
     ('Alexander Wright', '903097', 3, 'FACILITY'),
-    ('Dong-hyun Kim', '903098', 7, 'FACILITY'),
+    ('Tariq Hassan', '903098', 7, 'FACILITY'),
     ('Carlos Santos', '903099', 7, 'FACILITY'),
     ('Liam O''Connor', '903100', 7, 'FACILITY')
 ON CONFLICT (pin) DO NOTHING;
