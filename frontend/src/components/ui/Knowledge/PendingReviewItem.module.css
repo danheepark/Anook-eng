@@ -1,18 +1,21 @@
 .card {
-  display: flex;
+  position: relative;
+  display: inline-flex;
   flex-direction: column;
   justify-content: center;
   gap: 6px;
-  width: 100%;
-  min-width: 0;
-  padding: 14px 18px;
-  background-color: var(--color-white, #ffffff);
-  border: 1px solid var(--color-gray-200, #e5e7eb);
-  border-radius: var(--radius-md, 8px);
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  height: 82px;
+  flex: 0 0 260px;
+  padding: 16px 20px;
+  background-color: var(--color-gray-100, #f3f4f6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg, 10px);
   cursor: pointer;
-  transition: all var(--transition, 0.15s ease);
+  transition: all var(--transition, 0.15s ease), filter var(--transition, 0.15s ease);
   box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .clickable {
@@ -20,21 +23,46 @@
 }
 
 .card:hover {
-  background-color: var(--color-gray-50, #f9fafb);
-  border-color: var(--color-gray-400, #9ca3af);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  filter: brightness(0.95);
+}
+
+.deleteButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  opacity: 0;
+  visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-gray-400);
+  transition: opacity var(--transition, 0.15s ease), color var(--transition, 0.15s ease), visibility var(--transition, 0.15s ease);
+  z-index: 2;
+}
+
+.card:hover .deleteButton {
+  opacity: 1;
+  visibility: visible;
+}
+
+.deleteButton:hover {
+  color: var(--color-error, #ef4444);
 }
 
 .title {
-  font: var(--text-body-bold);
-  font-size: 14px;
-  font-weight: 600;
+  font: var(--text-h3-bold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.35;
+  padding-right: 20px;
 }
 
 .time {

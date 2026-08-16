@@ -10,13 +10,14 @@
   border-bottom: 1px solid var(--color-gray-200);
   border-radius: 0;
   cursor: pointer;
-  transition: border-color var(--transition, 0.2s ease);
+  transition: background-color var(--transition, 0.15s ease), border-color var(--transition, 0.15s ease);
   box-shadow: none;
   box-sizing: border-box;
   gap: 0;
 }
 
 .container:hover {
+  background-color: var(--color-gray-50, #f9fafb);
   border-bottom-color: var(--color-gray-300);
   box-shadow: none;
 }
@@ -54,7 +55,7 @@
   width: 120px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   white-space: nowrap;
   flex-shrink: 0;
 }

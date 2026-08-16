@@ -12,7 +12,7 @@ import styles from './page.module.css';
 
 export default function KnowledgeManagementPage() {
   const { t, language } = useTranslation();
-  const { data } = useKnowledge();
+  const { data, loading, error, createEntry, updateEntry, deleteEntry, refresh } = useKnowledge();
   const pendingCount = data.filter(item => item.status === 'PENDING').length;
   const approvedCount = data.filter(item => item.status === 'APPROVED').length;
 
@@ -56,7 +56,6 @@ export default function KnowledgeManagementPage() {
     { value: 'FACILITY', label: t.frontdeskPage.rag.tabs.FACILITY, count: getDomainCount('FACILITY') },
     { value: 'CONCIERGE', label: t.frontdeskPage.rag.tabs.CONCIERGE, count: getDomainCount('CONCIERGE') },
     { value: 'FRONT', label: t.frontdeskPage.rag.tabs.FRONT, count: getDomainCount('FRONT') },
-    { value: 'EMERGENCY', label: t.frontdeskPage.rag.tabs.EMERGENCY, count: getDomainCount('EMERGENCY') },
     { value: 'COMMON', label: t.frontdeskPage.rag.tabs.COMMON, count: getDomainCount('COMMON') }
   ];
 
@@ -71,7 +70,7 @@ export default function KnowledgeManagementPage() {
       {/* Teleport Search Bar to Header */}
       <HeaderSearchSlot>
         <SmartSearchBar
-          inputWrapperStyle={{ width: 200 }}
+          inputWrapperStyle={{ width: 240 }}
           value={searchValue}
           onChange={(val) => handleSearchChange(val)}
           placeholder={t.frontdeskPage.taskBoard.searchPlaceholder}
@@ -101,12 +100,19 @@ export default function KnowledgeManagementPage() {
       </HeaderSearchSlot>
 
       {/* 1. Top Section: Pending Knowledge / Knowledge Candidates */}
-      <section className={styles.pendingBox}>
+      <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>
-            {candidateState.isAnalyzed 
-              ? (language === 'en' ? 'Knowledge Candidates' : '지식 후보')
-              : (language === 'en' ? 'Pending Knowledge' : (t.frontdeskPage?.taskBoard?.titles?.aiTraining || '대기 중인 지식'))}
+            {candidateState.isAnalyzed ? (
+              <>
+                {language === 'en' ? 'Knowledge Candidates' : '지식 후보'}
+                <span className={styles.countBadge}>{candidateState.count}</span>
+              </>
+            ) : (
+              <>
+                {language === 'en' ? 'Pending Knowledge' : (t.frontdeskPage?.taskBoard?.titles?.aiTraining || '대기 중인 지식')}
+              </>
+            )}
           </h2>
           <div id="pending-knowledge-header-actions" />
         </div>
@@ -114,6 +120,11 @@ export default function KnowledgeManagementPage() {
           <KnowledgeReviewTab 
             domainCode="ALL" 
             searchValue={searchValue} 
+            data={data}
+            loading={loading}
+            error={error}
+            deleteEntry={deleteEntry}
+            onRefresh={refresh}
             onCandidateStateChange={(isAnalyzed, count) => {
               setCandidateState({ isAnalyzed, count });
             }}
@@ -153,6 +164,13 @@ export default function KnowledgeManagementPage() {
             domainCode={subTab} 
             searchValue={searchValue} 
             filterValue={filterValue} 
+            data={data}
+            loading={loading}
+            error={error}
+            createEntry={createEntry}
+            updateEntry={updateEntry}
+            deleteEntry={deleteEntry}
+            onRefresh={refresh}
             onMatchesChange={(m) => {
               // Matches callback
             }}

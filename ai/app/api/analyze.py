@@ -1198,20 +1198,18 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                         info_prompt = (
                             f"고객 질문: {request.text}\n\n"
                             f"아래 제공된 [호텔 지식]을 바탕으로 고객의 질문에 친절하게 답변하세요. {additional_instructions}{target_focus}\n"
-                            f"**중요**: 제공된 [호텔 지식]이 고객의 명시적인 질문(예: 특정 목적지)과 무관하다면, 억지로 답변을 지어내지 말고 '죄송합니다. 현재 해당 정보는 안내가 어렵습니다. 프론트 데스크로 연결해 드릴까요?' 라고 정중하게 답변하세요.\n"
+                            f"**중요**: 제공된 [호텔 지식]이 고객의 질문과 아예 무관하거나 답을 알 수 없다면, 절대 답변을 지어내지 말고 반드시 정확히 '{_get_static_reply('INFO_NOT_FOUND', request.language)}' 라는 문장만 그대로 출력하세요.\n"
                             f"만약 답변 내용이 택시, 꽃배달, 예약 등 서비스 관련 내용이거나, 프론트 데스크 연결을 제안하는 내용이라면, 답변 마지막에 반드시 '지금 바로 예약을 도와드릴까요?' 또는 '필요하시면 바로 접수해 드릴까요?'와 같이 서비스 이용을 유도하는 질문을 포함하세요.\n"
-                            f"**주의**: 질문형으로 대화를 끝맺었다면, 고객이 누를 수 있는 답변 버튼(예: ['네', '아니오'])을 clarification_options에 반드시 제공하세요.\n"
-                            f"서비스 유도 질문이 없는 일반적인 정보 안내인 경우에만 마지막에 '{_get_static_reply('NEED_MORE_INFO', request.language)}'를 덧붙이세요.\n\n"
+                            f"**주의**: 질문형으로 대화를 끝맺었다면, 고객이 누를 수 있는 답변 버튼(예: ['네', '아니오'])을 clarification_options에 반드시 제공하세요.\n\n"
                             f"[호텔 지식]\n{knowledge}"
                         )
                     else:
                         info_prompt = (
                             f"고객 질문: {request.text}\n\n"
                             f"아래 제공된 [호텔 지식]은 고객 질문에 대해 검색된 공식 답변입니다. 반드시 이 지식을 활용하여 고객의 질문에 사용된 언어(또는 {request.language} 언어)로 친절하게 답변하세요. {additional_instructions}{target_focus}\n"
-                            f"고객이 한 번 더 묻거나 구체적으로 묻더라도, 제공된 [호텔 지식]을 명확한 답으로 간주하고 답변을 작성하세요. "
-                            f"그리고 답변 마지막에 반드시 '{_get_static_reply('NEED_MORE_INFO', request.language)}' 라는 문장을 덧붙이세요.\n"
-                            f"만약 [호텔 지식]이 고객의 질문과 아예 무관하다면, 절대 유추하거나 지어내지 말고 "
-                            f"'{_get_static_reply('INFO_NOT_FOUND', request.language)}' 라는 문장을 그대로 답변으로 사용하세요.\n\n"
+                            f"만약 [호텔 지식]에 고객 질문에 대한 답변이 있다면 그 내용을 바탕으로 친절하고 명확하게 답변하세요.\n"
+                            f"만약 [호텔 지식]이 고객의 질문과 아예 무관하거나 답을 알 수 없다면, 절대 내용을 지어내거나 추측하지 말고 "
+                            f"반드시 정확히 '{_get_static_reply('INFO_NOT_FOUND', request.language)}' 라는 문장만 단독으로 출력하세요. (이 경우 추가적인 질문이나 선택지를 절대 덧붙이지 마세요.)\n\n"
                             f"[호텔 지식]\n{knowledge}"
                         )
                     raw = await call_gemini_async(
@@ -1265,30 +1263,25 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             info_not_found_msg = _get_static_reply("INFO_NOT_FOUND", request.language)
             need_more_info_msg = _get_static_reply("NEED_MORE_INFO", request.language)
             
-            if guest_reply == info_not_found_msg:
-                # [수정] 컨시어지인 경우 INFO_NOT_FOUND 상태에서도 에이전트에게 한 번 더 기회를 줌 (이미 위에서 처리되지 않은 경우)
-                if domain == "CONCIERGE" and "CONCIERGE" in DOMAIN_AGENTS:
-                     pass
-                
-                # [수정] 정보가 없을 때 강제 이관(ESCALATION) 대신 Soft Fallback을 통해 고객에게 연결 의사 묻기
+            if guest_reply == info_not_found_msg or "[INFO_NOT_FOUND]" in guest_reply or (info_not_found_msg and info_not_found_msg in guest_reply):
+                # ── [원칙 1: AI가 답을 못하고, 해결 주체가 명확함 → 바로 FRONT Handoff] ──
+                print(f"[Analyze] 🚨 지식 부재(INFO_NOT_FOUND) → 프론트 데스크 즉시 Handoff 티켓 발행")
                 response = {
-                    "guest_reply": "제가 바로 확인해 드리기 어려운 내용이네요. 프론트 데스크 직원을 바로 연결해 드릴까요?" if request.language == "ko" else "That's a tricky one for me — would you like me to connect you to the front desk?",
-                    "summary": "추가 정보 필요 (프론트 연결 제안)",
-                    "domain_code": None,
-                    "priority": "NORMAL",
-                    "entities": {},
-                    "confidence": 0.0,
+                    "guest_reply": _get_static_reply("INFO_NOT_FOUND", request.language),
+                    "summary": f"{request.text[:20]}... (프론트 이관)",
+                    "domain_code": "FRONT",
+                    "priority": "URGENT",
+                    "entities": {"intent": "ESCALATION", "reason": "LACK_OF_KNOWLEDGE"},
+                    "confidence": 1.0,
                     "missing_fields": [],
-                    "clarification_options": [
-                        _get_static_reply("OPTION_YES", request.language),
-                        _get_static_reply("OPTION_NO", request.language)
-                    ],
-                    "reasoning": getattr(primary, 'reasoning', 'Unknown')
+                    "clarification_options": [],
+                    "reasoning": getattr(primary, 'reasoning', f"• Lack of knowledge for: '{request.text}'.\n• Immediate handoff to front desk.")
                 }
             elif need_more_info_msg in guest_reply:
+                # ── [원칙 2: handoff 자체가 선택적인 상황 → Confirmation ([Yes] [No])] ──
                 response = {
                     "guest_reply": guest_reply,
-                    "summary": "추가 정보 필요 (프론트 연결 제안)",
+                    "summary": "추가 정보 안내 (프론트 연결 제안)",
                     "domain_code": None,
                     "priority": "NORMAL",
                     "entities": {},

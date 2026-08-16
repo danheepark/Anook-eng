@@ -143,8 +143,8 @@
       "modal": {
         "registerTitle": "지식 데이터 등록",
         "editTitle": "지식 정보 수정",
-        "domainLabel": "도메인 분류",
-        "domainPlaceholder": "분류 선택",
+        "domainLabel": "담당 부서",
+        "domainPlaceholder": "부서 선택",
         "titleLabel": "제목",
         "titlePlaceholder": "예상 질문이나 제목을 입력하세요",
         "contentLabel": "내용",
@@ -648,7 +648,7 @@
     "클래식 치즈버거": "클래식 치즈버거"
   },
   "chatInput": {
-    "placeholder": "무엇이든 물어보세요...",
+    "placeholder": "무엇이든 물어보세요",
     "placeholders": [
       "“수건 2장 더 가져다주세요”",
       "“조식 몇 시인가요?”",

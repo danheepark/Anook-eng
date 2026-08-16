@@ -18,6 +18,31 @@ export interface KnowledgeModalProps {
   onDelete?: () => void;
 }
 
+function formatKnowledgeDateTime(dateVal?: string | Date, language: string = 'en') {
+  if (!dateVal) return '';
+  let date: Date;
+  if (dateVal instanceof Date) {
+    date = dateVal;
+  } else {
+    date = new Date(String(dateVal).replace(' ', 'T'));
+  }
+  if (isNaN(date.getTime())) return String(dateVal);
+
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const year = date.getFullYear();
+  const timeStr = `${hours}:${minutes}`;
+
+  if (language === 'ko') {
+    return `${timeStr} ${year}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  }
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = monthNames[date.getMonth()];
+  const day = date.getDate();
+  return `${timeStr} ${month} ${day} ${year}`;
+}
+
 export default function KnowledgeModal({
   isOpen,
   onClose,
@@ -28,7 +53,7 @@ export default function KnowledgeModal({
   onEdit,
   onDelete
 }: KnowledgeModalProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
@@ -49,7 +74,10 @@ export default function KnowledgeModal({
         <div className={styles.footer}>
           <div className={styles.dateInfo}>
             <Clock size={16} className={styles.clockIcon} />
-            <span className={styles.dateText}>{(t.common as any)?.lastUpdated || '최종 업데이트: '}{updatedAt}</span>
+            <span className={styles.dateText}>
+              {(t.common as any)?.lastUpdated || (language === 'en' ? 'Last updated: ' : '최종 업데이트: ')}
+              {formatKnowledgeDateTime(updatedAt, language)}
+            </span>
           </div>
           <div className={styles.actionButtons} style={{ display: 'flex', gap: 'var(--space-8)' }}>
             {onDelete && (

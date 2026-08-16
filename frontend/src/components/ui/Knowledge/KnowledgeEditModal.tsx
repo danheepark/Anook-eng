@@ -33,7 +33,8 @@ export default function KnowledgeEditModal({
     { value: 'HK', label: '하우스키핑 (HK)' },
     { value: 'FACILITY', label: '시설관리 (FACILITY)' },
     { value: 'FB', label: '식음료 (FB)' },
-    { value: 'CONCIERGE', label: '컨시어지 (CONCIERGE)' }
+    { value: 'CONCIERGE', label: '컨시어지 (CONCIERGE)' },
+    { value: 'COMMON', label: '공통 (COMMON)' }
   ],
   onSave
 }: KnowledgeEditModalProps) {
@@ -57,35 +58,29 @@ export default function KnowledgeEditModal({
 
         {/* Body */}
         <div className={styles.body}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>{ragModal?.domainLabel || '도메인 분류'}</label>
-            <Dropdown
-              options={domainOptions}
-              value={domainCode}
-              onChange={(val) => setDomainCode(val as string)}
-              placeholder={ragModal?.domainPlaceholder || '분류 선택'}
-            />
-          </div>
+          <Dropdown
+            label={ragModal?.domainLabel || 'Department'}
+            options={domainOptions}
+            value={domainCode}
+            onChange={(val) => setDomainCode(val as string)}
+            placeholder={ragModal?.domainPlaceholder || 'Select department'}
+          />
 
-          <div className={styles.formGroup}>
-            <InputField
-              label={ragModal?.titleLabel || '제목'}
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder={ragModal?.titlePlaceholder || '예상 질문이나 제목을 입력하세요'}
-            />
-          </div>
+          <InputField
+            label={ragModal?.titleLabel || 'Title'}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder={ragModal?.titlePlaceholder || 'Enter expected question or title'}
+          />
 
-          <div className={styles.formGroup}>
-            <InputField
-              as="textarea"
-              label={ragModal?.contentLabel || '내용'}
-              value={answer}
-              onChange={(e: any) => setAnswer(e.target.value)}
-              placeholder={ragModal?.contentPlaceholder || '답변이나 매뉴얼 상세 내용을 입력하세요'}
-              rows={4}
-            />
-          </div>
+          <InputField
+            as="textarea"
+            label={ragModal?.contentLabel || 'Content'}
+            value={answer}
+            onChange={(e: any) => setAnswer(e.target.value)}
+            placeholder={ragModal?.contentPlaceholder || 'Enter answer or manual details'}
+            rows={4}
+          />
         </div>
 
         {/* Footer */}

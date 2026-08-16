@@ -180,31 +180,23 @@ export default function RequestDetailPanel({
 
   const formatExactDateTime = (createdAt?: string) => {
     if (!createdAt) return '';
-    const createdDate = new Date(createdAt);
+    const createdDate = new Date(createdAt.replace(' ', 'T'));
     if (isNaN(createdDate.getTime())) return createdAt;
 
+    const hours = String(createdDate.getHours()).padStart(2, '0');
+    const minutes = String(createdDate.getMinutes()).padStart(2, '0');
+    const year = createdDate.getFullYear();
+    const timeStr = `${hours}:${minutes}`;
+
     if (language === 'ko') {
-      const m = createdDate.getMonth() + 1;
-      const d = createdDate.getDate();
-      let hours = createdDate.getHours();
-      const ampm = hours >= 12 ? '오후' : '오전';
-      hours = hours % 12 || 12;
-      const minutes = String(createdDate.getMinutes()).padStart(2, '0');
-      return `${ampm} ${hours}:${minutes} · ${m}월 ${d}일`;
+      return `${timeStr} ${year}년 ${createdDate.getMonth() + 1}월 ${createdDate.getDate()}일`;
     }
 
-    const timeStr = createdDate.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[createdDate.getMonth()];
+    const day = createdDate.getDate();
 
-    const dateStr = createdDate.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-
-    return `${timeStr} · ${dateStr}`;
+    return `${timeStr} ${month} ${day} ${year}`;
   };
 
   interface ReasoningItem {

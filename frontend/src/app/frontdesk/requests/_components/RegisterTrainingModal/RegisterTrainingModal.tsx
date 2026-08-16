@@ -32,7 +32,7 @@ export default function RegisterTrainingModal({
   roomNo = '',
   requestId,
 }: RegisterTrainingModalProps & { requestId?: number }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { extractFromChat, batchRegister, extracting, registering, error } = useExtractKnowledge();
   const [localCandidates, setLocalCandidates] = useState<LocalCandidate[]>([]);
 
@@ -55,13 +55,12 @@ export default function RegisterTrainingModal({
   }, [isOpen, roomNo, departmentId]);
 
   const DOMAIN_OPTIONS = [
-    { value: 'FRONT', label: (t.frontdeskPage?.rag?.tabs as any)?.FRONT || '프론트' },
-    { value: 'HK', label: (t.frontdeskPage?.rag?.tabs as any)?.HK || '하우스키핑' },
-    { value: 'FACILITY', label: (t.frontdeskPage?.rag?.tabs as any)?.FACILITY || '시설관리' },
-    { value: 'FB', label: (t.frontdeskPage?.rag?.tabs as any)?.FB || '식음료' },
-    { value: 'CONCIERGE', label: (t.frontdeskPage?.rag?.tabs as any)?.CONCIERGE || '컨시어지' },
-    { value: 'EMERGENCY', label: (t.frontdeskPage?.rag?.tabs as any)?.EMERGENCY || '긴급' },
-    { value: 'COMMON', label: (t.frontdeskPage?.rag?.tabs as any)?.COMMON || '공통' },
+    { value: 'FRONT', label: (t.frontdeskPage?.rag?.tabs as any)?.FRONT || (language === 'en' ? 'Front Desk' : '프론트') },
+    { value: 'HK', label: (t.frontdeskPage?.rag?.tabs as any)?.HK || (language === 'en' ? 'Housekeeping' : '하우스키핑') },
+    { value: 'FACILITY', label: (t.frontdeskPage?.rag?.tabs as any)?.FACILITY || (language === 'en' ? 'Facility' : '시설관리') },
+    { value: 'FB', label: (t.frontdeskPage?.rag?.tabs as any)?.FB || (language === 'en' ? 'F&B' : '식음료') },
+    { value: 'CONCIERGE', label: (t.frontdeskPage?.rag?.tabs as any)?.CONCIERGE || (language === 'en' ? 'Concierge' : '컨시어지') },
+    { value: 'COMMON', label: (t.frontdeskPage?.rag?.tabs as any)?.COMMON || (language === 'en' ? 'Common' : '공통') },
   ];
 
   const handleToggle = (index: number) => {
@@ -93,7 +92,7 @@ export default function RegisterTrainingModal({
   const handleSave = async () => {
     const selectedItems = localCandidates.filter(c => c.selected);
     if (selectedItems.length === 0) {
-      alert('등록할 항목을 선택해주세요.');
+      alert(language === 'en' ? 'Please select at least one item to register.' : '등록할 항목을 선택해주세요.');
       return;
     }
 
@@ -119,20 +118,38 @@ export default function RegisterTrainingModal({
 
   if (!isOpen) return null;
 
+  const modalTitle = extracting
+    ? (language === 'en' ? 'Generating Knowledge Candidates' : '지식 후보 추출 중')
+    : (language === 'en' ? 'Extract & Register AI Knowledge' : 'AI RAG 지식 추출 및 등록');
+
+  const modalSubtitle = extracting
+    ? (language === 'en' ? 'Turning conversations into knowledge candidates…' : '상담 대화를 지식 후보로 추출하는 중입니다…')
+    : (language === 'en'
+        ? 'Review and edit the AI-extracted Q&A knowledge from this conversation before registering.'
+        : '상담 대화에서 추출된 Q&A 지식을 검토 및 수정한 후 등록하세요.');
+
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
       <ModalCard
         size="md"
+        className={styles.modalCardFixed}
         onClose={onClose}
-        title="AI RAG 지식 추출 및 등록"
-        subtitle={"상담 대화 내용에서 RAG 학습에 적합한 Q&A 지식을 AI가 분석하고 추출했습니다.\n내용을 검토 및 수정 후 등록하세요."}
+        title={modalTitle}
+        subtitle={modalSubtitle}
       >
         <div className={styles.container}>
 
           {extracting ? (
             <div className={styles.loadingContainer}>
-              <div className={styles.spinner} />
-              <div>상담 대화 내용을 AI 분석 중입니다...</div>
+              <div className={styles.skeletonSingleCard}>
+                <div className={styles.skeletonCardHeader}>
+                  <div className={styles.skeletonCheckbox} />
+                  <div className={styles.skeletonTitle} />
+                </div>
+                <div className={styles.skeletonDropdown} />
+                <div className={styles.skeletonQuestion} />
+                <div className={styles.skeletonSubtitle} />
+              </div>
             </div>
           ) : error ? (
             <div className={styles.errorBox}>
@@ -141,7 +158,9 @@ export default function RegisterTrainingModal({
             </div>
           ) : localCandidates.length === 0 ? (
             <div className={styles.emptyState}>
-              상담 대화에서 추출된 Q&A 후보가 없습니다. 대화 내용에 명확한 답변이 적재되었는지 확인해주세요.
+              {language === 'en'
+                ? 'No Q&A candidates were extracted from the conversation. Please ensure clear answers are present in the chat.'
+                : '상담 대화에서 추출된 Q&A 후보가 없습니다. 대화 내용에 명확한 답변이 적재되었는지 확인해주세요.'}
             </div>
           ) : (
             <div className={styles.candidatesContainer}>
@@ -154,7 +173,7 @@ export default function RegisterTrainingModal({
                     className={styles.checkboxInput}
                   />
                   <span className={styles.selectAllText}>
-                    전체 선택 ({localCandidates.filter(c => c.selected).length}/{localCandidates.length})
+                    {language === 'en' ? 'Select All' : '전체 선택'} ({localCandidates.filter(c => c.selected).length}/{localCandidates.length})
                   </span>
                 </label>
               </div>
@@ -170,13 +189,15 @@ export default function RegisterTrainingModal({
                           onChange={() => handleToggle(idx)}
                           className={styles.checkboxInput}
                         />
-                        <span className={styles.candidateNumber}>지식 후보 {idx + 1}</span>
+                        <span className={styles.candidateNumber}>
+                          {language === 'en' ? `Knowledge Candidate ${idx + 1}` : `지식 후보 ${idx + 1}`}
+                        </span>
                       </label>
                     </div>
 
                     <div className={styles.cardBody}>
                       <div className={styles.domainSelectWrapper}>
-                        <span className={styles.domainLabel}>분류 부서</span>
+                        <span className={styles.domainLabel}>{language === 'en' ? 'Department' : '담당 부서'}</span>
                         <Dropdown
                           options={DOMAIN_OPTIONS}
                           value={item.domainCode}
@@ -186,19 +207,19 @@ export default function RegisterTrainingModal({
                       </div>
                       <InputField
                         as="textarea"
-                        label="질문"
+                        label={language === 'en' ? 'Question' : '질문'}
                         value={item.question}
                         onChange={(e) => handleTextChange(idx, 'question', e.target.value)}
-                        placeholder="질문을 입력하세요..."
+                        placeholder={language === 'en' ? 'Enter question…' : '질문을 입력하세요...'}
                         className={`${styles.cardInput} ${styles.questionInput}`}
                         rows={1}
                       />
                       <InputField
                         as="textarea"
-                        label="답변"
+                        label={language === 'en' ? 'Answer' : '답변'}
                         value={item.answer}
                         onChange={(e) => handleTextChange(idx, 'answer', e.target.value)}
-                        placeholder="답변을 입력하세요..."
+                        placeholder={language === 'en' ? 'Enter answer…' : '답변을 입력하세요...'}
                         className={styles.cardInput}
                         rows={3}
                       />
@@ -209,18 +230,25 @@ export default function RegisterTrainingModal({
             </div>
           )}
 
-          <div className={styles.footer}>
-            <Button variant="secondary" onClick={onClose} disabled={registering}>
-              취소
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleSave}
-              disabled={extracting || registering || localCandidates.length === 0}
-            >
-              {registering ? '등록 중...' : '선택 항목 등록하기'}
-            </Button>
-          </div>
+          {!extracting && (
+            <div className={styles.footer}>
+              <Button variant="secondary" onClick={onClose} disabled={registering}>
+                {t.common?.cancel || (language === 'en' ? 'Cancel' : '취소')}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                className={styles.registerButton}
+                disabled={extracting || registering || localCandidates.length === 0}
+              >
+                {registering
+                  ? (language === 'en' ? 'Registering…' : '등록 중...')
+                  : (language === 'en'
+                      ? `Register Selected (${localCandidates.filter(c => c.selected).length})`
+                      : `선택 항목 등록하기 (${localCandidates.filter(c => c.selected).length}건)`)}
+              </Button>
+            </div>
+          )}
         </div>
       </ModalCard>
     </ModalOverlay>

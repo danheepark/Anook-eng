@@ -150,8 +150,8 @@
       "modal": {
         "registerTitle": "Register Knowledge",
         "editTitle": "Edit Knowledge",
-        "domainLabel": "Domain Classification",
-        "domainPlaceholder": "Select domain",
+        "domainLabel": "Department",
+        "domainPlaceholder": "Select department",
         "titleLabel": "Title",
         "titlePlaceholder": "Enter expected question or title",
         "contentLabel": "Content",
@@ -655,7 +655,7 @@
     "클래식 치즈버거": "Classic Cheeseburger"
   },
   "chatInput": {
-    "placeholder": "Ask me anything...",
+    "placeholder": "Ask me anything",
     "placeholders": [
       "Try “Bring two extra towels”",
       "Try “What time is breakfast?”",

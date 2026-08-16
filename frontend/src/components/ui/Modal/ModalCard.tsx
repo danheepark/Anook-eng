@@ -10,6 +10,7 @@ interface ModalCardProps {
   onClose?: () => void;
   title?: string;
   subtitle?: string;
+  className?: string;
   children: React.ReactNode;
 }
 
@@ -19,13 +20,14 @@ export default function ModalCard({
   onClose,
   title,
   subtitle,
+  className = '',
   children,
 }: ModalCardProps) {
   const sizeClass = size === 'sm' ? styles.sizeSm : size === 'md' ? styles.sizeMd : styles.sizeLg;
   const overflowClass = overflowVisible ? styles.overflowVisible : '';
 
   return (
-    <div className={`${styles.modalCard} ${sizeClass} ${overflowClass}`} onClick={(e) => e.stopPropagation()}>
+    <div className={`${styles.modalCard} ${sizeClass} ${overflowClass} ${className}`.trim()} onClick={(e) => e.stopPropagation()}>
       {onClose && (
         <button className={styles.closeButton} onClick={onClose} aria-label="닫기">
           <CancelIcon />

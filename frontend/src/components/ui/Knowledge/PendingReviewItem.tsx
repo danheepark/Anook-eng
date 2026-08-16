@@ -1,6 +1,5 @@
-'use client';
-
 import React from 'react';
+import { DeleteIcon } from '@/components/icons';
 import styles from './PendingReviewItem.module.css';
 import { useTranslation } from '@/app/useTranslation';
 
@@ -10,6 +9,7 @@ export interface PendingReviewItemProps {
   time?: string;
   updatedAt?: string;
   onClick?: () => void;
+  onDelete?: () => void;
   isActiveMatch?: boolean;
   highlightQuery?: string;
 }
@@ -24,19 +24,18 @@ function formatDateTime(dateVal?: string | Date, language: string = 'en') {
   }
   if (isNaN(date.getTime())) return String(dateVal);
 
-  let hours = date.getHours();
+  const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  const paddedHours = String(hours).padStart(2, '0');
+  const timeStr = `${hours}:${minutes}`;
 
-  const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  if (language === 'en') {
-    return `${paddedHours}:${minutes} ${ampm}, ${monthsEn[date.getMonth()]} ${date.getDate()}`;
-  } else {
-    return `${paddedHours}:${minutes} ${ampm}, ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  if (language === 'ko') {
+    return `${timeStr} ${date.getMonth() + 1}월 ${date.getDate()}일`;
   }
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = monthNames[date.getMonth()];
+  const day = date.getDate();
+  return `${timeStr} ${month} ${day}`;
 }
 
 const renderHighlightedText = (text: string, search: string, isActive: boolean) => {
@@ -72,11 +71,12 @@ export default function PendingReviewItem({
   time,
   updatedAt,
   onClick,
+  onDelete,
   isActiveMatch = false,
   highlightQuery = '',
 }: PendingReviewItemProps) {
   const { language } = useTranslation();
-  const displayTime = time || formatDateTime(updatedAt, language);
+  const displayTime = time ? (time.includes('ago') || time.includes('전') ? time : formatDateTime(time, language)) : formatDateTime(updatedAt, language);
 
   return (
     <div 
@@ -84,6 +84,18 @@ export default function PendingReviewItem({
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
       onClick={onClick}
     >
+      <button
+        type="button"
+        className={styles.deleteButton}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete?.();
+        }}
+        title={language === 'en' ? 'Exclude' : '삭제'}
+        aria-label={language === 'en' ? 'Exclude' : '삭제'}
+      >
+        <DeleteIcon width={18} height={18} />
+      </button>
       <h4 className={styles.title} title={title}>
         {renderHighlightedText(title, highlightQuery, isActiveMatch)}
       </h4>

@@ -18,6 +18,31 @@ export interface KnowledgeItemProps {
   highlightQuery?: string;
 }
 
+function formatKnowledgeDateTime(dateVal?: string | Date, language: string = 'en') {
+  if (!dateVal) return '';
+  let date: Date;
+  if (dateVal instanceof Date) {
+    date = dateVal;
+  } else {
+    date = new Date(String(dateVal).replace(' ', 'T'));
+  }
+  if (isNaN(date.getTime())) return String(dateVal);
+
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const year = date.getFullYear();
+  const timeStr = `${hours}:${minutes}`;
+
+  if (language === 'ko') {
+    return `${timeStr} ${year}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  }
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = monthNames[date.getMonth()];
+  const day = date.getDate();
+  return `${timeStr} ${month} ${day} ${year}`;
+}
+
 const renderHighlightedText = (text: string, search: string, isActive: boolean) => {
   if (!search) return text;
   const parts = text.split(new RegExp(`(${search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')})`, 'gi'));
@@ -117,7 +142,7 @@ export default function KnowledgeItem({
       {/* 3. Date (Direct child) */}
       {updatedAt ? (
         <div className={styles.dateWrapper}>
-          <span className={styles.dateText}>{updatedAt}</span>
+          <span className={styles.dateText}>{formatKnowledgeDateTime(updatedAt, language)}</span>
         </div>
       ) : null}
 

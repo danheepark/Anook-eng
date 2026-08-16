@@ -8,7 +8,7 @@ import PendingReviewItem from '@/components/ui/Knowledge/PendingReviewItem';
 import PendingKnowledgeItem from '@/components/ui/Knowledge/PendingKnowledgeItem';
 import PendingKnowledgeHeader from '@/components/ui/Knowledge/PendingKnowledgeHeader';
 import KnowledgeEditModal from '@/components/ui/Knowledge/KnowledgeEditModal';
-import { useKnowledge } from '../../useKnowledge';
+import { useKnowledge, KnowledgeEntry } from '../../useKnowledge';
 import styles from './KnowledgeReviewTab.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useRagAnalysis } from './useRagAnalysis';
@@ -20,6 +20,11 @@ interface KnowledgeReviewTabProps {
   onMatchesChange?: (matches: number[]) => void;
   activeMatchId?: number | null;
   onCandidateStateChange?: (isAnalyzed: boolean, count: number) => void;
+  data?: KnowledgeEntry[];
+  loading?: boolean;
+  error?: string | null;
+  deleteEntry?: (id: number) => Promise<void>;
+  onRefresh?: () => Promise<void>;
 }
 
 interface LocalCandidate {
@@ -35,12 +40,23 @@ export default function KnowledgeReviewTab({
   onMatchesChange,
   activeMatchId,
   onCandidateStateChange,
+  data: propData,
+  loading: propLoading,
+  error: propError,
+  deleteEntry: propDeleteEntry,
+  onRefresh: propOnRefresh
 }: KnowledgeReviewTabProps) {
   const { t, language } = useTranslation();
   const aiTraining = (t.frontdeskPage as any)?.aiTraining;
-  const { data, loading, error, deleteEntry, refresh } = useKnowledge(
+  const fallbackHook = useKnowledge(
     domainCode === 'ALL' ? undefined : domainCode
   );
+
+  const data = propData !== undefined ? propData : fallbackHook.data;
+  const loading = propLoading !== undefined ? propLoading : fallbackHook.loading;
+  const error = propError !== undefined ? propError : fallbackHook.error;
+  const deleteEntry = propDeleteEntry || fallbackHook.deleteEntry;
+  const refresh = propOnRefresh || fallbackHook.refresh;
 
   const {
     analyzePending,
@@ -88,35 +104,45 @@ export default function KnowledgeReviewTab({
   // 단일 삭제/제외 확인 모달
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
+  // 후보 항목 수정 모달
+  const [editingCandidateIdx, setEditingCandidateIdx] = useState<number | null>(null);
+
+  // 가로 드래그 스크롤
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const isDraggingRef = React.useRef(false);
+  const startXRef = React.useRef(0);
+  const scrollLeftRef = React.useRef(0);
+  const hasMovedRef = React.useRef(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!gridRef.current) return;
+    isDraggingRef.current = true;
+    hasMovedRef.current = false;
+    startXRef.current = e.pageX - gridRef.current.offsetLeft;
+    scrollLeftRef.current = gridRef.current.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !gridRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - gridRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 1.2;
+    if (Math.abs(walk) > 6) {
+      hasMovedRef.current = true;
+    }
+    gridRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDraggingRef.current = false;
+  };
+  const [isCandidateModalOpen, setIsCandidateModalOpen] = useState(false);
+
   // 채팅 히스토리 모달
   const [selectedChatHistory, setSelectedChatHistory] = useState<{ roomNo: string; title?: string } | null>(null);
 
-  // 반응형 컬럼 기준: ≥1440px(5), 1200~1439px(4), 960~1199px(3), <960px(2)
-  const [maxCols, setMaxCols] = useState(5);
-
-  useEffect(() => {
-    const updateMaxCols = () => {
-      if (typeof window === 'undefined') return;
-      const w = window.innerWidth;
-      if (w >= 1440) setMaxCols(5);
-      else if (w >= 1200) setMaxCols(4);
-      else if (w >= 960) setMaxCols(3);
-      else setMaxCols(2);
-    };
-
-    updateMaxCols();
-    window.addEventListener('resize', updateMaxCols);
-    return () => window.removeEventListener('resize', updateMaxCols);
-  }, []);
-
-  // 대기 목록 확장/축소 상태 (카드가 많을 때 View all)
-  const [isExpanded, setIsExpanded] = useState(false);
-  const hasOverflow = filteredItems.length > maxCols;
-  const displayedItems = isExpanded || !hasOverflow ? filteredItems : filteredItems.slice(0, maxCols);
-
   // 후보 항목 수정 모달
   const [editCandidateIndex, setEditCandidateIndex] = useState<number | null>(null);
-  const [isCandidateModalOpen, setIsCandidateModalOpen] = useState(false);
 
   // activeMatchId 스크롤
   useEffect(() => {
@@ -135,7 +161,6 @@ export default function KnowledgeReviewTab({
     { value: 'FACILITY', label: (t.frontdeskPage?.rag?.tabs as any)?.FACILITY || '시설관리' },
     { value: 'FB', label: (t.frontdeskPage?.rag?.tabs as any)?.FB || '식음료' },
     { value: 'CONCIERGE', label: (t.frontdeskPage?.rag?.tabs as any)?.CONCIERGE || '컨시어지' },
-    { value: 'EMERGENCY', label: (t.frontdeskPage?.rag?.tabs as any)?.EMERGENCY || '긴급' },
     { value: 'COMMON', label: (t.frontdeskPage?.rag?.tabs as any)?.COMMON || '공통' },
   ];
 
@@ -254,16 +279,17 @@ export default function KnowledgeReviewTab({
                 <Button variant="secondary" onClick={handleCancelAnalysis} disabled={registering}>
                   {t.common?.cancel || (language === 'en' ? 'Cancel' : '취소')}
                 </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleBatchRegister}
+                <Button 
+                  variant="primary" 
+                  onClick={handleBatchRegister} 
+                  className={styles.registerButton}
                   disabled={registering || candidates.filter(c => c.selected).length === 0}
                 >
-                  {registering
-                    ? (aiTraining?.registering || (language === 'en' ? 'Registering...' : '등록 중...'))
+                  {registering 
+                    ? (aiTraining?.registering || (language === 'en' ? 'Registering...' : '등록 중...')) 
                     : (language === 'en'
-                      ? `Register Selected (${candidates.filter(c => c.selected).length})`
-                      : (aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`))}
+                        ? `Register Selected (${candidates.filter(c => c.selected).length})`
+                        : (aiTraining?.registerSelected?.replace('{{count}}', candidates.filter(c => c.selected).length.toString()) || `선택 항목 등록하기 (${candidates.filter(c => c.selected).length}건)`))}
                 </Button>
               </>
             ) : (
@@ -272,9 +298,11 @@ export default function KnowledgeReviewTab({
                 onClick={handleAnalyze}
                 disabled={analyzing || filteredItems.length === 0}
               >
-                {analyzing
-                  ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...')
-                  : (language === 'en' ? `Add ${filteredItems.length} to Knowledge` : `지식 ${filteredItems.length}개 추가`)}
+                {analyzing 
+                  ? (language === 'en' ? 'Analyzing...' : 'AI 분석 중...') 
+                  : (language === 'en' 
+                      ? `Add ${filteredItems.length} to Knowledge` 
+                      : `${filteredItems.length}개 지식 추가`)}
               </Button>
             )}
           </div>,
@@ -284,9 +312,34 @@ export default function KnowledgeReviewTab({
 
       {/* Main Content Area */}
       {analyzing ? (
-        <div className={styles.loadingBox}>
-          <div className={styles.spinner} />
-          <div>{aiTraining?.analyzingText || '선택하신 상담 대화 내역에서 AI가 지식 데이터를 추출하는 중입니다...'}</div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.candidateContainer}>
+            <div className={styles.cardList}>
+              <div className={styles.skeletonRow}>
+                <div className={styles.skeletonLeftSection}>
+                  <div className={styles.skeletonCheckbox} />
+                  <div className={styles.skeletonMainInfo}>
+                    <div 
+                      className={styles.skeletonTitle} 
+                      style={{ width: '75%' }} 
+                    />
+                    <div 
+                      className={styles.skeletonSubtitle} 
+                      style={{ width: '95%' }} 
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.skeletonBadgeWrapper}>
+                  <div className={styles.skeletonDropdown} />
+                </div>
+
+                <div className={styles.skeletonActions}>
+                  <div className={styles.skeletonDeleteIcon} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : analysisError ? (
         <div className={styles.errorBox}>
@@ -333,54 +386,43 @@ export default function KnowledgeReviewTab({
           </div>
         </div>
       ) : (
-        // 기본 대기 목록 (분석 전 - 간결한 카드 그리드)
-        <div className={styles.pendingGridWrapper}>
-          <div className={styles.pendingGrid}>
-            {filteredItems.length === 0 ? (
-              <div className={styles.emptyState}>
-                {aiTraining?.empty || '검토 대기 중인 항목이 없습니다.'}
-              </div>
-            ) : (
-              displayedItems.map(item => (
-                <PendingReviewItem
-                  key={item.id}
-                  id={item.id}
-                  title={item.question}
-                  updatedAt={item.updatedAt}
-                  onClick={() => {
-                    if (item.roomNo) {
-                      setSelectedChatHistory({
-                        roomNo: item.roomNo,
-                        title: item.question || undefined,
-                      });
-                    } else {
-                      alert('대화 내역 정보가 없는 항목입니다.');
-                    }
-                  }}
-                  isActiveMatch={activeMatchId === item.id}
-                  highlightQuery={searchValue}
-                />
-              ))
-            )}
-          </div>
-          <div
-            className={styles.viewAllWrapper}
-            style={{
-              visibility: hasOverflow ? 'visible' : 'hidden',
-              pointerEvents: hasOverflow ? 'auto' : 'none',
-            }}
-          >
-            <button
-              type="button"
-              className={styles.viewAllBtn}
-              onClick={() => setIsExpanded(prev => !prev)}
-              tabIndex={hasOverflow ? 0 : -1}
-            >
-              {isExpanded
-                ? (language === 'en' ? 'Show less' : '접기')
-                : (language === 'en' ? `View all (${filteredItems.length})` : `전체 보기 (${filteredItems.length}개)`)}
-            </button>
-          </div>
+        // 기본 대기 목록 (분석 전 - 간결한 가로 스크롤 카드 행)
+        <div 
+          ref={gridRef}
+          className={styles.pendingGrid}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+        >
+          {filteredItems.length === 0 ? (
+            <div className={styles.emptyState}>
+              {aiTraining?.empty || '검토 대기 중인 항목이 없습니다.'}
+            </div>
+          ) : (
+            filteredItems.map(item => (
+              <PendingReviewItem
+                key={item.id}
+                id={item.id}
+                title={item.question}
+                updatedAt={item.updatedAt}
+                onClick={() => {
+                  if (hasMovedRef.current) return;
+                  if (item.roomNo) {
+                    setSelectedChatHistory({
+                      roomNo: item.roomNo,
+                      title: item.question || undefined,
+                    });
+                  } else {
+                    alert('대화 내역 정보가 없는 항목입니다.');
+                  }
+                }}
+                onDelete={() => setDeleteTargetId(item.id)}
+                isActiveMatch={activeMatchId === item.id}
+                highlightQuery={searchValue}
+              />
+            ))
+          )}
         </div>
       )}
 

@@ -27,7 +27,6 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [sizeError, setSizeError] = useState(false);
   const [shouldAutoSend, setShouldAutoSend] = useState(false);
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -39,15 +38,6 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
   const showToast = useUiStore((state) => state.showToast);
   const { t } = useTranslation();
   const l = t.chatInput;
-  const placeholders: string[] = (l as any).placeholders || [];
-
-  useEffect(() => {
-    if (!placeholders || placeholders.length === 0) return;
-    const timer = setInterval(() => {
-      setPlaceholderIndex(prev => (prev + 1) % placeholders.length);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, [placeholders.length, language]);
 
   React.useEffect(() => {
     if (onUserTyping) {
@@ -275,7 +265,7 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
           <textarea
             ref={textareaRef}
             className={styles.input} 
-            placeholder={isRecording ? l.listening : (isStaff ? (placeholder || l.placeholder) : (placeholders.length === 0 ? (placeholder || l.placeholder) : ''))} 
+            placeholder={isRecording ? l.listening : (placeholder || l.placeholder || (language === 'en' ? 'Ask me anything' : '무엇이든 물어보세요'))} 
             value={value} 
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -286,13 +276,6 @@ export default function ChatInput({ onSend, isTyping, onStop, onUserTyping, isSt
             onBlur={() => setIsFocused(false)}
             rows={1}
           />
-          {!isStaff && !isRecording && value === '' && placeholders.length > 0 && (
-            <div className={styles.placeholderOverlay} aria-hidden="true">
-              <span key={`${language}-${placeholderIndex}`} className={styles.placeholderText}>
-                {placeholders[placeholderIndex]}
-              </span>
-            </div>
-          )}
         </div>
         <div className={styles.actionGroup}>
           {isStaff ? (

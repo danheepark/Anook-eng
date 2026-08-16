@@ -315,7 +315,7 @@ export default function TaskTicket({
 
   let displayTitle = toSentenceCase(getFixedTitle().trim());
 
-  const formatDoneDateTime = (dateVal: string | Date | undefined) => {
+  const formatDoneDateTime = (dateVal: string | Date | undefined, lang: string = 'en') => {
     if (!dateVal) return '';
     let date: Date;
     if (dateVal instanceof Date) {
@@ -324,25 +324,24 @@ export default function TaskTicket({
       date = new Date(String(dateVal).replace(' ', 'T'));
     }
     if (isNaN(date.getTime())) return '';
-    let hours = date.getHours();
+    const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const paddedHours = String(hours).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}`;
 
-    const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    if (language === 'en') {
-      return `${paddedHours}:${minutes} ${ampm}, ${monthsEn[date.getMonth()]} ${date.getDate()}`;
-    } else {
-      return `${paddedHours}:${minutes} ${ampm}, ${date.getMonth() + 1}월 ${date.getDate()}일`;
+    if (lang === 'ko') {
+      return `${timeStr} ${date.getMonth() + 1}월 ${date.getDate()}일`;
     }
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[date.getMonth()];
+    const day = date.getDate();
+    return `${timeStr} ${month} ${day}`;
   };
 
   let timeDisplay = '';
   if (status === 'DONE') {
     const doneTime = updatedAt || createdAt;
-    timeDisplay = doneTime ? formatDoneDateTime(doneTime) : '';
+    timeDisplay = doneTime ? formatDoneDateTime(doneTime, language) : '';
   } else {
     const activeTime = createdAt || updatedAt;
     timeDisplay = activeTime ? getRelativeTime(activeTime, language, t.ticketUI.time) : '';

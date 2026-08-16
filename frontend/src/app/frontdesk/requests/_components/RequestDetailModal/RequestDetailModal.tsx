@@ -440,15 +440,19 @@ export default function RequestDetailModal({
     if (!dt) return '';
     const d = new Date(typeof dt === 'string' ? dt.replace(' ', 'T') : dt);
     if (isNaN(d.getTime())) return '';
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    let hours = d.getHours();
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
     const minutes = String(d.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const paddedHours = String(hours).padStart(2, '0');
-    return `${paddedHours}:${minutes} ${ampm}, ${yyyy}.${mm}.${dd}`;
+    const timeStr = `${hours}:${minutes}`;
+
+    if (language === 'ko') {
+      return `${timeStr} ${year}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+    }
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[d.getMonth()];
+    const day = d.getDate();
+    return `${timeStr} ${month} ${day} ${year}`;
   };
 
   const getRelativeTimeString = (dateString: string | Date | undefined): string => {

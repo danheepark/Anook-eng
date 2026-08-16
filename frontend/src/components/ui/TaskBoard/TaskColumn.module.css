@@ -22,6 +22,12 @@
   box-sizing: border-box;
 }
 
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8, 8px);
+}
+
 .headerRight {
   display: flex;
   align-items: center;
@@ -33,25 +39,14 @@
   font-weight: 700;
   margin: 0;
   color: var(--color-gray-900);
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
 }
 
 .count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 5px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--color-gray-500);
-  background-color: rgba(0, 0, 0, 0.06);
-  border-radius: var(--radius-full);
-  box-sizing: border-box;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .content {

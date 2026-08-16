@@ -113,17 +113,24 @@ export default function useFrontdeskRequests(dept?: string, searchQuery: string 
     return 0; // fallback to existing sort (createdAt)
   });
 
+  const safeParseTime = (dateStr?: string | null) => {
+    if (!dateStr) return 0;
+    const normalized = String(dateStr).replace(' ', 'T');
+    const time = new Date(normalized).getTime();
+    return isNaN(time) ? 0 : time;
+  };
+
   const cancelPending = filteredRequests.filter(r => r.cancelRequested);
-  const completed = filteredRequests.filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED');
-  
-  // completed 배열 내에서 CANCELLED 항목을 항상 제일 뒤로 정렬
-  completed.sort((a, b) => {
-    const aIsCancelled = a.status === 'CANCELLED';
-    const bIsCancelled = b.status === 'CANCELLED';
-    if (!aIsCancelled && bIsCancelled) return -1;
-    if (aIsCancelled && !bIsCancelled) return 1;
-    return 0;
-  });
+  const completed = filteredRequests
+    .filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED')
+    .sort((a, b) => {
+      const timeA = safeParseTime(a.updatedAt || a.cancelRequestedAt || a.createdAt);
+      const timeB = safeParseTime(b.updatedAt || b.cancelRequestedAt || b.createdAt);
+      if (timeA !== timeB) {
+        return timeB - timeA;
+      }
+      return b.id - a.id;
+    });
 
   return { requests: filteredRequests, pending, inProgress, cancelPending, completed, loading, error, refetch: fetchRequests };
 }

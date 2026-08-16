@@ -18,11 +18,39 @@ interface KnowledgeLibraryTabProps {
   filterValue: string;
   onMatchesChange?: (matches: number[]) => void;
   activeMatchId?: number | null;
+  data?: KnowledgeEntry[];
+  loading?: boolean;
+  error?: string | null;
+  createEntry?: (payload: { question: string; answer: string; domainCode: string }) => Promise<void>;
+  updateEntry?: (id: number, payload: { question: string; answer: string; domainCode: string }) => Promise<void>;
+  deleteEntry?: (id: number) => Promise<void>;
+  onRefresh?: () => Promise<void>;
 }
 
-export default function KnowledgeLibraryTab({ domainCode, searchValue, filterValue, onMatchesChange, activeMatchId }: KnowledgeLibraryTabProps) {
+export default function KnowledgeLibraryTab({ 
+  domainCode, 
+  searchValue, 
+  filterValue, 
+  onMatchesChange, 
+  activeMatchId,
+  data: propData,
+  loading: propLoading,
+  error: propError,
+  createEntry: propCreateEntry,
+  updateEntry: propUpdateEntry,
+  deleteEntry: propDeleteEntry,
+  onRefresh: propOnRefresh
+}: KnowledgeLibraryTabProps) {
   const { t, language } = useTranslation();
-  const { data, loading, error, createEntry, updateEntry, deleteEntry } = useKnowledge(domainCode === 'ALL' ? undefined : domainCode);
+  const fallbackHook = useKnowledge(domainCode === 'ALL' ? undefined : domainCode);
+  
+  const data = propData !== undefined ? propData : fallbackHook.data;
+  const loading = propLoading !== undefined ? propLoading : fallbackHook.loading;
+  const error = propError !== undefined ? propError : fallbackHook.error;
+  const createEntry = propCreateEntry || fallbackHook.createEntry;
+  const updateEntry = propUpdateEntry || fallbackHook.updateEntry;
+  const deleteEntry = propDeleteEntry || fallbackHook.deleteEntry;
+
   const [selectedKnowledge, setSelectedKnowledge] = useState<KnowledgeEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
@@ -37,17 +65,18 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
     { value: 'HK', label: t.frontdeskPage.rag.tabs.HK },
     { value: 'FACILITY', label: t.frontdeskPage.rag.tabs.FACILITY },
     { value: 'FB', label: t.frontdeskPage.rag.tabs.FB },
-    { value: 'CONCIERGE', label: t.frontdeskPage.rag.tabs.CONCIERGE }
+    { value: 'CONCIERGE', label: t.frontdeskPage.rag.tabs.CONCIERGE },
+    { value: 'COMMON', label: t.frontdeskPage.rag.tabs.COMMON }
   ];
 
-  // 현재 탭의 특성에 따라 domainOptions 생성 (지식 추가 시 사용)
-  const domainOptions = domainCode && domainCode !== 'ALL'
-    ? ALL_OPTIONS.filter(opt => opt.value === domainCode)
-    : ALL_OPTIONS;
+  // 어떤 탭에 있든 지식 추가/수정 시에는 모든 부서(공통 포함)를 선택할 수 있어야 함
+  const domainOptions = ALL_OPTIONS;
 
-  // APPROVED 상태만 필터링 및 검색 필터 적용
+  // APPROVED 상태 및 도메인 필터 적용
   let filteredData = data.filter(item => 
     item.status === 'APPROVED' && (
+      domainCode === 'ALL' || item.domainCode?.toUpperCase() === domainCode.toUpperCase()
+    ) && (
       item.question.toLowerCase().includes(searchValue.toLowerCase()) ||
       item.answer.toLowerCase().includes(searchValue.toLowerCase())
     )
@@ -181,8 +210,9 @@ export default function KnowledgeLibraryTab({ domainCode, searchValue, filterVal
               setIsCreatingNew(false);
             }
           }}
+          mode={isCreatingNew ? 'register' : 'edit'}
           domainOptions={domainOptions}
-          initialDomainCode={isCreatingNew ? (domainCode === 'ALL' ? 'HK' : domainCode) : selectedKnowledge?.domainCode}
+          initialDomainCode={isCreatingNew ? (domainCode === 'ALL' ? 'COMMON' : domainCode) : (selectedKnowledge?.domainCode || 'COMMON')}
           initialQuestion={isCreatingNew ? '' : selectedKnowledge?.question}
           initialAnswer={isCreatingNew ? '' : selectedKnowledge?.answer}
           onSave={async (formData) => {

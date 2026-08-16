@@ -47,7 +47,7 @@ export default function SmartSearchBar({
   const showMatches = totalMatches !== undefined && currentMatch !== undefined && onPrev && onNext;
 
   return (
-    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', ...style }}>
+    <div className={`${styles.root} ${className}`.trim()} style={{ width: '100%', ...style }}>
       <div style={{ width: '100%', ...inputWrapperStyle }}>
         <div className={styles.searchContainer}>
           <div className={styles.searchIconWrapper}>
@@ -62,6 +62,35 @@ export default function SmartSearchBar({
             onChange={(e) => onChange(e.target.value)}
             {...props}
           />
+          {value && showMatches && (
+            <div className={styles.inlineMatchControls}>
+              <span className={styles.matchCount}>
+                {totalMatches > 0 ? `${currentMatch + 1} / ${totalMatches}` : '0 / 0'}
+              </span>
+              {totalMatches > 0 && (
+                <div className={styles.arrowButtons}>
+                  <button 
+                    type="button"
+                    onClick={onPrev}
+                    className={styles.arrowBtn}
+                    aria-label="Previous match"
+                    title="Previous match"
+                  >
+                    <ArrowUpIcon width={12} height={12} color="currentColor" />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={onNext}
+                    className={styles.arrowBtn}
+                    aria-label="Next match"
+                    title="Next match"
+                  >
+                    <ArrowDownIcon width={12} height={12} color="currentColor" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           {!!value && !disabled && (
             <button 
               type="button" 
@@ -74,35 +103,6 @@ export default function SmartSearchBar({
           )}
         </div>
       </div>
-      {value && showMatches && (
-        <div className={styles.matchControlsRow}>
-          {totalMatches > 0 ? (
-            <>
-              <span className={styles.matchCount}>{currentMatch + 1} / {totalMatches}</span>
-              <div className={styles.arrowButtons}>
-                <button 
-                  type="button"
-                  onClick={onPrev}
-                  className={styles.arrowBtn}
-                  aria-label="Previous match"
-                >
-                  <ArrowUpIcon width={12} height={12} color="var(--color-gray-600)" />
-                </button>
-                <button 
-                  type="button"
-                  onClick={onNext}
-                  className={styles.arrowBtn}
-                  aria-label="Next match"
-                >
-                  <ArrowDownIcon width={12} height={12} color="var(--color-gray-600)" />
-                </button>
-              </div>
-            </>
-          ) : (
-            <span className={styles.matchCount}>0 / 0</span>
-          )}
-        </div>
-      )}
     </div>
   );
 }

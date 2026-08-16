@@ -48,7 +48,8 @@
 }
 
 .textPlaceholder {
-  font: var(--text-body-medium);
+  font: var(--text-body-regular);
+  font-weight: 400;
   color: var(--color-gray-500); /* var(--color-gray-500) */
 }
 

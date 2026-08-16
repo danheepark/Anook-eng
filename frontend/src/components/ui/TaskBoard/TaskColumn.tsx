@@ -19,11 +19,11 @@ export default function TaskColumn({ title, count = 0, children, className = '',
   return (
     <div className={`${styles.column} ${statusClass} ${className}`.trim()}>
       <div className={styles.header}>
-        <h3 className={styles.title}>
-          {title}
+        <h3 className={styles.title}>{title}</h3>
+        <div className={styles.rightSection}>
           {count >= 0 && <span className={styles.count}>{count}</span>}
-        </h3>
-        {headerRight && <div className={styles.headerRight}>{headerRight}</div>}
+          {headerRight && <div className={styles.headerRight}>{headerRight}</div>}
+        </div>
       </div>
       <div className={styles.content}>
         {children}

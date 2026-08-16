@@ -82,7 +82,7 @@ function SidebarItem({ icon: Icon, label, href, isActive = false, isDanger = fal
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
         <Icon className={styles.icon} />
         {hasBadge && (
-          <div style={{ position: 'absolute', top: '-2px', right: '-2px', width: '8px', height: '8px', backgroundColor: 'var(--color-error)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', top: '-2px', right: '-2px', width: '8px', height: '8px', backgroundColor: 'var(--color-error)', border: '1.5px solid var(--color-white)', borderRadius: '50%', boxSizing: 'content-box' }} />
         )}
       </div>
       <span className={styles.label}>

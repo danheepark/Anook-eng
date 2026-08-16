@@ -85,8 +85,9 @@
 }
 
 .inputElement::placeholder {
-  /* Body/Regular */
-  color: var(--color-gray-500); /* var(--color-gray-500) */
+  font: var(--text-body-regular);
+  font-weight: 400;
+  color: var(--color-gray-500);
 }
 
 .inputElement:disabled {
@@ -124,4 +125,10 @@
   resize: vertical;
   min-height: 72px;
   font-family: inherit;
+}
+
+.textareaElement::placeholder {
+  font: var(--text-body-regular);
+  font-weight: 400;
+  color: var(--color-gray-500);
 }
