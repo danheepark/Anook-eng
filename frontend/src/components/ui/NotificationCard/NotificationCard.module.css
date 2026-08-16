@@ -74,18 +74,35 @@
   flex-shrink: 0;
 }
 
-.chevronWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-gray-400);
+.deptName {
+  font: var(--text-caption-medium);
+  font-weight: 600;
+  white-space: nowrap;
   flex-shrink: 0;
-  transition: transform var(--transition), color var(--transition);
 }
 
-.card:hover .chevronIcon {
-  color: var(--color-gray-700);
-  transform: translateX(2px);
+.deptHk {
+  color: var(--color-dept-hk-text);
+}
+
+.deptFb {
+  color: var(--color-dept-fb-text);
+}
+
+.deptFacility {
+  color: var(--color-dept-facility-text);
+}
+
+.deptConcierge {
+  color: var(--color-dept-concierge-text);
+}
+
+.deptFront {
+  color: var(--color-dept-front-text);
+}
+
+.deptEmergency {
+  color: var(--color-dept-emergency-text);
 }
 
 /* 2. Middle Row: Description */
@@ -101,37 +118,14 @@
   overflow: hidden;
 }
 
-/* 3. Footer Row: Meta Info & Action Buttons */
+/* 3. Footer Row: Action Buttons */
 .footerRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-12);
+  justify-content: flex-end;
+  gap: var(--space-8);
   margin-top: var(--space-4);
   width: 100%;
-}
-
-.metaInfo {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  min-width: 0;
-}
-
-.deptInfo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-6, 6px);
-  font: var(--text-caption-medium);
-  color: var(--color-gray-500);
-  white-space: nowrap;
-}
-
-.deptDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--color-gray-400);
 }
 
 .actions {

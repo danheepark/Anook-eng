@@ -1,5 +1,4 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
 import Button from '@/components/ui/Button/Button';
 import { useTranslation } from '@/app/useTranslation';
@@ -60,6 +59,18 @@ function formatRelativeTime(isoStr?: string, language?: string): string {
   return `${diffInDays}d ago`;
 }
 
+function getDeptClass(deptName?: string): string {
+  if (!deptName) return '';
+  const upper = deptName.toUpperCase();
+  if (upper.includes('HK') || upper.includes('HOUSEKEEPING') || upper.includes('하우스키핑')) return styles.deptHk;
+  if (upper.includes('FB') || upper.includes('FNB') || upper.includes('식음료')) return styles.deptFb;
+  if (upper.includes('FACILITY') || upper.includes('MAINTENANCE') || upper.includes('시설')) return styles.deptFacility;
+  if (upper.includes('CONCIERGE') || upper.includes('컨시어지')) return styles.deptConcierge;
+  if (upper.includes('EMERGENCY') || upper.includes('긴급')) return styles.deptEmergency;
+  if (upper.includes('FRONT') || upper.includes('프론트')) return styles.deptFront;
+  return '';
+}
+
 export default function NotificationCard({
   variant,
   title,
@@ -92,7 +103,7 @@ export default function NotificationCard({
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
       onClick={onClick}
     >
-      {/* 1. Header Row: Title + Inline Badges (Time, Type, Urgent) + Right Chevron */}
+      {/* 1. Header Row: Title + Inline Badges (Time, Type, Urgent) + Top-Right Colored Dept Name */}
       <div className={styles.headerRow}>
         <div className={styles.titleAndBadges}>
           <div className={styles.titleWrapper}>
@@ -114,9 +125,11 @@ export default function NotificationCard({
           </div>
         </div>
 
-        <div className={styles.chevronWrapper}>
-          <ChevronRight size={16} className={styles.chevronIcon} />
-        </div>
+        {departmentName && (
+          <span className={`${styles.deptName} ${getDeptClass(departmentName)}`}>
+            {departmentName}
+          </span>
+        )}
       </div>
 
       {/* 2. Middle Row: Description Preview */}
@@ -124,17 +137,8 @@ export default function NotificationCard({
         <p className={styles.description}>{description}</p>
       )}
 
-      {/* 3. Footer Row: Department Info & Action Buttons */}
+      {/* 3. Footer Row: Action Buttons */}
       <div className={styles.footerRow}>
-        <div className={styles.metaInfo}>
-          {departmentName && (
-            <div className={styles.deptInfo}>
-              <span className={styles.deptDot} />
-              <span className={styles.deptLabel}>{departmentName}</span>
-            </div>
-          )}
-        </div>
-
         <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
           <Button
             variant="secondary"
