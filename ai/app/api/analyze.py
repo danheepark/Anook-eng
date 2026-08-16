@@ -107,10 +107,10 @@ STATIC_REPLIES = {
         "zh": "您能详细告诉我您的需求吗？我很乐意立刻帮助您！😊"
     },
     "CANCEL_REJECTED": {
-        "ko": "안타깝게도 해당 요청은 취소가 어렵습니다. 🥲 이미 처리가 시작되었거나 부서 확인이 필요한 상태이니 양해 부탁드립니다. 🙏",
-        "en": "I'm sorry, but this request cannot be cancelled as it is already in progress or requires staff confirmation.",
-        "ja": "申し訳ありませんが、キャンセルリクエストは却下されました。すでに処理が開始されているか、部門の確認が必要です。🥲🙏",
-        "zh": "抱歉，取消请求被拒绝。该请求已在处理中或需要部门批准。🥲🙏"
+        "ko": "안타깝게도 해당 요청은 이미 준비 및 처리가 완료되어 취소가 어렵습니다. 너른 양해 부탁드립니다.",
+        "en": "I'm sorry, but this request cannot be cancelled as it has already been processed or completed.",
+        "ja": "申し訳ありませんが、該当のリクエストはすでに手配が完了しているため、キャンセルいたしかねます。何卒ご了承ください。",
+        "zh": "非常抱歉，由于该请求已在处理或已准备就绪，无法办理取消。敬请谅解。"
     },
     "CANCEL_SUCCESS": {
         "ko": "네, 요청하신 건이 정상적으로 즉시 취소 처리되었습니다. 😌 다른 필요하신 사항이 있다면 언제든 말씀해 주세요!",
