@@ -519,7 +519,7 @@ export default function TaskTicket({
             {status === 'TODO' && onAccept && (
               <Button
                 variant="secondary"
-                size="small"
+                size="medium"
                 onClick={onAccept}
                 disabled={!isOnline}
                 title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
@@ -530,7 +530,7 @@ export default function TaskTicket({
             {status === 'IN_PROGRESS' && !cancelRequested && onComplete && (
               <Button
                 variant="secondary"
-                size="small"
+                size="medium"
                 onClick={onComplete}
                 disabled={!isOnline}
                 title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
@@ -543,7 +543,7 @@ export default function TaskTicket({
                 {onRejectCancel && (
                   <Button
                     variant="secondary"
-                    size="small"
+                    size="medium"
                     onClick={onRejectCancel}
                     disabled={!isOnline}
                     title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
@@ -554,7 +554,7 @@ export default function TaskTicket({
                 {onApproveCancel && (
                   <Button
                     variant="primary"
-                    size="small"
+                    size="medium"
                     onClick={onApproveCancel}
                     disabled={!isOnline}
                     title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
