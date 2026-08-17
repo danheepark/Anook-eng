@@ -87,7 +87,12 @@
 }
 
 .tabWrapper {
+  width: 100%;
+}
+
+.headerTabs {
   padding: 0 var(--space-16);
+  box-sizing: border-box;
 }
 
 .closeButton {

@@ -167,6 +167,7 @@ export default function HeaderNotification() {
 
           <div className={styles.tabWrapper}>
             <Tabs
+              className={styles.headerTabs}
               variant="line"
               options={[
                 { label: language === 'en' ? 'All' : '전체', value: 'all', count: totalNotifications },
