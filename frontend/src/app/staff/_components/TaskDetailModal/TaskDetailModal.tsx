@@ -466,6 +466,18 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
             {/* 2. 본문 */}
             <div className={styles.modalBody}>
+              {/* 취소 요청 일시 (Cancel request일 때 최상단 표시) */}
+              {task.cancelRequested && (task.cancelRequestedAt || task.updatedAt) && (
+                <div className={styles.reasoningItem}>
+                  <span className={styles.secondaryLabel}>
+                    {language === 'ko' ? '취소 요청 일시' : 'Cancellation requested at'}
+                  </span>
+                  <p className={styles.reasoningText}>
+                    {formatCreatedAt(task.cancelRequestedAt || task.updatedAt)}
+                  </p>
+                </div>
+              )}
+
               {/* Created at 일시 (예: 01:50 Aug 17 2026) */}
               {task.createdAt && (
                 <div className={styles.reasoningItem}>

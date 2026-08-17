@@ -571,6 +571,18 @@ export default function RequestDetailModal({
         </div>
 
         <div className={styles.modalBody}>
+          {/* 취소 요청 일시 (Cancel request일 때 최상단 표시) */}
+          {activeDetail.cancelRequested && (activeDetail.cancelRequestedAt || activeDetail.updatedAt) && (
+            <div className={styles.reasoningItem}>
+              <span className={styles.secondaryLabel}>
+                {language === 'ko' ? '취소 요청 일시' : 'Cancellation requested at'}
+              </span>
+              <p className={styles.reasoningText}>
+                {formatCreatedAt(activeDetail.cancelRequestedAt || activeDetail.updatedAt)}
+              </p>
+            </div>
+          )}
+
           {/* 1. Created at 일시 (예: 01:50 Aug 17 2026) */}
           {activeDetail.createdAt && (
             <div className={styles.reasoningItem}>
