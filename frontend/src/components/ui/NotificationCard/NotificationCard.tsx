@@ -88,7 +88,7 @@ export default function NotificationCard({
     : (language === 'en' ? 'Transfer request' : '이관 승인 요청');
 
   // 2. 둘째 줄: 그 판단의 대상 (객실 · 요청 항목) - RequestCard subtitle 스타일
-  const roomDisplay = language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`;
+  const roomDisplay = language === 'en' ? `ROOM ${roomNumber}` : `${roomNumber}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanTitle = toSentenceCase(title);
   const targetDisplay = cleanTitle ? `${roomDisplay} · ${cleanTitle}` : roomDisplay;

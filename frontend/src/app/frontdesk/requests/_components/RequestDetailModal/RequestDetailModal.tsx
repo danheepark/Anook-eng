@@ -531,7 +531,7 @@ export default function RequestDetailModal({
   };
 
   const deptDisplayName = getDeptName(activeDetail.departmentId, activeDetail.departmentName);
-  const roomDisplay = language === 'en' ? `Room ${activeDetail.roomNo}` : `${activeDetail.roomNo}호`;
+  const roomDisplay = language === 'en' ? `ROOM ${activeDetail.roomNo}` : `${activeDetail.roomNo}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanSummary = toSentenceCase(cleanTitleSummary(translatedSummary || activeDetail.summary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');
 

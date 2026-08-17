@@ -245,7 +245,7 @@ export default function AiRoutingPage() {
                     {item.summary || t.frontdeskPage?.aiRouting?.requestPreviewEmpty || '요청 내용 없음'}
                   </div>
                   <div className={styles.ratingItemRight}>
-                    <span className={styles.ratingRoom}>{language === 'ko' ? `${item.roomNo}호` : `NO.${item.roomNo}`}</span>
+                    <span className={styles.ratingRoom}>{language === 'ko' ? `${item.roomNo}호` : `ROOM ${item.roomNo}`}</span>
                     <span className={styles.ratingDate}>{formatDate(item.createdAt)}</span>
                   </div>
                 </div>

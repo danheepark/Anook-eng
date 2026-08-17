@@ -446,7 +446,7 @@ export default function TaskTicket({
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {roomNo && (
             <span className={styles.roomNo}>
-              {language === 'ko' ? `${roomNo}호` : `NO.${roomNo}`}
+              {language === 'ko' ? `${roomNo}호` : `ROOM ${roomNo}`}
             </span>
           )}
           {department && (

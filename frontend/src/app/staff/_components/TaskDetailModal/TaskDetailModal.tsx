@@ -437,7 +437,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
   };
 
   const statusInfo = getStatusInfo(task.status, task.priority);
-  const roomDisplay = language === 'en' ? `Room ${task.roomNumber}` : `${task.roomNumber}호`;
+  const roomDisplay = language === 'en' ? `ROOM ${task.roomNumber}` : `${task.roomNumber}호`;
   const rawSummary = translatedSummary || task.summary;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanSummary = toSentenceCase(cleanTitleSummary(rawSummary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');

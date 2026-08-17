@@ -519,7 +519,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
                 <ChevronLeft size={22} />
               </button>
             )}
-            <span className={styles.roomBadge}>{language === 'en' ? `Room ${roomNumber}` : `${roomNumber}호`}</span>
+            <span className={styles.roomBadge}>{language === 'en' ? `ROOM ${roomNumber}` : `${roomNumber}호`}</span>
             {summary ? (
               <h3 className={styles.title}>{summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')}</h3>
             ) : null}
