@@ -51,7 +51,11 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
     - If the guest replies "ADD" (confirming they want to add a duplicate), you MUST set `action_type` to `"ADD"`. (For duplicate adds, just treat it as ADD).
     - If the guest replies "REPLACE", you MUST set `action_type` to `"REPLACE"`.
     - **ANTI-REDUNDANCY RULE (CRITICAL UX)**: Whenever you provide `clarification_options`, keep the text in `clarification_question` brief and conversational without repeating option pill names in the body text. Let the clickable pills present the choices.
-13. SUMMARY FORMAT (CRITICAL): Your `summary` MUST be a specific 1-3 word noun phrase of what the guest wants in English (e.g., 'Towel x2', 'Room Cleaning', 'Water Spill Cleaning'). DO NOT use generic phrases like 'Housekeeping request' or just single vague words like 'Cleaning'. If the guest mentions specific liquids, stains, or areas (e.g., water on floor, wine spill, bathroom), include them in the summary (e.g., 'Water Cleanup', 'Spill Cleaning'). This applies to ALL requests, including ADD_DUPLICATE.
+13. CLEANING DISTINCTION & SUMMARY FORMAT (CRITICAL OPERATIONAL UX):
+    - You MUST distinguish between routine full room cleaning vs. specific spot/spill cleanups so housekeeping staff can prepare the appropriate equipment (e.g. mop for water spills, stain remover for wine, broom for broken glass):
+      - Routine overall room cleaning: `summary: "Full Room Cleaning"` or `"Room Cleaning"`.
+      - Specific spot/spill/object cleanup: You MUST specify the exact target/substance in `summary` (e.g., `Water Cleanup`, `Water Spill Cleaning`, `Wine Stain Cleaning`, `Glass Cleanup`, `Trash Removal`).
+    - 🚨 STRICTLY FORBIDDEN: NEVER output single vague words like `"Cleaning"` or generic phrases like `"Housekeeping request"`. The summary MUST contain the specific item/substance being cleaned whenever mentioned by the guest. This applies to ALL requests, including ADD_DUPLICATE.
 14. ORDER MODIFICATION & PARTIAL CANCELLATION RULE (CRITICAL!):
     - If the guest wants to modify or partially cancel an existing request (e.g., "change to", "remove", "cancel" for a specific item), you MUST output `action_type: "REPLACE"` and set `target_keyword` to the name of the item being removed or changed.
     - **SUMMARY FORMAT**: When `action_type` is `REPLACE`, the `summary` MUST reflect ONLY the FINAL remaining items, using the same format as new requests. Do NOT use narrative descriptions like "Change", "Cancel", "Keep".
