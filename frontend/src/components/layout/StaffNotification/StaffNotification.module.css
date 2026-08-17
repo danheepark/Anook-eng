@@ -55,7 +55,7 @@
   top: 100%;
   right: 0;
   margin-top: var(--space-8);
-  width: var(--modal-width-lg);
+  width: var(--modal-width-sm);
   max-width: calc(100vw - 32px);
   background-color: var(--color-white);
   border: 1px solid var(--color-gray-200);
