@@ -443,6 +443,20 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 </div>
               )}
 
+              {/* Accepted by 수락 담당자 및 시간 */}
+              {task.assignedStaffName && (
+                <div className={styles.reasoningItem}>
+                  <span className={styles.secondaryLabel}>
+                    {language === 'ko' ? '수락 담당자' : 'Accepted by'}
+                  </span>
+                  <p className={styles.reasoningText}>
+                    {task.updatedAt
+                      ? `${task.assignedStaffName} at ${formatModalDateTime(task.updatedAt, task.status === 'COMPLETED')}`
+                      : task.assignedStaffName}
+                  </p>
+                </div>
+              )}
+
               {/* AI 분석 엔티티 (Item Requests, Order Menu 등) */}
               {task.entities && renderEntities(task.entities, language)}
 

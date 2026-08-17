@@ -510,6 +510,20 @@ export default function RequestDetailModal({
             </div>
           )}
 
+          {/* Accepted by 수락 담당자 및 시간 */}
+          {activeDetail.assignedStaffName && (
+            <div className={styles.reasoningItem}>
+              <span className={styles.secondaryLabel}>
+                {language === 'ko' ? '수락 담당자' : 'Accepted by'}
+              </span>
+              <p className={styles.reasoningText}>
+                {activeDetail.updatedAt
+                  ? `${activeDetail.assignedStaffName} at ${formatModalDateTime(activeDetail.updatedAt, activeDetail.status === 'COMPLETED')}`
+                  : activeDetail.assignedStaffName}
+              </p>
+            </div>
+          )}
+
           {/* 2. AI 분석 엔티티 (Task Requests, Target Time, Items 등) */}
           {activeDetail.entities && renderEntities(activeDetail.entities, t, language)}
 

@@ -235,7 +235,7 @@
 .footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-top: auto;
   width: 100%;
 }
@@ -252,6 +252,7 @@
   color: var(--color-gray-400);
   white-space: nowrap;
   line-height: 1;
+  padding-bottom: 2px;
 }
 
 .textStatus {
