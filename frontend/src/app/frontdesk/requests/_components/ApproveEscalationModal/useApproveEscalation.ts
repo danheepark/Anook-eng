@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { handleResponse } from '@/lib/api';
 
 export default function useApproveEscalation() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const approveEscalation = async (id: number, departmentId: string, priority: string) => {
+  const approveEscalation = useCallback(async (id: number, departmentId: string, priority: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -22,7 +22,7 @@ export default function useApproveEscalation() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return { approveEscalation, loading, error };
 }
