@@ -15,7 +15,7 @@
 }
 
 .title {
-  font: var(--text-body-bold);
+  font: var(--text-body-semibold);
   color: var(--color-gray-900);
 }
 

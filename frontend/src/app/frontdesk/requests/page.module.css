@@ -88,6 +88,13 @@
   margin: 0 0 var(--space-16) 0;
 }
 
+.requestsTabs {
+  margin: 0 calc(var(--space-16) * -1) !important;
+  padding: 0 var(--space-16) !important;
+  width: calc(100% + var(--space-16) * 2) !important;
+  box-sizing: border-box !important;
+}
+
 .cardGrid {
   display: flex;
   flex-direction: column;

@@ -181,7 +181,8 @@
 }
 
 .legendPct {
-  font: var(--text-body-bold);
+  font: var(--text-body-medium);
+  font-weight: 600;
   color: var(--color-gray-900);
 }
 

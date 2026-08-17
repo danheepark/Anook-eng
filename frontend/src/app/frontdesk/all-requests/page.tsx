@@ -196,6 +196,7 @@ export default function AllRequestsPage() {
                       ticketId={req.id}
                       roomNo={req.roomNo}
                       department={req.departmentName}
+                      showDeptBar={true}
                       priority={mapPriority(req.priority)}
                       title={req.summary}
                       description={req.rawText || ''}
@@ -223,6 +224,7 @@ export default function AllRequestsPage() {
                       ticketId={req.id}
                       roomNo={req.roomNo}
                       department={req.departmentName}
+                      showDeptBar={true}
                       priority={mapPriority(req.priority)}
                       title={req.summary}
                       description={req.rawText || ''}
@@ -265,6 +267,7 @@ export default function AllRequestsPage() {
                       ticketId={req.id}
                       roomNo={req.roomNo}
                       department={req.departmentName}
+                      showDeptBar={true}
                       priority={mapPriority(req.priority)}
                       title={req.summary}
                       description={req.rawText || ''}

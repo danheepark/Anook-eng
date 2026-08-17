@@ -120,7 +120,7 @@
 
   .tableContainer.inline .rowItem::before {
     content: attr(data-label);
-    font-weight: bold;
+    font-weight: 600;
     color: var(--color-gray-500);
     flex-shrink: 0;
     min-width: 80px;
@@ -152,7 +152,7 @@
 
   .tableContainer.stacked .rowItem::before {
     content: attr(data-label);
-    font-weight: bold;
+    font-weight: 600;
     color: var(--color-gray-500);
     flex-shrink: 0;
     font-size: 0.8125rem;

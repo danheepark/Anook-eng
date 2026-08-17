@@ -32,7 +32,7 @@
 }
 
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
@@ -70,7 +70,7 @@
 }
 
 .dateText {
-  font: var(--text-caption-medium);
+  font: var(--text-caption-regular);
   font-size: 12px;
   color: var(--color-gray-500);
   white-space: nowrap;

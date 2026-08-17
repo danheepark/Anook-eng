@@ -39,7 +39,7 @@
 }
 
 .decisionTitle {
-  font: var(--text-h3-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
@@ -54,7 +54,7 @@
 
 .deptName {
   font: var(--text-caption-medium);
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -100,7 +100,7 @@
   line-height: var(--main-line-height);
 }
 
-/* 3. Bottom Row: Left Time Display + Right Approve Button */
+/* 3. Bottom Row: Left Department Badge + Right Action Buttons */
 .bottomRow {
   display: flex;
   align-items: center;
@@ -110,8 +110,15 @@
   gap: var(--space-8);
 }
 
+.bottomLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-shrink: 0;
+}
+
 .timeText {
-  font: var(--text-caption-medium);
+  font: var(--text-caption-regular);
   color: var(--color-gray-400);
   white-space: nowrap;
   flex-shrink: 0;

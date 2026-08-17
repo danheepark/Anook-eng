@@ -121,12 +121,16 @@ function DashboardContent() {
 
   const [departmentId, setDepartmentId] = useState<string>('');
   const [departmentName, setDepartmentName] = useState('');
+  const [staffName, setStaffName] = useState('');
   const [departmentRole, setDepartmentRole] = useState<any>('housekeeping');
 
   useEffect(() => {
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => {
+        if (data.name) {
+          setStaffName(data.name);
+        }
         if (data.departmentId) {
           setDepartmentId(data.departmentId);
           // Sidebar Role 매핑
@@ -162,7 +166,7 @@ function DashboardContent() {
   const staffDashboardT = t.frontdeskPage?.staffDashboard;
   const currentDeptTitle = (departmentId && t.ticketUI.department[departmentId as keyof typeof t.ticketUI.department]) || departmentName || staffDashboardT?.defaultDept || '부서';
   const pageTitle = view === 'my'
-    ? (staffDashboardT?.myTasks || '내 작업')
+    ? (staffName || staffDashboardT?.myTasks || '내 작업')
     : (staffDashboardT?.allTasks || '{{dept}} 전체 작업').replace('{{dept}}', currentDeptTitle);
 
   useEffect(() => {
@@ -201,6 +205,29 @@ function DashboardContent() {
   };
 
   const boardData = useMemo(() => {
+    const safeParseTime = (dateStr?: string | null) => {
+      if (!dateStr) return 0;
+      const normalized = String(dateStr).replace(' ', 'T');
+      const time = new Date(normalized).getTime();
+      return isNaN(time) ? 0 : time;
+    };
+
+    const sortByPriorityAndCreatedAt = (taskList: typeof filteredTasks) => {
+      return [...taskList].sort((a, b) => {
+        // 1. 긴급(URGENT)이 최우선
+        const aUrgent = a.priority === 'URGENT';
+        const bUrgent = b.priority === 'URGENT';
+        if (aUrgent && !bUrgent) return -1;
+        if (!aUrgent && bUrgent) return 1;
+
+        // 2. 최신 생성일(createdAt) 순
+        const timeA = safeParseTime(a.createdAt);
+        const timeB = safeParseTime(b.createdAt);
+        if (timeA !== timeB) return timeB - timeA;
+        return b.id - a.id;
+      });
+    };
+
     const sortByCancelRequested = (taskList: typeof filteredTasks) => {
       return [...taskList].sort((a, b) => {
         // 1. 취소 요청(cancelRequested) 건이 무조건 최상위
@@ -214,15 +241,11 @@ function DashboardContent() {
         if (!aUrgent && bUrgent) return 1;
         
         // 3. 우선순위도 같으면 최신 생성일 순 정렬
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        const timeA = safeParseTime(a.createdAt);
+        const timeB = safeParseTime(b.createdAt);
+        if (timeA !== timeB) return timeB - timeA;
+        return b.id - a.id;
       });
-    };
-
-    const safeParseTime = (dateStr?: string | null) => {
-      if (!dateStr) return 0;
-      const normalized = String(dateStr).replace(' ', 'T');
-      const time = new Date(normalized).getTime();
-      return isNaN(time) ? 0 : time;
     };
 
     const allDoneTasks = filteredTasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED');
@@ -257,7 +280,7 @@ function DashboardContent() {
     });
 
     return {
-      TODO: filteredTasks.filter(t => (t.status === 'PENDING' || t.status === 'ESCALATED') && !t.cancelRequested),
+      TODO: sortByPriorityAndCreatedAt(filteredTasks.filter(t => (t.status === 'PENDING' || t.status === 'ESCALATED') && !t.cancelRequested)),
       IN_PROGRESS: sortByCancelRequested(filteredTasks.filter(t => t.status === 'IN_PROGRESS')),
       DONE: filteredDoneTasks.sort((a, b) => {
         const timeA = safeParseTime(a.updatedAt || a.cancelRequestedAt || a.createdAt);

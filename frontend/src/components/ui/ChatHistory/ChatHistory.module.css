@@ -9,7 +9,7 @@
 }
 
 .title {
-  font: var(--text-body-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
   padding: var(--space-24) var(--space-24) var(--space-16) var(--space-24);
   margin: 0;
@@ -78,7 +78,7 @@
 }
 
 .roomNumber {
-  font: var(--text-h3-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
 }
 

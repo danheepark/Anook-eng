@@ -3,7 +3,7 @@ import styles from './StatusBadge.module.css';
 
 export interface TagProps {
   // 의미론적(Semantic) 색상 배지 지정
-  variant?: 'red' | 'purple' | 'green' | 'gray' | 'hk' | 'fb' | 'facility' | 'concierge' | 'front' | 'emergency';
+  variant?: 'red' | 'orange' | 'purple' | 'green' | 'gray' | 'hk' | 'fb' | 'facility' | 'concierge' | 'front' | 'emergency';
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;

@@ -52,7 +52,7 @@
 }
 
 .roomNumber {
-  font: var(--text-h2-bold);
+  font: var(--text-h2-semibold);
   color: var(--color-gray-800);
 }
 
@@ -85,7 +85,7 @@
 }
 
 .timeText {
-  font: var(--text-caption-medium);
+  font: var(--text-caption-regular);
   color: var(--color-gray-500);
   white-space: nowrap;
   flex-shrink: 0;
@@ -97,7 +97,7 @@
 }
 
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;

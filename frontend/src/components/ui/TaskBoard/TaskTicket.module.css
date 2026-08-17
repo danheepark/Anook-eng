@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   min-height: 184px;
-  padding: calc(var(--space-24) + 4px) var(--space-24) var(--space-24);
+  padding: var(--space-16);
   gap: var(--space-16);
   border: 1px solid var(--color-surface);
   /* 연한 회색 테두리 */
@@ -32,73 +32,43 @@
 .hk .topColorBar {
   background-color: var(--color-dept-hk-border);
 }
-
-.hk .deptBadge {
+.hk .roomNo {
   color: var(--color-dept-hk-text);
-}
-
-.hk .headerDivider {
-  background-color: var(--color-dept-hk-text);
 }
 
 .facility .topColorBar {
   background-color: var(--color-dept-facility-border);
 }
-
-.facility .deptBadge {
+.facility .roomNo {
   color: var(--color-dept-facility-text);
-}
-
-.facility .headerDivider {
-  background-color: var(--color-dept-facility-text);
 }
 
 .fb .topColorBar {
   background-color: var(--color-dept-fb-border);
 }
-
-.fb .deptBadge {
+.fb .roomNo {
   color: var(--color-dept-fb-text);
-}
-
-.fb .headerDivider {
-  background-color: var(--color-dept-fb-text);
 }
 
 .concierge .topColorBar {
   background-color: var(--color-dept-concierge-border);
 }
-
-.concierge .deptBadge {
+.concierge .roomNo {
   color: var(--color-dept-concierge-text);
-}
-
-.concierge .headerDivider {
-  background-color: var(--color-dept-concierge-text);
 }
 
 .front .topColorBar {
   background-color: var(--color-dept-front-border);
 }
-
-.front .deptBadge {
+.front .roomNo {
   color: var(--color-dept-front-text);
-}
-
-.front .headerDivider {
-  background-color: var(--color-dept-front-text);
 }
 
 .emergency .topColorBar {
   background-color: var(--color-dept-emergency-border);
 }
-
-.emergency .deptBadge {
+.emergency .roomNo {
   color: var(--color-dept-emergency-text);
-}
-
-.emergency .headerDivider {
-  background-color: var(--color-dept-emergency-text);
 }
 
 .taskTicket.emergency {
@@ -110,21 +80,10 @@
   border-color: var(--color-gray-300);
 }
 
-.deptBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font: var(--text-caption-medium);
-  font-weight: 700;
-  white-space: nowrap;
-  color: var(--color-gray-700);
-  /* default text */
-}
-
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .headerRight {
@@ -132,6 +91,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  margin-left: auto;
 }
 
 .statusRow {
@@ -167,30 +127,40 @@
 }
 
 .timeText {
-  font: var(--text-caption-medium);
+  font: var(--text-caption-regular);
   color: var(--color-gray-400);
   white-space: nowrap;
   line-height: 1;
 }
 
-.roomNo {
-  font: var(--text-h3-medium);
-  color: var(--color-gray-700);
-  white-space: nowrap;
-  padding: 6px 8px;
-  border: 1.5px solid var(--color-gray-500);
-  border-radius: var(--radius-sm);
-  line-height: 1;
-  display: flex;
+.headerLeft {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.roomNo {
+  font: var(--text-body-bold);
+  color: var(--color-gray-900);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.cancelPendingText {
+  font: var(--text-body-bold);
+  color: #F97316;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 .headerDivider {
-  width: 1px;
-  height: 12px;
-  background-color: var(--color-gray-300);
-  margin: 0 var(--space-2);
+  width: calc(100% + var(--space-16) * 2);
+  height: 1px;
+  background-color: var(--color-gray-200);
+  margin: calc(var(--space-4) * -1) calc(var(--space-16) * -1);
+  border: none;
+  flex-shrink: 0;
 }
 
 .content {
@@ -206,8 +176,15 @@
   margin-bottom: -2px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-body-lg-medium);
   color: var(--color-gray-900);
   margin: 0;
 }
@@ -215,7 +192,8 @@
 .description {
   font: var(--text-body-regular);
   color: #2A2A2A;
-  margin-top: var(--space-4);
+  margin-top: calc(var(--space-4) * -1);
+  margin-bottom: 0;
   word-break: break-word;
   white-space: pre-wrap;
 }
@@ -238,6 +216,15 @@
   align-items: flex-end;
   margin-top: auto;
   width: 100%;
+  gap: var(--space-8);
+}
+
+.footerLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  min-width: 0;
 }
 
 .footerActions {
@@ -245,6 +232,18 @@
   display: flex;
   align-items: center;
   gap: var(--space-8);
+  flex-shrink: 0;
+}
+
+.rejectBtn {
+  background-color: var(--color-white) !important;
+  color: var(--color-gray-900) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.rejectBtn:hover:not(:disabled) {
+  background-color: var(--color-gray-50) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
 }
 
 .assigneeText {
@@ -302,12 +301,12 @@
   pointer-events: none;
 }
 
-/* --- 취소 대기중인 카드 특별 경고 스타일 (디자인 시스템 변수 활용) --- */
+/* --- 취소 대기중인 카드 스타일 --- */
 .cancelPendingCard {
-  border-color: var(--color-tag-text-orange) !important;
-  background-color: var(--color-tag-background-orange) !important;
+  background-color: #FFFAF5 !important;
+  border: 2px solid #F97316 !important;
 }
 
-.cancelPendingCard .topColorBar {
-  background-color: var(--color-tag-text-orange) !important;
+.cancelPendingCard:hover {
+  border-color: #EA580C !important;
 }

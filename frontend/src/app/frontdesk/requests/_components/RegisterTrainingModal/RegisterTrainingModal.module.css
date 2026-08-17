@@ -264,7 +264,7 @@
 }
 
 .candidateNumber {
-  font: var(--text-h3-bold) !important;
+  font: var(--text-h3-semibold) !important;
   color: var(--color-gray-900);
 }
 

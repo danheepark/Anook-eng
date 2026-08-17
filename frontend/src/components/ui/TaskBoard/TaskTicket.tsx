@@ -11,6 +11,7 @@ export interface TaskTicketProps {
   roomNo?: string | number;
   priority?: 'NORMAL' | 'URGENT';
   department?: string;
+  showDeptBar?: boolean;
   title: string;
   description: string;
   status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
@@ -67,6 +68,7 @@ export default function TaskTicket({
   roomNo,
   priority = 'NORMAL',
   department,
+  showDeptBar = false,
   title,
   description,
   status = 'TODO',
@@ -342,6 +344,8 @@ export default function TaskTicket({
   if (status === 'DONE') {
     const doneTime = updatedAt || createdAt;
     timeDisplay = doneTime ? formatDoneDateTime(doneTime, language) : '';
+  } else if (status === 'IN_PROGRESS' && updatedAt) {
+    timeDisplay = getRelativeTime(updatedAt, language, t.ticketUI.time);
   } else {
     const activeTime = createdAt || updatedAt;
     timeDisplay = activeTime ? getRelativeTime(activeTime, language, t.ticketUI.time) : '';
@@ -435,28 +439,28 @@ export default function TaskTicket({
   return (
     <div 
       id={ticketId ? `ticket-${ticketId}` : undefined}
-      className={`${styles.taskTicket} ${styles[deptKey]} ${(isCancelled || isEscalated) ? styles.isCancelled : ''} ${cancelRequested ? styles.cancelPendingCard : ''}`}
+      className={`${styles.taskTicket} ${styles[deptKey] || ''} ${(isCancelled || isEscalated) ? styles.isCancelled : ''} ${cancelRequested ? styles.cancelPendingCard : ''}`}
       style={{
         boxShadow: isActiveMatch ? '0 0 0 2px var(--color-primary-400), 0 4px 16px rgba(0, 0, 0, 0.12)' : undefined,
         transition: 'all 0.2s ease-in-out'
       }}
     >
-      <div className={styles.topColorBar} />
+      {showDeptBar && <div className={styles.topColorBar} />}
       <div className={styles.header}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div className={styles.headerLeft}>
           {roomNo && (
             <span className={styles.roomNo}>
               {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
             </span>
           )}
-          {department && (
-            <div className={styles.deptBadge}>
-              {displayDept}
-            </div>
+          {cancelRequested && (
+            <span className={styles.cancelPendingText}>
+              {t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Pending' : '취소 대기')}
+            </span>
           )}
         </div>
         <div className={styles.headerRight}>
-          {(isCancelled || isEscalated || cancelRequested || priority === 'URGENT') && (
+          {(isCancelled || isEscalated || priority === 'URGENT') && (
             <div className={styles.statusRow}>
               {isCancelled && (
                 <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
@@ -466,11 +470,6 @@ export default function TaskTicket({
               {isEscalated && (
                 <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
                   {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
-                </span>
-              )}
-              {cancelRequested && (
-                <span className={`${styles.textStatus} ${styles.textStatusCancelPending}`}>
-                  {t.ticketUI.badge.cancelPending}
                 </span>
               )}
               {priority === 'URGENT' && (
@@ -483,12 +482,12 @@ export default function TaskTicket({
           )}
 
           <div className={styles.ticketMeta}>
-            {timeDisplay && <span className={styles.timeText}>{timeDisplay}</span>}
-            {timeDisplay && ticketId && <span className={styles.metaDot}>·</span>}
             {ticketId && <span className={styles.ticketId}>#{ticketId}</span>}
           </div>
         </div>
       </div>
+
+      <div className={styles.headerDivider} />
 
       <div className={styles.content}>
         {entities?.is_contactless && (
@@ -502,19 +501,24 @@ export default function TaskTicket({
           )}
         </h3>
         {cleanedDescription && (
-          <p className={`${styles.description} ${(!cleanedDescription.trim().startsWith('-') && !cleanedDescription.trim().startsWith('•')) ? styles.descriptionCompact : ''}`}>
+          <p className={styles.description}>
             {highlightSearch ? renderHighlightedText(cleanedDescription, highlightSearch, isActiveMatch) : cleanedDescription}
           </p>
         )}
       </div>
 
-      {(assigneeName || Boolean((status === 'TODO' && onAccept) || (status === 'IN_PROGRESS' && !cancelRequested && onComplete) || (status === 'IN_PROGRESS' && cancelRequested && (onRejectCancel || onApproveCancel)))) && (
+      {(assigneeName || timeDisplay || Boolean((status === 'TODO' && onAccept) || (status === 'IN_PROGRESS' && !cancelRequested && onComplete) || (status === 'IN_PROGRESS' && cancelRequested && (onRejectCancel || onApproveCancel)))) && (
         <div className={styles.footer}>
-          {assigneeName && (
-            <span className={styles.assigneeText}>
-              {language === 'en' ? `Accepted by ${assigneeName}` : `${assigneeName} 담당`}
-            </span>
-          )}
+          <div className={styles.footerLeft}>
+            {assigneeName && (
+              <span className={styles.assigneeText}>
+                {language === 'en' ? `Accepted by ${assigneeName}` : `${assigneeName} 담당`}
+              </span>
+            )}
+            {timeDisplay && (
+              <span className={styles.timeText}>{timeDisplay}</span>
+            )}
+          </div>
           <div className={styles.footerActions}>
             {status === 'TODO' && onAccept && (
               <Button
@@ -544,6 +548,7 @@ export default function TaskTicket({
                   <Button
                     variant="secondary"
                     size="medium"
+                    className={styles.rejectBtn}
                     onClick={onRejectCancel}
                     disabled={!isOnline}
                     title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}

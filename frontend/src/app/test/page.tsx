@@ -835,9 +835,9 @@ export default function ComponentShowcasePage() {
                     <h5 style={{ font: 'var(--text-caption-bold)', color: 'var(--color-gray-500)', marginBottom: 'var(--space-8)' }}>Task Ticket Column</h5>
                     <ComponentLabel path="components/ui/TaskBoard/TaskColumn.tsx & TaskTicket.tsx" />
                     <div style={{ display: 'flex', gap: 'var(--space-24)', overflowX: 'auto', paddingBottom: 'var(--space-8)' }}>
-                      <TaskColumn title="진행 전" count={1}><TaskTicket status="TODO" ticketId="1204" priority="URGENT" title="에어컨 수리" description="에어컨 작동 안 됨" createdAt={new Date(Date.now() - 45 * 60 * 1000).toISOString()} /></TaskColumn>
-                      <TaskColumn title="진행 중" count={1}><TaskTicket status="IN_PROGRESS" ticketId="1205" priority="NORMAL" title="수건 추가" description="수건 2장 요청" createdAt={new Date(Date.now() - 120 * 60 * 1000).toISOString()} updatedAt={new Date(Date.now() - 15 * 60 * 1000).toISOString()} /></TaskColumn>
-                      <TaskColumn title="완료" count={1}><TaskTicket status="DONE" ticketId="302" priority="NORMAL" title="샤워기 헤드 교체" description="수압 약함" createdAt={new Date(Date.now() - 150 * 60 * 1000).toISOString()} /></TaskColumn>
+                      <TaskColumn title="진행 전" count={1}><TaskTicket status="TODO" ticketId="1204" roomNo="1204" department="facility" priority="URGENT" title="에어컨 수리" description="에어컨 작동 안 됨" createdAt={new Date(Date.now() - 45 * 60 * 1000).toISOString()} /></TaskColumn>
+                      <TaskColumn title="진행 중" count={1}><TaskTicket status="IN_PROGRESS" ticketId="1205" roomNo="502" department="hk" priority="NORMAL" title="수건 추가" description="수건 2장 요청" createdAt={new Date(Date.now() - 120 * 60 * 1000).toISOString()} updatedAt={new Date(Date.now() - 15 * 60 * 1000).toISOString()} /></TaskColumn>
+                      <TaskColumn title="완료" count={1}><TaskTicket status="DONE" ticketId="302" roomNo="302" department="facility" priority="NORMAL" title="샤워기 헤드 교체" description="수압 약함" createdAt={new Date(Date.now() - 150 * 60 * 1000).toISOString()} /></TaskColumn>
                     </div>
                   </div>
 

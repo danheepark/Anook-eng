@@ -60,7 +60,7 @@
 /* In-line Editable Input Fields */
 .editableTitle {
   width: 100%;
-  font: var(--text-h3-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
   background-color: var(--color-white);
   border: 1px solid var(--color-gray-300);

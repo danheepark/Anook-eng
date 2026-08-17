@@ -44,7 +44,7 @@ public class StaffRequestQueryAdapter implements RequestQueryPort {
             sql.append(" AND r.priority != 'EMERGENCY'");
         }
 
-        sql.append(" ORDER BY r.updated_at DESC, r.created_at DESC");
+        sql.append(" ORDER BY r.created_at DESC");
 
         return jdbcTemplate.query(sql.toString(), (rs, rowNum) -> {
             Long rId = rs.getLong("id");

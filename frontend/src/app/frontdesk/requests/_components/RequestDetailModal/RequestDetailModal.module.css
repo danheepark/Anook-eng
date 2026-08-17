@@ -5,28 +5,30 @@
   margin-bottom: var(--space-8);
 }
 
-.title {
-  font: var(--text-h2-bold) !important;
-  color: var(--color-gray-900);
-  margin: 0;
-  word-break: break-word;
+.titleRow {
   display: flex;
   align-items: center;
   gap: var(--space-8);
   flex-wrap: wrap;
 }
 
-.deptName {
-  font: inherit;
+.roomNo {
+  font: var(--text-body-bold);
+  color: var(--color-gray-900);
   white-space: nowrap;
+  line-height: 1.2;
 }
 
-.subtitle {
+.title {
   font: var(--text-h2-bold) !important;
   color: var(--color-gray-900);
   margin: 0;
-  line-height: var(--main-line-height);
   word-break: break-word;
+}
+
+.cancelPrefix {
+  color: #F97316;
+  font-weight: 700;
 }
 
 .deptHk {
@@ -67,7 +69,7 @@
 }
 
 .secondaryLabel {
-  font: var(--text-caption-medium);
+  font: var(--text-caption-regular);
   color: var(--color-gray-500);
   letter-spacing: -0.1px;
 }
@@ -89,7 +91,7 @@
 }
 
 .photoTitle {
-  font: var(--text-h3-bold);
+  font: var(--text-h3-medium);
   color: var(--color-gray-900);
   margin: 0;
 }

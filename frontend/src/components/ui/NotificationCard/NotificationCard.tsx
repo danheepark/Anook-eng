@@ -53,16 +53,16 @@ function getRelativeTime(dateString?: string | Date, language: string = 'en', ti
   }
 }
 
-function getDeptClass(deptName?: string): string {
-  if (!deptName) return '';
+function getDeptVariant(deptName?: string): 'hk' | 'fb' | 'facility' | 'concierge' | 'front' | 'emergency' | 'gray' {
+  if (!deptName) return 'gray';
   const upper = deptName.toUpperCase();
-  if (upper.includes('HK') || upper.includes('HOUSEKEEPING') || upper.includes('하우스키핑')) return styles.deptHk;
-  if (upper.includes('FB') || upper.includes('FNB') || upper.includes('식음료')) return styles.deptFb;
-  if (upper.includes('FACILITY') || upper.includes('MAINTENANCE') || upper.includes('시설')) return styles.deptFacility;
-  if (upper.includes('CONCIERGE') || upper.includes('컨시어지')) return styles.deptConcierge;
-  if (upper.includes('EMERGENCY') || upper.includes('긴급')) return styles.deptEmergency;
-  if (upper.includes('FRONT') || upper.includes('프론트')) return styles.deptFront;
-  return '';
+  if (upper.includes('HK') || upper.includes('HOUSEKEEPING') || upper.includes('하우스키핑')) return 'hk';
+  if (upper.includes('FB') || upper.includes('FNB') || upper.includes('식음료')) return 'fb';
+  if (upper.includes('FACILITY') || upper.includes('MAINTENANCE') || upper.includes('시설')) return 'facility';
+  if (upper.includes('CONCIERGE') || upper.includes('컨시어지')) return 'concierge';
+  if (upper.includes('EMERGENCY') || upper.includes('긴급')) return 'emergency';
+  if (upper.includes('FRONT') || upper.includes('프론트')) return 'front';
+  return 'gray';
 }
 
 export default function NotificationCard({
@@ -98,7 +98,7 @@ export default function NotificationCard({
       className={`${styles.card} ${onClick ? styles.clickable : ''}`}
       onClick={onClick}
     >
-      {/* 1. 첫 줄: Front Desk가 해야 할 판단 + 긴급 배지 + 우측 부서명 */}
+      {/* 1. 첫 줄: Front Desk가 해야 할 판단 + 긴급 배지 + 우측 시간 표기 */}
       <div className={styles.headerRow}>
         <div className={styles.titleAndBadges}>
           <h4 className={styles.decisionTitle}>{decisionText}</h4>
@@ -112,10 +112,8 @@ export default function NotificationCard({
           </div>
         </div>
 
-        {departmentName && (
-          <span className={`${styles.deptName} ${getDeptClass(departmentName)}`}>
-            {departmentName}
-          </span>
+        {timeText && (
+          <span className={styles.timeText}>{timeText}</span>
         )}
       </div>
 
@@ -124,9 +122,15 @@ export default function NotificationCard({
         <p className={styles.targetText}>{targetDisplay}</p>
       </div>
 
-      {/* 3. 셋째 줄: 좌측 시간 표기 + 우측 Approve 버튼 */}
+      {/* 3. 셋째 줄: 좌측 부서 뱃지 + 우측 Action 버튼 */}
       <div className={styles.bottomRow}>
-        <span className={styles.timeText}>{timeText}</span>
+        <div className={styles.bottomLeft}>
+          {departmentName && (
+            <StatusBadge variant={getDeptVariant(departmentName)}>
+              {departmentName}
+            </StatusBadge>
+          )}
+        </div>
 
         <div className={styles.actionSection} onClick={(e) => e.stopPropagation()}>
           {secondaryLabel && onSecondaryClick && (

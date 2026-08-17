@@ -530,23 +530,26 @@ export default function RequestDetailModal({
     return deptId || '';
   };
 
+  const getDeptBadgeVariant = (deptId?: string): 'hk' | 'fb' | 'facility' | 'concierge' | 'front' | 'emergency' | 'gray' => {
+    if (!deptId) return 'gray';
+    const upper = deptId.toUpperCase();
+    if (upper.includes('HK') || upper.includes('HOUSEKEEPING') || upper.includes('하우스키핑')) return 'hk';
+    if (upper.includes('FB') || upper.includes('FNB') || upper.includes('식음료')) return 'fb';
+    if (upper.includes('FACILITY') || upper.includes('MAINTENANCE') || upper.includes('시설')) return 'facility';
+    if (upper.includes('CONCIERGE') || upper.includes('컨시어지')) return 'concierge';
+    if (upper.includes('EMERGENCY') || upper.includes('긴급')) return 'emergency';
+    if (upper.includes('FRONT') || upper.includes('프론트')) return 'front';
+    return 'gray';
+  };
+
   const deptDisplayName = getDeptName(activeDetail.departmentId, activeDetail.departmentName);
   const roomDisplay = language === 'en' ? `ROOM ${activeDetail.roomNo}` : `${activeDetail.roomNo}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanSummary = toSentenceCase(cleanTitleSummary(translatedSummary || activeDetail.summary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');
 
-  let modalTitle = cleanSummary;
-  let modalSubtitle = roomDisplay;
-
-  if (activeDetail.cancelRequested) {
-    modalTitle = language === 'en' ? 'Cancel request' : '취소 요청';
-    modalSubtitle = cleanSummary ? `${roomDisplay} · ${cleanSummary}` : roomDisplay;
-  } else if (activeDetail.status === 'ESCALATED') {
-    modalTitle = language === 'en' ? 'Transfer request' : '이관 요청';
-    modalSubtitle = cleanSummary ? `${roomDisplay} · ${cleanSummary}` : roomDisplay;
-  } else {
-    modalTitle = cleanSummary || roomDisplay;
-    modalSubtitle = cleanSummary ? roomDisplay : '';
+  let modalTitle = cleanSummary || roomDisplay;
+  if (activeDetail.status === 'ESCALATED' && !activeDetail.cancelRequested) {
+    modalTitle = cleanSummary ? `${language === 'en' ? 'Transfer request' : '이관 요청'} · ${cleanSummary}` : (language === 'en' ? 'Transfer request' : '이관 요청');
   }
 
   return (
@@ -555,17 +558,17 @@ export default function RequestDetailModal({
         <ModalCard size="md" overflowVisible={false} onClose={onClose}>
         {/* 헤더 */}
         <div className={styles.header}>
-          <h2 className={styles.title}>
+          <span className={`${styles.roomNo} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
+            {roomDisplay}
+          </span>
+          <div className={styles.titleRow}>
+            <h2 className={styles.title}>{modalTitle}</h2>
             {deptDisplayName && (
-              <span className={`${styles.deptName} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
+              <StatusBadge variant={getDeptBadgeVariant(activeDetail.departmentId || activeDetail.departmentName)}>
                 {deptDisplayName}
-              </span>
+              </StatusBadge>
             )}
-            <span>{modalTitle}</span>
-          </h2>
-          {modalSubtitle && (
-            <p className={styles.subtitle}>{modalSubtitle}</p>
-          )}
+          </div>
         </div>
 
         <div className={styles.modalBody}>
@@ -589,20 +592,6 @@ export default function RequestDetailModal({
               </span>
               <p className={styles.reasoningText}>
                 {formatCreatedAt(activeDetail.createdAt)}
-              </p>
-            </div>
-          )}
-
-          {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 00:21) */}
-          {activeDetail.assignedStaffName && (
-            <div className={styles.reasoningItem}>
-              <span className={styles.secondaryLabel}>
-                {language === 'ko' ? '수락 담당자' : 'Accepted by'}
-              </span>
-              <p className={styles.reasoningText}>
-                {activeDetail.updatedAt
-                  ? `${activeDetail.assignedStaffName} at ${formatAcceptedAt(activeDetail.updatedAt, activeDetail.createdAt)}`
-                  : activeDetail.assignedStaffName}
               </p>
             </div>
           )}
@@ -634,6 +623,30 @@ export default function RequestDetailModal({
               </div>
             ));
           })()}
+
+          {/* Accepted by 수락 담당자 */}
+          {activeDetail.assignedStaffName && (
+            <div className={styles.reasoningItem}>
+              <span className={styles.secondaryLabel}>
+                {language === 'ko' ? '수락 담당자' : 'Accepted by'}
+              </span>
+              <p className={styles.reasoningText}>
+                {activeDetail.assignedStaffName}
+              </p>
+            </div>
+          )}
+
+          {/* Accepted at 수락 일시 */}
+          {activeDetail.assignedStaffName && activeDetail.updatedAt && (
+            <div className={styles.reasoningItem}>
+              <span className={styles.secondaryLabel}>
+                {language === 'ko' ? '수락 일시' : 'Accepted at'}
+              </span>
+              <p className={styles.reasoningText}>
+                {formatCreatedAt(activeDetail.updatedAt)}
+              </p>
+            </div>
+          )}
 
           {/* 4. 첨부 사진 */}
           {activeDetail.imageUrl && (

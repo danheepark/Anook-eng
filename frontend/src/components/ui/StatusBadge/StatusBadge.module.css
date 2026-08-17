@@ -18,6 +18,11 @@
   color: var(--color-tag-text-red);
 }
 
+.orange {
+  background-color: var(--color-tag-background-orange, #FFEDD5);
+  color: var(--color-tag-text-orange, #EA580C);
+}
+
 .purple {
   background-color: var(--color-tag-background-violet);
   color: var(--color-tag-text-violet);

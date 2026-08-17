@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-8);
-  font: var(--text-h2-bold);
+  font: var(--text-h2-semibold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;
@@ -50,7 +50,7 @@
 
 .titleDot {
   color: var(--color-gray-900);
-  font-weight: 700;
+  font-weight: 600;
   flex-shrink: 0;
   user-select: none;
 }

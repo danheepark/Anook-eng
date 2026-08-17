@@ -59,7 +59,8 @@
   justify-content: center;
   background: var(--color-gray-100);
   color: var(--color-gray-700);
-  font: var(--text-body-bold);
+  font: var(--text-body-medium);
+  font-weight: 600;
   padding: 4px 10px;
   border-radius: var(--radius-sm);
   min-width: 48px;
@@ -80,12 +81,13 @@
 }
 
 .ratingText {
-  font: var(--text-body-bold);
+  font: var(--text-body-medium);
+  font-weight: 600;
   color: var(--color-gray-800);
 }
 
 .dateText {
-  font: var(--text-caption-medium);
+  font: var(--text-caption-regular);
   color: var(--color-gray-500);
   font-size: 12px;
 }

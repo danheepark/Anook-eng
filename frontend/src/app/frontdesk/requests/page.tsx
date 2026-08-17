@@ -579,6 +579,7 @@ export default function FrontDeskPage() {
           {/* Tabs inside left pane */}
           <div style={{ marginBottom: 0 }}>
             <Tabs
+              className={styles.requestsTabs}
               options={[
                 { label: t.chatPanel?.inProgressTab || '진행 중', value: 'active', count: activeCount },
                 { label: t.chatPanel?.completedTab || '상담 완료', value: 'completed', count: completedCount }

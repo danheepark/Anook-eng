@@ -103,16 +103,6 @@ export default function useFrontdeskRequests(dept?: string, searchQuery: string 
     filteredRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
-  const pending = filteredRequests.filter(r => r.status === 'PENDING' || r.status === 'ESCALATED');
-  const inProgress = filteredRequests.filter(r => r.status === 'ASSIGNED' || r.status === 'IN_PROGRESS');
-  
-  // inProgress 배열 내에서 취소 대기(cancelRequested) 항목을 최상단으로 정렬
-  inProgress.sort((a, b) => {
-    if (a.cancelRequested && !b.cancelRequested) return -1;
-    if (!a.cancelRequested && b.cancelRequested) return 1;
-    return 0; // fallback to existing sort (createdAt)
-  });
-
   const safeParseTime = (dateStr?: string | null) => {
     if (!dateStr) return 0;
     const normalized = String(dateStr).replace(' ', 'T');
@@ -120,6 +110,39 @@ export default function useFrontdeskRequests(dept?: string, searchQuery: string 
     return isNaN(time) ? 0 : time;
   };
 
+  const sortByPriorityAndCreatedAt = (reqList: FrontdeskRequest[]) => {
+    return [...reqList].sort((a, b) => {
+      const aUrgent = a.priority === 'URGENT';
+      const bUrgent = b.priority === 'URGENT';
+      if (aUrgent && !bUrgent) return -1;
+      if (!aUrgent && bUrgent) return 1;
+
+      const timeA = safeParseTime(a.createdAt);
+      const timeB = safeParseTime(b.createdAt);
+      if (timeA !== timeB) return timeB - timeA;
+      return b.id - a.id;
+    });
+  };
+
+  const sortByCancelRequested = (reqList: FrontdeskRequest[]) => {
+    return [...reqList].sort((a, b) => {
+      if (a.cancelRequested && !b.cancelRequested) return -1;
+      if (!a.cancelRequested && b.cancelRequested) return 1;
+
+      const aUrgent = a.priority === 'URGENT';
+      const bUrgent = b.priority === 'URGENT';
+      if (aUrgent && !bUrgent) return -1;
+      if (!aUrgent && bUrgent) return 1;
+
+      const timeA = safeParseTime(a.createdAt);
+      const timeB = safeParseTime(b.createdAt);
+      if (timeA !== timeB) return timeB - timeA;
+      return b.id - a.id;
+    });
+  };
+
+  const pending = sortByPriorityAndCreatedAt(filteredRequests.filter(r => r.status === 'PENDING' || r.status === 'ESCALATED'));
+  const inProgress = sortByCancelRequested(filteredRequests.filter(r => r.status === 'ASSIGNED' || r.status === 'IN_PROGRESS'));
   const cancelPending = filteredRequests.filter(r => r.cancelRequested);
   const completed = filteredRequests
     .filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED')

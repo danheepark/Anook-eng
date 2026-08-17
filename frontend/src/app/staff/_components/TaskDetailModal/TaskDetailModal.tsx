@@ -436,12 +436,25 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
     }
   };
 
+  const getDeptClass = (deptId?: string) => {
+    if (!deptId) return '';
+    const upper = deptId.toUpperCase();
+    if (upper.includes('HK') || upper.includes('HOUSEKEEPING') || upper.includes('하우스키핑')) return styles.deptHk;
+    if (upper.includes('FB') || upper.includes('FNB') || upper.includes('식음료')) return styles.deptFb;
+    if (upper.includes('FACILITY') || upper.includes('MAINTENANCE') || upper.includes('시설')) return styles.deptFacility;
+    if (upper.includes('CONCIERGE') || upper.includes('컨시어지')) return styles.deptConcierge;
+    if (upper.includes('EMERGENCY') || upper.includes('긴급')) return styles.deptEmergency;
+    if (upper.includes('FRONT') || upper.includes('프론트')) return styles.deptFront;
+    return '';
+  };
+
   const statusInfo = getStatusInfo(task.status, task.priority);
   const roomDisplay = language === 'en' ? `ROOM ${task.roomNumber}` : `${task.roomNumber}호`;
   const rawSummary = translatedSummary || task.summary;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanSummary = toSentenceCase(cleanTitleSummary(rawSummary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');
-  const modalTitle = cleanSummary ? `${roomDisplay} · ${cleanSummary}` : roomDisplay;
+  
+  let modalTitle = cleanSummary || roomDisplay;
 
   const rawTextParts = task.rawText ? task.rawText.split('\n|||TRANSFER_REASON|||') : [];
   const transferReasonText = rawTextParts.length > 1 ? rawTextParts.slice(1).join('\n').trim() : null;
@@ -452,16 +465,26 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
         <ModalCard size="md" overflowVisible={false} onClose={handleClose}>
           {/* 1. 헤더 */}
           <div className={styles.header}>
-            <div className={styles.headerTop}>
-              {task.cancelRequested ? (
-                <StatusBadge variant="red">
-                  {language === 'en' ? 'Cancel request' : '취소 요청'}
-                </StatusBadge>
-              ) : (
+            <span className={`${styles.roomNo} ${getDeptClass(task.departmentId)}`}>
+              {roomDisplay}
+            </span>
+            <div className={styles.titleRow}>
+              <h2 className={styles.title}>
+                {task.cancelRequested ? (
+                  <>
+                    <span className={styles.cancelPrefix}>
+                      {language === 'en' ? 'Cancel request' : '취소 요청'}
+                    </span>
+                    {cleanSummary ? ` · ${cleanSummary}` : ''}
+                  </>
+                ) : (
+                  modalTitle
+                )}
+              </h2>
+              {!task.cancelRequested && (
                 <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
               )}
             </div>
-            <h2 className={styles.title}>{modalTitle}</h2>
           </div>
 
           {/* 2. 본문 */}
@@ -486,20 +509,6 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 </span>
                 <p className={styles.reasoningText}>
                   {formatCreatedAt(task.createdAt)}
-                </p>
-              </div>
-            )}
-
-            {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 00:21) */}
-            {task.assignedStaffName && (
-              <div className={styles.reasoningItem}>
-                <span className={styles.secondaryLabel}>
-                  {language === 'ko' ? '수락 담당자' : 'Accepted by'}
-                </span>
-                <p className={styles.reasoningText}>
-                  {task.updatedAt
-                    ? `${task.assignedStaffName} at ${formatAcceptedAt(task.updatedAt, task.createdAt)}`
-                    : task.assignedStaffName}
                 </p>
               </div>
             )}
@@ -531,6 +540,30 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 </div>
               ));
             })()}
+
+            {/* Accepted by 수락 담당자 */}
+            {task.assignedStaffName && (
+              <div className={styles.reasoningItem}>
+                <span className={styles.secondaryLabel}>
+                  {language === 'ko' ? '수락 담당자' : 'Accepted by'}
+                </span>
+                <p className={styles.reasoningText}>
+                  {task.assignedStaffName}
+                </p>
+              </div>
+            )}
+
+            {/* Accepted at 수락 일시 */}
+            {task.assignedStaffName && task.updatedAt && (
+              <div className={styles.reasoningItem}>
+                <span className={styles.secondaryLabel}>
+                  {language === 'ko' ? '수락 일시' : 'Accepted at'}
+                </span>
+                <p className={styles.reasoningText}>
+                  {formatCreatedAt(task.updatedAt)}
+                </p>
+              </div>
+            )}
 
             {/* 첨부 사진 */}
             {task.imageUrl && (

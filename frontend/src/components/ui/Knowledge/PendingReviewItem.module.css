@@ -56,7 +56,7 @@
 }
 
 .title {
-  font: var(--text-h3-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
   margin: 0;
   white-space: nowrap;

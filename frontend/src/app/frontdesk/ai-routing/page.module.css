@@ -46,7 +46,7 @@
 }
 
 .sectionTitle {
-  font: var(--text-h2-bold);
+  font: var(--text-h2-semibold);
   color: var(--color-gray-900);
   margin: 0;
 }
@@ -66,12 +66,12 @@
 
 .previewAi {
   color: var(--color-primary);
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .previewCustomer {
   color: var(--color-tag-text-red);
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .previewMeta {
@@ -117,7 +117,7 @@
 }
 
 .ratingPanelTitle {
-  font: var(--text-h3-bold);
+  font: var(--text-h3-semibold);
   color: var(--color-gray-900);
   margin: 0;
 }
@@ -199,7 +199,8 @@
 }
 
 .ratingRoom {
-  font: var(--text-caption-bold);
+  font: var(--text-caption-medium);
+  font-weight: 600;
   color: var(--color-gray-700);
 }
 
