@@ -5,6 +5,7 @@ import styles from './FeedbackCard.module.css';
 import { ReviewStarIcon } from '@/components/icons';
 import { Check, Home, Utensils, Wrench, ConciergeBell, Monitor, AlertTriangle, FileText } from 'lucide-react';
 import { useTranslation } from '@/app/useTranslation';
+import { useUiStore } from '@/stores/useUiStore';
 
 const DOMAIN_MAP: Record<string, { icon: React.ElementType; label: string }> = {
   HK: { icon: Home, label: '하우스키핑' },
@@ -42,7 +43,9 @@ export default function FeedbackCard({
   systemContent,
   systemSubtitle
 }: FeedbackCardProps) {
-  const { t, language } = useTranslation();
+  const { chatLanguage } = useUiStore();
+  const [targetLang] = useState(chatLanguage);
+  const { t, language } = useTranslation(targetLang);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);

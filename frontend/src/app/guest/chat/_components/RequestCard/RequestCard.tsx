@@ -84,11 +84,7 @@ export default function RequestCard({
   isReadOnly = false,
 }: RequestCardProps) {
   const { chatLanguage, language } = useUiStore();
-  const [targetLang, setTargetLang] = useState<string>(isReadOnly ? language : chatLanguage);
-
-  useEffect(() => {
-    setTargetLang(isReadOnly ? language : chatLanguage);
-  }, [chatLanguage, language, isReadOnly]);
+  const [targetLang] = useState<string>(isReadOnly ? language : chatLanguage);
 
   const { t } = useTranslation(targetLang);
 
