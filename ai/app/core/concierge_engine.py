@@ -202,6 +202,43 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
         else:
             domain_code = "CONCIERGE"
     
+    # ── CODE-LEVEL GUARDRAIL: Prevent Add/Replace infinite loop ──
+    if result.needs_clarification:
+        _cl_opts = getattr(result, 'clarification_options', None) or []
+        _opts_lower = [o.lower() for o in _cl_opts]
+        _is_add_replace_q = any(o in _opts_lower for o in ('add', 'replace'))
+
+        _q_text = (getattr(result, 'clarification_question', '') or '').lower()
+        if not _is_add_replace_q and 'add' in _q_text and 'replace' in _q_text:
+            _is_add_replace_q = True
+
+        if _is_add_replace_q:
+            _user_lower = user_message.strip().lower()
+
+            _previously_asked = False
+            if chat_history:
+                for _msg in chat_history:
+                    _content = (_msg.get('content') or '').lower()
+                    _role = _msg.get('role', '')
+                    if _role != 'user' and 'add' in _content and 'replace' in _content:
+                        _previously_asked = True
+                        break
+
+            if _user_lower in ('add', 'replace') or _previously_asked:
+                print(f"[CONCIERGE Guard] ✅ Suppressing Add/Replace loop (prev_asked={_previously_asked}, user='{_user_lower}')")
+                result.clarification_options = []
+                result.needs_clarification = False
+                # domain_code가 위에서 None으로 설정되었으므로 재지정
+                if is_request_intent:
+                    domain_code = "CONCIERGE"
+
+                if _user_lower == 'replace':
+                    cleaned_raw["action_type"] = "REPLACE"
+                else:
+                    result.target_request_id = None
+                    cleaned_raw.pop("target_request_id", None)
+                    cleaned_raw["action_type"] = "ADD_DUPLICATE"
+
     # /analyze 응답 규격에 맞게 변환 (HotelRequestSchema 준수)
     
     final_response = getattr(result, "final_reply", "")

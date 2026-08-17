@@ -67,6 +67,44 @@ async def run_hk_agent(user_message: str, room_no: str, chat_history: list = Non
 
     result = HotelRequestSchema(**raw)
 
+    # ── CODE-LEVEL GUARDRAIL: Prevent Add/Replace infinite loop ──
+    # The code-level duplicate detection in analyze.py re-triggers every turn
+    # because active_requests don't change until the order is finalized.
+    # If the user already answered "Add" or "Replace", or the question was
+    # already asked in a previous turn, suppress the re-ask and proceed.
+    if result.needs_clarification:
+        clarification_opts = getattr(result, 'clarification_options', None) or []
+        opts_lower = [o.lower() for o in clarification_opts]
+        is_add_replace_q = any(o in opts_lower for o in ('add', 'replace'))
+
+        q_text = (getattr(result, 'clarification_question', '') or '').lower()
+        if not is_add_replace_q and 'add' in q_text and 'replace' in q_text:
+            is_add_replace_q = True
+
+        if is_add_replace_q:
+            user_lower = user_message.strip().lower()
+
+            previously_asked = False
+            if chat_history:
+                for msg in chat_history:
+                    content = (msg.get('content') or '').lower()
+                    role = msg.get('role', '')
+                    if role != 'user' and 'add' in content and 'replace' in content:
+                        previously_asked = True
+                        break
+
+            if user_lower in ('add', 'replace') or previously_asked:
+                print(f"[HK Guard] ✅ Suppressing Add/Replace loop (prev_asked={previously_asked}, user='{user_lower}')")
+                result.clarification_options = []
+                result.needs_clarification = False
+
+                if user_lower == 'replace':
+                    raw["action_type"] = "REPLACE"
+                else:
+                    result.target_request_id = None
+                    raw.pop("target_request_id", None)
+                    raw["action_type"] = "ADD_DUPLICATE"
+
     # 7. analyze.py 응답 형태로 변환
     # 되묻기(needs_clarification)일 때나 에스컬레이션(관할 밖)일 때는 domain_code=None → 백엔드가 불필요한 티켓을 생성하지 않음
     action_type = raw.get("action_type")

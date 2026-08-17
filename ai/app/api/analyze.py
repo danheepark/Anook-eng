@@ -1680,9 +1680,24 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             # 브라우니 주문 후 콜라를 추가 주문하는 것은 정상이므로 중복 질문 X.
             # 브라우니 주문 후 브라우니를 다시 주문하면 중복 질문 O.
             # ──────────────────────────────────────────────
+            # [방어 로직] 이미 Add/Replace 질문이 나갔다면 중복 감지 스킵
+            # (에이전트 레벨 가드레일 실패 시 2차 방어)
+            _skip_dup_gate = False
+            _user_lower = request.text.strip().lower() if request.text else ""
+            if _user_lower in ("add", "replace", "추가", "변경"):
+                _skip_dup_gate = True
+            elif hasattr(request, 'chat_history') and request.chat_history:
+                for _ch_msg in request.chat_history:
+                    _ch_content = (_ch_msg.get('content') or '').lower()
+                    _ch_role = _ch_msg.get('role', '')
+                    if _ch_role != 'user' and 'add' in _ch_content and 'replace' in _ch_content:
+                        _skip_dup_gate = True
+                        break
+
             if (final_domain_code
                     and action_type == "ADD"
                     and not is_escalation
+                    and not _skip_dup_gate
                     and hasattr(request, 'active_requests') and request.active_requests):
 
                 # 1) 새 요청의 아이템 키워드 추출
