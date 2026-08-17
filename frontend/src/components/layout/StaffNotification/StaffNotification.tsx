@@ -5,7 +5,6 @@ import { useTranslation } from '@/app/useTranslation';
 import { useSSE } from '@/app/useSSE';
 import { handleResponse } from '@/lib/api';
 import NotificationCard from '@/components/ui/NotificationCard/NotificationCard';
-import Tabs from '@/components/ui/Tab/Tabs';
 import styles from './StaffNotification.module.css';
 
 export interface StaffTask {
@@ -168,17 +167,6 @@ export default function StaffNotification() {
             <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label={language === 'en' ? 'Close' : '닫기'}>
               <X size={18} />
             </button>
-          </div>
-
-          <div className={styles.tabWrapper}>
-            <Tabs
-              variant="line"
-              options={[
-                { label: language === 'en' ? 'Cancel' : '취소', value: 'cancel', count: totalNotifications },
-              ]}
-              activeValue="cancel"
-              onChange={() => {}}
-            />
           </div>
 
           <div className={styles.content}>
