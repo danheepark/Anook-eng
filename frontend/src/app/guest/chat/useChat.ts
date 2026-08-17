@@ -483,27 +483,10 @@ export function useChat() {
 
         // COMPLETED는 ChatEndCard(FEEDBACK)로 처리
         if (payload.status !== 'COMPLETED') {
-          // FRONT/EMERGENCY 도메인 카드는 제자리에서 상태만 업데이트 (제거/재생성 방지)
-          const isInPlaceDomain = payload.domainCode === 'FRONT' || payload.domainCode === 'EMERGENCY';
-
           setMessages(prev => {
             const existingIdx = prev.findIndex(m => m.id === `request-${payload.requestId}` || m.meta?.requestId === payload.requestId);
             const existingMeta = existingIdx >= 0 ? (prev[existingIdx].meta || {}) : {};
             const existingGrace = existingMeta.graceRemaining || 0;
-
-            if (isInPlaceDomain && existingIdx >= 0) {
-              // FRONT/EMERGENCY: 제자리에서 상태만 업데이트 (카드 위치/보더 유지)
-              const updated = [...prev];
-              updated[existingIdx] = {
-                ...updated[existingIdx],
-                meta: {
-                  ...updated[existingIdx].meta,
-                  status: payload.status,
-                  graceRemaining: 0,
-                }
-              };
-              return updated;
-            }
 
             // 부서가 변경된 경우: 기존 카드는 유지하고 새 카드를 하단에 추가
             const existingDomain = existingMeta.domainCode;
@@ -579,23 +562,39 @@ export function useChat() {
             const existingWithContent = [...prev].reverse().find(m => (m.meta?.requestId === payload.requestId || m.id === `request-${payload.requestId}`) && m.content);
             const preservedContent = existingWithContent ? existingWithContent.content : '';
 
-            // 같은 도메인 내 상태 변경: 기존 카드 교체
-            const filtered = prev.filter(m => m.meta?.requestId !== payload.requestId && m.id !== `request-${payload.requestId}`);
-
-            return [...filtered, {
-              ...requestMsg,
-              content: preservedContent,
-              id: `request-${payload.requestId}-${Date.now()}`,
-              meta: {
-                ...requestMsg.meta,
-                entities: payload.entities || existingMeta.entities,
-                priority: payload.priority || existingMeta.priority,
-                cancelReason: payload.cancelReason || existingMeta.cancelReason,
-                cancelledAt: payload.status === 'CANCELLED' ? (existingMeta.cancelledAt || new Date().toISOString()) : undefined,
-                createdAt: existingMeta.createdAt || payload.createdAt || new Date().toISOString(),
-                graceRemaining: payload.type === 'NEW_REQUEST' ? payload.graceRemaining : (payload.status === 'CANCELLED' ? 0 : existingGrace)
-              }
-            }];
+            // 같은 도메인 내 상태 변경: 기존 카드 제자리에서 교체 (위치 불변)
+            if (existingIdx >= 0) {
+              const updated = [...prev];
+              updated[existingIdx] = {
+                ...updated[existingIdx],
+                content: preservedContent || updated[existingIdx].content, // 텍스트 보존
+                meta: {
+                  ...updated[existingIdx].meta,
+                  status: payload.status,
+                  entities: payload.entities || existingMeta.entities,
+                  priority: payload.priority || existingMeta.priority,
+                  cancelReason: payload.cancelReason || existingMeta.cancelReason,
+                  cancelledAt: payload.status === 'CANCELLED' ? (existingMeta.cancelledAt || new Date().toISOString()) : undefined,
+                  graceRemaining: payload.type === 'NEW_REQUEST' ? payload.graceRemaining : (payload.status === 'CANCELLED' ? 0 : existingGrace)
+                }
+              };
+              return updated;
+            } else {
+              // 최초 생성
+              return [...prev, {
+                ...requestMsg,
+                content: preservedContent,
+                id: `request-${payload.requestId}-${Date.now()}`,
+                meta: {
+                  ...requestMsg.meta,
+                  entities: payload.entities,
+                  priority: payload.priority,
+                  cancelReason: payload.cancelReason,
+                  createdAt: payload.createdAt || new Date().toISOString(),
+                  graceRemaining: payload.graceRemaining
+                }
+              }];
+            }
           });
         } else {
           // COMPLETED: 도메인별 분기

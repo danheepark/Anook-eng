@@ -55,6 +55,24 @@ export default function PmsPage() {
   const [payingAll, setPayingAll] = useState(false);
   const [selectedGuestForQR, setSelectedGuestForQR] = useState<Guest | null>(null);
   const [baseUrl, setBaseUrl] = useState('');
+  const [copiedGuestId, setCopiedGuestId] = useState<number | null>(null);
+  const [copiedNotice, setCopiedNotice] = useState(false);
+
+  const handleCopyQrLink = async (accessCode: string, guestId?: number) => {
+    const url = `${baseUrl}/chat?code=${accessCode}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      if (guestId) {
+        setCopiedGuestId(guestId);
+        setTimeout(() => setCopiedGuestId(null), 2000);
+      } else {
+        setCopiedNotice(true);
+        setTimeout(() => setCopiedNotice(false), 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy QR link', err);
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -317,10 +335,16 @@ export default function PmsPage() {
                       투숙 중
                     </span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
                     <button
                       className={styles.actionBtn}
-                      style={{ marginRight: 8 }}
+                      title="QR 링크 복사"
+                      onClick={() => handleCopyQrLink(guest.accessCode, guest.id)}
+                    >
+                      {copiedGuestId === guest.id ? '✅' : '📋'}
+                    </button>
+                    <button
+                      className={styles.actionBtn}
                       title="QR 코드 보기"
                       onClick={() => setSelectedGuestForQR(guest)}
                     >
@@ -612,7 +636,14 @@ export default function PmsPage() {
               {baseUrl}/chat?code={selectedGuestForQR.accessCode}
             </p>
 
-            <div className={styles.confirmActions}>
+            <div className={styles.confirmActions} style={{ gap: 12 }}>
+              <button
+                className={styles.btnCancel}
+                onClick={() => handleCopyQrLink(selectedGuestForQR.accessCode)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+              >
+                📋 {copiedNotice ? '복사 완료!' : 'QR 링크 복사'}
+              </button>
               <button className={styles.btnSubmit} onClick={() => setSelectedGuestForQR(null)}>
                 확인
               </button>

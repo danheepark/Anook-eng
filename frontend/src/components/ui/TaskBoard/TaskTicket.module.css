@@ -268,7 +268,7 @@
 }
 
 .assigneeText {
-  font: var(--text-caption-medium);
+  font: var(--text-caption-regular);
   color: var(--color-gray-400);
   white-space: nowrap;
   line-height: 1;
@@ -324,7 +324,7 @@
 
 /* --- 취소 대기중인 카드 스타일 --- */
 .cancelPendingCard {
-  background-color: #FFE6DC !important;
+  background-color: #ffd1c2 !important;
   border: none !important;
 }
 

@@ -91,7 +91,7 @@
 
 .secondaryLabel {
   font: var(--text-caption-regular);
-  color: var(--color-gray-500);
+  color: var(--color-gray-400);
   letter-spacing: -0.1px;
 }
 

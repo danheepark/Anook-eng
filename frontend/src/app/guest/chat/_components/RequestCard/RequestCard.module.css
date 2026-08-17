@@ -212,21 +212,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-tag-background-orange, #FFF5F2);
+  background-color: #FFFFFF;
   color: var(--color-tag-text-orange, #FF5703);
   border: 1px solid color-mix(in srgb, var(--color-tag-text-orange, #FF5703) 40%, transparent);
   border-radius: 9999px;
-  padding: 2px 6px;
-  font-size: 10px;
+  padding: 3px 8px;
+  font: var(--text-caption-medium);
   margin-left: 8px;
   line-height: 1;
-  font-weight: 500;
   white-space: nowrap;
 }
 
 .cancelPendingCard {
-  background: rgba(255, 255, 255, 0.5) !important;
-  border: 1px solid var(--color-tag-text-orange, #FF5703) !important;
+  background: rgba(254, 186, 163, 0.3) !important;
 }
 
 .cancelPendingCard .iconContainer,
