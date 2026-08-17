@@ -29,6 +29,7 @@ export default function useRequestDetail() {
 
   const fetchDetail = async (id: number) => {
     setLoading(true);
+    setDetail(null);
     setError(null);
     try {
       const res = await fetch(`/api/frontdesk/requests/${id}`);

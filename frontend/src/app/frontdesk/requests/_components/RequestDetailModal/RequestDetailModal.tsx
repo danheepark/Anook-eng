@@ -292,26 +292,7 @@ export default function RequestDetailModal({
   const { detail, fetchDetail, changePriority, changeDepartment, requestEscalation, cancelRequest, loading } = useRequestDetail();
   const router = useRouter();
 
-  // Fallback mock detail for /test page or API failure
-  const activeDetail = detail || (isOpen && !loading ? {
-    id: requestId,
-    status: 'PENDING',
-    priority: 'NORMAL',
-    departmentId: 'HK',
-    departmentName: '하우스키핑',
-    entities: { items: [{ item: '수건', count: 2 }] },
-    rawText: '수건 2장 더 가져다주세요. 욕실용 수건으로 부탁합니다.',
-    summary: '수건 2장 추가 요청',
-    confidence: 0.98,
-    roomNo: '707',
-    assignedStaffId: null,
-    assignedStaffName: null,
-    version: 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    cancelRequested: false,
-    cancelRequestedAt: null,
-  } : null);
+  const activeDetail = detail;
 
   const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
   const [showManualAssign, setShowManualAssign] = useState(false);
@@ -346,7 +327,19 @@ export default function RequestDetailModal({
       .catch(() => {});
   }, [isOpen]);
 
-  if (!activeDetail) return null;
+  if (!isOpen) return null;
+
+  if (loading || !activeDetail) {
+    return (
+      <ModalOverlay isOpen={isOpen} onClose={onClose}>
+        <ModalCard size="md" overflowVisible={false} onClose={onClose}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '260px', color: 'var(--color-gray-400)', font: 'var(--text-body-medium)' }}>
+            <span>{t.common?.loading || 'Loading...'}</span>
+          </div>
+        </ModalCard>
+      </ModalOverlay>
+    );
+  }
 
   const getStatusText = (status: string) => {
     switch (status) {
