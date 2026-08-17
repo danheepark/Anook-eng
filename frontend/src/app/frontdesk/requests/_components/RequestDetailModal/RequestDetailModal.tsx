@@ -489,9 +489,12 @@ export default function RequestDetailModal({
         {/* 헤더 */}
         <div className={styles.header}>
           <div className={styles.headerTop}>
-            <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
-            {activeDetail.cancelRequested && (
-              <StatusBadge variant="red">{t.frontdeskPage.requestDetailModal.status.cancelRequested}</StatusBadge>
+            {activeDetail.cancelRequested ? (
+              <StatusBadge variant="red">
+                {language === 'en' ? 'Cancel request' : '취소 요청'}
+              </StatusBadge>
+            ) : (
+              <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
             )}
           </div>
           <h2 className={styles.title}>{modalTitle}</h2>

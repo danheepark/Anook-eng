@@ -419,11 +419,12 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
             {/* 1. 헤더 */}
             <div className={styles.header}>
               <div className={styles.headerTop}>
-                <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
-                {task.cancelRequested && (
+                {task.cancelRequested ? (
                   <StatusBadge variant="red">
-                    {language === 'en' ? 'Cancellation Requested' : '고객 취소 요청'}
+                    {language === 'en' ? 'Cancel request' : '취소 요청'}
                   </StatusBadge>
+                ) : (
+                  <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
                 )}
               </div>
               <h2 className={styles.title}>{modalTitle}</h2>
