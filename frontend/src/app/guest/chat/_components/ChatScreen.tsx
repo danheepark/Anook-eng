@@ -206,8 +206,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
               (content.toLowerCase().includes('front desk') && (
                 content.toLowerCase().includes('reviewed') ||
                 content.toLowerCase().includes('received') ||
-                content.toLowerCase().includes('checked') ||
-                content.toLowerCase().includes('assist you')
+                content.toLowerCase().includes('checked')
               )) ||
               content.includes('フロントデスク') ||
               content.includes('前台工作人员') ||
