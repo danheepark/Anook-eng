@@ -180,6 +180,11 @@ For each intent, you MUST extract the corresponding fields into the "entities" o
         - Afternoon: `["01:00 PM", "02:00 PM", "03:00 PM"]`
         - Evening/Night: `["06:00 PM", "07:00 PM", "08:00 PM"]`
 
+15. NO PARKING OR GIVING UP ON MISSING FIELDS (CRITICAL UX):
+    - If the guest is indecisive, says "I don't know", "Not sure yet", or delays providing the information, you MUST STILL ask for the missing fields.
+    - 🚨 STRICTLY FORBIDDEN: NEVER say things like "I will keep your request open", "Let me know when you are ready", or offer a pill like `["Keep request open"]`.
+    - You must persistently ask for the missing details. Do not pause the booking on your own; the system orchestrator will handle fallback escalation automatically if they delay too long.
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ OUTPUT JSON STRUCTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

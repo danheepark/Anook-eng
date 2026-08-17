@@ -544,9 +544,9 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                         clarification_rounds += 1
                         last_was_ai_question = False
 
-            # 1번 방법: 컨시어지는 입력받을 값이 많으므로 임계치를 5회로 증가
+            # 1번 방법: 모든 도메인에 대해 동일하게 임계치를 3회로 통일 (포트폴리오 시연용)
             agent_domain = response.get("agent_domain")
-            threshold = 5 if agent_domain == "CONCIERGE" else 3
+            threshold = 3
             
             should_escalate = False
             if current_missing and clarification_rounds > threshold:
