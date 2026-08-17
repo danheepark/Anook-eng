@@ -429,52 +429,41 @@ export default function RequestDetailModal({
     }
   };
 
-  const formatTimeDateOrder = (dt: string | Date | undefined) => {
-    if (!dt) return '';
-    const d = new Date(typeof dt === 'string' ? dt.replace(' ', 'T') : dt);
+  // 1. Created at 일시 포맷 (예: 01:50 Aug 17 2026)
+  const formatCreatedAt = (dateString: string | Date | undefined): string => {
+    if (!dateString) return '';
+    const d = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
     if (isNaN(d.getTime())) return '';
-    const year = d.getFullYear();
     const hours = String(d.getHours()).padStart(2, '0');
     const minutes = String(d.getMinutes()).padStart(2, '0');
-    const timeStr = `${hours}:${minutes}`;
+    const year = d.getFullYear();
+    const day = d.getDate();
 
     if (language === 'ko') {
-      return `${timeStr} ${year}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+      return `${hours}:${minutes} ${year}년 ${d.getMonth() + 1}월 ${day}일`;
     }
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const month = monthNames[d.getMonth()];
-    const day = d.getDate();
-    return `${timeStr} ${month} ${day} ${year}`;
+    return `${hours}:${minutes} ${month} ${day} ${year}`;
   };
 
-  const getRelativeTimeString = (dateString: string | Date | undefined): string => {
+  // 2. Accepted by 시간 포맷 (연도 제외, 예: 01:50 Aug 17)
+  const formatAcceptedAt = (dateString: string | Date | undefined): string => {
     if (!dateString) return '';
-    const date = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
-    if (isNaN(date.getTime())) return '';
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const d = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
+    if (isNaN(d.getTime())) return '';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const day = d.getDate();
 
-    if (diffDays > 0) {
-      return `${diffDays}${language === 'en' ? ' ' : ''}${language === 'ko' ? '일 전' : 'days ago'}`;
-    } else if (diffHours > 0) {
-      return `${diffHours}${language === 'en' ? ' ' : ''}${language === 'ko' ? '시간 전' : 'hrs ago'}`;
-    } else if (diffMins > 0) {
-      return `${diffMins}${language === 'en' ? ' ' : ''}${language === 'ko' ? '분 전' : 'mins ago'}`;
-    } else {
-      return language === 'ko' ? '방금 전' : 'Just now';
+    if (language === 'ko') {
+      return `${hours}:${minutes} ${d.getMonth() + 1}월 ${day}일`;
     }
-  };
 
-  const formatModalDateTime = (dt: string | undefined, isCompleted: boolean) => {
-    if (!dt) return '';
-    if (isCompleted) {
-      return formatTimeDateOrder(dt);
-    }
-    return getRelativeTimeString(dt);
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[d.getMonth()];
+    return `${hours}:${minutes} ${month} ${day}`;
   };
 
   const roomPrefix = language === 'ko' ? `${activeDetail.roomNo}호` : `NO.${activeDetail.roomNo}`;
@@ -501,19 +490,19 @@ export default function RequestDetailModal({
         </div>
 
         <div className={styles.modalBody}>
-          {/* 1. Created at 일시 */}
+          {/* 1. Created at 일시 (예: 01:50 Aug 17 2026) */}
           {activeDetail.createdAt && (
             <div className={styles.reasoningItem}>
               <span className={styles.secondaryLabel}>
                 {language === 'ko' ? '요청 일시' : 'Created at'}
               </span>
               <p className={styles.reasoningText}>
-                {formatModalDateTime(activeDetail.createdAt, activeDetail.status === 'COMPLETED')}
+                {formatCreatedAt(activeDetail.createdAt)}
               </p>
             </div>
           )}
 
-          {/* Accepted by 수락 담당자 및 시간 */}
+          {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 01:50 Aug 17) */}
           {activeDetail.assignedStaffName && (
             <div className={styles.reasoningItem}>
               <span className={styles.secondaryLabel}>
@@ -521,7 +510,7 @@ export default function RequestDetailModal({
               </span>
               <p className={styles.reasoningText}>
                 {activeDetail.updatedAt
-                  ? `${activeDetail.assignedStaffName} at ${formatModalDateTime(activeDetail.updatedAt, activeDetail.status === 'COMPLETED')}`
+                  ? `${activeDetail.assignedStaffName} at ${formatAcceptedAt(activeDetail.updatedAt)}`
                   : activeDetail.assignedStaffName}
               </p>
             </div>

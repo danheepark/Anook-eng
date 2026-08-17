@@ -326,49 +326,41 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
     }
   };
 
-  // 날짜/시간 포맷팅
-  const formatTimeDateOrder = (dateString: string | Date | undefined): string => {
+  // 1. Created at 일시 포맷 (예: 01:50 Aug 17 2026)
+  const formatCreatedAt = (dateString: string | Date | undefined): string => {
     if (!dateString) return '';
     const d = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
     if (isNaN(d.getTime())) return '';
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    let hours = d.getHours();
+    const hours = String(d.getHours()).padStart(2, '0');
     const minutes = String(d.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const paddedHours = String(hours).padStart(2, '0');
-    return `${paddedHours}:${minutes} ${ampm}, ${yyyy}.${mm}.${dd}`;
+    const year = d.getFullYear();
+    const day = d.getDate();
+
+    if (language === 'ko') {
+      return `${hours}:${minutes} ${year}년 ${d.getMonth() + 1}월 ${day}일`;
+    }
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[d.getMonth()];
+    return `${hours}:${minutes} ${month} ${day} ${year}`;
   };
 
-  const getRelativeTimeString = (dateString: string | Date | undefined): string => {
+  // 2. Accepted by 시간 포맷 (연도 제외, 예: 01:50 Aug 17)
+  const formatAcceptedAt = (dateString: string | Date | undefined): string => {
     if (!dateString) return '';
-    const date = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
-    if (isNaN(date.getTime())) return '';
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const d = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
+    if (isNaN(d.getTime())) return '';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const day = d.getDate();
 
-    if (diffDays > 0) {
-      return `${diffDays}${language === 'en' ? ' ' : ''}${language === 'ko' ? '일 전' : 'days ago'}`;
-    } else if (diffHours > 0) {
-      return `${diffHours}${language === 'en' ? ' ' : ''}${language === 'ko' ? '시간 전' : 'hrs ago'}`;
-    } else if (diffMins > 0) {
-      return `${diffMins}${language === 'en' ? ' ' : ''}${language === 'ko' ? '분 전' : 'mins ago'}`;
-    } else {
-      return language === 'ko' ? '방금 전' : 'Just now';
+    if (language === 'ko') {
+      return `${hours}:${minutes} ${d.getMonth() + 1}월 ${day}일`;
     }
-  };
 
-  const formatModalDateTime = (dt: string | undefined, isCompleted: boolean) => {
-    if (!dt) return '';
-    if (isCompleted) {
-      return formatTimeDateOrder(dt);
-    }
-    return getRelativeTimeString(dt);
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[d.getMonth()];
+    return `${hours}:${minutes} ${month} ${day}`;
   };
 
   const STATUS_VARIANT_MAP: Record<string, 'red' | 'purple' | 'green' | 'gray'> = {
@@ -432,19 +424,19 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
             {/* 2. 본문 */}
             <div className={styles.modalBody}>
-              {/* Created at 일시 */}
+              {/* Created at 일시 (예: 01:50 Aug 17 2026) */}
               {task.createdAt && (
                 <div className={styles.reasoningItem}>
                   <span className={styles.secondaryLabel}>
                     {language === 'ko' ? '요청 일시' : 'Created at'}
                   </span>
                   <p className={styles.reasoningText}>
-                    {formatModalDateTime(task.createdAt, task.status === 'COMPLETED')}
+                    {formatCreatedAt(task.createdAt)}
                   </p>
                 </div>
               )}
 
-              {/* Accepted by 수락 담당자 및 시간 */}
+              {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 01:50 Aug 17) */}
               {task.assignedStaffName && (
                 <div className={styles.reasoningItem}>
                   <span className={styles.secondaryLabel}>
@@ -452,7 +444,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   </span>
                   <p className={styles.reasoningText}>
                     {task.updatedAt
-                      ? `${task.assignedStaffName} at ${formatModalDateTime(task.updatedAt, task.status === 'COMPLETED')}`
+                      ? `${task.assignedStaffName} at ${formatAcceptedAt(task.updatedAt)}`
                       : task.assignedStaffName}
                   </p>
                 </div>
