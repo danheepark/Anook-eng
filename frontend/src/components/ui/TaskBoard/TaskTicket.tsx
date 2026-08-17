@@ -472,7 +472,7 @@ export default function TaskTicket({
         <div className={styles.headerLeft}>
           {cancelRequested ? (
             <span className={styles.cancelPendingPill}>
-              {roomNo ? (language === 'ko' ? `${roomNo}호 취소 요청` : `RM ${roomNo} Cancel Request`) : (t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Request' : '취소 요청'))}
+              {t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Request' : '취소 요청')}
             </span>
           ) : (
             roomNo && (
@@ -513,6 +513,11 @@ export default function TaskTicket({
       <div className={styles.headerDivider} />
 
       <div className={styles.content}>
+        {cancelRequested && roomNo && (
+          <span className={styles.roomNo}>
+            {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
+          </span>
+        )}
         {entities?.is_contactless && (
           <div className={styles.badgeRow}>
             <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>

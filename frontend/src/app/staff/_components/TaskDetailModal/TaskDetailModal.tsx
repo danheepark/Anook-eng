@@ -466,22 +466,21 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
           {/* 1. 헤더 */}
           <div className={styles.header}>
             <div className={styles.headerLeft}>
-              {task.cancelRequested ? (
-                <span className={styles.cancelPendingPill}>
-                  {roomDisplay} {language === 'en' ? 'Cancel Request' : '취소 요청'}
-                </span>
-              ) : (
-                <span className={`${styles.roomNo} ${getDeptClass(task.departmentId)}`}>
-                  {roomDisplay}
-                </span>
-              )}
+              <span className={`${styles.roomNo} ${getDeptClass(task.departmentId)}`}>
+                {roomDisplay}
+              </span>
             </div>
             <div className={styles.titleRow}>
-              <h2 className={styles.title}>{modalTitle}</h2>
-              {!task.cancelRequested && (
-                <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
-              )}
+              <h2 className={styles.title}>
+                {task.cancelRequested ? (language === 'en' ? 'Cancel Request' : '취소 요청') : modalTitle}
+              </h2>
+              <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
             </div>
+            {task.cancelRequested && cleanSummary && (
+              <div className={styles.cancelSubTitle}>
+                {cleanSummary}
+              </div>
+            )}
           </div>
 
           {/* 2. 본문 */}

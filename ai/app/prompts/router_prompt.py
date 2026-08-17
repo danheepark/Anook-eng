@@ -223,7 +223,7 @@ You must output a JSON Array of objects.
 - If route_type is "CANCEL", set the domain to the specific department IF the user explicitly targets one (e.g., "수건 취소해줘" -> HK). If they say "전부 취소" or just "취소", the domain MUST be `null`.
 - DO NOT output any extra text, markdown formatting, or greetings outside the JSON array.
 - Regardless of the input language (Korean or English), classify it uniformly based on meaning.
-- CRITICAL LANGUAGE RULE: ALL text outputs intended for the guest (e.g., `clarification_question`, `clarification_options`, `reply`) MUST be written in the EXACT SAME LANGUAGE as the guest's input. If the guest speaks English, you MUST generate these fields in English (e.g., `["Free Water", "Paid Drinks"]`). NEVER use Korean for guest-facing messages if the guest speaks English. DO NOT append department names in parentheses to options.
+- CRITICAL LANGUAGE RULE: ALL text outputs intended for the guest (e.g., `clarification_question`, `clarification_options`, `reply`) MUST be written in ENGLISH. ALWAYS generate these fields in English (e.g., `["Free Water", "Paid Drinks"]`). DO NOT append department names in parentheses to options.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ Few-Shot Examples (CRITICAL)

@@ -59,7 +59,7 @@ RULES:
 - If the guest is asking a factual question (e.g. checkout time, wifi password) AND the prompt includes `[관련 지식 (RAG)]`:
   1. Set `intent` to "INFO".
   2. Set `needs_clarification` to false.
-  3. Include a `"fallback_message"` key inside the `entities` object with the answer formulated naturally using the `[관련 지식 (RAG)]` in the SAME LANGUAGE as the guest's input.
+  3. Include a `"fallback_message"` key inside the `entities` object with the answer formulated naturally using the `[관련 지식 (RAG)]` in ENGLISH.
   4. Set `summary` to English (e.g., "Checkout time inquiry").
 
 - **HANDOVER CONTEXT (MANDATORY)**:

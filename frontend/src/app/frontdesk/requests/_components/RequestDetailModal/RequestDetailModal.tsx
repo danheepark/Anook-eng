@@ -550,22 +550,21 @@ export default function RequestDetailModal({
         {/* 헤더 */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            {activeDetail.cancelRequested ? (
-              <span className={styles.cancelPendingPill}>
-                {roomDisplay} {language === 'en' ? 'Cancel Request' : '취소 요청'}
-              </span>
-            ) : (
-              <span className={`${styles.roomNo} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
-                {roomDisplay}
-              </span>
-            )}
+            <span className={`${styles.roomNo} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
+              {roomDisplay}
+            </span>
           </div>
           <div className={styles.titleRow}>
-            <h2 className={styles.title}>{modalTitle}</h2>
-            {!activeDetail.cancelRequested && (
-              <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
-            )}
+            <h2 className={styles.title}>
+              {activeDetail.cancelRequested ? (language === 'en' ? 'Cancel Request' : '취소 요청') : modalTitle}
+            </h2>
+            <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
           </div>
+          {activeDetail.cancelRequested && cleanSummary && (
+            <div className={styles.cancelSubTitle}>
+              {cleanSummary}
+            </div>
+          )}
         </div>
 
         <div className={styles.modalBody}>

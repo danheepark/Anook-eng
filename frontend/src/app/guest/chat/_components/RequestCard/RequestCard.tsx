@@ -129,40 +129,41 @@ export default function RequestCard({
       }
     } else if (domainCode === 'CONCIERGE') {
       if (!intent || !entities) return null;
+      const isEn = targetLang === 'en';
       switch (intent) {
         case 'TAXI':
-          return `택시 호출${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
+          return isEn ? 'Taxi Reservation' : `택시 예약`;
         case 'LUGGAGE_STORAGE': {
           const count = entities.count;
-          const action = entities.action === 'store' ? '보관' : '찾기';
+          const action = entities.action === 'store' 
+            ? (isEn ? 'Storage' : '보관') 
+            : (isEn ? 'Retrieval' : '찾기');
           return count 
-            ? `짐 ${count}개 ${action}` // Removed " 요청"
-            : `수하물 ${action}`; // Removed " 요청"
+            ? (isEn ? `Luggage (${count} pcs) ${action}` : `짐 ${count}개 ${action}`)
+            : (isEn ? `Luggage ${action}` : `수하물 ${action}`);
         }
         case 'RESTAURANT': 
-          return `식당${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
+          return isEn ? 'Restaurant Reservation' : `식당 예약`;
         case 'WAKE_UP_CALL': {
           const time = entities.time as string | undefined;
           return time 
-            ? `${time} 모닝콜${t.cardUI?.message?.reserveSuffix || ' 예약'}` 
-            : `모닝콜${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
+            ? (isEn ? `Wake-up Call (${time})` : `${time} 모닝콜`) 
+            : (isEn ? 'Wake-up Call' : '모닝콜');
         }
         case 'POSTAL_SERVICE': {
           const item = entities.item as string | undefined;
-          return item ? `${item} 발송 대행` : '우편물 발송 대행';
+          return isEn ? (item ? `${item} Shipping` : 'Postal Shipping') : (item ? `${item} 발송 대행` : '우편물 발송 대행');
         }
         case 'DELIVERY': {
           const item = entities.item as string | undefined;
-          return item 
-            ? `${item} 배달` // Removed " 요청"
-            : `배달`; // Removed " 요청"
+          return isEn ? (item ? `${item} Delivery` : 'Delivery') : (item ? `${item} 배달` : '배달');
         }
         case 'RESERVATION': {
           const target = entities.target as string | undefined;
           const time = entities.time as string | undefined;
-          if (target && time) return `${time} ${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
-          if (target) return `${target}${t.cardUI?.message?.reserveSuffix || ' 예약'}`;
-          return `예약`; // Changed from '예약 요청'
+          if (target && time) return isEn ? `${target} Reservation (${time})` : `${time} ${target} 예약`;
+          if (target) return isEn ? `${target} Reservation` : `${target} 예약`;
+          return isEn ? 'Reservation' : '예약';
         }
         case 'OTHER': {
           const desc = entities.description as string | undefined;

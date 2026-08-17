@@ -175,6 +175,10 @@
   line-height: 1.2;
 }
 
+.content .roomNo {
+  margin-bottom: -4px;
+}
+
 .headerDivider {
   width: calc(100% + var(--space-16) * 2);
   height: 1px;
@@ -326,6 +330,13 @@
 .cancelPendingCard {
   background-color: #ffd1c2 !important;
   border: none !important;
+}
+
+.cancelPendingCard .ticketId,
+.cancelPendingCard .metaDot,
+.cancelPendingCard .timeText,
+.cancelPendingCard .assigneeText {
+  color: var(--color-gray-500) !important;
 }
 
 .cancelPendingCard .headerDivider {

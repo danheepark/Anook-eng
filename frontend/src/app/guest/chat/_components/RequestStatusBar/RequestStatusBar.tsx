@@ -257,9 +257,11 @@ export default function RequestStatusBar({
   const detailsText = translatedDetails || rawDetails;
   
   let computedProgress = 0;
-  if (status === 'CREATED' || status === 'PENDING' || status === 'CANCEL_PENDING' || status === 'ESCALATED') {
+  if (status === 'CANCEL_PENDING') {
+    computedProgress = progress >= 50 ? 50 : 0;
+  } else if (status === 'CREATED' || status === 'PENDING' || status === 'ESCALATED') {
     computedProgress = 0;
-  } else if (status === 'IN_PROGRESS') {
+  } else if (status === 'IN_PROGRESS' || status === 'ASSIGNED') {
     computedProgress = 50;
   } else if (status === 'COMPLETED') {
     computedProgress = 100;
