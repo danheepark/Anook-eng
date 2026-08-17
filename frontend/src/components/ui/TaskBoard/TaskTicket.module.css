@@ -235,14 +235,16 @@
 .footer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   margin-top: auto;
   width: 100%;
 }
 
-.footer > div:last-child {
+.footerActions {
   margin-left: auto;
-  margin-bottom: -8px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
 }
 
 .assigneeText {
@@ -250,7 +252,6 @@
   color: var(--color-gray-400);
   white-space: nowrap;
   line-height: 1;
-  margin-bottom: -2px;
 }
 
 .textStatus {

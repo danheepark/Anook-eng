@@ -515,12 +515,12 @@ export default function TaskTicket({
               {language === 'en' ? `Accepted by ${assigneeName}` : `${assigneeName} 담당`}
             </span>
           )}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div className={styles.footerActions}>
             {status === 'TODO' && onAccept && (
               <Button
-                variant="primary"
+                variant="secondary"
+                size="small"
                 onClick={onAccept}
-                style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
                 disabled={!isOnline}
                 title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
               >
@@ -529,9 +529,9 @@ export default function TaskTicket({
             )}
             {status === 'IN_PROGRESS' && !cancelRequested && onComplete && (
               <Button
-                variant="primary"
+                variant="secondary"
+                size="small"
                 onClick={onComplete}
-                style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
                 disabled={!isOnline}
                 title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
               >
@@ -539,12 +539,12 @@ export default function TaskTicket({
               </Button>
             )}
             {status === 'IN_PROGRESS' && cancelRequested && (
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 {onRejectCancel && (
                   <Button
-                    variant="secondary"
+                    variant="outlined"
+                    size="small"
                     onClick={onRejectCancel}
-                    style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', backgroundColor: '#ffffff', border: '1px solid var(--color-gray-300)', minWidth: '76px', justifyContent: 'center' }}
                     disabled={!isOnline}
                     title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
                   >
@@ -553,9 +553,9 @@ export default function TaskTicket({
                 )}
                 {onApproveCancel && (
                   <Button
-                    variant="primary"
+                    variant="secondary"
+                    size="small"
                     onClick={onApproveCancel}
-                    style={{ padding: '4px 12px', minHeight: 'auto', fontSize: '12px', minWidth: '76px', justifyContent: 'center' }}
                     disabled={!isOnline}
                     title={!isOnline ? "오프라인 상태에서는 변경할 수 없습니다" : undefined}
                   >
