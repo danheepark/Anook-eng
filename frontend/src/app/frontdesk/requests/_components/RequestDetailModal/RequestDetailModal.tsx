@@ -552,21 +552,29 @@ export default function RequestDetailModal({
     modalTitle = cleanSummary ? `${language === 'en' ? 'Transfer request' : '이관 요청'} · ${cleanSummary}` : (language === 'en' ? 'Transfer request' : '이관 요청');
   }
 
+  const rawTextParts = activeDetail.rawText ? activeDetail.rawText.split('\n|||TRANSFER_REASON|||') : [];
+  const transferReasonText = rawTextParts.length > 1 ? rawTextParts.slice(1).join('\n').trim() : null;
+
   return (
     <>
       <ModalOverlay isOpen={isOpen && !showManualAssign && !isChatHistoryOpen} onClose={onClose}>
         <ModalCard size="md" overflowVisible={false} onClose={onClose}>
         {/* 헤더 */}
         <div className={styles.header}>
-          <span className={`${styles.roomNo} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
-            {roomDisplay}
-          </span>
+          <div className={styles.headerLeft}>
+            <span className={`${styles.roomNo} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
+              {roomDisplay}
+            </span>
+            {activeDetail.cancelRequested && (
+              <span className={styles.cancelPendingText}>
+                {language === 'en' ? 'Cancel Request' : '취소 요청'}
+              </span>
+            )}
+          </div>
           <div className={styles.titleRow}>
             <h2 className={styles.title}>{modalTitle}</h2>
-            {deptDisplayName && (
-              <StatusBadge variant={getDeptBadgeVariant(activeDetail.departmentId || activeDetail.departmentName)}>
-                {deptDisplayName}
-              </StatusBadge>
+            {!activeDetail.cancelRequested && (
+              <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
             )}
           </div>
         </div>
@@ -654,6 +662,16 @@ export default function RequestDetailModal({
               <h3 className={styles.photoTitle}>{t.frontdeskPage.requestDetailModal.photo || (language === 'en' ? 'Attached Photo' : '첨부 사진')}</h3>
               <div className={styles.photoBox}>
                 <img src={activeDetail.imageUrl} alt={t.frontdeskPage.requestDetailModal.photo || 'Attached Photo'} className={styles.photoImg} />
+              </div>
+            </div>
+          )}
+
+          {/* 업무 전달 사유 */}
+          {transferReasonText && (
+            <div className={styles.reasoningItem}>
+              <span className={styles.secondaryLabel}>{language === 'en' ? 'Transfer Reason' : '업무 전달 사유'}</span>
+              <div className={styles.transferReasonBox}>
+                {transferReasonText}
               </div>
             </div>
           )}

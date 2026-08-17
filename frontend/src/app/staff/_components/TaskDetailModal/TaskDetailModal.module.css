@@ -21,9 +21,23 @@
   flex-wrap: wrap;
 }
 
+.headerLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-width: 0;
+}
+
 .roomNo {
   font: var(--text-body-bold);
   color: var(--color-gray-900);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.cancelPendingText {
+  font: var(--text-body-bold);
+  color: #FF5B1F;
   white-space: nowrap;
   line-height: 1.2;
 }
@@ -43,7 +57,7 @@
 }
 
 .cancelPrefix {
-  color: #F97316;
+  color: #FF5B1F;
   font-weight: 700;
 }
 

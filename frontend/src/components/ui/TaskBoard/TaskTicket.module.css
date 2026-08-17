@@ -32,6 +32,7 @@
 .hk .topColorBar {
   background-color: var(--color-dept-hk-border);
 }
+
 .hk .roomNo {
   color: var(--color-dept-hk-text);
 }
@@ -39,6 +40,7 @@
 .facility .topColorBar {
   background-color: var(--color-dept-facility-border);
 }
+
 .facility .roomNo {
   color: var(--color-dept-facility-text);
 }
@@ -46,6 +48,7 @@
 .fb .topColorBar {
   background-color: var(--color-dept-fb-border);
 }
+
 .fb .roomNo {
   color: var(--color-dept-fb-text);
 }
@@ -53,6 +56,7 @@
 .concierge .topColorBar {
   background-color: var(--color-dept-concierge-border);
 }
+
 .concierge .roomNo {
   color: var(--color-dept-concierge-text);
 }
@@ -60,6 +64,7 @@
 .front .topColorBar {
   background-color: var(--color-dept-front-border);
 }
+
 .front .roomNo {
   color: var(--color-dept-front-text);
 }
@@ -67,6 +72,7 @@
 .emergency .topColorBar {
   background-color: var(--color-dept-emergency-border);
 }
+
 .emergency .roomNo {
   color: var(--color-dept-emergency-text);
 }
@@ -88,9 +94,9 @@
 
 .headerRight {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-8);
   margin-left: auto;
 }
 
@@ -136,7 +142,7 @@
 .headerLeft {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-12);
   min-width: 0;
 }
 
@@ -149,7 +155,7 @@
 
 .cancelPendingText {
   font: var(--text-body-bold);
-  color: #F97316;
+  color: #FF5B1F;
   white-space: nowrap;
   line-height: 1.2;
 }
@@ -303,8 +309,8 @@
 
 /* --- 취소 대기중인 카드 스타일 --- */
 .cancelPendingCard {
-  background-color: #FFFAF5 !important;
-  border: 2px solid #F97316 !important;
+  background-color: #FFF1EF !important;
+  border: 2px solid #FF5B1F !important;
 }
 
 .cancelPendingCard:hover {

@@ -551,7 +551,7 @@
       "completed": "Completed",
       "completedMark": "Completed",
       "cancelled": "Cancelled",
-      "cancelPending": "Cancel Pending",
+      "cancelPending": "Cancel Request",
       "escalated": "Awaiting Staff"
     },
     "statusBar": {
@@ -608,7 +608,7 @@
     },
     "badge": {
       "cancelled": "Cancelled",
-      "cancelPending": "Cancel Pending",
+      "cancelPending": "Cancel Request",
       "urgent": "Urgent",
       "contactless": "Contactless",
       "targetTime": "Target Time"

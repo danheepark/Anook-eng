@@ -455,7 +455,7 @@ export default function TaskTicket({
           )}
           {cancelRequested && (
             <span className={styles.cancelPendingText}>
-              {t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Pending' : '취소 대기')}
+              {t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Request' : '취소 요청')}
             </span>
           )}
         </div>

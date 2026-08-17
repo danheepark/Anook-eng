@@ -601,7 +601,7 @@
     },
     "badge": {
       "cancelled": "취소됨",
-      "cancelPending": "취소 대기",
+      "cancelPending": "취소 요청",
       "urgent": "긴급",
       "contactless": "비대면 배달",
       "targetTime": "희망 시간"

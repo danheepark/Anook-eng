@@ -465,22 +465,18 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
         <ModalCard size="md" overflowVisible={false} onClose={handleClose}>
           {/* 1. 헤더 */}
           <div className={styles.header}>
-            <span className={`${styles.roomNo} ${getDeptClass(task.departmentId)}`}>
-              {roomDisplay}
-            </span>
+            <div className={styles.headerLeft}>
+              <span className={`${styles.roomNo} ${getDeptClass(task.departmentId)}`}>
+                {roomDisplay}
+              </span>
+              {task.cancelRequested && (
+                <span className={styles.cancelPendingText}>
+                  {language === 'en' ? 'Cancel Request' : '취소 요청'}
+                </span>
+              )}
+            </div>
             <div className={styles.titleRow}>
-              <h2 className={styles.title}>
-                {task.cancelRequested ? (
-                  <>
-                    <span className={styles.cancelPrefix}>
-                      {language === 'en' ? 'Cancel request' : '취소 요청'}
-                    </span>
-                    {cleanSummary ? ` · ${cleanSummary}` : ''}
-                  </>
-                ) : (
-                  modalTitle
-                )}
-              </h2>
+              <h2 className={styles.title}>{modalTitle}</h2>
               {!task.cancelRequested && (
                 <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
               )}
