@@ -535,17 +535,17 @@ export default function RequestDetailModal({
   const deptDisplayName = getDeptName(activeDetail.departmentId, activeDetail.departmentName);
   const roomDisplay = language === 'en' ? `Room ${activeDetail.roomNo}` : `${activeDetail.roomNo}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
-  const cleanSummary = toSentenceCase(cleanTitleSummary(translatedSummary || activeDetail.summary));
+  const cleanSummary = toSentenceCase(cleanTitleSummary(translatedSummary || activeDetail.summary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');
 
   let modalTitle = cleanSummary;
   let modalSubtitle = roomDisplay;
 
   if (activeDetail.cancelRequested) {
     modalTitle = language === 'en' ? 'Cancel request' : '취소 요청';
-    modalSubtitle = cleanSummary ? `${roomDisplay}, ${cleanSummary}` : roomDisplay;
+    modalSubtitle = cleanSummary ? `${roomDisplay} · ${cleanSummary}` : roomDisplay;
   } else if (activeDetail.status === 'ESCALATED') {
     modalTitle = language === 'en' ? 'Transfer request' : '이관 요청';
-    modalSubtitle = cleanSummary ? `${roomDisplay}, ${cleanSummary}` : roomDisplay;
+    modalSubtitle = cleanSummary ? `${roomDisplay} · ${cleanSummary}` : roomDisplay;
   } else {
     modalTitle = cleanSummary || roomDisplay;
     modalSubtitle = cleanSummary ? roomDisplay : '';
