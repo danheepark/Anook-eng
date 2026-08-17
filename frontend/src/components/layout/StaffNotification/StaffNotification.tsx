@@ -5,6 +5,7 @@ import { useTranslation } from '@/app/useTranslation';
 import { useSSE } from '@/app/useSSE';
 import { handleResponse } from '@/lib/api';
 import NotificationCard from '@/components/ui/NotificationCard/NotificationCard';
+import Tabs from '@/components/ui/Tab/Tabs';
 import styles from './StaffNotification.module.css';
 
 export interface StaffTask {
@@ -29,7 +30,7 @@ export default function StaffNotification() {
   
   const popupRef = useRef<HTMLDivElement>(null);
   const { showToast } = useUiStore();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { subscribe } = useSSE();
 
   // 1. 부서 ID 세션 조회
@@ -115,14 +116,14 @@ export default function StaffNotification() {
         body: JSON.stringify({ version })
       });
       if (res.ok) {
-        showToast('취소가 승인되었습니다.', 'success');
+        showToast(language === 'en' ? 'Cancellation approved.' : '취소가 승인되었습니다.', 'success');
         fetchRequests(true);
       } else {
-        showToast('취소 승인에 실패했습니다.', 'error');
+        showToast(language === 'en' ? 'Failed to approve cancellation.' : '취소 승인에 실패했습니다.', 'error');
       }
     } catch (e) {
       console.error(e);
-      showToast('취소 승인 중 오류가 발생했습니다.', 'error');
+      showToast(language === 'en' ? 'An error occurred during approval.' : '취소 승인 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -134,20 +135,20 @@ export default function StaffNotification() {
         body: JSON.stringify({ version })
       });
       if (res.ok) {
-        showToast('취소 요청이 반려되었습니다.', 'success');
+        showToast(language === 'en' ? 'Cancellation rejected.' : '취소 요청이 반려되었습니다.', 'success');
         fetchRequests(true);
       } else {
-        showToast('취소 반려에 실패했습니다.', 'error');
+        showToast(language === 'en' ? 'Failed to reject cancellation.' : '취소 반려에 실패했습니다.', 'error');
       }
     } catch (e) {
       console.error(e);
-      showToast('취소 반려 중 오류가 발생했습니다.', 'error');
+      showToast(language === 'en' ? 'An error occurred during rejection.' : '취소 반려 중 오류가 발생했습니다.', 'error');
     }
   };
 
   return (
     <div className={styles.container} ref={popupRef}>
-      <button className={styles.bellButton} onClick={() => setIsOpen(!isOpen)} aria-label="부서 알림함">
+      <button className={styles.bellButton} onClick={() => setIsOpen(!isOpen)} aria-label={language === 'en' ? 'Notifications' : '알림'}>
         <div className={styles.iconWrapper}>
           <Bell size={18} color="currentColor" />
           {totalNotifications > 0 && (
@@ -159,15 +160,32 @@ export default function StaffNotification() {
       {isOpen && (
         <div className={styles.popup}>
           <div className={styles.header}>
-            <h3 className={styles.title}>부서 취소 승인 대기함</h3>
-            <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label="닫기">
-              <X size={20} />
+            <div className={styles.headerTitleRow}>
+              <h3 className={styles.title}>
+                {language === 'en' ? 'Notifications' : '알림'}
+              </h3>
+            </div>
+            <button className={styles.closeButton} onClick={() => setIsOpen(false)} aria-label={language === 'en' ? 'Close' : '닫기'}>
+              <X size={18} />
             </button>
+          </div>
+
+          <div className={styles.tabWrapper}>
+            <Tabs
+              variant="line"
+              options={[
+                { label: language === 'en' ? 'Cancel' : '취소', value: 'cancel', count: totalNotifications },
+              ]}
+              activeValue="cancel"
+              onChange={() => {}}
+            />
           </div>
 
           <div className={styles.content}>
             {totalNotifications === 0 ? (
-              <div className={styles.empty}>대기 중인 요청이 없습니다.</div>
+              <div className={styles.empty}>
+                {language === 'en' ? 'No pending requests.' : '대기 중인 요청이 없습니다.'}
+              </div>
             ) : (
               <div className={styles.list}>
                 {pendingCancellations.map(req => {
@@ -184,7 +202,7 @@ export default function StaffNotification() {
                     departmentName={req.departmentName}
                     createdAt={req.createdAt}
                     priority={req.priority}
-                    primaryLabel="승인"
+                    primaryLabel={language === 'en' ? 'Approve' : '승인'}
                     onPrimaryClick={() => handleApproveCancel(req.id, req.version)}
                   />
                   );
