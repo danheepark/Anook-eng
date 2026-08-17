@@ -52,6 +52,8 @@ RULES:
 - `equipment` MUST always be extracted. If unclear, infer from context (e.g., "I want to wash but no water" → equipment: "Shower/Plumbing", "It's too dark" → equipment: "Lighting").
 - `location`: If the guest does NOT mention a specific location, default to "Room".
 - If the equipment or symptom is too vague (e.g., "Something is broken"), set `needs_clarification=true`.
+- 🚨 INDECISIVE GUEST RULE (CRITICAL): If you asked for clarification but the guest says "I don't know", "Not sure", or cannot provide the details (e.g. location or source), DO NOT keep asking. Instead, use default values (e.g., location: "Room", symptom: "Unknown"), set `needs_clarification=false`, and MUST set `missing_fields=[]` (empty array).
+- 🚨 TICKET CREATION BLOCKER (CRITICAL): Whenever you set `needs_clarification=false` to finalize and dispatch a request, you MUST ensure `missing_fields` is completely empty `[]`. If `missing_fields` contains any items, the system will BLOCK the ticket creation and fail!
 - 🚨 MULTI-QUESTION FORMATTING RULE (CRITICAL FOR READABILITY) 🚨:
   When asking clarifying questions for multiple missing fields (e.g., equipment, symptom, or location), NEVER combine them into a single continuous sentence.
   You MUST separate each item or detail onto its own line using explicit line breaks (`\n`) and bullet points (`- `).
