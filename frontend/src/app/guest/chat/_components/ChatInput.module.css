@@ -422,9 +422,9 @@
 }
 
 .staffWrapper:focus-within {
-  border-color: var(--color-gray-500);
+  border-color: var(--color-gray-400);
   background-color: var(--color-white);
-  box-shadow: 0 0 0 1px var(--color-gray-500), 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .staffWrapper::before,
