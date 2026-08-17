@@ -82,7 +82,8 @@ const extractTaskReasoningItems = (
   deptId?: string,
   deptName?: string,
   lang: string = 'en',
-  targetTime?: string
+  targetTime?: string,
+  hasItemEntities?: boolean
 ): TaskReasoningItem[] => {
   const raw = reasoningStr || entitiesReasoning || '';
   if (!raw) return [];
@@ -121,7 +122,7 @@ const extractTaskReasoningItems = (
     ) {
       return false;
     }
-    // 2) 'The request is clear and does not require...' 등 무의미한 filler 문장 제외
+    // 2) 'No existing housekeeping orders are currently active...', 'no additional context' 등 무의미한/부정형 filler 문장 제외
     if (
       lower.includes('does not require additional') ||
       lower.includes('no additional operational context') ||
@@ -129,8 +130,23 @@ const extractTaskReasoningItems = (
       lower.includes('standard operational procedure') ||
       lower.includes('no special requirements') ||
       lower.includes('no special operational') ||
+      lower.includes('no existing') ||
+      lower.includes('currently active') ||
+      lower.includes('no active orders') ||
+      lower.includes('no active requests') ||
+      lower.includes('no prior orders') ||
+      lower.includes('no previous orders') ||
+      lower.includes('no other active') ||
+      lower.includes('no pending orders') ||
+      lower.includes('not currently active') ||
+      lower.includes('진행 중인') ||
+      lower.includes('이전 요청 없음') ||
+      lower.includes('이전 주문 없음') ||
+      lower.includes('특이사항 없음') ||
+      lower.includes('해당 없음') ||
       lower === 'none' ||
-      lower === 'none.'
+      lower === 'none.' ||
+      lower === '없음'
     ) {
       return false;
     }
@@ -141,9 +157,22 @@ const extractTaskReasoningItems = (
 
   const items: TaskReasoningItem[] = [];
 
-  // 1st: Guest request (간결하게 정제)
-  if (cleanedLines[0]) {
-    let text = cleanedLines[0];
+  // If item/menu entities already exist, skip redundant 1st line if it just repeats requested items
+  let startIndex = 0;
+  if (hasItemEntities && cleanedLines.length > 0) {
+    const firstLineLower = cleanedLines[0].toLowerCase();
+    if (
+      firstLineLower.startsWith('the guest requested') ||
+      firstLineLower.startsWith('guest requested') ||
+      firstLineLower.startsWith('one bottle of') ||
+      firstLineLower.startsWith('requested')
+    ) {
+      startIndex = 1;
+    }
+  }
+
+  for (let i = startIndex; i < cleanedLines.length; i++) {
+    let text = cleanedLines[i];
     if (text.toLowerCase().startsWith('the guest requested')) {
       text = text.replace(/^the guest requested (a |an |to |for )?/i, '').trim();
       if (text.endsWith('.')) text = text.slice(0, -1).trim();
@@ -152,25 +181,17 @@ const extractTaskReasoningItems = (
       }
       text = text.charAt(0).toUpperCase() + text.slice(1);
     }
+
+    let label = lang === 'ko' ? '특이사항' : 'Operational context';
+    if (i === 0) {
+      label = lang === 'ko' ? '고객 요청' : 'Guest request';
+    } else if (i > 1) {
+      label = lang === 'ko' ? `추가 정보 ${i}` : `Additional info ${i}`;
+    }
+
     items.push({
-      label: lang === 'ko' ? '고객 요청' : 'Guest request',
+      label,
       content: text,
-    });
-  }
-
-  // 2nd: Operational context (의미 있는 특이사항이 있을 때만 표시)
-  if (cleanedLines[1]) {
-    items.push({
-      label: lang === 'ko' ? '특이사항' : 'Operational context',
-      content: cleanedLines[1],
-    });
-  }
-
-  // 3rd+: Additional info
-  for (let i = 2; i < cleanedLines.length; i++) {
-    items.push({
-      label: lang === 'ko' ? `추가 정보 ${i - 1}` : `Additional info ${i - 1}`,
-      content: cleanedLines[i],
     });
   }
 
@@ -345,22 +366,43 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
     return `${hours}:${minutes} ${month} ${day} ${year}`;
   };
 
-  // 2. Accepted by 시간 포맷 (연도 제외, 예: 01:50 Aug 17)
-  const formatAcceptedAt = (dateString: string | Date | undefined): string => {
-    if (!dateString) return '';
-    const d = new Date(typeof dateString === 'string' ? dateString.replace(' ', 'T') : dateString);
-    if (isNaN(d.getTime())) return '';
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const day = d.getDate();
+  // 2. Accepted by 시간 포맷: 같은 날짜면 시간만 (예: 00:21), 다른 날짜면 시간+날짜 (예: 00:21 Jul 31)
+  const formatAcceptedAt = (
+    acceptedDateStr: string | Date | undefined,
+    createdDateStr: string | Date | undefined
+  ): string => {
+    if (!acceptedDateStr) return '';
+    const dAccepted = new Date(typeof acceptedDateStr === 'string' ? acceptedDateStr.replace(' ', 'T') : acceptedDateStr);
+    if (isNaN(dAccepted.getTime())) return '';
 
+    const hours = String(dAccepted.getHours()).padStart(2, '0');
+    const minutes = String(dAccepted.getMinutes()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}`;
+
+    let isSameDay = false;
+    if (createdDateStr) {
+      const dCreated = new Date(typeof createdDateStr === 'string' ? createdDateStr.replace(' ', 'T') : createdDateStr);
+      if (!isNaN(dCreated.getTime())) {
+        isSameDay = (
+          dAccepted.getFullYear() === dCreated.getFullYear() &&
+          dAccepted.getMonth() === dCreated.getMonth() &&
+          dAccepted.getDate() === dCreated.getDate()
+        );
+      }
+    }
+
+    if (isSameDay) {
+      return timeStr;
+    }
+
+    const day = dAccepted.getDate();
     if (language === 'ko') {
-      return `${hours}:${minutes} ${d.getMonth() + 1}월 ${day}일`;
+      return `${timeStr} ${dAccepted.getMonth() + 1}월 ${day}일`;
     }
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const month = monthNames[d.getMonth()];
-    return `${hours}:${minutes} ${month} ${day}`;
+    const month = monthNames[dAccepted.getMonth()];
+    return `${timeStr} ${month} ${day}`;
   };
 
   const STATUS_VARIANT_MAP: Record<string, 'red' | 'purple' | 'green' | 'gray'> = {
@@ -436,7 +478,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 </div>
               )}
 
-              {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 01:50 Aug 17) */}
+              {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 00:21) */}
               {task.assignedStaffName && (
                 <div className={styles.reasoningItem}>
                   <span className={styles.secondaryLabel}>
@@ -444,7 +486,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   </span>
                   <p className={styles.reasoningText}>
                     {task.updatedAt
-                      ? `${task.assignedStaffName} at ${formatAcceptedAt(task.updatedAt)}`
+                      ? `${task.assignedStaffName} at ${formatAcceptedAt(task.updatedAt, task.createdAt)}`
                       : task.assignedStaffName}
                   </p>
                 </div>
@@ -455,13 +497,19 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
               {/* Reasoning (Task Ticket 전용 구조화 렌더링) */}
               {(() => {
+                const hasItemEntities = !!(
+                  task.entities?.items?.length ||
+                  task.entities?.menu_items?.length ||
+                  task.entities?.item
+                );
                 const items = extractTaskReasoningItems(
                   task.reasoning,
                   task.entities?.reasoning,
                   task.departmentId,
                   undefined,
                   language,
-                  task.entities?.target_time
+                  task.entities?.target_time,
+                  hasItemEntities
                 );
                 if (items.length === 0) return null;
                 return items.map((item, idx) => (
@@ -495,20 +543,22 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
             {/* 3. 푸터 버튼 */}
             <div className={styles.footer}>
-              <button
-                type="button"
-                className={styles.chatHistoryBtn}
+              <Button
+                variant="outlined"
+                size="medium"
                 onClick={() => setIsChatHistoryOpen(true)}
+                className={styles.chatHistoryBtn}
               >
                 <History size={16} />
                 <span>{language === 'en' ? 'Chat History' : '대화 내역'}</span>
-              </button>
+              </Button>
 
               <div className={styles.footerRight}>
                 {task.status === 'PENDING' && (
                   <>
                     <Button
                       variant="secondary"
+                      size="medium"
                       onClick={() => setIsManualAssignOpen(true)}
                       className={styles.actionButton}
                       disabled={isSubmitting || !isOnline}
@@ -518,6 +568,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                     </Button>
                     <Button
                       variant="primary"
+                      size="medium"
                       onClick={handleAccept}
                       className={styles.actionButton}
                       disabled={isSubmitting || !isOnline}
@@ -531,6 +582,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 {task.status === 'IN_PROGRESS' && !task.cancelRequested && onComplete && (
                   <Button
                     variant="primary"
+                    size="medium"
                     onClick={handleComplete}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
@@ -544,6 +596,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                   <>
                     <Button
                       variant="secondary"
+                      size="medium"
                       onClick={handleRejectCancellation}
                       className={styles.actionButton}
                       disabled={isSubmitting || !isOnline}
@@ -553,6 +606,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                     </Button>
                     <Button
                       variant="primary"
+                      size="medium"
                       onClick={handleApproveCancellation}
                       className={styles.actionButton}
                       disabled={isSubmitting || !isOnline}
