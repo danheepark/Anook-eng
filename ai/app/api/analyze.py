@@ -492,7 +492,9 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                 "restaurant_name": ["식당", "레스토랑", "이름", "어디"],
                 "target": ["무엇을", "어떤 대상", "어떤 것"],
                 "store_name": ["가게", "상점", "플랫폼", "어디", "이름"],
-                "type": ["병원", "약국", "어떤 곳"]
+                "type": ["병원", "약국", "어떤 곳"],
+                "selected_option": ["어떻게", "옵션", "어떤", "how", "which", "option", "cooked", "hot", "cold", "iced", "rare", "medium", "well-done", "well", "done"],
+                "field_name": ["어떤", "무엇을", "what", "which", "how", "where", "when"]
             }
             
             current_keywords = []
@@ -509,9 +511,12 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                 role = msg.get("role")
                 if role == "ai":
                     msg_content = msg.get("content", "").strip()
-                    if "?" in msg_content:
-                        msg_content_lower = msg_content.lower()
-                        
+                    msg_content_lower = msg_content.lower()
+                    has_question = "?" in msg_content
+                    has_keyword = current_keywords and any(kw in msg_content_lower for kw in current_keywords)
+                    is_wait_phrase = any(w in msg_content_lower for w in ["take your time", "let me know", "no problem", "no rush", "천천히", "알려주세요"])
+                    
+                    if has_question or has_keyword or is_wait_phrase:
                         # 2번 방법: 이 AI 질문이 포함하고 있는 필수값 키워드 종류 개수를 파악 (진행도 검사)
                         asked_fields = [f for f, kws in keyword_map.items() if any(kw in msg_content_lower for kw in kws)]
                         
@@ -528,11 +533,11 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
                         if current_missing and not current_keywords:
                             # current_missing이 있지만 keyword가 정의되지 않은 경우 루프 단절
                             break
-                        if current_keywords and not any(kw in msg_content_lower for kw in current_keywords):
-                            break # 이전 질문은 다른 것을 물어봤으므로 연속 루프가 아님!
+                        if current_keywords and not any(kw in msg_content_lower for kw in current_keywords) and not is_wait_phrase:
+                            break # 이전 질문은 다른 것을 물어봤으므로 연속 루프가 아님! (단, wait_phrase면 허용)
                         last_was_ai_question = True
                     else:
-                        break # AI가 질문을 안 했으면 되묻기 사이클 단절
+                        break # AI가 관련 질문이나 대기 멘트를 안 했으면 되묻기 사이클 단절
                 elif role == "user":
                     if last_was_ai_question:
                         # 이전 사이클(AI질문->고객답변) 1라운드 추가
@@ -646,19 +651,23 @@ async def analyze_message(request: AnalyzeRequest) -> List[Dict[str, Any]]:
         for resp in final_responses[1:]:
             resp["clarification_options"] = []
 
-    # ── [선택지 정제: 불필요한 부서명 괄호 제거 & 본문 간결화 (Anti-Redundancy)] ──
+    # ── [선택지 정제: 불필요한 부서명 괄호 제거 & 메타 안내 옵션 필터링 & 본문 간결화 (Anti-Redundancy)] ──
     for resp in final_responses:
         opts = resp.get("clarification_options")
         if opts and isinstance(opts, list) and len(opts) > 0:
             cleaned_opts = []
             for opt in opts:
-                # e.g. "Order Room Service (Food & Beverage)" -> "Order Room Service"
                 c_opt = re.sub(r'\s*\((?:Food\s*&\s*Beverage|Concierge|Front\s*Desk|Housekeeping|Facility|Emergency|FB|HK|FRONT|FACILITY|식음료|컨시어지|프론트|하우스키핑|시설관리|응급)\)', '', opt, flags=re.IGNORECASE).strip()
-                cleaned_opts.append(c_opt if c_opt else opt)
+                # 메타 안내 문구 필터링 (e.g., "Provide destination", "Provide passenger count", "Enter details")
+                c_opt_low = c_opt.lower()
+                if any(meta_kw in c_opt_low for meta_kw in ["provide ", "enter ", "specify ", "fill ", "입력", "제공"]):
+                    continue
+                if c_opt:
+                    cleaned_opts.append(c_opt)
             resp["clarification_options"] = cleaned_opts
 
             original_reply = resp.get("guest_reply", "")
-            if original_reply:
+            if original_reply and cleaned_opts:
                 resp["guest_reply"] = _clean_clarification_reply(original_reply, cleaned_opts, request.language)
 
     return final_responses

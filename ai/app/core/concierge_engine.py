@@ -3,43 +3,44 @@ from app.prompts.concierge_prompt import CONCIERGE_SYSTEM_PROMPT
 from app.schemas.common import HotelRequestSchema
 from app.domains.rag import service as rag_service
 
-# Step 1 전용: 대화에서 확인된 엔티티를 추출하는 경량 프롬프트
+# Step 1: Lightweight prompt to extract confirmed entities from conversation
 ENTITY_EXTRACT_PROMPT = """You are an entity extraction assistant for a hotel concierge conversation.
 
 TASK: Read the conversation and extract ALL entities that the guest has confirmed or provided.
 
 RULES:
-1. Only include entities the guest explicitly stated (e.g., "개화꽃" → item: "개화꽃").
-2. If the AI mentioned an entity in its message (e.g., "개화꽃을 몇 송이?") and the guest did NOT deny it in their reply, treat it as confirmed.
-3. If the guest said "아무데서나" or "상관없어" for any field, set it to "호텔 지정".
-4. Convert time references to absolute format if possible.
-5. Output ONLY a flat JSON object. No explanation, no markdown.
+1. ONLY include entities that the guest EXPLICITLY stated in their own messages (e.g., "Flowers" → item: "Flowers", "Seoul Station" → destination: "Seoul Station").
+2. NEVER include, assume, or extract entities that were only mentioned by the AI in questions or examples unless the guest explicitly confirmed or stated that value in their own reply.
+3. If the guest said "anywhere" or "doesn't matter" for any field, set it to "Hotel Default".
+4. If a guest provides a vague time (e.g., "morning", "tomorrow"), DO NOT hallucinate or guess a specific hour (e.g., "09:00 AM"). Do not extract `time` unless a specific hour is provided.
+5. DO NOT hallucinate quantities (e.g., `passenger_count`: 3) unless the guest explicitly provided a number.
+6. Output ONLY a flat JSON object. No explanation, no markdown.
 
 EXAMPLE:
-[대화]
-AI: 어떤 꽃을 배달해 드릴까요?
-고객: 개화꽃
-AI: 개화꽃을 몇 송이 배달해 드릴까요?
-고객: 10송이
+[Conversation]
+AI: What kind of flowers would you like delivered?
+Guest: Blooming flowers
+AI: How many blooming flowers would you like?
+Guest: 10 stems
 
 OUTPUT:
-{"intent": "DELIVERY", "item": "개화꽃", "quantity": 10}
+{"intent": "DELIVERY", "item": "Blooming flowers", "quantity": 10}
 """
 
 async def run_concierge_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, active_requests: list = None, system_language: str = "en", **kwargs) -> dict:
     """
-    컨시어지 에이전트 엔진 (Step 0-2)
+    Concierge Agent Engine (Step 0-2)
     ───────────────────────────
-    고객 메시지를 받아 Gemini를 호출하고, 컨시어지 도메인에 특화된 정보를 추출한다.
+    Calls Gemini with guest message and extracts concierge-specific information.
     """
     
     from datetime import datetime, timedelta, timezone
     
-    # 현재 한국 시간 구하기 (UTC+9)
+    # Get current Korea time (UTC+9)
     kst = timezone(timedelta(hours=9))
     now_str = datetime.now(kst).strftime('%Y-%m-%d %H:%M')
     
-    # 1. RAG 검색 → CONCIERGE 도메인 지식
+    # 1. RAG Search → CONCIERGE domain knowledge
     rag_context = ""
     try:
         rag_results = rag_service.search_hybrid(
@@ -48,55 +49,55 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
         if rag_results:
             rag_context = "\n".join([f"- {r['question']}: {r['answer']}" for r in rag_results])
     except Exception as e:
-        print(f"[CONCIERGE Agent] RAG 검색 실패: {e}")
+        print(f"[CONCIERGE Agent] RAG search failed: {e}")
 
-    # 2. 대화 맥락 조립
+    # 2. Assemble conversation context
     prompt = ""
     if special_notes := kwargs.get("special_notes"):
-        prompt += f"[투숙객 PMS 특이사항 (Special Notes)]\n{special_notes}\n\n"
+        prompt += f"[Guest PMS Special Notes]\n{special_notes}\n\n"
 
     if chat_history:
         context = "\n".join([
-            f"{'고객' if m.get('role')=='user' else 'AI'}: {m.get('content')}"
+            f"{'Guest' if m.get('role')=='user' else 'AI'}: {m.get('content')}"
             for m in chat_history[-15:]
         ])
-        prompt += f"[현재 날짜 및 시각]\n{now_str}\n\n[대화 맥락]\n{context}\n\n"
+        prompt += f"[Current Date and Time]\n{now_str}\n\n[Chat Context]\n{context}\n\n"
         
-        # ── Step 1: 경량 Gemini 호출로 기존 엔티티 추출 ──
-        # 2턴(메시지 4개) 이상일 때만 실행 (첫 턴에는 추출할 엔티티 없음)
+        # ── Step 1: Lightweight Gemini call to extract existing entities ──
+        # Only run when turn count >= 2 (4 messages), no entities to extract on first turn
         accumulated_entities = {}
         if len(chat_history) >= 4:
             try:
                 extract_result = await call_gemini_async(
-                    prompt=f"[대화]\n{context}",
+                    prompt=f"[Conversation]\n{context}",
                     system_instruction=ENTITY_EXTRACT_PROMPT
                 )
                 if isinstance(extract_result, dict):
                     # __ai_log_meta 등 내부 메타데이터 필터링
                     accumulated_entities = {k: v for k, v in extract_result.items() if not k.startswith('__')}
-                    print(f"[CONCIERGE] 📋 Step 1 추출 엔티티: {accumulated_entities}")
+                    print(f"[CONCIERGE] 📋 Step 1 Extracted Entities: {accumulated_entities}")
             except Exception as e:
-                print(f"[CONCIERGE] ⚠️ 엔티티 추출 실패 (무시, 기존 방식 진행): {e}")
+                print(f"[CONCIERGE] ⚠️ Entity extraction failed (ignoring, proceeding with default): {e}")
         
-        # Step 1 결과를 [확인된 정보] 블록으로 주입
+        # Inject Step 1 results into [Confirmed Information] block
         if accumulated_entities:
             entities_str = "\n".join([
                 f"- {k}: {v} ✅" for k, v in accumulated_entities.items() if v
             ])
-            prompt += f"[확인된 정보 - 아래 값들은 이미 고객이 확인한 것이므로 반드시 유지하세요]\n{entities_str}\n\n"
+            prompt += f"[Confirmed Information - Keep these previously confirmed values]\n{entities_str}\n\n"
     else:
-        prompt = f"[현재 날짜 및 시각]\n{now_str}\n\n고객 객실: {room_no}\n"
+        prompt = f"[Current Date and Time]\n{now_str}\n\nGuest Room: {room_no}\n"
         
     if rag_context:
-        prompt += f"[관련 지식 (RAG)]\n{rag_context}\n\n"
+        prompt += f"[Related Knowledge (RAG)]\n{rag_context}\n\n"
         
     if active_requests:
-        prompt += "[현재 활성화된 예약 내역]\n"
+        prompt += "[Currently Active Reservations]\n"
         for req in active_requests:
             prompt += f"- {req}\n"
         prompt += "\n"
         
-    prompt += f"[현재 요청]\n고객 메시지: {user_message}"
+    prompt += f"[Current Request]\nGuest message: {user_message}"
     
     try:
         # Gemini 호출
@@ -113,16 +114,16 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
         clean_fields = ["clarification_question", "summary", "request_id", "room_no"]
         cleaned_raw = {k: (v if v is not None else ("" if k in clean_fields else ([] if k in ["clarification_options", "missing_fields"] else v))) for k, v in raw.items()}
         
-        # room_no는 AI의 응답보다 우리가 인자로 받은 값이 더 정확하므로 강제 주입
+        # room_no is more accurate from our input than AI response
         cleaned_raw["room_no"] = room_no if room_no else cleaned_raw.get("room_no", "")
         
-        # Pydantic 스키마 검증
+        # Pydantic schema validation
         result = HotelRequestSchema(**cleaned_raw)
     except Exception as e:
-        print(f"[Concierge] ⚠️ 에러 발생: {e}")
-        # 에러 발생 시 안전한 Fallback 응답 반환
+        print(f"[Concierge] ⚠️ Error occurred: {e}")
+        # Safe fallback response on error
         fallback_err = {
-            "ko": "죄송합니다. 요청을 처리하는 중에 잠시 문제가 발생했습니다. 잠시 후 다시 말씀해 주시거나 프론트 데스크(내선 0번)로 연락 부탁드립니다.",
+            "ko": "Sorry, there was a problem processing your request. Please try again later or contact the front desk.",
             "en": "Sorry, there was a problem processing your request. Please try again later or contact the front desk.",
             "ja": "申し訳ありません。リクエストの処理中に問題が発生しました。しばらくしてから再度お試しいただくか、フロントデスクまでご連絡ください。",
             "zh": "抱歉，处理您的请求时出现问题。请稍后再试或联系前台。"
@@ -130,8 +131,8 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
         return {
             "request_id": "REQ_ERR",
             "room_no": room_no,
-            "domain": "FRONT", # 에러 시 프론트로 이관
-            "summary": "AI 처리 오류 (Fallback)",
+            "domain": "FRONT", # Escalate to front desk on error
+            "summary": "AI Processing Error (Fallback)",
             "priority": "NORMAL",
             "entities": {"intent": "OTHER", "error": str(e)},
             "confidence": 0.0,
@@ -142,47 +143,47 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
             "missing_fields": []
         }
     
-    # 기본 응답 메시지 생성 (intent별 상세화는 단계 1에서 수행)
+    # Generate default reply message
     intent = result.entities.get('intent')
     entities = result.entities
     
     if intent == 'TAXI':
-        dest = entities.get('destination', '목적지')
-        time = entities.get('time', '지금 바로')
+        dest = entities.get('destination', 'destination')
+        time = entities.get('time', 'now')
         count = entities.get('passenger_count', '1')
-        default_reply = f"배차 확인 후 안내해 드리겠습니다. {time}에 {dest}(으)로 가시는 택시({count}명)를 예약해 드릴까요?"
+        default_reply = f"I will check availability and confirm. Would you like to book a taxi for {count} passenger(s) to {dest} at {time}?"
     elif intent == 'LUGGAGE_STORAGE':
-        count = entities.get('count', '짐')
-        action = "보관" if entities.get('action') == 'store' else "찾기"
-        default_reply = f"담당 직원이 곧 도움을 드리러 가겠습니다. 짐 {count}개를 {action}하시겠습니까?"
+        count = entities.get('count', 'luggage')
+        action = "store" if entities.get('action') == 'store' else "pick up"
+        default_reply = f"Our staff will assist you shortly. Would you like to {action} {count} piece(s) of luggage?"
     elif intent == 'RESTAURANT':
-        res_name = entities.get('restaurant_name', '식당')
+        res_name = entities.get('restaurant_name', 'restaurant')
         cuisine = entities.get('cuisine_type')
         cuisine_str = f"({cuisine})" if cuisine else ""
-        default_reply = f"요청하신 {res_name}{cuisine_str} 예약을 진행해 드릴까요?"
+        default_reply = f"Would you like me to proceed with the reservation for {res_name}{cuisine_str}?"
     elif intent == 'TOUR_INFO':
-        category = entities.get('category', '관광지')
-        default_reply = f"멋진 {category} 장소들을 찾고 계시군요! 아늑이 엄선한 추천 명소를 안내해 드리겠습니다."
+        category = entities.get('category', 'attraction')
+        default_reply = f"Looking for great {category} spots? I'll guide you to recommended places!"
     elif intent == 'RESERVATION':
-        target = entities.get('target', '요청하신 항목')
-        time = entities.get('time', '정해진 시간')
-        default_reply = f"확인 후 다시 연락드리겠습니다. {time}에 {target} 예약을 진행해 드릴까요?"
+        target = entities.get('target', 'requested item')
+        time = entities.get('time', 'scheduled time')
+        default_reply = f"I will check and get back to you. Shall I proceed with the reservation for {target} at {time}?"
     elif intent == 'DELIVERY':
-        item = entities.get('item', '물품')
-        default_reply = f"도착 시 객실로 안내해 드리겠습니다. 요청하신 {item} 배달/전달 건을 접수해 드릴까요?"
+        item = entities.get('item', 'item')
+        default_reply = f"We will bring it up to your room upon arrival. Shall I accept the delivery request for {item}?"
     elif intent == 'WAKE_UP_CALL':
-        time = entities.get('time', '정해진 시간')
-        default_reply = f"편안한 밤 되세요! {time}에 모닝콜을 예약해 드릴까요?"
+        time = entities.get('time', 'scheduled time')
+        default_reply = f"Sleep well! Shall I schedule a wake-up call for {time}?"
     elif intent == 'MEDICAL_INFO':
-        m_type = "병원" if entities.get('type') == 'Hospital' else "약국"
-        default_reply = f"근처에서 가장 가까운 {m_type}을(를) 안내해 드리겠습니다. 몸 상태가 많이 안 좋으시면 직원 호출을 눌러주세요."
+        m_type = "hospital" if entities.get('type') == 'Hospital' else "pharmacy"
+        default_reply = f"I'll guide you to the nearest {m_type}. Please press staff call if you feel unwell."
     elif intent == 'POSTAL_SERVICE':
-        item = entities.get('item', '우편물')
-        default_reply = f"요청하신 {item} 발송 대행 업무를 도와드릴까요? (1층 컨시어지 데스크 방문 필요)"
+        item = entities.get('item', 'mail')
+        default_reply = f"Would you like assistance with sending {item}? (Requires visiting 1st floor concierge desk)"
     if intent == 'INFO':
-        default_reply = entities.get('fallback_message', "안내해 드리겠습니다." if system_language == "ko" else "I will assist you with that.")
+        default_reply = entities.get('fallback_message', "I will assist you with that.")
     else:
-        default_reply = "안내해 드리겠습니다." if system_language == "ko" else "I will assist you with that."
+        default_reply = "I will assist you with that."
     
     # [AN-344] 더블체크 UX 및 정보 제공 인텐트 처리 고도화:
     # 1. 정보 안내 목적의 인텐트 (INFO, TOUR_INFO, MEDICAL_INFO)는 티켓을 생성하지 않도록 domain_code = None 처리합니다.
@@ -239,7 +240,7 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
                     cleaned_raw.pop("target_request_id", None)
                     cleaned_raw["action_type"] = "ADD_DUPLICATE"
 
-    # /analyze 응답 규격에 맞게 변환 (HotelRequestSchema 준수)
+    # Convert to /analyze response format (adhere to HotelRequestSchema)
     
     final_response = getattr(result, "final_reply", "")
     if not final_response:
