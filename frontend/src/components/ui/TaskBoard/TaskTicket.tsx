@@ -8,6 +8,8 @@ import { useTranslationApi } from '@/app/useTranslationApi';
 
 export interface TaskTicketProps {
   ticketId?: string | number;
+  version?: number;
+  draggable?: boolean;
   roomNo?: string | number;
   priority?: 'NORMAL' | 'URGENT';
   department?: string;
@@ -65,6 +67,8 @@ const renderHighlightedText = (text: string, search: string, isActiveMatch: bool
 
 export default function TaskTicket({
   ticketId,
+  version,
+  draggable = false,
   roomNo,
   priority = 'NORMAL',
   department,
@@ -83,7 +87,7 @@ export default function TaskTicket({
   isEscalated = false,
   assigneeName,
   entities,
-  highlightSearch,
+  highlightSearch = '',
   isActiveMatch = false
 }: TaskTicketProps) {
   const isOnline = useNetworkStore((state) => state.isOnline);
@@ -439,24 +443,43 @@ export default function TaskTicket({
   return (
     <div 
       id={ticketId ? `ticket-${ticketId}` : undefined}
+      draggable={draggable && !isCancelled}
+      onDragStart={(e) => {
+        if (!draggable || isCancelled) return;
+        const dragData = {
+          id: ticketId,
+          version,
+          fromStatus: status,
+          cancelRequested
+        };
+        e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+        e.dataTransfer.setData('text/plain', String(ticketId));
+        e.dataTransfer.effectAllowed = 'move';
+        (e.currentTarget as HTMLElement).style.opacity = '0.4';
+      }}
+      onDragEnd={(e) => {
+        (e.currentTarget as HTMLElement).style.opacity = '1';
+      }}
       className={`${styles.taskTicket} ${styles[deptKey] || ''} ${(isCancelled || isEscalated) ? styles.isCancelled : ''} ${cancelRequested ? styles.cancelPendingCard : ''}`}
       style={{
         boxShadow: isActiveMatch ? '0 0 0 2px var(--color-primary-400), 0 4px 16px rgba(0, 0, 0, 0.12)' : undefined,
-        transition: 'all 0.2s ease-in-out'
+        transition: 'all 0.2s ease-in-out',
+        cursor: draggable && !isCancelled ? 'grab' : undefined
       }}
     >
       {showDeptBar && <div className={styles.topColorBar} />}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          {roomNo && (
-            <span className={styles.roomNo}>
-              {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
+          {cancelRequested ? (
+            <span className={styles.cancelPendingPill}>
+              {roomNo ? (language === 'ko' ? `${roomNo}호 취소 요청` : `RM ${roomNo} Cancel Request`) : (t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Request' : '취소 요청'))}
             </span>
-          )}
-          {cancelRequested && (
-            <span className={styles.cancelPendingText}>
-              {t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Request' : '취소 요청')}
-            </span>
+          ) : (
+            roomNo && (
+              <span className={styles.roomNo}>
+                {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
+              </span>
+            )
           )}
         </div>
         <div className={styles.headerRight}>

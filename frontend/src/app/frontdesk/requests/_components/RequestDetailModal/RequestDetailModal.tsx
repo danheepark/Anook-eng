@@ -346,19 +346,7 @@ export default function RequestDetailModal({
       .catch(() => {});
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
-  if (loading || !activeDetail) {
-    return (
-      <ModalOverlay isOpen={isOpen} onClose={onClose}>
-        <ModalCard size="md" overflowVisible={false} onClose={onClose}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '260px', color: 'var(--color-gray-400)', font: 'var(--text-body-medium)' }}>
-            <span>{t.common?.loading || 'Loading...'}</span>
-          </div>
-        </ModalCard>
-      </ModalOverlay>
-    );
-  }
+  if (!isOpen || loading || !activeDetail) return null;
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -562,12 +550,13 @@ export default function RequestDetailModal({
         {/* 헤더 */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <span className={`${styles.roomNo} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
-              {roomDisplay}
-            </span>
-            {activeDetail.cancelRequested && (
-              <span className={styles.cancelPendingText}>
-                {language === 'en' ? 'Cancel Request' : '취소 요청'}
+            {activeDetail.cancelRequested ? (
+              <span className={styles.cancelPendingPill}>
+                {roomDisplay} {language === 'en' ? 'Cancel Request' : '취소 요청'}
+              </span>
+            ) : (
+              <span className={`${styles.roomNo} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
+                {roomDisplay}
               </span>
             )}
           </div>

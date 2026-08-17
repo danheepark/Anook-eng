@@ -361,6 +361,29 @@ function DashboardContent() {
                     title={col.title}
                     count={columnTasks.length}
                     status={col.status as 'TODO' | 'IN_PROGRESS' | 'DONE'}
+                    onDropTask={async (dragged) => {
+                      const targetStatus = col.status as 'TODO' | 'IN_PROGRESS' | 'DONE';
+                      if (dragged.fromStatus === targetStatus) return;
+
+                      try {
+                        if (dragged.fromStatus === 'TODO' && targetStatus === 'IN_PROGRESS') {
+                          await acceptTask(dragged.id, dragged.version || 0);
+                        } else if (dragged.fromStatus === 'IN_PROGRESS' && targetStatus === 'DONE') {
+                          if (dragged.cancelRequested) {
+                            await approveCancellation(dragged.id, dragged.version || 0);
+                          } else {
+                            await completeTask(dragged.id, dragged.version || 0);
+                          }
+                        } else if (dragged.fromStatus === 'TODO' && targetStatus === 'DONE') {
+                          await acceptTask(dragged.id, dragged.version || 0);
+                          await completeTask(dragged.id, dragged.version || 0);
+                        } else if (dragged.fromStatus === 'IN_PROGRESS' && targetStatus === 'TODO' && dragged.cancelRequested) {
+                          await rejectCancellation(dragged.id, dragged.version || 0);
+                        }
+                      } catch (err) {
+                        console.error('Failed to update task via drag and drop', err);
+                      }
+                    }}
                     headerRight={col.status === 'DONE' ? (
                       <DateFilterDropdown
                         filterType={dateFilterType}
@@ -381,6 +404,8 @@ function DashboardContent() {
                         >
                           <TaskTicket
                             ticketId={task.id}
+                            version={task.version}
+                            draggable={true}
                             roomNo={task.roomNumber}
                             department={task.departmentId}
                             priority={mapPriority(task.priority)}

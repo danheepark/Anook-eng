@@ -139,6 +139,12 @@
   line-height: 1;
 }
 
+.topBadgeRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
 .headerLeft {
   display: inline-flex;
   align-items: center;
@@ -150,12 +156,21 @@
   font: var(--text-body-bold);
   color: var(--color-gray-900);
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1;
 }
 
-.cancelPendingText {
-  font: var(--text-body-bold);
+.cancelPendingPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  background-color: #FFFFFF;
   color: #FF5B1F;
+  font: var(--text-body-medium);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   white-space: nowrap;
   line-height: 1.2;
 }
@@ -190,7 +205,7 @@
 }
 
 .title {
-  font: var(--text-body-lg-medium);
+  font: var(--text-h3-bold);
   color: var(--color-gray-900);
   margin: 0;
 }
@@ -309,10 +324,14 @@
 
 /* --- 취소 대기중인 카드 스타일 --- */
 .cancelPendingCard {
-  background-color: #FFF1EF !important;
-  border: 2px solid #FF5B1F !important;
+  background-color: #FFE6DC !important;
+  border: none !important;
+}
+
+.cancelPendingCard .headerDivider {
+  display: none !important;
 }
 
 .cancelPendingCard:hover {
-  border-color: #EA580C !important;
+  border: none !important;
 }

@@ -5,6 +5,12 @@
   margin-bottom: var(--space-8);
 }
 
+.topBadgeRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
 .titleRow {
   display: flex;
   align-items: center;
@@ -23,12 +29,21 @@
   font: var(--text-body-bold);
   color: var(--color-gray-900);
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1;
 }
 
-.cancelPendingText {
-  font: var(--text-body-bold);
+.cancelPendingPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  background-color: #FFFFFF;
   color: #FF5B1F;
+  font: var(--text-body-medium);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   white-space: nowrap;
   line-height: 1.2;
 }
