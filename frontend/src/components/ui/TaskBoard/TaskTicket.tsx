@@ -542,7 +542,7 @@ export default function TaskTicket({
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 {onRejectCancel && (
                   <Button
-                    variant="outlined"
+                    variant="secondary"
                     size="small"
                     onClick={onRejectCancel}
                     disabled={!isOnline}
@@ -553,7 +553,7 @@ export default function TaskTicket({
                 )}
                 {onApproveCancel && (
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     size="small"
                     onClick={onApproveCancel}
                     disabled={!isOnline}
