@@ -35,17 +35,27 @@
   min-width: 0;
 }
 
-.roomBadge {
-  font: var(--text-h2-bold);
-  color: var(--color-gray-900);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
   font: var(--text-h2-bold);
   color: var(--color-gray-900);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.titleDot {
+  color: var(--color-gray-900);
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.summaryText {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
