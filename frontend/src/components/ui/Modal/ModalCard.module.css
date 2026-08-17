@@ -146,10 +146,20 @@
 }
 
 /* Enforce EXACTLY 32px visual gap (24px gap + 8px margin-top) for all modal footers & button groups */
-.modalCard div[class*="footer"],
-.modalCard div[class*="buttonGroup"],
-.modalCard div[class*="actionGroup"] {
+.modalCard > div[class*="footer"],
+.modalCard > div[class*="buttonGroup"],
+.modalCard > div[class*="actionGroup"],
+.modalCard > footer {
   margin-top: var(--space-8) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Ensure nested elements inside footer like footerRight never get margin-top */
+.modalCard div[class*="footerRight"],
+.modalCard div[class*="footerLeft"],
+.modalCard div[class*="footerActions"] {
+  margin-top: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
