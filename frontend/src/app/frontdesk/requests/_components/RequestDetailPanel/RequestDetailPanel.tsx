@@ -273,11 +273,11 @@ export default function RequestDetailPanel({
       </div>
 
       <div className={styles.detailContent}>
-        {/* 1. Created at 일시 */}
+        {/* 1. Request created at 일시 */}
         {detail.createdAt && (
           <div className={styles.reasoningItem}>
             <span className={styles.secondaryLabel}>
-              {language === 'ko' ? '요청 일시' : 'Created at'}
+              {language === 'ko' ? '요청 일시' : 'Request created at'}
             </span>
             <p className={styles.reasoningText}>
               {formatExactDateTime(detail.createdAt)}

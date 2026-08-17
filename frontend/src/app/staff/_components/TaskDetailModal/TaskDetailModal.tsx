@@ -437,10 +437,11 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
   };
 
   const statusInfo = getStatusInfo(task.status, task.priority);
-  const roomPrefix = language === 'ko' ? `${task.roomNumber}호` : `NO.${task.roomNumber}`;
+  const roomDisplay = language === 'en' ? `Room ${task.roomNumber}` : `${task.roomNumber}호`;
   const rawSummary = translatedSummary || task.summary;
-  const cleanSummary = cleanTitleSummary(rawSummary);
-  const modalTitle = cleanSummary ? `${roomPrefix} ${cleanSummary}` : roomPrefix;
+  const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+  const cleanSummary = toSentenceCase(cleanTitleSummary(rawSummary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');
+  const modalTitle = cleanSummary ? `${roomDisplay} · ${cleanSummary}` : roomDisplay;
 
   const rawTextParts = task.rawText ? task.rawText.split('\n|||TRANSFER_REASON|||') : [];
   const transferReasonText = rawTextParts.length > 1 ? rawTextParts.slice(1).join('\n').trim() : null;
@@ -449,186 +450,184 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
     <>
       <ModalOverlay isOpen={isOpen && !isManualAssignOpen && !isChatHistoryOpen} onClose={handleClose}>
         <ModalCard size="md" overflowVisible={false} onClose={handleClose}>
-          <div className={styles.container}>
-            {/* 1. 헤더 */}
-            <div className={styles.header}>
-              <div className={styles.headerTop}>
-                {task.cancelRequested ? (
-                  <StatusBadge variant="red">
-                    {language === 'en' ? 'Cancel request' : '취소 요청'}
-                  </StatusBadge>
-                ) : (
-                  <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
-                )}
+          {/* 1. 헤더 */}
+          <div className={styles.header}>
+            <div className={styles.headerTop}>
+              {task.cancelRequested ? (
+                <StatusBadge variant="red">
+                  {language === 'en' ? 'Cancel request' : '취소 요청'}
+                </StatusBadge>
+              ) : (
+                <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
+              )}
+            </div>
+            <h2 className={styles.title}>{modalTitle}</h2>
+          </div>
+
+          {/* 2. 본문 */}
+          <div className={styles.modalBody}>
+            {/* 취소 요청 일시 (Cancel request일 때 최상단 표시) */}
+            {task.cancelRequested && (task.cancelRequestedAt || task.updatedAt) && (
+              <div className={styles.reasoningItem}>
+                <span className={styles.secondaryLabel}>
+                  {language === 'ko' ? '취소 요청 일시' : 'Cancellation requested at'}
+                </span>
+                <p className={styles.reasoningText}>
+                  {formatCreatedAt(task.cancelRequestedAt || task.updatedAt)}
+                </p>
               </div>
-              <h2 className={styles.title}>{modalTitle}</h2>
-            </div>
+            )}
 
-            {/* 2. 본문 */}
-            <div className={styles.modalBody}>
-              {/* 취소 요청 일시 (Cancel request일 때 최상단 표시) */}
-              {task.cancelRequested && (task.cancelRequestedAt || task.updatedAt) && (
-                <div className={styles.reasoningItem}>
-                  <span className={styles.secondaryLabel}>
-                    {language === 'ko' ? '취소 요청 일시' : 'Cancellation requested at'}
-                  </span>
-                  <p className={styles.reasoningText}>
-                    {formatCreatedAt(task.cancelRequestedAt || task.updatedAt)}
-                  </p>
+            {/* Request created at 일시 (예: 01:50 Aug 17 2026) */}
+            {task.createdAt && (
+              <div className={styles.reasoningItem}>
+                <span className={styles.secondaryLabel}>
+                  {language === 'ko' ? '요청 일시' : 'Request created at'}
+                </span>
+                <p className={styles.reasoningText}>
+                  {formatCreatedAt(task.createdAt)}
+                </p>
+              </div>
+            )}
+
+            {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 00:21) */}
+            {task.assignedStaffName && (
+              <div className={styles.reasoningItem}>
+                <span className={styles.secondaryLabel}>
+                  {language === 'ko' ? '수락 담당자' : 'Accepted by'}
+                </span>
+                <p className={styles.reasoningText}>
+                  {task.updatedAt
+                    ? `${task.assignedStaffName} at ${formatAcceptedAt(task.updatedAt, task.createdAt)}`
+                    : task.assignedStaffName}
+                </p>
+              </div>
+            )}
+
+            {/* AI 분석 엔티티 (Item Requests, Order Menu 등) */}
+            {task.entities && renderEntities(task.entities, language)}
+
+            {/* Reasoning (Task Ticket 전용 구조화 렌더링) */}
+            {(() => {
+              const hasItemEntities = !!(
+                task.entities?.items?.length ||
+                task.entities?.menu_items?.length ||
+                task.entities?.item
+              );
+              const items = extractTaskReasoningItems(
+                task.reasoning,
+                task.entities?.reasoning,
+                task.departmentId,
+                undefined,
+                language,
+                task.entities?.target_time,
+                hasItemEntities
+              );
+              if (items.length === 0) return null;
+              return items.map((item, idx) => (
+                <div key={idx} className={styles.reasoningItem}>
+                  <span className={styles.secondaryLabel}>{item.label}</span>
+                  <p className={styles.reasoningText}>{item.content}</p>
                 </div>
-              )}
+              ));
+            })()}
 
-              {/* Created at 일시 (예: 01:50 Aug 17 2026) */}
-              {task.createdAt && (
-                <div className={styles.reasoningItem}>
-                  <span className={styles.secondaryLabel}>
-                    {language === 'ko' ? '요청 일시' : 'Created at'}
-                  </span>
-                  <p className={styles.reasoningText}>
-                    {formatCreatedAt(task.createdAt)}
-                  </p>
+            {/* 첨부 사진 */}
+            {task.imageUrl && (
+              <div className={styles.photoSection}>
+                <h3 className={styles.photoTitle}>{language === 'en' ? 'Attached Photo' : '첨부 사진'}</h3>
+                <div className={styles.photoBox}>
+                  <img src={task.imageUrl} alt={language === 'en' ? 'Attached Photo' : '첨부 사진'} className={styles.photoImg} />
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Accepted by 수락 담당자 및 시간 (예: Sarah Williams at 00:21) */}
-              {task.assignedStaffName && (
-                <div className={styles.reasoningItem}>
-                  <span className={styles.secondaryLabel}>
-                    {language === 'ko' ? '수락 담당자' : 'Accepted by'}
-                  </span>
-                  <p className={styles.reasoningText}>
-                    {task.updatedAt
-                      ? `${task.assignedStaffName} at ${formatAcceptedAt(task.updatedAt, task.createdAt)}`
-                      : task.assignedStaffName}
-                  </p>
+            {/* 업무 전달 사유 */}
+            {transferReasonText && (
+              <div className={styles.reasoningItem}>
+                <span className={styles.secondaryLabel}>{language === 'en' ? 'Transfer Reason' : '업무 전달 사유'}</span>
+                <div className={styles.transferReasonBox}>
+                  {transferReasonText}
                 </div>
-              )}
+              </div>
+            )}
+          </div>
 
-              {/* AI 분석 엔티티 (Item Requests, Order Menu 등) */}
-              {task.entities && renderEntities(task.entities, language)}
+          {/* 3. 푸터 버튼 */}
+          <div className={styles.footer}>
+            <Button
+              variant="outlined"
+              size="medium"
+              onClick={() => setIsChatHistoryOpen(true)}
+              className={styles.chatHistoryBtn}
+            >
+              <History size={16} />
+              <span>{language === 'en' ? 'Chat History' : '대화 내역'}</span>
+            </Button>
 
-              {/* Reasoning (Task Ticket 전용 구조화 렌더링) */}
-              {(() => {
-                const hasItemEntities = !!(
-                  task.entities?.items?.length ||
-                  task.entities?.menu_items?.length ||
-                  task.entities?.item
-                );
-                const items = extractTaskReasoningItems(
-                  task.reasoning,
-                  task.entities?.reasoning,
-                  task.departmentId,
-                  undefined,
-                  language,
-                  task.entities?.target_time,
-                  hasItemEntities
-                );
-                if (items.length === 0) return null;
-                return items.map((item, idx) => (
-                  <div key={idx} className={styles.reasoningItem}>
-                    <span className={styles.secondaryLabel}>{item.label}</span>
-                    <p className={styles.reasoningText}>{item.content}</p>
-                  </div>
-                ));
-              })()}
-
-              {/* 첨부 사진 */}
-              {task.imageUrl && (
-                <div className={styles.photoSection}>
-                  <h3 className={styles.photoTitle}>{language === 'en' ? 'Attached Photo' : '첨부 사진'}</h3>
-                  <div className={styles.photoBox}>
-                    <img src={task.imageUrl} alt={language === 'en' ? 'Attached Photo' : '첨부 사진'} className={styles.photoImg} />
-                  </div>
-                </div>
-              )}
-
-              {/* 업무 전달 사유 */}
-              {transferReasonText && (
-                <div className={styles.reasoningItem}>
-                  <span className={styles.secondaryLabel}>{language === 'en' ? 'Transfer Reason' : '업무 전달 사유'}</span>
-                  <div className={styles.transferReasonBox}>
-                    {transferReasonText}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 3. 푸터 버튼 */}
-            <div className={styles.footer}>
-              <Button
-                variant="outlined"
-                size="medium"
-                onClick={() => setIsChatHistoryOpen(true)}
-                className={styles.chatHistoryBtn}
-              >
-                <History size={16} />
-                <span>{language === 'en' ? 'Chat History' : '대화 내역'}</span>
-              </Button>
-
-              <div className={styles.footerRight}>
-                {task.status === 'PENDING' && (
-                  <>
-                    <Button
-                      variant="secondary"
-                      size="medium"
-                      onClick={() => setIsManualAssignOpen(true)}
-                      className={styles.actionButton}
-                      disabled={isSubmitting || !isOnline}
-                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                    >
-                      {language === 'en' ? 'Assign Task' : '업무 배정'}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="medium"
-                      onClick={handleAccept}
-                      className={styles.actionButton}
-                      disabled={isSubmitting || !isOnline}
-                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                    >
-                      {language === 'en' ? 'Accept Task' : '업무 수락'}
-                    </Button>
-                  </>
-                )}
-
-                {task.status === 'IN_PROGRESS' && !task.cancelRequested && onComplete && (
+            <div className={styles.footerRight}>
+              {task.status === 'PENDING' && (
+                <>
                   <Button
-                    variant="primary"
+                    variant="secondary"
                     size="medium"
-                    onClick={handleComplete}
+                    onClick={() => setIsManualAssignOpen(true)}
                     className={styles.actionButton}
                     disabled={isSubmitting || !isOnline}
                     title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    {language === 'en' ? 'Complete Task' : '업무 완료'}
+                    {language === 'en' ? 'Assign Task' : '업무 배정'}
                   </Button>
-                )}
+                  <Button
+                    variant="primary"
+                    size="medium"
+                    onClick={handleAccept}
+                    className={styles.actionButton}
+                    disabled={isSubmitting || !isOnline}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                  >
+                    {language === 'en' ? 'Accept Task' : '업무 수락'}
+                  </Button>
+                </>
+              )}
 
-                {task.status === 'IN_PROGRESS' && task.cancelRequested && (
-                  <>
-                    <Button
-                      variant="secondary"
-                      size="medium"
-                      onClick={handleRejectCancellation}
-                      className={styles.actionButton}
-                      disabled={isSubmitting || !isOnline}
-                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                    >
-                      {language === 'en' ? 'Reject' : '취소 반려'}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="medium"
-                      onClick={handleApproveCancellation}
-                      className={styles.actionButton}
-                      disabled={isSubmitting || !isOnline}
-                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                    >
-                      {language === 'en' ? 'Approve' : '취소 승인'}
-                    </Button>
-                  </>
-                )}
-              </div>
+              {task.status === 'IN_PROGRESS' && !task.cancelRequested && onComplete && (
+                <Button
+                  variant="primary"
+                  size="medium"
+                  onClick={handleComplete}
+                  className={styles.actionButton}
+                  disabled={isSubmitting || !isOnline}
+                  title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                >
+                  {language === 'en' ? 'Complete Task' : '업무 완료'}
+                </Button>
+              )}
+
+              {task.status === 'IN_PROGRESS' && task.cancelRequested && (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="medium"
+                    onClick={handleRejectCancellation}
+                    className={styles.actionButton}
+                    disabled={isSubmitting || !isOnline}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                  >
+                    {language === 'en' ? 'Reject' : '취소 반려'}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="medium"
+                    onClick={handleApproveCancellation}
+                    className={styles.actionButton}
+                    disabled={isSubmitting || !isOnline}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                  >
+                    {language === 'en' ? 'Approve' : '취소 승인'}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </ModalCard>

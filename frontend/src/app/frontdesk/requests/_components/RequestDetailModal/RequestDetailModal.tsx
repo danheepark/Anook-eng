@@ -581,11 +581,11 @@ export default function RequestDetailModal({
             </div>
           )}
 
-          {/* 1. Created at 일시 (예: 01:50 Aug 17 2026) */}
+          {/* 1. Request created at 일시 (예: 01:50 Aug 17 2026) */}
           {activeDetail.createdAt && (
             <div className={styles.reasoningItem}>
               <span className={styles.secondaryLabel}>
-                {language === 'ko' ? '요청 일시' : 'Created at'}
+                {language === 'ko' ? '요청 일시' : 'Request created at'}
               </span>
               <p className={styles.reasoningText}>
                 {formatCreatedAt(activeDetail.createdAt)}

@@ -259,7 +259,7 @@
       "basicInfo": "Basic Info",
       "roomNo": "Room No",
       "currentDept": "Current Dept",
-      "createdAt": "Created At",
+      "createdAt": "Request created at",
       "updatedAt": "Last Updated",
       "requestContent": "Request Content",
       "summary": "Summary",
