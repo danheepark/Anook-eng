@@ -242,28 +242,26 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
   if (entities.items?.length > 0) {
     rendered.push(
       <div key="items" className={styles.reasoningItem}>
-        <span className={styles.secondaryLabel}>{labels.items}</span>
-        <div className={styles.reasoningText}>
-          {entities.items.map((it: any, idx: number) => {
+        <span className={styles.secondaryLabel}>{language === 'en' ? 'Item Request' : (labels?.items || '물품 요청')}</span>
+        <p className={styles.reasoningText}>
+          {entities.items.map((it: any) => {
             const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
-            return <div key={idx}>• {itemText} - {it.count}{labels.countSuffix}</div>;
-          })}
-        </div>
+            return `${itemText} x${it.count}`;
+          }).join(', ')}
+        </p>
       </div>
     );
   }
   if (entities.menu_items?.length > 0) {
     rendered.push(
       <div key="menu_items" className={styles.reasoningItem}>
-        <span className={styles.secondaryLabel}>{labels.menu_items}</span>
-        <div className={styles.reasoningText}>
-          {entities.menu_items.map((mi: any, idx: number) => (
-            <div key={idx}>
-              • {mi.name} - {mi.quantity}{labels.countSuffix}
-              {mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'None' && ` (${labels.option}: ${mi.selected_option})`}
-            </div>
-          ))}
-        </div>
+        <span className={styles.secondaryLabel}>{language === 'en' ? 'Order Menu' : (labels?.menu_items || '주문 메뉴')}</span>
+        <p className={styles.reasoningText}>
+          {entities.menu_items.map((mi: any) => {
+            const opt = mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'None' ? ` (${mi.selected_option})` : '';
+            return `${mi.name}${opt} x${mi.quantity}`;
+          }).join(', ')}
+        </p>
       </div>
     );
   }
