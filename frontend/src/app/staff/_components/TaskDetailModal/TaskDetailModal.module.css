@@ -20,12 +20,6 @@
   gap: var(--space-8);
 }
 
-.headerBadges {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-}
-
 .title {
   font: var(--text-h2-bold) !important;
   color: var(--color-gray-900);

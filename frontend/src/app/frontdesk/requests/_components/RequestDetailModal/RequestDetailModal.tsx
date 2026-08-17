@@ -466,10 +466,48 @@ export default function RequestDetailModal({
     return `${hours}:${minutes} ${month} ${day}`;
   };
 
-  const roomPrefix = language === 'ko' ? `${activeDetail.roomNo}호` : `NO.${activeDetail.roomNo}`;
-  const rawSummary = translatedSummary || activeDetail.summary;
-  const cleanSummary = cleanTitleSummary(rawSummary);
-  const modalTitle = cleanSummary ? `${roomPrefix} ${cleanSummary}` : roomPrefix;
+  const getDeptClass = (deptIdOrName?: string) => {
+    if (!deptIdOrName) return '';
+    const upper = deptIdOrName.toUpperCase();
+    if (upper.includes('HK') || upper.includes('HOUSEKEEPING') || upper.includes('하우스키핑')) return styles.deptHk;
+    if (upper.includes('FB') || upper.includes('FNB') || upper.includes('식음료')) return styles.deptFb;
+    if (upper.includes('FACILITY') || upper.includes('MAINTENANCE') || upper.includes('시설')) return styles.deptFacility;
+    if (upper.includes('CONCIERGE') || upper.includes('컨시어지')) return styles.deptConcierge;
+    if (upper.includes('EMERGENCY') || upper.includes('긴급')) return styles.deptEmergency;
+    if (upper.includes('FRONT') || upper.includes('프론트')) return styles.deptFront;
+    return '';
+  };
+
+  const getDeptName = (deptId?: string, fallbackName?: string) => {
+    if (deptId === 'HK') return language === 'ko' ? '하우스키핑' : 'Housekeeping';
+    if (deptId === 'FB') return language === 'ko' ? '식음료' : 'F&B';
+    if (deptId === 'FACILITY') return language === 'ko' ? '시설관리' : 'Facility';
+    if (deptId === 'CONCIERGE') return language === 'ko' ? '컨시어지' : 'Concierge';
+    if (deptId === 'FRONT') return language === 'ko' ? '프론트데스크' : 'Front Desk';
+    const d = departments.find(dep => dep.id === deptId);
+    if (d) return d.name;
+    if (fallbackName) return fallbackName;
+    return deptId || '';
+  };
+
+  const deptDisplayName = getDeptName(activeDetail.departmentId, activeDetail.departmentName);
+  const roomDisplay = language === 'en' ? `Room ${activeDetail.roomNo}` : `${activeDetail.roomNo}호`;
+  const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+  const cleanSummary = toSentenceCase(cleanTitleSummary(translatedSummary || activeDetail.summary));
+
+  let modalTitle = cleanSummary;
+  let modalSubtitle = roomDisplay;
+
+  if (activeDetail.cancelRequested) {
+    modalTitle = language === 'en' ? 'Cancel request' : '취소 요청';
+    modalSubtitle = cleanSummary ? `${roomDisplay}, ${cleanSummary}` : roomDisplay;
+  } else if (activeDetail.status === 'ESCALATED') {
+    modalTitle = language === 'en' ? 'Transfer request' : '이관 요청';
+    modalSubtitle = cleanSummary ? `${roomDisplay}, ${cleanSummary}` : roomDisplay;
+  } else {
+    modalTitle = cleanSummary || roomDisplay;
+    modalSubtitle = cleanSummary ? roomDisplay : '';
+  }
 
   return (
     <>
@@ -477,16 +515,17 @@ export default function RequestDetailModal({
         <ModalCard size="md" overflowVisible={false} onClose={onClose}>
         {/* 헤더 */}
         <div className={styles.header}>
-          <div className={styles.headerTop}>
-            {activeDetail.cancelRequested ? (
-              <StatusBadge variant="red">
-                {language === 'en' ? 'Cancel request' : '취소 요청'}
-              </StatusBadge>
-            ) : (
-              <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
+          <h2 className={styles.title}>
+            {deptDisplayName && (
+              <span className={`${styles.deptName} ${getDeptClass(activeDetail.departmentId || activeDetail.departmentName)}`}>
+                {deptDisplayName}
+              </span>
             )}
-          </div>
-          <h2 className={styles.title}>{modalTitle}</h2>
+            <span>{modalTitle}</span>
+          </h2>
+          {modalSubtitle && (
+            <p className={styles.subtitle}>{modalSubtitle}</p>
+          )}
         </div>
 
         <div className={styles.modalBody}>
