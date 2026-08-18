@@ -182,17 +182,19 @@ export default function StaffNotification() {
                   cleanDesc = cleanDesc.replace(/^\[주문 상세\]\s*-\s*details:\s*/i, '');
 
                   return (
-                  <NotificationCard
-                    key={`cancel-${req.id}`}
-                    variant="cancel"
-                    title={req.summary}
-                    roomNumber={req.roomNumber}
-                    departmentName={req.departmentName}
-                    createdAt={req.createdAt}
-                    priority={req.priority}
-                    primaryLabel={language === 'en' ? 'Approve' : '승인'}
-                    onPrimaryClick={() => handleApproveCancel(req.id, req.version)}
-                  />
+                    <NotificationCard
+                      key={`cancel-${req.id}`}
+                      variant="cancel"
+                      title={req.summary}
+                      roomNumber={req.roomNumber}
+                      departmentName={req.departmentName}
+                      createdAt={req.createdAt}
+                      priority={req.priority}
+                      primaryLabel={language === 'en' ? 'Approve' : '승인'}
+                      onPrimaryClick={() => handleApproveCancel(req.id, req.version)}
+                      secondaryLabel={language === 'en' ? 'Reject' : '반려'}
+                      onSecondaryClick={() => handleRejectCancel(req.id, req.version)}
+                    />
                   );
                 })}
               </div>
