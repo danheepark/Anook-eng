@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { History } from 'lucide-react';
+import { History, MoreVertical, Trash2 } from 'lucide-react';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
 import StatusBadge from '@/components/ui/StatusBadge/StatusBadge';
@@ -272,6 +272,8 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
   const [isManualAssignOpen, setIsManualAssignOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
   const { showToast } = useUiStore();
   const isOnline = useNetworkStore((state) => state.isOnline);
   const { t, language } = useTranslation();
@@ -281,7 +283,26 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
   const handleClose = () => {
     setIsManualAssignOpen(false);
+    setIsMoreMenuOpen(false);
+    setIsCancelConfirmOpen(false);
     onClose();
+  };
+
+  const handleDirectCancel = async () => {
+    if (onApproveCancellation) {
+      setIsSubmitting(true);
+      try {
+        await onApproveCancellation(task.id, task.version);
+        showToast(language === 'en' ? 'Task cancelled successfully.' : '태스크가 취소 처리되었습니다.', 'success');
+        setIsCancelConfirmOpen(false);
+        setIsMoreMenuOpen(false);
+        handleClose();
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : (language === 'en' ? 'Failed to cancel task.' : '태스크 취소 중 오류가 발생했습니다.'), 'error');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
   };
 
   const handleAccept = async () => {
@@ -461,8 +482,42 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
 
   return (
     <>
-      <ModalOverlay isOpen={isOpen && !isManualAssignOpen && !isChatHistoryOpen} onClose={handleClose}>
+      <ModalOverlay isOpen={isOpen && !isManualAssignOpen && !isChatHistoryOpen && !isCancelConfirmOpen} onClose={handleClose}>
         <ModalCard size="md" overflowVisible={false} onClose={handleClose}>
+          {/* 우측 상단 더보기 (⋮) 메뉴 - 취소/완료 상태 제외 */}
+          {task.status !== 'COMPLETED' && task.status !== 'CANCELLED' && (
+            <div className={styles.topRightActions}>
+              <div className={styles.moreMenuWrapper}>
+                <button
+                  type="button"
+                  className={styles.moreButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMoreMenuOpen(!isMoreMenuOpen);
+                  }}
+                  aria-label={language === 'en' ? 'More options' : '더보기'}
+                >
+                  <MoreVertical size={18} />
+                </button>
+                {isMoreMenuOpen && (
+                  <div className={styles.menuPopover} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      className={styles.menuItemDelete}
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        setIsCancelConfirmOpen(true);
+                      }}
+                    >
+                      <Trash2 size={15} />
+                      <span>{language === 'en' ? 'Cancel Task' : '태스크 취소'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* 1. 헤더 */}
           <div className={styles.header}>
             <div className={styles.headerLeft}>
@@ -705,6 +760,33 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
         }}
         saving={isSubmitting}
       />
+
+      <ModalOverlay isOpen={isCancelConfirmOpen} onClose={() => setIsCancelConfirmOpen(false)}>
+        <ModalCard size="sm" onClose={() => setIsCancelConfirmOpen(false)}>
+          <div className={styles.confirmBox}>
+            <h3 className={styles.confirmTitle}>{language === 'en' ? 'Cancel Task' : '태스크 취소'}</h3>
+            <p className={styles.confirmDesc}>
+              {language === 'en'
+                ? `Are you sure you want to cancel the task for Room ${task.roomNumber}? This action will mark the ticket as Cancelled.`
+                : `정말 ${task.roomNumber}호의 태스크를 취소하시겠습니까? 이 작업은 취소(CANCELLED) 처리됩니다.`}
+            </p>
+            <div className={styles.confirmActions}>
+              <Button variant="outlined" size="medium" onClick={() => setIsCancelConfirmOpen(false)} disabled={isSubmitting}>
+                {language === 'en' ? 'Keep Task' : '돌아가기'}
+              </Button>
+              <Button
+                variant="primary"
+                size="medium"
+                style={{ backgroundColor: '#DC2626', borderColor: '#DC2626', color: '#FFFFFF' }}
+                onClick={handleDirectCancel}
+                disabled={isSubmitting}
+              >
+                {language === 'en' ? 'Confirm Cancel' : '취소 확정'}
+              </Button>
+            </div>
+          </div>
+        </ModalCard>
+      </ModalOverlay>
     </>
   );
 }

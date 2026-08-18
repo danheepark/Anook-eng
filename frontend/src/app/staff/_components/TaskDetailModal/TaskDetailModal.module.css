@@ -210,3 +210,97 @@
   border-color: var(--color-gray-300) !important;
   color: var(--color-gray-900) !important;
 }
+
+/* ──────────────────────────────────────────────────────────
+   Top-Right More Menu (⋮ Icon & Popover)
+   ────────────────────────────────────────────────────────── */
+.topRightActions {
+  position: absolute;
+  top: 24px;
+  right: 54px;
+  z-index: 20;
+}
+
+.moreMenuWrapper {
+  position: relative;
+}
+
+.moreButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--color-gray-400);
+  transition: color 0.15s ease;
+}
+
+.moreButton:hover {
+  color: var(--color-gray-700);
+}
+
+.menuPopover {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  min-width: 140px;
+  z-index: 100;
+}
+
+.menuItemDelete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #DC2626;
+  font: var(--text-body-medium);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.menuItemDelete:hover {
+  background-color: #FEF2F2;
+}
+
+/* Confirmation Box */
+.confirmBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirmTitle {
+  font: var(--text-h3-bold);
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.confirmDesc {
+  font: var(--text-body-medium);
+  color: var(--color-gray-600);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
