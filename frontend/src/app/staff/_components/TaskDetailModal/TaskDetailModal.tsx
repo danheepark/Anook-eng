@@ -609,7 +609,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
   const rawItemList = computeTaskItemList(task.entities);
 
   // 단일 항목 등 제목과 본문 내용이 완전히 동일/중복인 경우 중복 라인 제거 (TaskTicket과 동일한 로직)
-  const itemList = React.useMemo(() => {
+  const itemList = (() => {
     if (!rawItemList || rawItemList.length === 0) return [];
     const normTitle = String(modalTitle || '')
       .replace(/^[-•*]\s*/gm, '')
@@ -638,7 +638,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
         .trim();
       return normLine !== normTitle;
     });
-  }, [rawItemList, modalTitle]);
+  })();
 
   const rawTextParts = task.rawText ? task.rawText.split('\n|||TRANSFER_REASON|||') : [];
   const transferReasonText = rawTextParts.length > 1 ? rawTextParts.slice(1).join('\n').trim() : null;
