@@ -214,15 +214,11 @@
 /* ──────────────────────────────────────────────────────────
    Top-Right More Menu (⋮ Icon & Popover)
    ────────────────────────────────────────────────────────── */
-.topRightActions {
-  position: absolute;
-  top: 24px;
-  right: 54px;
-  z-index: 20;
-}
-
 .moreMenuWrapper {
   position: relative;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
 }
 
 .moreButton {

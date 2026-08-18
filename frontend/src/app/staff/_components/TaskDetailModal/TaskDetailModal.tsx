@@ -484,40 +484,6 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
     <>
       <ModalOverlay isOpen={isOpen && !isManualAssignOpen && !isChatHistoryOpen && !isCancelConfirmOpen} onClose={handleClose}>
         <ModalCard size="md" overflowVisible={false} onClose={handleClose}>
-          {/* 우측 상단 더보기 (⋮) 메뉴 - 취소/완료 상태 제외 */}
-          {task.status !== 'COMPLETED' && task.status !== 'CANCELLED' && (
-            <div className={styles.topRightActions}>
-              <div className={styles.moreMenuWrapper}>
-                <button
-                  type="button"
-                  className={styles.moreButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMoreMenuOpen(!isMoreMenuOpen);
-                  }}
-                  aria-label={language === 'en' ? 'More options' : '더보기'}
-                >
-                  <MoreVertical size={18} />
-                </button>
-                {isMoreMenuOpen && (
-                  <div className={styles.menuPopover} onClick={(e) => e.stopPropagation()}>
-                    <button
-                      type="button"
-                      className={styles.menuItemDelete}
-                      onClick={() => {
-                        setIsMoreMenuOpen(false);
-                        setIsCancelConfirmOpen(true);
-                      }}
-                    >
-                      <Trash2 size={15} />
-                      <span>{language === 'en' ? 'Cancel Task' : '태스크 취소'}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* 1. 헤더 */}
           <div className={styles.header}>
             <div className={styles.headerLeft}>
@@ -530,6 +496,38 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 {task.cancelRequested ? (language === 'en' ? 'Cancel Request' : '취소 요청') : modalTitle}
               </h2>
               <StatusBadge variant={statusInfo.variant}>{statusInfo.text}</StatusBadge>
+
+              {/* 우측 더보기 (⋮) 메뉴 - title과 나란히, X 아이콘 아래에 위치 */}
+              {task.status !== 'COMPLETED' && task.status !== 'CANCELLED' && (
+                <div className={styles.moreMenuWrapper}>
+                  <button
+                    type="button"
+                    className={styles.moreButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMoreMenuOpen(!isMoreMenuOpen);
+                    }}
+                    aria-label={language === 'en' ? 'More options' : '더보기'}
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+                  {isMoreMenuOpen && (
+                    <div className={styles.menuPopover} onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className={styles.menuItemDelete}
+                        onClick={() => {
+                          setIsMoreMenuOpen(false);
+                          setIsCancelConfirmOpen(true);
+                        }}
+                      >
+                        <Trash2 size={15} />
+                        <span>{language === 'en' ? 'Cancel Task' : '태스크 취소'}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             {task.cancelRequested && cleanSummary && (
               <div className={styles.cancelSubTitle}>
