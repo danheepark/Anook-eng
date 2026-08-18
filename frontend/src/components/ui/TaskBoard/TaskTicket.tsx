@@ -483,7 +483,7 @@ export default function TaskTicket({
           )}
         </div>
         <div className={styles.headerRight}>
-          {(isCancelled || isEscalated || priority === 'URGENT') && (
+          {(isCancelled || isEscalated) && (
             <div className={styles.statusRow}>
               {isCancelled && (
                 <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
@@ -494,12 +494,6 @@ export default function TaskTicket({
                 <span className={`${styles.textStatus} ${styles.textStatusCancelled}`}>
                   {language === 'ko' ? '이관 대기중' : 'Transfer Pending'}
                 </span>
-              )}
-              {priority === 'URGENT' && (
-                <div className={`${styles.textStatus} ${styles.textStatusUrgent}`}>
-                  {t.ticketUI.badge.urgent}
-                  <span className={styles.redDot} />
-                </div>
               )}
             </div>
           )}
@@ -512,16 +506,24 @@ export default function TaskTicket({
 
       <div className={styles.headerDivider} />
 
+      {(priority === 'URGENT' || entities?.is_contactless) && (
+        <div className={styles.badgeRowContainer}>
+          {entities?.is_contactless && (
+            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
+          )}
+          {priority === 'URGENT' && (
+            <div className={styles.urgentBadgeWrapper}>
+              <StatusBadge variant="red">{t.ticketUI.badge.urgent}</StatusBadge>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className={styles.content}>
         {cancelRequested && roomNo && (
           <span className={styles.roomNo}>
             {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
           </span>
-        )}
-        {entities?.is_contactless && (
-          <div className={styles.badgeRow}>
-            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
-          </div>
         )}
         <h3 className={styles.title}>
           {isTranslating ? t.common.loading || 'Loading...' : (
