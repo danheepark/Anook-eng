@@ -148,7 +148,8 @@
 .headerLeft {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-12);
+  gap: var(--space-8);
+  flex-wrap: wrap;
   min-width: 0;
 }
 

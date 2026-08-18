@@ -470,16 +470,18 @@ export default function TaskTicket({
       {showDeptBar && <div className={styles.topColorBar} />}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          {cancelRequested ? (
+          {roomNo && (
+            <span className={styles.roomNo}>
+              {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
+            </span>
+          )}
+          {cancelRequested && (
             <span className={styles.cancelPendingPill}>
               {t.ticketUI.badge.cancelPending || (language === 'en' ? 'Cancel Request' : '취소 요청')}
             </span>
-          ) : (
-            roomNo && (
-              <span className={styles.roomNo}>
-                {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
-              </span>
-            )
+          )}
+          {entities?.is_contactless && (
+            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
           )}
           {priority === 'URGENT' && (
             <StatusBadge variant="red">{t.ticketUI.badge.urgent}</StatusBadge>
@@ -510,16 +512,6 @@ export default function TaskTicket({
       <div className={styles.headerDivider} />
 
       <div className={styles.content}>
-        {cancelRequested && roomNo && (
-          <span className={styles.roomNo}>
-            {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
-          </span>
-        )}
-        {entities?.is_contactless && (
-          <div className={styles.badgeRow}>
-            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
-          </div>
-        )}
         <h3 className={styles.title}>
           {isTranslating ? t.common.loading || 'Loading...' : (
             highlightSearch ? renderHighlightedText(displayTitle as string, highlightSearch, isActiveMatch) : displayTitle
