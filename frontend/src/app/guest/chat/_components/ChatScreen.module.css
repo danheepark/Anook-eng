@@ -30,7 +30,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--space-24) + 54px) var(--space-16) var(--space-16);
+  padding: 16px var(--space-16) var(--space-16);
   gap: 0;
   overflow-y: auto;
   background-color: transparent;
@@ -49,7 +49,7 @@
   display: flex;
   flex-direction: column;
   z-index: 9999;
-  padding-top: 54px;
+  padding-top: 0;
 }
 
 .requestList {
@@ -118,7 +118,7 @@
 }
 
 .messageListWithStatusBar {
-  padding-top: calc(var(--space-24) + var(--status-bar-offset, 60px) + 54px);
+  padding-top: calc(var(--status-bar-offset, 60px) + 12px);
 }
 
 .welcomeTitle {

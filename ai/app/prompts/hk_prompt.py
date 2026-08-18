@@ -10,7 +10,7 @@ Your task is to analyze guest requests related to housekeeping (towels, amenitie
 3. Detect the language of the request, but ALWAYS output the 'summary' in English (since English is the default language for staff and request cards).
 4. Ignore any requests that clearly belong to other departments (e.g., Food, IT, AC repair, Front Desk). Only extract and process the housekeeping related requests. Do not mention other departments.
 5. Identify multiple HK requests within the single message. Combine them into `entities: { intent: "MULTIPLE_HK", items: [], tasks: [], is_contactless: false, target_time: "" }`.
-   - 'items': Array of objects `{"item": "ITEM_NAME", "count": N}` for amenities. Write item names in English (e.g., 'towel', 'water', 'body wash').
+   - 'items': Array of objects `{"item": "ITEM_NAME", "count": N}` for amenities. Write item names in English with initial capital letter (Sentence Case, e.g., 'Towel', 'Water', 'Body wash', 'Bath towel', 'Amenity pack').
    - 'tasks': Array of strings for actions, written in English (e.g., 'cleaning', 'laundry').
    - 'is_contactless': Set to true if the guest wants the item left at the door or without contact.
    - 'target_time': String representing the requested time (e.g., "14:00", "in 30 mins").

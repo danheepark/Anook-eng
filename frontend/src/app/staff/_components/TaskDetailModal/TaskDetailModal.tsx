@@ -181,24 +181,29 @@ const computeTaskItemList = (entities?: any): string[] => {
   if (!entities) return [];
   const lines: string[] = [];
 
+  const toSentenceCase = (str: string) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+
   if (Array.isArray(entities.menu_items) && entities.menu_items.length > 0) {
     entities.menu_items.forEach((it: any) => {
       const opt = it.selected_option && it.selected_option !== '없음' && it.selected_option !== 'none' ? ` (${it.selected_option})` : '';
-      lines.push(`- ${it.name}${opt} ${it.quantity ? `×${it.quantity}` : ''}`.trim());
+      const name = toSentenceCase(it.name || '');
+      lines.push(`- ${name}${opt} ${it.quantity ? `×${it.quantity}` : ''}`.trim());
     });
   } else if (Array.isArray(entities.items) && entities.items.length > 0) {
     entities.items.forEach((it: any) => {
       const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
-      lines.push(`- ${itemText} ${it.count ? `×${it.count}` : ''}`.trim());
+      const name = toSentenceCase(itemText || '');
+      lines.push(`- ${name} ${it.count ? `×${it.count}` : ''}`.trim());
     });
   } else if (entities.item) {
     const itemText = typeof entities.item === 'object' && entities.item !== null ? (entities.item.name || entities.item.id || '') : entities.item;
-    lines.push(`- ${itemText} ${entities.count ? `×${entities.count}` : ''}`.trim());
+    const name = toSentenceCase(itemText || '');
+    lines.push(`- ${name} ${entities.count ? `×${entities.count}` : ''}`.trim());
   }
 
   if (Array.isArray(entities.tasks)) {
     entities.tasks.forEach((tStr: string) => {
-      lines.push(`- ${tStr}`);
+      lines.push(`- ${toSentenceCase(tStr || '')}`);
     });
   }
 
@@ -603,7 +608,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
   const rawSummary = translatedSummary || task.summary;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanSummary = toSentenceCase(cleanTitleSummary(rawSummary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');
-  
+
   const computedTitle = computeTaskTitle(task.departmentId, task.summary, task.entities, language);
   let modalTitle = computedTitle || cleanSummary || roomDisplay;
   const rawItemList = computeTaskItemList(task.entities);

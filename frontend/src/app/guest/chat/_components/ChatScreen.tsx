@@ -83,7 +83,7 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
     if (!statusBarRef.current) return;
     const updateOffset = () => {
       if (statusBarRef.current) {
-        const height = statusBarRef.current.offsetHeight - 54;
+        const height = statusBarRef.current.offsetHeight;
         document.documentElement.style.setProperty('--status-bar-offset', `${Math.max(0, height)}px`);
       }
     };

@@ -246,7 +246,8 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
         <p className={styles.reasoningText}>
           {entities.items.map((it: any) => {
             const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
-            return `${itemText} x${it.count}`;
+            const name = itemText ? itemText.charAt(0).toUpperCase() + itemText.slice(1) : '';
+            return `${name} x${it.count}`;
           }).join(', ')}
         </p>
       </div>
@@ -259,7 +260,8 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
         <p className={styles.reasoningText}>
           {entities.menu_items.map((mi: any) => {
             const opt = mi.selected_option && mi.selected_option !== '없음' && mi.selected_option !== 'None' ? ` (${mi.selected_option})` : '';
-            return `${mi.name}${opt} x${mi.quantity}`;
+            const name = mi.name ? mi.name.charAt(0).toUpperCase() + mi.name.slice(1) : '';
+            return `${name}${opt} x${mi.quantity}`;
           }).join(', ')}
         </p>
       </div>
