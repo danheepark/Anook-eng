@@ -4,17 +4,17 @@ import React, { useState } from 'react';
 import styles from './ChatEndCard.module.css';
 import { ReviewStarIcon } from '@/components/icons';
 import { Check, Home, Utensils, Wrench, ConciergeBell, Monitor, AlertTriangle, FileText } from 'lucide-react';
+import { useTranslation } from '@/app/useTranslation';
+import { useUiStore } from '@/stores/useUiStore';
 
-const RATING_LABELS = ['', '별로예요', '그저 그래요', '보통이에요', '좋았어요', '최고예요!'];
-
-const DOMAIN_MAP: Record<string, { icon: React.ElementType; label: string }> = {
-  HK: { icon: Home, label: '하우스키핑' },
-  FB: { icon: Utensils, label: '식음료' },
-  FACILITY: { icon: Wrench, label: '시설관리' },
-  CONCIERGE: { icon: ConciergeBell, label: '컨시어지' },
-  FRONT: { icon: Monitor, label: '프론트' },
-  EMERGENCY: { icon: AlertTriangle, label: '긴급' },
-  UNKNOWN: { icon: FileText, label: '기타' },
+const DOMAIN_MAP: Record<string, { icon: React.ElementType }> = {
+  HK: { icon: Home },
+  FB: { icon: Utensils },
+  FACILITY: { icon: Wrench },
+  CONCIERGE: { icon: ConciergeBell },
+  FRONT: { icon: Monitor },
+  EMERGENCY: { icon: AlertTriangle },
+  UNKNOWN: { icon: FileText },
 };
 
 export interface ChatEndCardProps {
@@ -25,13 +25,18 @@ export interface ChatEndCardProps {
 }
 
 export default function ChatEndCard({ summary, domainCode, completedAt, onSubmitRating }: ChatEndCardProps) {
+  const { chatLanguage, language: uiLanguage } = useUiStore();
+  const targetLang = chatLanguage || uiLanguage || 'en';
+  const { t } = useTranslation(targetLang);
+
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
 
+  const ratingLabels = ['', t.feedbackCard?.ratings['1'] || 'Terrible', t.feedbackCard?.ratings['2'] || 'Poor', t.feedbackCard?.ratings['3'] || 'Average', t.feedbackCard?.ratings['4'] || 'Good', t.feedbackCard?.ratings['5'] || 'Excellent!'];
+
   const activeRating = hoverRating || rating;
   const domainInfo = DOMAIN_MAP[domainCode || 'UNKNOWN'] || DOMAIN_MAP['UNKNOWN'];
-  const DomainIcon = domainInfo.icon;
 
   const handleStarClick = (star: number) => {
     if (submitted) return;
@@ -41,8 +46,8 @@ export default function ChatEndCard({ summary, domainCode, completedAt, onSubmit
   };
 
   const formatTime = (dateStr?: string) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
+    const d = dateStr ? new Date(dateStr) : new Date();
+    if (isNaN(d.getTime())) return '';
     const h = String(d.getHours()).padStart(2, '0');
     const m = String(d.getMinutes()).padStart(2, '0');
     return `${h}:${m}`;
@@ -52,7 +57,11 @@ export default function ChatEndCard({ summary, domainCode, completedAt, onSubmit
   const displaySummary = summary
     .replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')
     .replace(/미학습 정보.*$/, '')
-    .trim() || '요청 처리';
+    .trim() || (targetLang === 'ko' ? '요청 처리' : 'Request Processed');
+
+  const completedLabel = targetLang === 'ko' ? '완료' : 'Completed';
+  const satisfactionLabel = t.feedbackCard?.satisfactionQuestion || (targetLang === 'ko' ? '서비스가 만족스러우셨나요?' : 'How was our service?');
+  const thankYouLabel = t.feedbackCard?.thankYou || (targetLang === 'ko' ? '감사합니다!' : 'Thank you!');
 
   return (
     <div className={`glass-panel ${styles.card}`}>
@@ -68,15 +77,15 @@ export default function ChatEndCard({ summary, domainCode, completedAt, onSubmit
         <div className={styles.rightColumn}>
           <div className={styles.content}>
             <div className={styles.summaryRow}>
-              <div className={styles.summary}>{displaySummary} 완료</div>
+              <div className={styles.summary}>{displaySummary} {completedLabel}</div>
               <div className={styles.timeLabel}>{formatTime(completedAt)}</div>
             </div>
           </div>
 
           <div className={styles.subtitle}>
             {submitted
-              ? `${RATING_LABELS[rating]} · 감사합니다!`
-              : '서비스가 만족스러우셨나요?'}
+              ? `${ratingLabels[rating]} · ${thankYouLabel}`
+              : satisfactionLabel}
           </div>
 
           {/* Inline Star Rating */}

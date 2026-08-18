@@ -378,8 +378,8 @@ export default function RequestCard({
   const translatedDetails = isDetailsTranslationRequired ? translatedDetailsRaw : rawDetails;
 
   const formatTime = (dateStr?: string) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
+    const d = dateStr ? new Date(dateStr) : new Date();
+    if (isNaN(d.getTime())) return '';
     const h = String(d.getHours()).padStart(2, '0');
     const m = String(d.getMinutes()).padStart(2, '0');
     return `${h}:${m}`;

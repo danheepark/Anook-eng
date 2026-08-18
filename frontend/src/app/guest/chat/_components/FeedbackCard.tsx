@@ -43,14 +43,14 @@ export default function FeedbackCard({
   systemContent,
   systemSubtitle
 }: FeedbackCardProps) {
-  const { chatLanguage } = useUiStore();
-  const [targetLang] = useState(chatLanguage);
+  const { chatLanguage, language: uiLanguage } = useUiStore();
+  const targetLang = chatLanguage || uiLanguage || 'en';
   const { t, language } = useTranslation(targetLang);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   
-  const ratingLabels = ['', t.feedbackCard?.ratings['1'] || '별로예요', t.feedbackCard?.ratings['2'] || '그저 그래요', t.feedbackCard?.ratings['3'] || '보통이에요', t.feedbackCard?.ratings['4'] || '좋았어요', t.feedbackCard?.ratings['5'] || '최고예요!'];
+  const ratingLabels = ['', t.feedbackCard?.ratings['1'] || 'Terrible', t.feedbackCard?.ratings['2'] || 'Poor', t.feedbackCard?.ratings['3'] || 'Average', t.feedbackCard?.ratings['4'] || 'Good', t.feedbackCard?.ratings['5'] || 'Excellent!'];
 
   const activeRating = hoverRating || rating;
   const domainInfo = DOMAIN_MAP[domainCode || 'UNKNOWN'] || DOMAIN_MAP['UNKNOWN'];
@@ -66,8 +66,8 @@ export default function FeedbackCard({
   };
 
   const formatTime = (dateStr?: string) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
+    const d = dateStr ? new Date(dateStr) : new Date();
+    if (isNaN(d.getTime())) return '';
     const h = String(d.getHours()).padStart(2, '0');
     const m = String(d.getMinutes()).padStart(2, '0');
     return `${h}:${m}`;
@@ -121,9 +121,11 @@ export default function FeedbackCard({
   }
 
   // 게스트용 제목: 도메인 라벨 + "요청 완료"
+  const domainLabel = (t.guestChat?.progress?.domains as Record<string, string>)?.[domainCode || 'UNKNOWN'] || domainCode || 'UNKNOWN';
+  const requestCompletedLabel = t.feedbackCard?.requestCompleted || (targetLang === 'ko' ? '요청 완료' : 'Completed');
   const displayTitle = hasRequestInfo
-    ? `${domainInfo.label} ${t.feedbackCard?.requestCompleted || '요청 완료'}`
-    : (t.feedbackCard?.consultationCompleted || '상담이 완료되었습니다');
+    ? (targetLang === 'ko' ? `${domainInfo.label} ${requestCompletedLabel}` : `${domainLabel} ${requestCompletedLabel}`)
+    : (t.feedbackCard?.consultationCompleted || (targetLang === 'ko' ? '상담이 완료되었습니다' : 'Conversation Ended'));
 
   return (
     <div className={`glass-panel ${styles.card}`}>

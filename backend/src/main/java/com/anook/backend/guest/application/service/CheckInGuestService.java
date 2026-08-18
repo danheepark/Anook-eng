@@ -8,6 +8,7 @@ import com.anook.backend.guest.application.port.out.RoomQueryPort;
 import com.anook.backend.global.exception.BusinessException;
 import com.anook.backend.global.exception.ErrorCode;
 import com.anook.backend.guest.domain.model.Guest;
+import com.anook.backend.room.application.service.RoomInventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class CheckInGuestService implements CheckInGuestUseCase {
 
     private final GuestRepositoryPort guestRepository;
     private final RoomQueryPort roomQueryPort;
+    private final RoomInventoryService roomInventoryService;
 
     @Override
     public CheckInGuestResult checkIn(CheckInGuestCommand command) {
@@ -38,7 +40,10 @@ public class CheckInGuestService implements CheckInGuestUseCase {
             throw new BusinessException(ErrorCode.ALREADY_CHECKED_IN);
         }
 
-        // 3) 도메인 모델 생성 및 저장
+        // 3) 신규 투숙객 체크인 시 해당 객실의 기존 Redis 물품 인벤토리 카운터 강제 리셋
+        roomInventoryService.resetInventory(command.roomNumber());
+
+        // 4) 도메인 모델 생성 및 저장
         Guest guest = Guest.create(command.roomNumber(), command.name(), command.phone(), command.checkoutDate(), command.specialNotes());
         Guest saved = guestRepository.save(guest);
 
