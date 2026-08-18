@@ -217,7 +217,7 @@
 
 .description {
   font: var(--text-body-regular);
-  color: #2A2A2A;
+  color: var(--color-gray-500);
   margin-top: calc(var(--space-4) * -1);
   margin-bottom: 0;
   word-break: break-word;
