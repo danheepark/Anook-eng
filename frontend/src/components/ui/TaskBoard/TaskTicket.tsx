@@ -357,47 +357,55 @@ export default function TaskTicket({
 
 
 
-  const manualDesc = React.useMemo(() => {
-    if (!description) return '';
+  // 1. 순수 재배정/이관 사유 추출
+  const transferReason = React.useMemo(() => {
+    if (!description) return null;
     if (description.includes('|||TRANSFER_REASON|||')) {
       const parts = description.split('|||TRANSFER_REASON|||');
-      const itemPart = parts[0].trim();
       const transferPart = parts.slice(1).join('\n').trim();
       const cleanTransferPart = transferPart.replace(/^\[[A-Z0-9_]+\]\s*[^\n]*/i, '').trim();
-      
-      const resParts = [];
-      if (itemPart) resParts.push(itemPart);
       if (cleanTransferPart) {
         const reasonLabel = language === 'ko' ? '재배정 사유' : 'Reassignment reason';
-        resParts.push(`[${reasonLabel}] ${cleanTransferPart}`);
+        return `[${reasonLabel}] ${cleanTransferPart}`;
       }
-      return resParts.join('\n');
+    } else if (/\[(?:Reassignment reason|재배정 사유)\]/i.test(description)) {
+      const lines = description.split('\n');
+      const reasonLine = lines.find(l => /\[(?:Reassignment reason|재배정 사유)\]/i.test(l));
+      if (reasonLine) return reasonLine.trim();
     }
+    return null;
+  }, [description, language]);
+
+  // 2. 수동 설명 텍스트 추출
+  const manualItemDesc = React.useMemo(() => {
+    if (!description) return '';
     let desc = description;
+    if (desc.includes('|||TRANSFER_REASON|||')) {
+      desc = desc.split('|||TRANSFER_REASON|||')[0].trim();
+    }
     if (desc.includes('[주문 상세]')) {
       desc = desc.split('[주문 상세]')[0].trim();
     }
     return desc.trim();
-  }, [description, language]);
+  }, [description]);
 
-  let displayDescription = fallbackDescription;
+  // 3. 카드 노출용 최종 description 조립
+  let displayDescription = '';
   if (entityDetails) {
-    if (manualDesc && manualDesc !== entityDetails) {
-      const cleanManualDesc = manualDesc
-        .split('\n')
-        .filter(line => !line.trim().startsWith('•') && !line.trim().startsWith('-'))
-        .join('\n')
-        .trim();
-      if (cleanManualDesc) {
-        displayDescription = `${entityDetails}\n${cleanManualDesc}`;
-      } else {
-        displayDescription = entityDetails;
-      }
-    } else {
-      displayDescription = entityDetails;
+    // 아이템 엔티티 목록이 존재하는 카드는 아이템 목록을 기본 노출하고, 재배정 사유가 있는 경우에만 하단에 추가
+    displayDescription = entityDetails;
+    if (transferReason) {
+      displayDescription = `${displayDescription}\n${transferReason}`;
     }
-  } else if (manualDesc) {
-    displayDescription = manualDesc;
+  } else if (manualItemDesc) {
+    displayDescription = manualItemDesc;
+    if (transferReason && !manualItemDesc.includes(transferReason)) {
+      displayDescription = `${displayDescription}\n${transferReason}`;
+    }
+  } else if (transferReason) {
+    displayDescription = transferReason;
+  } else if (fallbackDescription) {
+    displayDescription = fallbackDescription;
   }
 
   
