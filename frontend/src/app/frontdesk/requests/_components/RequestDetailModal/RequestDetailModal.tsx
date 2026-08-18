@@ -783,10 +783,7 @@ export default function RequestDetailModal({
       <ManualAssignModal
         isOpen={showManualAssign}
         onClose={() => setShowManualAssign(false)}
-        detail={{
-          ...activeDetail,
-          description: ''
-        }}
+        detail={activeDetail}
         departments={departments}
         onSave={handleManualSave}
         saving={saving}

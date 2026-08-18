@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ModalOverlay from '@/components/ui/Modal/ModalOverlay';
 import ModalCard from '@/components/ui/Modal/ModalCard';
 import Button from '@/components/ui/Button/Button';
@@ -23,6 +23,7 @@ interface RequestDetail {
   createdAt: string;
   status: string;
   description?: string;
+  entities?: any;
 }
 
 interface ManualAssignModalProps {
@@ -34,23 +35,85 @@ interface ManualAssignModalProps {
   saving: boolean;
 }
 
+function computeTaskItemList(entities?: any): string[] {
+  if (!entities) return [];
+  const lines: string[] = [];
+
+  if (Array.isArray(entities.menu_items) && entities.menu_items.length > 0) {
+    entities.menu_items.forEach((it: any) => {
+      const opt = it.selected_option && it.selected_option !== '없음' && it.selected_option !== 'none' ? ` (${it.selected_option})` : '';
+      lines.push(`- ${it.name}${opt} ${it.quantity ? `×${it.quantity}` : ''}`.trim());
+    });
+  } else if (Array.isArray(entities.items) && entities.items.length > 0) {
+    entities.items.forEach((it: any) => {
+      const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
+      lines.push(`- ${itemText} ${it.count ? `×${it.count}` : ''}`.trim());
+    });
+  } else if (entities.item) {
+    const itemText = typeof entities.item === 'object' && entities.item !== null ? (entities.item.name || entities.item.id || '') : entities.item;
+    lines.push(`- ${itemText} ${entities.count ? `×${entities.count}` : ''}`.trim());
+  }
+
+  if (Array.isArray(entities.tasks)) {
+    entities.tasks.forEach((tStr: string) => {
+      lines.push(`- ${tStr}`);
+    });
+  }
+
+  return lines;
+}
+
 export default function ManualAssignModal({ isOpen, onClose, detail, departments, onSave, saving }: ManualAssignModalProps) {
   const { language } = useTranslation();
   const [editDeptId, setEditDeptId] = useState(detail.departmentId);
   const [editSummary, setEditSummary] = useState(detail.summary || '');
-  const [editDescription, setEditDescription] = useState(detail.description || '');
+  const [editDescription, setEditDescription] = useState('');
+  const [reassignReason, setReassignReason] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setEditDeptId(detail.departmentId);
       setEditSummary(detail.summary || '');
-      setEditDescription(detail.description || '');
+      setReassignReason('');
+
+      // 상세 설명 기본값 설정: 기존 description이 없으면 entities에서 item list 자동 추출
+      let initialDesc = detail.description || '';
+      if (!initialDesc && detail.entities) {
+        const itemLines = computeTaskItemList(detail.entities);
+        if (itemLines.length > 0) {
+          initialDesc = itemLines.join('\n');
+        }
+      }
+      setEditDescription(initialDesc);
     }
   }, [isOpen, detail]);
+
+  // 미리보기 카드용 통합 설명 (아이템 리스트 + 재배정 사유)
+  const previewDescription = useMemo(() => {
+    const parts = [];
+    if (editDescription.trim()) parts.push(editDescription.trim());
+    if (reassignReason.trim()) {
+      const reasonLabel = language === 'ko' ? '재배정 사유' : 'Reassignment reason';
+      parts.push(`[${reasonLabel}] ${reassignReason.trim()}`);
+    }
+    return parts.join('\n\n');
+  }, [editDescription, reassignReason, language]);
 
   if (!isOpen) return null;
 
   const canSubmit = editDeptId && editDeptId !== 'FRONT' && editSummary.trim().length > 0;
+
+  const handleAssignSubmit = () => {
+    const finalParts = [];
+    if (editDescription.trim()) {
+      finalParts.push(editDescription.trim());
+    }
+    if (reassignReason.trim()) {
+      finalParts.push(`|||TRANSFER_REASON|||\n${reassignReason.trim()}`);
+    }
+    const finalDescription = finalParts.join('\n');
+    onSave(editDeptId, 'NORMAL', editSummary, finalDescription);
+  };
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
@@ -66,7 +129,8 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
                 department={editDeptId}
                 priority={'NORMAL'}
                 title={editSummary || (language === 'ko' ? '배정할 업무 내용을 입력하세요' : 'Enter task summary')}
-                description={editDescription}
+                description={previewDescription}
+                entities={detail.entities}
                 status="TODO"
                 createdAt={detail.createdAt}
               />
@@ -105,7 +169,14 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
               />
             </div>
 
-
+            <div className={styles.editField}>
+              <InputField
+                label={language === 'ko' ? '재배정 사유' : 'Reassignment Reason'}
+                value={reassignReason}
+                onChange={(e) => setReassignReason(e.target.value)}
+                placeholder={language === 'ko' ? '재배정 또는 이관 사유를 입력하세요 (선택)' : 'Enter reason for reassignment (optional)'}
+              />
+            </div>
           </div>
         </div>
 
@@ -113,7 +184,7 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
           <Button variant="secondary" onClick={onClose}>
             {language === 'ko' ? '취소' : 'Cancel'}
           </Button>
-          <Button variant="primary" disabled={!canSubmit || saving} onClick={() => onSave(editDeptId, 'NORMAL', editSummary, editDescription)}>
+          <Button variant="primary" disabled={!canSubmit || saving} onClick={handleAssignSubmit}>
             {saving
               ? (language === 'ko' ? '저장 중...' : 'Saving...')
               : (language === 'ko' ? '배정하기' : 'Assign')}

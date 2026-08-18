@@ -419,10 +419,7 @@ export default function RequestDetailPanel({
           <ManualAssignModal
             isOpen={showManualAssign}
             onClose={() => setShowManualAssign(false)}
-            detail={{
-              ...detail,
-              description: ''
-            }}
+            detail={detail}
             departments={departments}
             onSave={handleSave}
             saving={saving}

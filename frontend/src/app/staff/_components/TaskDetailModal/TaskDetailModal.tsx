@@ -876,15 +876,15 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
           summary: task.summary,
           createdAt: task.createdAt,
           status: task.status,
-          description: ''
+          description: task.rawText || '',
+          entities: task.entities
         }}
         departments={DEPARTMENTS}
         onSave={async (editDeptId, editPriority, editSummary, editDescription) => {
           if (onTransfer) {
             setIsSubmitting(true);
             try {
-              const reason = `${editSummary || ''}${editDescription ? '\n' + editDescription : ''}`;
-              await onTransfer(task.id, task.version, editDeptId, reason);
+              await onTransfer(task.id, task.version, editDeptId, editDescription || editSummary || '');
               showToast(language === 'en' ? 'Task reassigned successfully.' : '업무 배정이 완료되었습니다.', 'success');
               setIsManualAssignOpen(false);
               onClose();
