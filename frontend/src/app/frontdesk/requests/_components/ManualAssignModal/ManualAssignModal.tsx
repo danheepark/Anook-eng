@@ -231,9 +231,20 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
     onSave(editDeptId, 'NORMAL', editSummary, finalDescription);
   };
 
+  const isReassign = detail.departmentId && detail.departmentId !== 'FRONT';
+  const modalTitleText = isReassign
+    ? (language === 'ko' ? '업무 재배정' : 'Reassign Task')
+    : (language === 'ko' ? '수동 배정' : 'Assign Task');
+
+  const buttonText = saving
+    ? (language === 'ko' ? '저장 중...' : 'Saving...')
+    : isReassign
+      ? (language === 'ko' ? '재배정하기' : 'Reassign')
+      : (language === 'ko' ? '배정하기' : 'Assign');
+
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose}>
-      <ModalCard size="md" overflowVisible={true} onClose={onClose} title={language === 'ko' ? '수동 배정' : 'Assign Task'}>
+      <ModalCard size="md" overflowVisible={true} onClose={onClose} title={modalTitleText}>
 
         <div className={styles.content}>
           {/* 미리보기 카드 — 입력필드와 1:1 실시간 동기화 */}
@@ -300,9 +311,7 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
             {language === 'ko' ? '취소' : 'Cancel'}
           </Button>
           <Button variant="primary" disabled={!canSubmit || saving} onClick={handleAssignSubmit}>
-            {saving
-              ? (language === 'ko' ? '저장 중...' : 'Saving...')
-              : (language === 'ko' ? '배정하기' : 'Assign')}
+            {buttonText}
           </Button>
         </div>
       </ModalCard>
