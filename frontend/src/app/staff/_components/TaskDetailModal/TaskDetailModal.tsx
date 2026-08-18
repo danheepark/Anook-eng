@@ -76,6 +76,133 @@ const cleanTitleSummary = (text?: string) => {
     .trim();
 };
 
+const computeTaskTitle = (
+  departmentId?: string,
+  summary?: string,
+  entities?: any,
+  language: string = 'en'
+): string => {
+  const isEn = language === 'en';
+  let deptKey = 'front';
+  const deptUpper = departmentId ? departmentId.toUpperCase() : '';
+
+  if (deptUpper.includes('HK') || deptUpper.includes('HOUSEKEEPING') || deptUpper.includes('하우스키핑')) {
+    deptKey = 'hk';
+  } else if (deptUpper.includes('FACILITY') || deptUpper.includes('시설')) {
+    deptKey = 'facility';
+  } else if (deptUpper.includes('FB') || deptUpper.includes('FNB') || deptUpper.includes('식음료')) {
+    deptKey = 'fb';
+  } else if (deptUpper.includes('CONCIERGE') || deptUpper.includes('컨시어지')) {
+    deptKey = 'concierge';
+  } else if (deptUpper.includes('EMERGENCY') || deptUpper.includes('긴급')) {
+    deptKey = 'emergency';
+  }
+
+  const intent = entities?.intent as string | undefined;
+
+  if (deptKey === 'hk') {
+    const items = entities?.items as any[] | undefined;
+    const tasks = entities?.tasks as string[] | undefined;
+    const totalCount = (items?.length || 0) + (tasks?.length || 0);
+    if (totalCount > 0) {
+      let firstLabel = '';
+      if (items && items.length > 0) {
+        const first = items[0];
+        const firstItemText = typeof first.item === 'object' && first.item !== null ? (first.item.name || first.item.id || '') : first.item;
+        firstLabel = `${firstItemText} x${first.count || 1}`;
+      } else if (tasks && tasks.length > 0) {
+        firstLabel = tasks[0];
+      }
+      const restCount = totalCount - 1;
+      const rest = restCount > 0 ? (isEn ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : ` 외 ${restCount}건`) : '';
+      return `${firstLabel}${rest}`;
+    }
+  } else if (deptKey === 'fb') {
+    const menuItems = entities?.menu_items as any[] | undefined;
+    if (menuItems && menuItems.length > 0) {
+      const first = menuItems[0];
+      const opt = first.selected_option && first.selected_option !== '없음' && first.selected_option !== 'none' ? ` (${first.selected_option})` : '';
+      const qty = first.quantity ? ` x${first.quantity}` : '';
+      const restCount = menuItems.length - 1;
+      const rest = restCount > 0 ? (isEn ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : ` 외 ${restCount}건`) : '';
+      return `${first.name}${opt}${qty}${rest}`;
+    }
+  } else if (deptKey === 'concierge' && intent && entities) {
+    const reserveSuffix = isEn ? ' reservation' : ' 예약';
+    switch (intent) {
+      case 'TAXI':
+        return isEn ? `Taxi call${reserveSuffix}` : `택시 호출${reserveSuffix}`;
+      case 'LUGGAGE_STORAGE': {
+        const count = entities.count;
+        if (isEn) {
+          const action = entities.action === 'store' ? 'storage' : 'pickup';
+          return count ? `${count} luggage ${action}` : `Luggage ${action}`;
+        }
+        const action = entities.action === 'store' ? '보관' : '찾기';
+        return count ? `짐 ${count}개 ${action}` : `수하물 ${action}`;
+      }
+      case 'RESTAURANT':
+        return isEn ? `Restaurant${reserveSuffix}` : `식당${reserveSuffix}`;
+      case 'WAKE_UP_CALL': {
+        const time = entities.time as string | undefined;
+        if (isEn) return time ? `${time} Wake-up call` : `Wake-up call`;
+        return time ? `${time} 모닝콜${reserveSuffix}` : `모닝콜${reserveSuffix}`;
+      }
+      case 'POSTAL_SERVICE': {
+        const item = entities.item as string | undefined;
+        if (isEn) return item ? `${item} mailing` : 'Mail service';
+        return item ? `${item} 발송 대행` : '우편물 발송 대행';
+      }
+      case 'DELIVERY': {
+        const item = entities.item as string | undefined;
+        if (isEn) return item ? `${item} delivery` : 'Delivery';
+        return item ? `${item} 배달` : `배달`;
+      }
+      case 'RESERVATION': {
+        const target = entities.target as string | undefined;
+        if (target) return `${target}${reserveSuffix}`;
+        return isEn ? 'Reservation' : '예약';
+      }
+    }
+  }
+
+  if (!summary) return '';
+  let clean = cleanTitleSummary(summary);
+  if (clean) {
+    clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+    return clean.replace(/\s*x\s*(\d+)/gi, ' ×$1');
+  }
+  return '';
+};
+
+const computeTaskItemList = (entities?: any): string[] => {
+  if (!entities) return [];
+  const lines: string[] = [];
+
+  if (Array.isArray(entities.menu_items) && entities.menu_items.length > 0) {
+    entities.menu_items.forEach((it: any) => {
+      const opt = it.selected_option && it.selected_option !== '없음' && it.selected_option !== 'none' ? ` (${it.selected_option})` : '';
+      lines.push(`- ${it.name}${opt} ${it.quantity ? `×${it.quantity}` : ''}`.trim());
+    });
+  } else if (Array.isArray(entities.items) && entities.items.length > 0) {
+    entities.items.forEach((it: any) => {
+      const itemText = typeof it.item === 'object' && it.item !== null ? (it.item.name || it.item.id || '') : it.item;
+      lines.push(`- ${itemText} ${it.count ? `×${it.count}` : ''}`.trim());
+    });
+  } else if (entities.item) {
+    const itemText = typeof entities.item === 'object' && entities.item !== null ? (entities.item.name || entities.item.id || '') : entities.item;
+    lines.push(`- ${itemText} ${entities.count ? `×${entities.count}` : ''}`.trim());
+  }
+
+  if (Array.isArray(entities.tasks)) {
+    entities.tasks.forEach((tStr: string) => {
+      lines.push(`- ${tStr}`);
+    });
+  }
+
+  return lines;
+};
+
 const extractTaskReasoningItems = (
   reasoningStr?: string | null,
   entitiesReasoning?: any,
@@ -198,7 +325,7 @@ const extractTaskReasoningItems = (
   return items;
 };
 
-function renderEntities(entities: Record<string, any>, language: string): React.ReactNode {
+function renderEntities(entities: Record<string, any>, language: string, skipItemList: boolean = false): React.ReactNode {
   const rendered: React.ReactNode[] = [];
 
   // 0) 정규화: item 키 단독 혹은 item+count 플랫 키 → items 배열로 통일
@@ -208,8 +335,8 @@ function renderEntities(entities: Record<string, any>, language: string): React.
     delete entities.count;
   }
 
-  // 1) 배열 타입 특수 렌더링
-  if (entities.items?.length > 0) {
+  // 1) 배열 타입 특수 렌더링 (skipItemList가 true면 상단 타이틀 아래 이미 표기되었으므로 본문 렌더링 생략)
+  if (!skipItemList && entities.items?.length > 0) {
     rendered.push(
       <div key="items" className={styles.reasoningItem}>
         <span className={styles.secondaryLabel}>{language === 'en' ? 'Item Request' : '물품 요청'}</span>
@@ -223,7 +350,7 @@ function renderEntities(entities: Record<string, any>, language: string): React.
     );
   }
 
-  if (entities.menu_items?.length > 0) {
+  if (!skipItemList && entities.menu_items?.length > 0) {
     rendered.push(
       <div key="menu_items" className={styles.reasoningItem}>
         <span className={styles.secondaryLabel}>{language === 'en' ? 'Order Menu' : '주문 메뉴'}</span>
@@ -475,7 +602,9 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
   const cleanSummary = toSentenceCase(cleanTitleSummary(rawSummary)).replace(/\s*x\s*(\d+)/gi, ' ×$1');
   
-  let modalTitle = cleanSummary || roomDisplay;
+  const computedTitle = computeTaskTitle(task.departmentId, task.summary, task.entities, language);
+  let modalTitle = computedTitle || cleanSummary || roomDisplay;
+  const itemList = computeTaskItemList(task.entities);
 
   const rawTextParts = task.rawText ? task.rawText.split('\n|||TRANSFER_REASON|||') : [];
   const transferReasonText = rawTextParts.length > 1 ? rawTextParts.slice(1).join('\n').trim() : null;
@@ -529,6 +658,16 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 </div>
               )}
             </div>
+
+            {/* 카드와 100% 동일하게 타이틀 바로 아래에 item list 렌더링 (회색 텍스트) */}
+            {itemList.length > 0 && (
+              <div className={styles.itemListSubtitle}>
+                {itemList.map((line, idx) => (
+                  <p key={idx} className={styles.itemListLine}>{line}</p>
+                ))}
+              </div>
+            )}
+
             {task.cancelRequested && cleanSummary && (
               <div className={styles.cancelSubTitle}>
                 {cleanSummary}
@@ -563,7 +702,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
             )}
 
             {/* AI 분석 엔티티 (Item Requests, Order Menu 등) */}
-            {task.entities && renderEntities(task.entities, language)}
+            {task.entities && renderEntities(task.entities, language, itemList.length > 0)}
 
             {/* Reasoning (Task Ticket 전용 구조화 렌더링) */}
             {(() => {

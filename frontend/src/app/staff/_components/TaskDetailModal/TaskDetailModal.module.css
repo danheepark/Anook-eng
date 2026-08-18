@@ -300,3 +300,19 @@
   gap: 12px;
   margin-top: 8px;
 }
+
+/* Item List Subtitle under Header Title */
+.itemListSubtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.itemListLine {
+  font: var(--text-body-regular);
+  color: var(--color-gray-500);
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+}
