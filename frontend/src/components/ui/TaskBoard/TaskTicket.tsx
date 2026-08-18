@@ -481,6 +481,9 @@ export default function TaskTicket({
               </span>
             )
           )}
+          {priority === 'URGENT' && (
+            <StatusBadge variant="red">{t.ticketUI.badge.urgent}</StatusBadge>
+          )}
         </div>
         <div className={styles.headerRight}>
           {(isCancelled || isEscalated) && (
@@ -506,24 +509,16 @@ export default function TaskTicket({
 
       <div className={styles.headerDivider} />
 
-      {(priority === 'URGENT' || entities?.is_contactless) && (
-        <div className={styles.badgeRowContainer}>
-          {entities?.is_contactless && (
-            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
-          )}
-          {priority === 'URGENT' && (
-            <div className={styles.urgentBadgeWrapper}>
-              <StatusBadge variant="red">{t.ticketUI.badge.urgent}</StatusBadge>
-            </div>
-          )}
-        </div>
-      )}
-
       <div className={styles.content}>
         {cancelRequested && roomNo && (
           <span className={styles.roomNo}>
             {language === 'ko' ? `${roomNo}호` : `RM ${roomNo}`}
           </span>
+        )}
+        {entities?.is_contactless && (
+          <div className={styles.badgeRow}>
+            <StatusBadge variant="purple">{t.ticketUI.badge.contactless}</StatusBadge>
+          </div>
         )}
         <h3 className={styles.title}>
           {isTranslating ? t.common.loading || 'Loading...' : (
