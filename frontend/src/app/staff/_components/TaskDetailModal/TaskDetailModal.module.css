@@ -219,6 +219,7 @@
   margin-left: auto;
   display: inline-flex;
   align-items: center;
+  margin-top: 14px;
 }
 
 .moreButton {
