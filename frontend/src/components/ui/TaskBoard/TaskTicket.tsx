@@ -402,20 +402,17 @@ export default function TaskTicket({
     else if (displayDescription === '직원') displayDescription = 'Staff';
   }
 
-  // 단일 항목 등 제목과 본문 내용이 완전히 동일/중복인 경우 중복 라인 제거
   const cleanedDescription = React.useMemo(() => {
     if (!displayDescription) return '';
-    const normTitle = String(displayTitle || '')
-      .replace(/^[-•*]\s*/gm, '')
-      .replace(/[×xX]/g, 'x')
-      .replace(/\s+/g, '')
-      .toLowerCase()
-      .trim();
-
     const lines = displayDescription.split('\n').map(l => l.trim()).filter(Boolean);
     
-    // 단일 라인이고 타이틀과 동일하면 숨김
     if (lines.length === 1) {
+      const normTitle = String(displayTitle || '')
+        .replace(/^[-•*]\s*/gm, '')
+        .replace(/[×xX]/g, 'x')
+        .replace(/\s+/g, '')
+        .toLowerCase()
+        .trim();
       const normLine = lines[0]
         .replace(/^[-•*]\s*/gm, '')
         .replace(/[×xX]/g, 'x')
@@ -426,18 +423,7 @@ export default function TaskTicket({
       return lines[0];
     }
 
-    // 복수 라인일 때 단순히 타이틀만 반복하는 라인 필터링 (예: '- cleaning'과 'Target Time: 14:00' 중 '- cleaning' 제거)
-    const filteredLines = lines.filter(line => {
-      const normLine = line
-        .replace(/^[-•*]\s*/gm, '')
-        .replace(/[×xX]/g, 'x')
-        .replace(/\s+/g, '')
-        .toLowerCase()
-        .trim();
-      return normLine !== normTitle;
-    });
-
-    return filteredLines.length > 0 ? filteredLines.join('\n') : '';
+    return displayDescription;
   }, [displayTitle, displayDescription]);
 
   return (
