@@ -22,6 +22,7 @@ interface RequestDetail {
   summary: string;
   createdAt: string;
   status: string;
+  assigneeName?: string;
   description?: string;
   entities?: any;
 }
@@ -259,7 +260,8 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
                 priority={'NORMAL'}
                 title={editSummary || (language === 'ko' ? '배정할 업무 내용을 입력하세요' : 'Enter task summary')}
                 description={previewDescription}
-                status="TODO"
+                status={detail.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'TODO'}
+                assigneeName={detail.assigneeName}
                 createdAt={detail.createdAt}
               />
             </div>

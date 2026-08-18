@@ -819,17 +819,31 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                 </>
               )}
 
-              {task.status === 'IN_PROGRESS' && !task.cancelRequested && onComplete && (
-                <Button
-                  variant="primary"
-                  size="medium"
-                  onClick={handleComplete}
-                  className={styles.actionButton}
-                  disabled={isSubmitting || !isOnline}
-                  title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
-                >
-                  {language === 'en' ? 'Complete Task' : '업무 완료'}
-                </Button>
+              {task.status === 'IN_PROGRESS' && !task.cancelRequested && (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="medium"
+                    onClick={() => setIsManualAssignOpen(true)}
+                    className={styles.actionButton}
+                    disabled={isSubmitting || !isOnline}
+                    title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                  >
+                    {language === 'en' ? 'Reassign Task' : '업무 재배정'}
+                  </Button>
+                  {onComplete && (
+                    <Button
+                      variant="primary"
+                      size="medium"
+                      onClick={handleComplete}
+                      className={styles.actionButton}
+                      disabled={isSubmitting || !isOnline}
+                      title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
+                    >
+                      {language === 'en' ? 'Complete Task' : '업무 완료'}
+                    </Button>
+                  )}
+                </>
               )}
 
               {task.status === 'IN_PROGRESS' && task.cancelRequested && (
@@ -883,6 +897,7 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
           summary: task.summary,
           createdAt: task.createdAt,
           status: task.status,
+          assigneeName: task.assignedStaffName || (task as any).assigneeName || (task as any).staffName,
           description: task.rawText || '',
           entities: task.entities
         }}
