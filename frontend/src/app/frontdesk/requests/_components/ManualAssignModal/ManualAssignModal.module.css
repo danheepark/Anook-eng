@@ -45,6 +45,14 @@
   overflow: hidden;
   background-color: var(--color-gray-50);
   pointer-events: none;
+  min-height: 216px;
+  display: flex;
+  flex-direction: column;
+}
+
+.previewCardWrapper > * {
+  min-height: 100% !important;
+  flex: 1 !important;
 }
 
 .formSection {
