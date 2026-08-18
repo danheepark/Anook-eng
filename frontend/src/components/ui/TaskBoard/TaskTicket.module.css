@@ -4,7 +4,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 164px;
+  min-height: 190px;
   padding: var(--space-16);
   gap: var(--space-12);
   border: 1px solid var(--color-surface);
