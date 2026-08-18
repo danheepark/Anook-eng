@@ -76,13 +76,16 @@ export default function ManualAssignModal({ isOpen, onClose, detail, departments
       setEditSummary(detail.summary || '');
       setReassignReason('');
 
-      // 상세 설명 기본값 설정: 기존 description이 없으면 entities에서 item list 자동 추출
-      let initialDesc = detail.description || '';
-      if (!initialDesc && detail.entities) {
+      // 상세 설명 기본값 설정: entities에서 item list를 최우선으로 추출하여 아이템 리스트 세팅
+      let initialDesc = '';
+      if (detail.entities) {
         const itemLines = computeTaskItemList(detail.entities);
         if (itemLines.length > 0) {
           initialDesc = itemLines.join('\n');
         }
+      }
+      if (!initialDesc) {
+        initialDesc = detail.description || '';
       }
       setEditDescription(initialDesc);
     }
