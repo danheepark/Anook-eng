@@ -355,8 +355,6 @@ export default function TaskTicket({
     timeDisplay = activeTime ? getRelativeTime(activeTime, language, t.ticketUI.time) : '';
   }
 
-
-
   // 1. 순수 재배정/이관 사유 추출
   const transferReason = React.useMemo(() => {
     if (!description) return null;
@@ -376,7 +374,7 @@ export default function TaskTicket({
     return null;
   }, [description, language]);
 
-  // 2. 수동 설명 텍스트 추출
+  // 2. 수동 설명 텍스트 추출 (재배정 사유 라인 본문 제거)
   const manualItemDesc = React.useMemo(() => {
     if (!description) return '';
     let desc = description;
@@ -386,26 +384,23 @@ export default function TaskTicket({
     if (desc.includes('[주문 상세]')) {
       desc = desc.split('[주문 상세]')[0].trim();
     }
-    return desc.trim();
+    const lines = desc
+      .split('\n')
+      .filter(l => !/\[(?:Reassignment reason|재배정 사유)\]/i.test(l));
+    return lines.join('\n').trim();
   }, [description]);
 
-  // 3. 카드 노출용 최종 description 조립
+  // 3. 카드 본문 노출용 최종 description 조립 (재배정 사유는 푸터 하단에 노출되므로 본문에서 제외)
   let displayDescription = '';
   if (entityDetails) {
-    // 아이템 엔티티 목록이 존재하는 카드는 아이템 목록을 기본 노출하고, 재배정 사유가 있는 경우에만 하단에 추가
     displayDescription = entityDetails;
-    if (transferReason) {
-      displayDescription = `${displayDescription}\n${transferReason}`;
-    }
   } else if (manualItemDesc) {
     displayDescription = manualItemDesc;
-    if (transferReason && !manualItemDesc.includes(transferReason)) {
-      displayDescription = `${displayDescription}\n${transferReason}`;
-    }
-  } else if (transferReason) {
-    displayDescription = transferReason;
   } else if (fallbackDescription) {
-    displayDescription = fallbackDescription;
+    const lines = fallbackDescription
+      .split('\n')
+      .filter(l => !/\[(?:Reassignment reason|재배정 사유)\]/i.test(l));
+    displayDescription = lines.join('\n').trim();
   }
 
   
@@ -536,9 +531,14 @@ export default function TaskTicket({
         )}
       </div>
 
-      {(assigneeName || timeDisplay || Boolean((status === 'TODO' && onAccept) || (status === 'IN_PROGRESS' && !cancelRequested && onComplete) || (status === 'IN_PROGRESS' && cancelRequested && (onRejectCancel || onApproveCancel)))) && (
+      {(transferReason || assigneeName || timeDisplay || Boolean((status === 'TODO' && onAccept) || (status === 'IN_PROGRESS' && !cancelRequested && onComplete) || (status === 'IN_PROGRESS' && cancelRequested && (onRejectCancel || onApproveCancel)))) && (
         <div className={styles.footer}>
           <div className={styles.footerLeft}>
+            {transferReason && (
+              <span className={styles.assigneeText}>
+                {transferReason}
+              </span>
+            )}
             {assigneeName && (
               <span className={styles.assigneeText}>
                 {language === 'en' ? `Accepted by ${assigneeName}` : `${assigneeName} 담당`}
