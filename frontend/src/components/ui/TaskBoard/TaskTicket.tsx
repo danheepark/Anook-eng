@@ -361,20 +361,24 @@ export default function TaskTicket({
     if (!description) return '';
     if (description.includes('|||TRANSFER_REASON|||')) {
       const parts = description.split('|||TRANSFER_REASON|||');
-      const transferPart = parts[parts.length - 1].trim();
-      const cleanPart = transferPart.replace(/^\[[A-Z0-9_]+\]\s*[^\n]*/i, '').trim();
-      return cleanPart;
+      const itemPart = parts[0].trim();
+      const transferPart = parts.slice(1).join('\n').trim();
+      const cleanTransferPart = transferPart.replace(/^\[[A-Z0-9_]+\]\s*[^\n]*/i, '').trim();
+      
+      const resParts = [];
+      if (itemPart) resParts.push(itemPart);
+      if (cleanTransferPart) {
+        const reasonLabel = language === 'ko' ? '재배정 사유' : 'Reassignment reason';
+        resParts.push(`[${reasonLabel}] ${cleanTransferPart}`);
+      }
+      return resParts.join('\n');
     }
     let desc = description;
     if (desc.includes('[주문 상세]')) {
       desc = desc.split('[주문 상세]')[0].trim();
     }
-    const lines = desc.split('\n').map(l => l.trim()).filter(Boolean);
-    if (lines.length > 1) {
-      return lines[lines.length - 1];
-    }
-    return '';
-  }, [description]);
+    return desc.trim();
+  }, [description, language]);
 
   let displayDescription = fallbackDescription;
   if (entityDetails) {
@@ -402,17 +406,20 @@ export default function TaskTicket({
     else if (displayDescription === '직원') displayDescription = 'Staff';
   }
 
+  // 단일 항목 등 제목과 본문 내용이 완전히 동일/중복인 경우 중복 라인 제거
   const cleanedDescription = React.useMemo(() => {
     if (!displayDescription) return '';
+    const normTitle = String(displayTitle || '')
+      .replace(/^[-•*]\s*/gm, '')
+      .replace(/[×xX]/g, 'x')
+      .replace(/\s+/g, '')
+      .toLowerCase()
+      .trim();
+
     const lines = displayDescription.split('\n').map(l => l.trim()).filter(Boolean);
     
+    // 단일 라인이고 타이틀과 동일하면 숨김
     if (lines.length === 1) {
-      const normTitle = String(displayTitle || '')
-        .replace(/^[-•*]\s*/gm, '')
-        .replace(/[×xX]/g, 'x')
-        .replace(/\s+/g, '')
-        .toLowerCase()
-        .trim();
       const normLine = lines[0]
         .replace(/^[-•*]\s*/gm, '')
         .replace(/[×xX]/g, 'x')
@@ -423,7 +430,18 @@ export default function TaskTicket({
       return lines[0];
     }
 
-    return displayDescription;
+    // 복수 라인일 때 단순히 타이틀만 반복하는 라인 필터링 (예: '- cleaning'과 'Target Time: 14:00' 중 '- cleaning' 제거)
+    const filteredLines = lines.filter(line => {
+      const normLine = line
+        .replace(/^[-•*]\s*/gm, '')
+        .replace(/[×xX]/g, 'x')
+        .replace(/\s+/g, '')
+        .toLowerCase()
+        .trim();
+      return normLine !== normTitle;
+    });
+
+    return filteredLines.length > 0 ? filteredLines.join('\n') : '';
   }, [displayTitle, displayDescription]);
 
   return (
