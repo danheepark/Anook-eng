@@ -101,4 +101,13 @@ public class RoomInventoryService {
         }
         return inventory;
     }
+
+    /**
+     * 해당 객실의 물품 사용량을 초기화합니다. (체크아웃 시 사용)
+     */
+    public void resetInventory(String roomNo) {
+        String key = REDIS_KEY_PREFIX + roomNo;
+        redisTemplate.delete(key);
+        log.info("[RoomInventory] {}호 체크아웃에 따른 수량 리셋 완료 (Redis 키 삭제)", roomNo);
+    }
 }
