@@ -707,7 +707,9 @@ export default function RequestDetailModal({
                   {t.frontdeskPage.requestDetailModal.buttons.forceCancel}
                 </Button>
                 <Button className={styles.footerButton} variant="primary" size="medium" onClick={() => setShowManualAssign(true)}>
-                  {language === 'en' ? 'Assign Task' : '업무 배정'}
+                  {activeDetail.departmentId && activeDetail.departmentId !== 'FRONT'
+                    ? (language === 'en' ? 'Reassign Task' : '업무 재배정')
+                    : (language === 'en' ? 'Assign Task' : '업무 배정')}
                 </Button>
                 {hasChanges && (
                   <Button className={styles.footerButton} variant="primary" size="medium" onClick={handleSave} disabled={saving || loading}>

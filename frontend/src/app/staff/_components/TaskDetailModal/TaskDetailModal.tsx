@@ -797,7 +797,12 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
                     disabled={isSubmitting || !isOnline}
                     title={!isOnline ? (language === 'en' ? 'Unavailable offline' : '오프라인 상태에서는 사용할 수 없습니다') : undefined}
                   >
-                    {language === 'en' ? 'Assign Task' : '업무 배정'}
+                    {(() => {
+                      const isReassign = task.departmentId && task.departmentId !== 'FRONT';
+                      return isReassign
+                        ? (language === 'en' ? 'Reassign Task' : '업무 재배정')
+                        : (language === 'en' ? 'Assign Task' : '업무 배정');
+                    })()}
                   </Button>
                   <Button
                     variant="primary"
