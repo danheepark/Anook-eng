@@ -100,6 +100,8 @@ const computeTaskTitle = (
 
   const intent = entities?.intent as string | undefined;
 
+  const toSentenceCase = (str: string) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+
   if (deptKey === 'hk') {
     const items = entities?.items as any[] | undefined;
     const tasks = entities?.tasks as string[] | undefined;
@@ -115,7 +117,7 @@ const computeTaskTitle = (
       }
       const restCount = totalCount - 1;
       const rest = restCount > 0 ? (isEn ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : ` 외 ${restCount}건`) : '';
-      return `${firstLabel}${rest}`;
+      return toSentenceCase(`${firstLabel}${rest}`);
     }
   } else if (deptKey === 'fb') {
     const menuItems = entities?.menu_items as any[] | undefined;
@@ -125,43 +127,43 @@ const computeTaskTitle = (
       const qty = first.quantity ? ` x${first.quantity}` : '';
       const restCount = menuItems.length - 1;
       const rest = restCount > 0 ? (isEn ? ` and ${restCount} other${restCount > 1 ? 's' : ''}` : ` 외 ${restCount}건`) : '';
-      return `${first.name}${opt}${qty}${rest}`;
+      return toSentenceCase(`${first.name}${opt}${qty}${rest}`);
     }
   } else if (deptKey === 'concierge' && intent && entities) {
     const reserveSuffix = isEn ? ' reservation' : ' 예약';
     switch (intent) {
       case 'TAXI':
-        return isEn ? `Taxi call${reserveSuffix}` : `택시 호출${reserveSuffix}`;
+        return toSentenceCase(isEn ? `Taxi call${reserveSuffix}` : `택시 호출${reserveSuffix}`);
       case 'LUGGAGE_STORAGE': {
         const count = entities.count;
         if (isEn) {
           const action = entities.action === 'store' ? 'storage' : 'pickup';
-          return count ? `${count} luggage ${action}` : `Luggage ${action}`;
+          return toSentenceCase(count ? `${count} luggage ${action}` : `Luggage ${action}`);
         }
         const action = entities.action === 'store' ? '보관' : '찾기';
-        return count ? `짐 ${count}개 ${action}` : `수하물 ${action}`;
+        return toSentenceCase(count ? `짐 ${count}개 ${action}` : `수하물 ${action}`);
       }
       case 'RESTAURANT':
-        return isEn ? `Restaurant${reserveSuffix}` : `식당${reserveSuffix}`;
+        return toSentenceCase(isEn ? `Restaurant${reserveSuffix}` : `식당${reserveSuffix}`);
       case 'WAKE_UP_CALL': {
         const time = entities.time as string | undefined;
-        if (isEn) return time ? `${time} Wake-up call` : `Wake-up call`;
-        return time ? `${time} 모닝콜${reserveSuffix}` : `모닝콜${reserveSuffix}`;
+        if (isEn) return toSentenceCase(time ? `${time} Wake-up call` : `Wake-up call`);
+        return toSentenceCase(time ? `${time} 모닝콜${reserveSuffix}` : `모닝콜${reserveSuffix}`);
       }
       case 'POSTAL_SERVICE': {
         const item = entities.item as string | undefined;
-        if (isEn) return item ? `${item} mailing` : 'Mail service';
-        return item ? `${item} 발송 대행` : '우편물 발송 대행';
+        if (isEn) return toSentenceCase(item ? `${item} mailing` : 'Mail service');
+        return toSentenceCase(item ? `${item} 발송 대행` : '우편물 발송 대행');
       }
       case 'DELIVERY': {
         const item = entities.item as string | undefined;
-        if (isEn) return item ? `${item} delivery` : 'Delivery';
-        return item ? `${item} 배달` : `배달`;
+        if (isEn) return toSentenceCase(item ? `${item} delivery` : 'Delivery');
+        return toSentenceCase(item ? `${item} 배달` : `배달`);
       }
       case 'RESERVATION': {
         const target = entities.target as string | undefined;
-        if (target) return `${target}${reserveSuffix}`;
-        return isEn ? 'Reservation' : '예약';
+        if (target) return toSentenceCase(`${target}${reserveSuffix}`);
+        return toSentenceCase(isEn ? 'Reservation' : '예약');
       }
     }
   }
@@ -169,7 +171,7 @@ const computeTaskTitle = (
   if (!summary) return '';
   let clean = cleanTitleSummary(summary);
   if (clean) {
-    clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+    clean = toSentenceCase(clean);
     return clean.replace(/\s*x\s*(\d+)/gi, ' ×$1');
   }
   return '';
