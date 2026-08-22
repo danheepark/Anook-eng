@@ -245,13 +245,6 @@ export default function RequestDetailPanel({
       });
     }
 
-    for (let i = 2; i < cleanedLines.length; i++) {
-      items.push({
-        label: `${lang === 'ko' ? '추가 정보' : 'Additional info'} ${i - 1}`,
-        content: cleanedLines[i],
-      });
-    }
-
     return items;
   };
 

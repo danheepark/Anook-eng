@@ -24,9 +24,9 @@ public class FrontdeskRequestPersistenceAdapter implements FrontdeskRequestQuery
     @Override
     public List<FrontdeskRequest> findAll(String status, String departmentId, String priority, List<String> exclude, String roomNo, String sort) {
         List<FrontdeskRequestJpaEntity> entities = jpaRepository.findAllWithFilters(
-                (status != null && !status.isBlank()) ? status.toUpperCase() : null,
-                (departmentId != null && !departmentId.isBlank()) ? departmentId.toUpperCase() : null,
-                (priority != null && !priority.isBlank()) ? priority.toUpperCase() : null,
+                (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) ? status.toUpperCase() : null,
+                (departmentId != null && !departmentId.isBlank() && !"ALL".equalsIgnoreCase(departmentId)) ? departmentId.toUpperCase() : null,
+                (priority != null && !priority.isBlank() && !"ALL".equalsIgnoreCase(priority)) ? priority.toUpperCase() : null,
                 roomNo
         );
 

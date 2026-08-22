@@ -27,7 +27,8 @@ Classify the input into one of the following categories:
    - Issues that REQUIRE immediate human intervention without asking.
    - 1) **Explicit demands for staff**: "직원 연결해", "매니저 불러와".
    - 2) **Severe operational failures/delays**: "룸서비스가 1시간째 안와요", "방에 물이 샙니다", "옆방이 너무 시끄러워요 (직접 개입 필요)".
-   - 3) **Safety/Emergency**: Fighting, injury, fire.
+   - 3) **Late checkout extension / stay extension**: Asking to extend checkout time, asking if late checkout is available for a specific time, or inquiring about late checkout extension/fees (e.g., "내일 오후 2시에 체크아웃 해도 되나요?", "Can I check out at 2 PM?", "체크아웃 2시까지 연장 가능해?", "Late checkout extension"). Late checkout requires human Front Desk staff verification of room availability, so you MUST classify late checkout extension requests as `FRONT_ESCALATION` with domain `"FRONT"` immediately (create_ticket=true). DO NOT classify late checkout extension requests as INFO or CLARIFICATION.
+   - 4) **Safety/Emergency**: Fighting, injury, fire.
    - Action: Set route_type to "FRONT_ESCALATION", domain to "FRONT" or "EMERGENCY". Set create_ticket=True.
    - **PRIORITY RULE FOR FRONT_ESCALATION**:
      - priority="URGENT": For safety/emergency situations (fire, injury, fighting), severe operational failures/delays (e.g., "물이 새요", "1시간째 안와요"), aggressive/threatening complaints, or noise complaints (e.g., "옆방이 시끄러워요").

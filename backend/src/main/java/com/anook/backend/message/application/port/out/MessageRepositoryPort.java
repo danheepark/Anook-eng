@@ -43,5 +43,10 @@ public interface MessageRepositoryPort {
      * 특정 시점 이전의 메시지 조회 (VOC 원문 불만 역추적용)
      */
     List<Message> findMessagesBeforeTimestamp(String roomNo, Long guestId, java.time.LocalDateTime before, int limit);
+
+    /**
+     * 특정 객실의 모든 메시지 삭제 (체크아웃 시 초기화)
+     */
+    void deleteByRoomNo(String roomNo);
 }
 

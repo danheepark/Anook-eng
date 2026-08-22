@@ -100,4 +100,19 @@ public class RequestPersistenceAdapter implements RequestRepositoryPort {
                 .map(RequestJpaEntity::toDomain)
                 .toList();
     }
+
+    @Override
+    public List<Request> findActiveByRoomNo(String roomNo) {
+        return jpaRepository.findByRoomNoAndStatusIn(
+                roomNo, List.of("CREATED", "PENDING", "IN_PROGRESS", "ESCALATED")
+        ).stream().map(RequestJpaEntity::toDomain).toList();
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteByRoomNo(String roomNo) {
+        jpaRepository.nullifyMessageRequestIdByRoomNo(roomNo);
+        jpaRepository.nullifyAiLogRequestIdByRoomNo(roomNo);
+        jpaRepository.deleteByRoomNo(roomNo);
+    }
 }

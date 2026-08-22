@@ -66,5 +66,10 @@ public class MessagePersistenceAdapter implements MessageRepositoryPort {
                 .map(MessageJpaEntity::toDomain)
                 .toList();
     }
+
+    @Override
+    public void deleteByRoomNo(String roomNo) {
+        jpaRepository.deleteByRoomNo(roomNo);
+    }
 }
 

@@ -53,7 +53,12 @@ async def translate_message(request: TranslateRequest) -> Dict[str, Any]:
             )
         )
         translated = raw.get("translated_text", request.text)
-        TRANSLATION_CACHE[cache_key] = translated
+        # 번역에 실패해 원문이 그대로 나온 결과는 캐시하지 않는다.
+        # (캐시해버리면 이후 같은 문장은 영구히 번역되지 않고 원문으로 전달된다)
+        if translated and translated != request.text:
+            TRANSLATION_CACHE[cache_key] = translated
+        else:
+            print(f"[Translate] ⚠️ 번역 결과가 원문과 동일 — 캐시하지 않음: '{request.text}'")
         print(f"[Translate] ✅ 번역 완료: {translated}\n")
         return {"translated_text": translated}
     except Exception as e:

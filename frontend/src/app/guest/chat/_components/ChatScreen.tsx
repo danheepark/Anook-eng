@@ -201,17 +201,21 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           const itemMarginTop = index === 0 ? 0 : isSameSender ? 4 : 16;
           const isAutoNotice = (content: string) => {
             if (!content) return false;
-            return content.includes('직원이 메시지를 확인했습니다') ||
-              (content.includes('프론트') && content.includes('확인했습니다')) ||
-              (content.toLowerCase().includes('front desk') && (
-                content.toLowerCase().includes('reviewed') ||
-                content.toLowerCase().includes('received') ||
-                content.toLowerCase().includes('checked')
+            const lower = content.toLowerCase();
+            return content.includes('확인했습니다') ||
+              content.includes('확인하였습니다') ||
+              content.includes('확인하셨습니다') ||
+              (content.includes('프론트') && (content.includes('확인') || content.includes('수신'))) ||
+              (lower.includes('front desk') && (
+                lower.includes('reviewed') ||
+                lower.includes('received') ||
+                lower.includes('checked') ||
+                lower.includes('seen')
               )) ||
               content.includes('フロントデスク') ||
               content.includes('前台工作人员') ||
               content.includes('긴급 대응팀') ||
-              content.toLowerCase().includes('emergency response team');
+              lower.includes('emergency response team');
           };
 
           const formatNoticeContent = (content: string) => {
@@ -222,6 +226,9 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
               .replace(/has reviewed your message/gi, 'reviewed your message')
               .replace(/has received your message/gi, 'reviewed your message')
               .replace(/has seen your message/gi, 'reviewed your message')
+              .replace(/프론트\s*데스크에서\s*고객님의\s*메시지를\s*확인하셨습니다\.?/gi, '프론트 데스크에서 메시지를 확인했습니다')
+              .replace(/프론트\s*데스크에서\s*고객님의\s*메시지를\s*확인하였습니다\.?/gi, '프론트 데스크에서 메시지를 확인했습니다')
+              .replace(/프론트\s*데스크에서\s*고객님의\s*메시지를\s*확인했습니다\.?/gi, '프론트 데스크에서 메시지를 확인했습니다')
               .replace(/\s*—\s*we'll be with you shortly\.?/gi, '')
               .replace(/\s*and will assist you shortly\.?/gi, '')
               .replace(/\s*and will assist you\.?/gi, '')
@@ -450,12 +457,16 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
           );
         })}
         {progressMsg && (
-          <ProgressIndicator domains={progressDomains} />
+          <div style={{ width: '100%', marginTop: '12px' }}>
+            <ProgressIndicator domains={progressDomains} />
+          </div>
         )}
         {isStaffTyping && (
-          <ChatBubble variant="received" bubbleStyle="sent" isFallback>
-            <span className={styles.typingDots}><span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} /></span>
-          </ChatBubble>
+          <div style={{ width: '100%', marginTop: '12px' }}>
+            <ChatBubble variant="received" bubbleStyle="sent" isFallback>
+              <span className={styles.typingDots}><span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} /></span>
+            </ChatBubble>
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>

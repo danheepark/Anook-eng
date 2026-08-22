@@ -227,7 +227,12 @@ export default function FrontDeskPage() {
 
   const handleStatusChange = async (ids: number[], newStatus: string) => {
     try {
-      // 서버 과부하 및 DB Lock 방지를 위해 묶음(배치) 순차 처리
+      const targetReq = mergedRequests.find(r => ids.includes(r.id));
+      if (targetReq) {
+        const roomStr = String(targetReq.roomNo);
+        setLastMessageTimes(prev => ({ ...prev, [roomStr]: Date.now() }));
+      }
+
       for (const id of ids) {
         await fetch(`/api/frontdesk/requests/${id}/status`, {
           method: 'PATCH',
@@ -235,21 +240,26 @@ export default function FrontDeskPage() {
           body: JSON.stringify({ status: newStatus }),
         });
       }
-      if (refetch) refetch();
-      if (emergRefetch) emergRefetch();
-      if (allRefetch) allRefetch();
       
-      if (newStatus === 'COMPLETED') {
-        const remainingActive = [...pending, ...inProgress].filter(r => !ids.includes(r.id));
-        const remainingActiveRooms = new Set(remainingActive.map(r => String(r.roomNo)));
+      if (refetch) await refetch();
+      if (emergRefetch) await emergRefetch();
+      if (allRefetch) await allRefetch();
 
-        if (remainingActiveRooms.size > 0) {
-          setActiveTab('active');
-        } else {
-          setActiveTab('completed');
+      if (newStatus === 'COMPLETED') {
+        setActiveTab('completed');
+        if (targetReq) {
+          const roomStr = String(targetReq.roomNo);
+          setActiveChatRoom({
+            roomNumber: roomStr,
+            requestIds: ids,
+            representativeId: targetReq.id,
+            status: 'COMPLETED',
+            summary: targetReq.summary,
+            initialMessage: targetReq.rawText || targetReq.summary
+          });
+        } else if (activeChatRoom) {
+          setActiveChatRoom(prev => prev ? { ...prev, status: 'COMPLETED' } : null);
         }
-        setActiveChatRoom(null);
-        setDetailTarget(null);
       } else {
         if (activeChatRoom && ids.includes(activeChatRoom.representativeId)) {
           setActiveChatRoom(prev => prev ? { ...prev, status: newStatus } : null);
@@ -353,14 +363,9 @@ export default function FrontDeskPage() {
       }
 
       const sortedReqs = [...reqs].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      const latestSummary = sortedReqs[0].summary
+      const summaryText = sortedReqs[0].summary
         .replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')
         .replace(/^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}|\d{2}-\d{2}\s\d{2}:\d{2})\s*/, '');
-      const otherCount = reqs.length - 1;
-      const countSuffix = language === 'en'
-        ? ` and ${otherCount} other${otherCount > 1 ? 's' : ''}`
-        : ` 외 ${otherCount}건`;
-      const summaryText = reqs.length > 1 ? `${latestSummary}${countSuffix}` : latestSummary;
 
       return {
         roomNo,
@@ -455,20 +460,22 @@ export default function FrontDeskPage() {
     }
   }, [filteredGroupedRooms, roomCurrentMatch]);
 
+  // 탭 변경 시 또는 목록 갱신 시 자동 카드 선택 로직 (선택된 채팅방이 현재 탭 목록에 없을 때만 최상단 카드 선택)
   useEffect(() => {
     // RAG 등록 플로우 진행 중에는 자동 카드 선택을 건너뜀 (모달이 닫힌 후 onClose에서 처리)
     if (isRagFlowActive) return;
+
     if (filteredGroupedRooms.length > 0) {
       const exists = activeChatRoom && filteredGroupedRooms.some(room => room.roomNo === activeChatRoom.roomNumber);
       if (!exists) {
-        const room = filteredGroupedRooms[0];
+        const topRoom = filteredGroupedRooms[0];
         setActiveChatRoom({
-          roomNumber: room.roomNo,
-          requestIds: room.allIds,
-          representativeId: room.representativeId,
-          status: room.repStatus,
-          summary: room.summaryText,
-          initialMessage: room.rawText || room.summaryText
+          roomNumber: topRoom.roomNo,
+          requestIds: topRoom.allIds,
+          representativeId: topRoom.representativeId,
+          status: topRoom.repStatus,
+          summary: topRoom.summaryText,
+          initialMessage: topRoom.rawText || topRoom.summaryText
         });
         setDetailTarget(null);
       }

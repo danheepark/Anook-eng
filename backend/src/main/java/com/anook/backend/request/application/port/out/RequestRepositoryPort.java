@@ -65,6 +65,17 @@ public interface RequestRepositoryPort {
     List<Request> findPendingByRoomNoAndGuestIdAndDepartmentId(String roomNo, Long guestId, String departmentId);
 
     /**
+     * 해당 객실의 모든 활성(미완료) 요청 조회 — 체크아웃 시 일괄 취소용
+     * (guestId 무관: 체크아웃 시 guest가 이미 삭제될 수 있으므로)
+     */
+    List<Request> findActiveByRoomNo(String roomNo);
+
+    /**
+     * 해당 객실의 모든 요청 DB 삭제 (체크아웃 시 완전히 비우기)
+     */
+    void deleteByRoomNo(String roomNo);
+
+    /**
      * 상태 조회 DTO (Port 레벨에서 사용하는 경량 DTO)
      */
     record RequestStatusDto(

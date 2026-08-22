@@ -820,7 +820,19 @@ export function useChat() {
     };
     setMessages(prev => {
       const filtered = prev.filter(m => m.type !== 'WELCOME');
-      return [...filtered, newUserMsg];
+      const cleaned = filtered.map(m => {
+        if (m.meta?.options && !m.meta?.selectedOption) {
+          return {
+            ...m,
+            meta: {
+              ...m.meta,
+              options: undefined
+            }
+          };
+        }
+        return m;
+      });
+      return [...cleaned, newUserMsg];
     });
 
     setIsTyping(true);

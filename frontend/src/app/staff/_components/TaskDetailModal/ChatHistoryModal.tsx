@@ -186,6 +186,59 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber, title }:
               const isSameSender = prevMsg && !isSystemMsg && prevMsg.senderType !== 'SYSTEM' && !prevMsg.content.includes('[SYSTEM]') && prevMsg.senderType === msg.senderType;
               const itemMarginTop = idx === 0 ? 0 : isSameSender ? 4 : 16;
 
+              const isAutoNotice = (content: string) => {
+                if (!content) return false;
+                const lower = content.toLowerCase();
+                return content.includes('확인했습니다') ||
+                  content.includes('확인하였습니다') ||
+                  content.includes('확인하셨습니다') ||
+                  (content.includes('프론트') && (content.includes('확인') || content.includes('수신'))) ||
+                  (lower.includes('front desk') && (
+                    lower.includes('reviewed') ||
+                    lower.includes('received') ||
+                    lower.includes('checked') ||
+                    lower.includes('seen')
+                  )) ||
+                  content.includes('フロントデスク') ||
+                  content.includes('前台工作人员') ||
+                  content.includes('긴급 대응팀') ||
+                  lower.includes('emergency response team');
+              };
+
+              const formatNoticeContent = (content: string) => {
+                if (!content) return '';
+                let formatted = content
+                  .replace(/A front desk team member\s+/gi, 'Front desk ')
+                  .replace(/A front desk staff member\s+/gi, 'Front desk ')
+                  .replace(/has reviewed your message/gi, 'reviewed your message')
+                  .replace(/has received your message/gi, 'reviewed your message')
+                  .replace(/has seen your message/gi, 'reviewed your message')
+                  .replace(/프론트\s*데스크에서\s*고객님의\s*메시지를\s*확인하셨습니다\.?/gi, '프론트 데스크에서 메시지를 확인했습니다')
+                  .replace(/프론트\s*데스크에서\s*고객님의\s*메시지를\s*확인하였습니다\.?/gi, '프론트 데스크에서 메시지를 확인했습니다')
+                  .replace(/프론트\s*데스크에서\s*고객님의\s*메시지를\s*확인했습니다\.?/gi, '프론트 데스크에서 메시지를 확인했습니다')
+                  .replace(/\s*—\s*we'll be with you shortly\.?/gi, '')
+                  .replace(/\s*and will assist you shortly\.?/gi, '')
+                  .replace(/\s*and will assist you\.?/gi, '')
+                  .replace(/\s*곧 안내\s*드리겠습니다\.?/g, '')
+                  .replace(/\s*곧 안내해\s*드리겠습니다\.?/g, '')
+                  .replace(/\s*すぐにご案内いたします。?/g, '')
+                  .replace(/\s*我们将很快为您提供帮助。?/g, '')
+                  .replace(/\n\s*/g, ' ')
+                  .replace(/[.]$/, '')
+                  .trim();
+                return formatted;
+              };
+
+              if (isAutoNotice(msg.content)) {
+                return (
+                  <div key={msg.id} className={styles.systemDivider}>
+                    <span className={styles.systemDividerText}>
+                      {formatNoticeContent(msg.content)}
+                    </span>
+                  </div>
+                );
+              }
+
               if (msg.type === 'REQUEST_CARD' && msg.meta) {
                 return (
                   <div key={msg.id} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: `${itemMarginTop}px` }}>

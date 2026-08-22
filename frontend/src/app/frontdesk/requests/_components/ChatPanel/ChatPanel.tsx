@@ -43,6 +43,9 @@ export interface ChatPanelProps {
   onMobileMore?: () => void;
 }
 
+/** 번역 이벤트가 끝내 오지 않을 때 원문을 노출하기까지 기다리는 시간 (ms) */
+const TRANSLATION_TIMEOUT_MS = 15000;
+
 const STATUS_MAP: Record<string, { text: string; variant: 'red' | 'purple' | 'green' | 'gray' }> = {
   PENDING: { text: '대기 중', variant: 'red' },
   ASSIGNED: { text: '배정됨', variant: 'purple' },
@@ -82,6 +85,24 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
+  // 번역 이벤트가 원본 메시지보다 먼저 도착한 경우를 대비한 버퍼 (messageId → 번역문)
+  const pendingTranslationsRef = useRef<Record<string, string>>({});
+  // 번역 대기 안전 타임아웃 핸들 (messageId → timer)
+  const translationTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  /**
+   * 번역 이벤트가 유실됐을 때만 원문을 노출하기 위한 안전 타임아웃 등록.
+   * 정상적으로 MESSAGE_TRANSLATED가 도착하면 타이머는 취소된다.
+   */
+  const scheduleTranslationTimeout = (msgId: string, delay: number = TRANSLATION_TIMEOUT_MS) => {
+    if (translationTimersRef.current[msgId]) clearTimeout(translationTimersRef.current[msgId]);
+    translationTimersRef.current[msgId] = setTimeout(() => {
+      delete translationTimersRef.current[msgId];
+      setMessages(prev => prev.map(m =>
+        m.id === msgId && m.isTranslating ? { ...m, isTranslating: false } : m
+      ));
+    }, Math.max(0, delay));
+  };
   const { subscribe } = useSSE();
   const { t, language } = useTranslation();
 
@@ -178,16 +199,28 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
         const chatMessages = data.map((msg: any) => {
           let displayContent = msg.content;
+          let isTranslating = false;
           if (msg.senderType === 'AI') {
             displayContent = msg.translatedContent ? translateContent(msg.translatedContent) : translateContent(msg.content);
+            if (!msg.translatedContent) {
+              const age = Date.now() - new Date(msg.createdAt).getTime();
+              isTranslating = age < TRANSLATION_TIMEOUT_MS
+                && /[\uAC00-\uD7A3\u3040-\u30FF\u4E00-\u9FFF]/.test(String(displayContent || ''));
+            }
           } else if (msg.senderType === 'GUEST' && msg.translatedContent) {
             displayContent = msg.translatedContent;
+          } else if (msg.senderType === 'GUEST') {
+            // 번역이 아직 저장되지 않은 최근 메시지는 원문 대신 번역 로딩(...)을 보여준다.
+            const isNonEnglish = /[\uAC00-\uD7A3\u3040-\u30FF\u4E00-\u9FFF]/.test(String(msg.content || ''));
+            const age = Date.now() - new Date(msg.createdAt).getTime();
+            isTranslating = isNonEnglish && age < TRANSLATION_TIMEOUT_MS;
           }
           return {
             id: String(msg.id),
             variant: msg.senderType === 'GUEST' ? 'received' as const : 'sent' as const,
             senderType: msg.senderType,
             content: displayContent,
+            isTranslating,
             _ts: new Date(msg.createdAt).getTime(),
           };
         });
@@ -230,6 +263,12 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
           ]);
         } else {
           setMessages(merged);
+          merged.forEach((m: any) => {
+            if (m.isTranslating) {
+              const age = Date.now() - new Date(data.find((d: any) => String(d.id) === m.id)?.createdAt || Date.now()).getTime();
+              scheduleTranslationTimeout(m.id, TRANSLATION_TIMEOUT_MS - age);
+            }
+          });
         }
 
         if (autoComplete) {
@@ -251,7 +290,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     };
 
     fetchMessages();
-  }, [roomNumber, autoComplete, initialMessage]);
+  }, [roomNumber, autoComplete, initialMessage, status]);
 
   // WebSocket 구독: 고객 메시지 및 AI 응답 실시간 수신
   useEffect(() => {
@@ -265,7 +304,18 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
 
       if (type === 'AI_RESPONSE' || type === 'STAFF_MESSAGE') {
         const rawContent = payload.originalContent ? (payload.originalContent as string) : content;
-        const displayContent = type === 'AI_RESPONSE' ? translateContent(rawContent) : rawContent;
+        const newMsgId = messageId ? String(messageId) : Date.now().toString();
+        // AI 응답은 고객 언어로 생성되므로 직원 화면에서도 번역 완료 전까지 원문을 노출하지 않는다.
+        const earlyTranslation = type === 'AI_RESPONSE' ? pendingTranslationsRef.current[newMsgId] : undefined;
+        if (earlyTranslation) delete pendingTranslationsRef.current[newMsgId];
+        const displayContent = type === 'AI_RESPONSE'
+          ? translateContent(earlyTranslation || rawContent)
+          : rawContent;
+        // 특수 코드([FORWARD_*] 등)는 translateContent가 이미 영문으로 바꿔주므로 로딩이 필요 없다.
+        const isTranslating = type === 'AI_RESPONSE'
+          && !earlyTranslation
+          && /[\uAC00-\uD7A3\u3040-\u30FF\u4E00-\u9FFF]/.test(displayContent);
+        if (isTranslating) scheduleTranslationTimeout(newMsgId);
         setMessages(prev => {
           if (messageId && prev.some(m => m.id === String(messageId))) return prev;
           // 낙관적 업데이트로 인한 중복 방지 (내용으로 비교)
@@ -274,51 +324,68 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
             return prev.map(m => (m.variant === 'sent' && m.content === displayContent && String(m.id).startsWith('temp')) ? { ...m, id: String(messageId), content: displayContent, senderType: 'STAFF' } : m);
           }
           return [...prev, {
-            id: messageId ? String(messageId) : Date.now().toString(),
+            id: newMsgId,
             variant: 'sent',
             senderType: type === 'STAFF_MESSAGE' ? 'STAFF' : 'AI',
             content: displayContent,
+            isTranslating,
           }];
         });
       } else if (type === 'GUEST_MESSAGE') {
         const isNonEnglish = /[\uAC00-\uD7A3\u3040-\u30FF\u4E00-\u9FFF]/.test(content);
         const newMsgId = messageId ? String(messageId) : Date.now().toString();
+        // 번역 이벤트가 먼저 도착한 경우 곧바로 번역본으로 렌더 (원문 노출 방지)
+        const earlyTranslation = pendingTranslationsRef.current[newMsgId];
+        if (earlyTranslation) delete pendingTranslationsRef.current[newMsgId];
+
         setMessages(prev => {
           if (messageId && prev.some(m => m.id === String(messageId))) return prev;
           return [...prev, {
             id: newMsgId,
             variant: 'received',
             senderType: 'GUEST',
-            content,
-            isTranslating: isNonEnglish,
+            content: earlyTranslation || content,
+            isTranslating: isNonEnglish && !earlyTranslation,
           }];
         });
 
-        // 3.5초 안전 타임아웃 (번역 이벤트 유실 시 원본 노출)
-        if (isNonEnglish) {
-          setTimeout(() => {
-            setMessages(prev => prev.map(m =>
-              m.id === newMsgId && m.isTranslating
-                ? { ...m, isTranslating: false }
-                : m
-            ));
-          }, 3500);
+        // 안전 타임아웃 (번역 이벤트 유실 시에만 원문 노출)
+        // 번역 LLM 응답이 늦어져도 원문이 잠깐 스쳐 보이지 않도록 충분히 길게 잡는다.
+        if (isNonEnglish && !earlyTranslation) {
+          scheduleTranslationTimeout(newMsgId);
         }
       } else if (type === 'GUEST_MESSAGE_TRANSLATED' || type === 'MESSAGE_TRANSLATED') {
         // 고객 또는 AI 메시지 번역 완료 → 기존 메시지의 content를 번역본으로 교체하고 번역 로딩 해제
         const translatedContent = payload.translatedContent as string;
         const targetMsgId = payload.messageId as number;
         if (translatedContent && targetMsgId) {
-          setMessages(prev => prev.map(m =>
-            m.id === String(targetMsgId) && (m.senderType === 'GUEST' || m.senderType === 'AI')
-              ? { ...m, content: m.senderType === 'AI' ? translateContent(translatedContent) : translatedContent, isTranslating: false }
-              : m
-          ));
+          const targetKey = String(targetMsgId);
+          if (translationTimersRef.current[targetKey]) {
+            clearTimeout(translationTimersRef.current[targetKey]);
+            delete translationTimersRef.current[targetKey];
+          }
+          setMessages(prev => {
+            // 아직 원본 메시지가 도착하지 않았다면 버퍼에 담아두고, GUEST_MESSAGE 수신 시 적용한다.
+            if (!prev.some(m => m.id === targetKey)) {
+              pendingTranslationsRef.current[targetKey] = translatedContent;
+              return prev;
+            }
+            return prev.map(m =>
+              m.id === targetKey && (m.senderType === 'GUEST' || m.senderType === 'AI')
+                ? { ...m, content: m.senderType === 'AI' ? translateContent(translatedContent) : translatedContent, isTranslating: false }
+                : m
+            );
+          });
         }
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      Object.values(translationTimersRef.current).forEach(clearTimeout);
+      translationTimersRef.current = {};
+      pendingTranslationsRef.current = {};
+    };
   }, [roomNumber, subscribe]);
 
   // 메시지 목록 스크롤 하단 유지
@@ -354,29 +421,50 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
     }
   };
 
-  // 상담 완료 버튼 클릭 시: RAG 모달을 먼저 열고, 선택 후 완료 처리
-  const handleCompleteConsultation = () => {
+  const completeRequest = async () => {
+    if (requestIds && requestIds.length > 0 && onStatusChange && status !== 'COMPLETED') {
+      await onStatusChange(requestIds, 'COMPLETED');
+    }
+
+    // 1. DB에 [SYSTEM] 완료 메시지 저장 (영구 보존 및 WS 전송)
+    try {
+      await fetch(`/api/frontdesk/messages/rooms/${roomNumber}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: '[SYSTEM] 이전 상담 및 처리가 모두 완료되었습니다.'
+        }),
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    // 2. 채팅 화면에 바로 [SYSTEM] 카드 생성
+    setMessages(prev => {
+      const systemContent = '[SYSTEM] 이전 상담 및 처리가 모두 완료되었습니다.';
+      const lastMsg = prev[prev.length - 1];
+      if (lastMsg && lastMsg.content === systemContent) {
+        return prev;
+      }
+      return [
+        ...prev,
+        {
+          id: `system-complete-${Date.now()}`,
+          variant: 'sent',
+          senderType: 'SYSTEM',
+          content: systemContent,
+        }
+      ];
+    });
+  };
+
+  // 상담 완료 버튼 클릭 시: 즉시 COMPLETED 처리 카드 표시 + RAG 모달 동시 오픈
+  const handleCompleteConsultation = async () => {
+    await completeRequest();
     const staffMessages = messages.filter(m => m.senderType === 'STAFF');
     if (staffMessages.length > 0) {
-      // 1. 직원이 답변한 내용이 있으면 RAG 등록 모달 열기 (아직 완료 처리 안 함)
       setIsRagConfirmOpen(true);
       onRagFlowChange?.(true);
-    } else {
-      // 2. 직원이 답변한 내용이 없으면 즉시 COMPLETED 처리
-      if (requestIds && requestIds.length > 0 && onStatusChange && status !== 'COMPLETED') {
-        onStatusChange(requestIds, 'COMPLETED');
-      }
-    }
-  };
-
-  // 그냥 닫기 (상담 완료 아님)
-  const handleClose = () => {
-    if (onClose) onClose();
-  };
-
-  const completeRequest = () => {
-    if (requestIds && requestIds.length > 0 && onStatusChange && status !== 'COMPLETED') {
-      onStatusChange(requestIds, 'COMPLETED');
     }
   };
 
@@ -522,10 +610,7 @@ export default function ChatPanel({ roomNumber = '1204', requestIds, representat
             <h2 className={styles.title}>
               <span>{language === 'en' ? `ROOM ${roomNumber}` : `${roomNumber}호`}</span>
               {summary ? (
-                <>
-                  <span className={styles.titleDot}>·</span>
-                  <span className={styles.summaryText}>{summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')}</span>
-                </>
+                <span className={styles.summaryText}>{summary.replace(/^\[(?:프론트 연결|직원 인수인계)\]\s*/, '')}</span>
               ) : null}
             </h2>
           </div>

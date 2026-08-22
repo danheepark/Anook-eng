@@ -150,16 +150,15 @@ export default function KnowledgeManagementPage() {
       {/* 2. Bottom Section: AI Knowledge Library */}
       <section className={styles.section}>
         <div className={styles.libraryHeader}>
+          <div className={styles.subTabs}>
+            <Tabs 
+              options={SUB_TAB_OPTIONS}
+              activeValue={subTab}
+              onChange={handleSubTabChange}
+              variant="line"
+            />
+          </div>
           <div id="knowledge-header-actions" className={styles.tabActions} />
-        </div>
-
-        <div className={styles.subTabs}>
-          <Tabs 
-            options={SUB_TAB_OPTIONS}
-            activeValue={subTab}
-            onChange={handleSubTabChange}
-            variant="line"
-          />
         </div>
 
         <div className={styles.sectionBody}>

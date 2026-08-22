@@ -126,8 +126,8 @@ export default function KnowledgeReviewTab({
     if (!isDraggingRef.current || !gridRef.current) return;
     e.preventDefault();
     const x = e.pageX - gridRef.current.offsetLeft;
-    const walk = (x - startXRef.current) * 1.2;
-    if (Math.abs(walk) > 6) {
+    const walk = (x - startXRef.current) * 1.5;
+    if (Math.abs(walk) > 5) {
       hasMovedRef.current = true;
     }
     gridRef.current.scrollLeft = scrollLeftRef.current - walk;

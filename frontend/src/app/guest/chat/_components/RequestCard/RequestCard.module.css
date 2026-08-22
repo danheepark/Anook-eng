@@ -182,7 +182,11 @@
 }
 
 .hiddenButtons {
-  display: none !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  margin-top: 0 !important;
+  transform: translateY(-8px) scaleY(0.9) !important;
+  pointer-events: none !important;
 }
 
 .modifiedLine {

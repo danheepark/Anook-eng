@@ -100,9 +100,25 @@ public class SendMessageService implements SendMessageUseCase {
         dispatchPort.sendToFrontdesk(guestPayload);
 
         // 2-2. 고객 언어 추적: 프론트에서 감지한 언어를 메모리에 저장 (직원 답장 시 번역 대상 언어로 사용)
-        String guestLang = cmd.guestLanguage() != null && !cmd.guestLanguage().isBlank() ? cmd.guestLanguage() : "ko";
-        guestLanguageMap.put(cmd.roomNo(), guestLang);
-        log.info("[Message] 고객 언어 갱신 — room: {}, lang: {}", cmd.roomNo(), guestLang);
+        //      단, 언어 판별 근거가 약한 메시지("1", "change" 같은 영문 빠른답변 버튼 등)로는
+        //      기존에 파악한 고객 언어를 덮어쓰지 않는다. (한국어 고객이 영문 버튼 한 번 눌렀다고
+        //      이후 직원 답장이 영어 그대로 전달되는 문제 방지)
+        String clientLang = cmd.guestLanguage() != null && !cmd.guestLanguage().isBlank() ? cmd.guestLanguage() : null;
+        String knownLang = guestLanguageMap.get(cmd.roomNo());
+        String guestLang;
+        if (hasStrongLanguageSignal(maskedContent)) {
+            guestLang = clientLang != null ? clientLang : detectLanguage(maskedContent);
+            guestLanguageMap.put(cmd.roomNo(), guestLang);
+            log.info("[Message] 고객 언어 갱신 — room: {}, lang: {}", cmd.roomNo(), guestLang);
+        } else if (knownLang != null) {
+            guestLang = knownLang;
+            log.info("[Message] 고객 언어 유지 — room: {}, lang: {} (판별 근거가 약한 메시지: {})",
+                    cmd.roomNo(), guestLang, maskedContent);
+        } else {
+            guestLang = clientLang != null ? clientLang : "ko";
+            guestLanguageMap.put(cmd.roomNo(), guestLang);
+            log.info("[Message] 고객 언어 초기 설정 — room: {}, lang: {}", cmd.roomNo(), guestLang);
+        }
 
         // 2-3. 고객 메시지를 직원 언어로 번역하여 DB 및 WebSocket으로 전달 (비동기)
         self.translateMessageForStaff(guestMsg.getId(), cmd.roomNo(), maskedContent, guestLang);
@@ -560,11 +576,15 @@ public class SendMessageService implements SendMessageUseCase {
         // ★ 고객의 실제 언어를 메모리에서 조회 (감지 이력 기반), 없으면 최근 고객 메시지로 감지
         String guestLang = guestLanguageMap.get(command.roomNo());
         if (guestLang == null) {
+            // 서버 재시작 등으로 메모리 기록이 없으면 최근 고객 메시지에서 다시 판별한다.
+            // 이때도 언어 판별 근거가 약한 메시지는 건너뛰고 실제로 문장을 쓴 메시지를 찾는다.
             guestLang = messagePort.findRecentByRoomNoAndGuestId(command.roomNo(), command.guestId(), 10)
                     .stream()
                     .filter(com.anook.backend.message.domain.model.Message::isFromGuest)
+                    .map(com.anook.backend.message.domain.model.Message::getContent)
+                    .filter(this::hasStrongLanguageSignal)
                     .findFirst()
-                    .map(m -> detectLanguage(m.getContent()))
+                    .map(this::detectLanguage)
                     .orElse("ko");
             guestLanguageMap.put(command.roomNo(), guestLang);
         }
@@ -581,7 +601,7 @@ public class SendMessageService implements SendMessageUseCase {
             log.info("[Message] 직원 언어({})와 고객 언어({})가 동일 — 번역 스킵", staffLang, guestLang);
             translatedForGuest = command.content();
         } else {
-            translatedForGuest = aiPort.translate(command.content(), guestLang);
+            translatedForGuest = translateWithRetry(command.content(), guestLang);
             log.info("[Message] 직원→고객 번역 완료: {} → {}", command.content(), translatedForGuest);
         }
 
@@ -612,7 +632,7 @@ public class SendMessageService implements SendMessageUseCase {
         }
 
         try {
-            String translatedForStaff = aiPort.translate(content, staffLang);
+            String translatedForStaff = translateWithRetry(content, staffLang);
             log.info("[Message] 고객/AI→직원 번역 완료 — msgId: {}, {} → {}", messageId, content, translatedForStaff);
 
             // DB에 translated_content 저장
@@ -644,6 +664,50 @@ public class SendMessageService implements SendMessageUseCase {
      * - 영문 알파벳이 과반수이면 "en"
      * - 그 외 기본값 "ko"
      */
+    /**
+     * 번역 호출. AI 서버가 일시적으로 실패하면 원문을 그대로 돌려주기 때문에
+     * (PythonAiHttpAdapter의 fallback), 결과가 원문과 동일하면 1회만 재시도한다.
+     * 재시도까지 실패하면 원문이 그대로 전달된다.
+     */
+    private String translateWithRetry(String text, String targetLanguage) {
+        String translated = aiPort.translate(text, targetLanguage);
+        if (translated == null || translated.equals(text)) {
+            log.warn("[Message] 번역 결과가 원문과 동일 — 1회 재시도 (target: {}, text: {})", targetLanguage, text);
+            String retried = aiPort.translate(text, targetLanguage);
+            if (retried != null && !retried.equals(text)) {
+                return retried;
+            }
+            log.error("[Message] 번역 재시도 실패 — 원문 전달 (target: {}, text: {})", targetLanguage, text);
+        }
+        return translated != null ? translated : text;
+    }
+
+    /**
+     * 해당 텍스트만으로 언어를 단정할 수 있는지 판단한다.
+     * - 한글/가나/한자가 하나라도 있으면 확실한 근거로 본다.
+     * - 라틴 문자만 있는 경우에는 두 단어 이상일 때만 근거로 인정한다.
+     *   ("1", "change", "add" 같은 영문 빠른답변 버튼/숫자 응답이 고객 언어를
+     *   영어로 뒤바꾸는 것을 막기 위함)
+     */
+    private boolean hasStrongLanguageSignal(String text) {
+        if (text == null || text.isBlank())
+            return false;
+        for (char c : text.toCharArray()) {
+            boolean isHangul = c >= '\uAC00' && c <= '\uD7A3';
+            boolean isKana = (c >= '\u3040' && c <= '\u309F') || (c >= '\u30A0' && c <= '\u30FF');
+            boolean isHan = c >= '\u4E00' && c <= '\u9FFF';
+            if (isHangul || isKana || isHan)
+                return true;
+        }
+        long alphaCount = text.chars().filter(c -> (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')).count();
+        if (alphaCount == 0)
+            return false;
+        long wordCount = java.util.Arrays.stream(text.trim().split("\\s+"))
+                .filter(w -> w.chars().anyMatch(c -> (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+                .count();
+        return wordCount >= 2;
+    }
+
     private String detectLanguage(String text) {
         if (text == null || text.isBlank())
             return "ko";

@@ -32,4 +32,11 @@ public interface MessageJpaRepository extends JpaRepository<MessageJpaEntity, Lo
      */
     List<MessageJpaEntity> findByRoomNoAndGuestIdAndCreatedAtBeforeOrderByCreatedAtDesc(
             String roomNo, Long guestId, java.time.LocalDateTime before, org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * 특정 객실의 모든 메시지 삭제 (체크아웃 시 초기화)
+     */
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM MessageJpaEntity m WHERE m.roomNo = :roomNo")
+    void deleteByRoomNo(@org.springframework.data.repository.query.Param("roomNo") String roomNo);
 }

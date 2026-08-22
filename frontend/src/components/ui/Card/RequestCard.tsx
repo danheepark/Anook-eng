@@ -158,7 +158,7 @@ export default function RequestCard({
 
         <div className={styles.rightSection}>
           <span className={styles.timeText}>
-            {getRelativeTime(createdAt, language, t.ticketUI?.time)}
+            {getRelativeTime(createdAt, language, t.ticketUI?.time, status)}
           </span>
           <div className={styles.badgeWrapper}>
             {isEmergency && (
@@ -187,10 +187,29 @@ export default function RequestCard({
   );
 }
 
-function getRelativeTime(dateString: string | Date, language: string = 'ko', timeTexts?: any): string {
+function getRelativeTime(dateString: string | Date, language: string = 'ko', timeTexts?: any, status?: string): React.ReactNode {
   if (!dateString) return '';
   const date = typeof dateString === 'string' ? new Date(dateString.replace(' ', 'T')) : new Date(dateString);
   if (isNaN(date.getTime())) return '';
+
+  const isCompleted = status === 'COMPLETED' || status === 'CANCELLED';
+
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  const dateFormatted = `${month}.${day}`;
+  const timeFormatted = `${hours}:${minutes}`;
+
+  if (isCompleted) {
+    return (
+      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.3 }}>
+        <span style={{ fontSize: '12px', color: 'var(--color-gray-500)', whiteSpace: 'nowrap' }}>{dateFormatted}</span>
+        <span style={{ fontSize: '12px', color: 'var(--color-gray-500)', whiteSpace: 'nowrap' }}>{timeFormatted}</span>
+      </div>
+    );
+  }
 
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -199,16 +218,12 @@ function getRelativeTime(dateString: string | Date, language: string = 'ko', tim
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffDays > 0) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const paddedHours = String(hours).padStart(2, '0');
-    return `${year}.${month}.${day} ${paddedHours}:${minutes} ${ampm}`;
+    return (
+      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.3 }}>
+        <span style={{ fontSize: '12px', color: 'var(--color-gray-500)', whiteSpace: 'nowrap' }}>{dateFormatted}</span>
+        <span style={{ fontSize: '12px', color: 'var(--color-gray-500)', whiteSpace: 'nowrap' }}>{timeFormatted}</span>
+      </div>
+    );
   } else if (diffHours > 0) {
     return timeTexts?.hoursAgo
       ? `${diffHours}${language === 'en' ? ' ' : ''}${timeTexts.hoursAgo}`

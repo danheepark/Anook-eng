@@ -38,4 +38,21 @@ public interface RequestJpaRepository extends JpaRepository<RequestJpaEntity, Lo
      * [Cancel & Replace] 같은 객실, 투숙객, 부서의 PENDING 상태 요청 목록 조회
      */
     List<RequestJpaEntity> findByRoomNoAndGuestIdAndDepartmentIdAndStatus(String roomNo, Long guestId, String departmentId, String status);
+
+    /**
+     * 해당 객실의 활성 상태 요청 조회 (체크아웃 일괄 취소용)
+     */
+    List<RequestJpaEntity> findByRoomNoAndStatusIn(String roomNo, List<String> statuses);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query(value = "UPDATE message SET request_id = NULL WHERE room_no = :roomNo", nativeQuery = true)
+    void nullifyMessageRequestIdByRoomNo(@org.springframework.data.repository.query.Param("roomNo") String roomNo);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query(value = "UPDATE ai_log SET request_id = NULL WHERE request_id IN (SELECT id FROM request WHERE room_no = :roomNo)", nativeQuery = true)
+    void nullifyAiLogRequestIdByRoomNo(@org.springframework.data.repository.query.Param("roomNo") String roomNo);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM RequestJpaEntity r WHERE r.roomNo = :roomNo")
+    void deleteByRoomNo(@org.springframework.data.repository.query.Param("roomNo") String roomNo);
 }

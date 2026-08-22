@@ -214,7 +214,7 @@ const extractTaskReasoningItems = (
     if (i === 0) {
       label = lang === 'ko' ? '고객 요청' : 'Guest request';
     } else if (i > 1) {
-      label = lang === 'ko' ? `추가 정보 ${i}` : `Additional info ${i}`;
+      break;
     }
 
     items.push({

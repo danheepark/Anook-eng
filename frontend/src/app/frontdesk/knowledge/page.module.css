@@ -1,13 +1,19 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-40, 40px);
+  gap: var(--space-48, 48px);
   flex: 1;
   min-height: 0;
   box-sizing: border-box;
   padding: var(--space-24);
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background-color: var(--color-white);
+}
+
+.container::-webkit-scrollbar {
+  display: none;
 }
 
 .section {
@@ -58,19 +64,28 @@
 
 .libraryHeader {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-bottom: var(--space-12, 12px);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-16);
+  border-bottom: 1px solid var(--color-gray-200);
+  margin-bottom: var(--space-16, 16px);
 }
 
 .subTabs {
-  width: 100%;
-  margin-bottom: 0;
+  flex: 1;
+  min-width: 0;
+  margin-bottom: -1px;
+}
+
+.subTabs :global(.variantLine) {
+  border-bottom: none !important;
 }
 
 .tabActions {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  padding-bottom: 6px;
 }
 
 .sectionBody {
