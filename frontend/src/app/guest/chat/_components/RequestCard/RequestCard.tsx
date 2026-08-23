@@ -413,8 +413,13 @@ export default function RequestCard({
         <div className={styles.rightColumn}>
           <div className={styles.content}>
             <div className={styles.summaryRow} style={{ position: 'relative', paddingRight: '50px' }}>
-              <div className={styles.summary} style={{ display: 'flex', alignItems: 'center' }}>
+              <div className={styles.summary} style={{ display: 'flex', alignItems: 'flex-start' }}>
                 <span>{finalTitle}</span>
+                {(() => {
+                  const highlightItems = (entities?.highlight_items as string[]) || [];
+                  const isTitleMod = !rawDetails && highlightItems.some(hi => finalTitle.toLowerCase().includes(hi.toLowerCase()));
+                  return isTitleMod ? <span className={styles.modifiedBadge} style={{ marginLeft: '6px' }}>Modified</span> : null;
+                })()}
                 {isCancelPending && (
                   <span className={styles.cancelPendingBadge}>
                     {targetLang === 'ko' ? '취소 대기중' : 'Cancel Pending'}

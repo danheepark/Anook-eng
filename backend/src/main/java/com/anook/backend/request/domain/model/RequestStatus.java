@@ -25,6 +25,17 @@ public enum RequestStatus {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("RequestStatus 값이 null이거나 비어있습니다.");
         }
-        return valueOf(value.trim().toUpperCase());
+        String upper = value.trim().toUpperCase();
+        if ("DONE".equals(upper)) {
+            return COMPLETED;
+        }
+        if ("CANCELED".equals(upper)) {
+            return CANCELLED;
+        }
+        try {
+            return valueOf(upper);
+        } catch (IllegalArgumentException e) {
+            return COMPLETED;
+        }
     }
 }

@@ -239,7 +239,8 @@ public class CreateRequestOnEventService {
                 ("true".equalsIgnoreCase(String.valueOf(savedRequest.getEntities().get("has_extra_charge"))));
 
         boolean requiresExplicitConfirm = isFbOrConcierge || isPaidHk;
-        boolean skipGrace = isEmergency || isComplaint;
+        boolean isExplicitEscalation = savedRequest.getEntities() != null && "true".equalsIgnoreCase(String.valueOf(savedRequest.getEntities().get("skip_grace")));
+        boolean skipGrace = isEmergency || isComplaint || isExplicitEscalation;
 
         String deptCode = savedRequest.getDomainCode() != null ? savedRequest.getDomainCode().name() : "UNKNOWN";
         int graceRemaining;

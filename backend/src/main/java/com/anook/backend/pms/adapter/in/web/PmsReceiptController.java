@@ -33,8 +33,12 @@ public class PmsReceiptController {
 
     @GetMapping
     public ResponseEntity<List<GetPmsReceiptResult>> getReceipts(
-            @RequestParam String roomNo,
+            @RequestParam(required = false) String roomNo,
             @RequestParam(name = "unpaid", required = false) Boolean unpaidOnly) {
+
+        if (roomNo == null || roomNo.isBlank()) {
+            return ResponseEntity.ok(List.of());
+        }
 
         List<GetPmsReceiptResult> receipts;
         if (Boolean.TRUE.equals(unpaidOnly)) {
@@ -52,8 +56,10 @@ public class PmsReceiptController {
     }
 
     @PatchMapping("/pay-all")
-    public ResponseEntity<Void> payAll(@RequestParam String roomNo) {
-        managePmsReceiptUseCase.payAllByRoomNo(roomNo);
+    public ResponseEntity<Void> payAll(@RequestParam(required = false) String roomNo) {
+        if (roomNo != null && !roomNo.isBlank()) {
+            managePmsReceiptUseCase.payAllByRoomNo(roomNo);
+        }
         return ResponseEntity.noContent().build();
     }
 }

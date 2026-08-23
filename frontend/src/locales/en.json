@@ -289,6 +289,7 @@
         "cancelRequested": "Cancellation Requested by Guest"
       },
       "entityLabels": {
+        "highlight_items": "Modified item",
         "is_contactless": "Contactless Delivery",
         "target_time": "Target Time",
         "equipment": "Equipment",
@@ -674,6 +675,7 @@
     "forwardConcierge": "Got it! I'll pass this along to the Concierge team right away.",
     "forwardFront": "Let me connect you to the front desk right now.",
     "infoNotFound": "I'm not quite sure about that one. I've passed your question along to the front desk, and they'll get back to you here shortly.",
+    "infoNotFoundAsk": "I don't have that information on hand. Would you like me to check with the front desk?",
     "cancelSuccess": "Done! Your request has been cancelled. Let me know if there's anything else I can help with!",
     "cancelPending": "Your request is already being worked on, so I've sent a cancellation request to the team. \n I'll let you know as soon as it's confirmed!",
     "piiGuard": "To keep your personal info safe, we can't accept sensitive details through chat. For anything like that, please call the front desk (dial 0) from your room phone, and they'll be happy to help!"

@@ -209,7 +209,11 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
             if str(ar_id) == str(target_id):
                 # Check if any item in the active request matches the new order
                 ar_summary = (ar.get("summary") or "").lower()
-                if any(item_name in ar_summary for item_name in new_items if item_name):
+                ar_entities = ar.get("entities") or {}
+                ar_menu_items = ar_entities.get("menu_items") or []
+                ar_item_names = [mi.get("name", "").lower() for mi in ar_menu_items if isinstance(mi, dict)]
+                
+                if any(item_name in ar_summary or item_name in ar_item_names for item_name in new_items if item_name):
                     matched = True
                 break
         if not matched:
@@ -323,6 +327,19 @@ async def run_fb_agent(user_message: str, room_no: str, chat_history: list = Non
             "zh": "餐饮订单已收到。"
         }
         guest_reply = result.final_reply or fallback_msg.get(system_language, fallback_msg["en"])
+
+        # [조건부 안내 제거] PENDING 상태인 기존 주문을 수정하는 경우 주방 안내 문구 제거
+        action_type = result.entities.get("action_type") or raw.get("action_type") or "ADD"
+        if action_type == "REPLACE":
+            target_id = result.target_request_id or result.entities.get("target_request_id") or raw.get("target_request_id")
+            if target_id and active_requests:
+                for ar in active_requests:
+                    ar_id = ar.get("id") or ar.get("request_id")
+                    if str(ar_id) == str(target_id):
+                        if ar.get("status") == "PENDING":
+                            warning_msg = "If the kitchen has already started on the original order, a staff member will follow up with you."
+                            guest_reply = guest_reply.replace(warning_msg, "").strip()
+                        break
 
     # 8. analyze.py 응답 포맷 반환
     # [수정] 주문 확인 단계(needs_clarification=True, missing_fields가 비어있고, intent가 주문/변경 관련인 경우)

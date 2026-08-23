@@ -32,13 +32,41 @@ public class MessageActiveRequestPersistenceAdapter implements MessageActiveRequ
     }
     @Override
     public java.util.List<java.util.Map<String, Object>> findActiveRequests(String roomNo, Long guestId) {
-        String sql = "SELECT id, department_id, summary, status " +
+        String sql = "SELECT id, department_id, summary, status, entities " +
                      "FROM request " +
                      "WHERE room_no = ? AND guest_id = ? AND status IN ('CREATED', 'PENDING', 'IN_PROGRESS', 'ESCALATED') " +
                      "ORDER BY created_at DESC " +
                      "LIMIT 10"; // AI에 보낼 문맥이므로 최근 10개로 제한
                      
-        return jdbcTemplate.queryForList(sql, roomNo, guestId);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            java.util.Map<String, Object> row = new java.util.HashMap<>();
+            row.put("id", rs.getLong("id"));
+            row.put("department_id", rs.getString("department_id"));
+            row.put("summary", rs.getString("summary"));
+            row.put("status", rs.getString("status"));
+            
+            Object entitiesObj = rs.getObject("entities");
+            if (entitiesObj != null) {
+                if (entitiesObj.getClass().getName().equals("org.postgresql.util.PGobject")) {
+                    try {
+                        java.lang.reflect.Method getValueMethod = entitiesObj.getClass().getMethod("getValue");
+                        String json = (String) getValueMethod.invoke(entitiesObj);
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        row.put("entities", mapper.readValue(json, Map.class));
+                    } catch (Exception e) {
+                        log.warn("entities PGobject parsing failed: {}", e.getMessage());
+                    }
+                } else if (entitiesObj instanceof String json) {
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        row.put("entities", mapper.readValue(json, Map.class));
+                    } catch (Exception e) {
+                        log.warn("entities String parsing failed: {}", e.getMessage());
+                    }
+                }
+            }
+            return row;
+        }, roomNo, guestId);
     }
 
     @Override

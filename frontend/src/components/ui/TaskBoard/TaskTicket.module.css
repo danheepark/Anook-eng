@@ -164,16 +164,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 10px;
+  padding: 3px var(--space-8);
   background-color: #FFFFFF;
   color: #FF5B1F;
-  font: var(--text-body-medium);
-  font-size: 14px;
-  font-weight: 500;
+  font: var(--text-caption-medium);
   border-radius: 9999px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   white-space: nowrap;
-  line-height: 1.2;
+  box-sizing: border-box;
 }
 
 .content .roomNo {
@@ -328,9 +326,24 @@
 }
 
 /* --- 취소 대기중인 카드 스타일 --- */
+@keyframes cancelPulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 91, 31, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 91, 31, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 91, 31, 0);
+  }
+}
+
 .cancelPendingCard {
-  background-color: #ffd1c2 !important;
-  border: none !important;
+  background-color: #FFF3EE !important;
+  border: 1px solid #FF5B1F !important;
+  animation: cancelPulseGlow 2s infinite ease-in-out;
 }
 
 .cancelPendingCard .ticketId,
@@ -345,5 +358,6 @@
 }
 
 .cancelPendingCard:hover {
-  border: none !important;
+  background-color: #FFE5D5 !important;
+  border: 1px solid #FF5B1F !important;
 }

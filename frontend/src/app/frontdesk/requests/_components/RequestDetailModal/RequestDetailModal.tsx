@@ -287,9 +287,14 @@ function renderEntities(entities: Record<string, any>, t: any, language: string)
       continue;
     }
 
-    const displayValue = typeof value === 'object' && value !== null
-      ? (value.name || value.id || JSON.stringify(value))
-      : String(value);
+    let displayValue: string;
+    if (Array.isArray(value)) {
+      displayValue = value.map(v => typeof v === 'object' && v !== null ? (v.name || v.id || JSON.stringify(v)) : String(v)).join(', ');
+    } else if (typeof value === 'object' && value !== null) {
+      displayValue = value.name || value.id || JSON.stringify(value);
+    } else {
+      displayValue = String(value);
+    }
 
     rendered.push(
       <div key={key} className={styles.reasoningItem}>

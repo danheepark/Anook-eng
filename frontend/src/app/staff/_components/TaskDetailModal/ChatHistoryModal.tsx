@@ -51,6 +51,9 @@ export default function ChatHistoryModal({ isOpen, onClose, roomNumber, title }:
     if (newContent.includes('[FORWARD_FRONT]') || newContent.includes('프론트 데스크 직원에게 연결하여 도움을 드리겠습니다') || newContent.includes('프론트데스크 직원이 곧 확인 후 안내')) {
       return t.aiReplies?.forwardFront || "Let me connect you to the front desk right now.";
     }
+    if (newContent.includes('[INFO_NOT_FOUND_ASK]')) {
+      return (t.aiReplies as any)?.infoNotFoundAsk || "I don't have that information on hand. Would you like me to check with the front desk?";
+    }
     if (newContent.includes('[INFO_NOT_FOUND]') || newContent.includes('프론트 데스크로 즉시 전달해 두었습니다') || newContent.includes('제가 바로 답변드리기 어려워')) {
       return t.aiReplies?.infoNotFound || "I'm not quite sure about that one. I've passed your question along to the front desk, and they'll get back to you here shortly.";
     }

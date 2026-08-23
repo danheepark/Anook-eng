@@ -172,20 +172,16 @@
   max-height: 100px;
   opacity: 1;
   overflow: hidden;
-  transform-origin: top;
-  transform: translateY(0) scaleY(1);
   transition:
-    max-height 0.7s cubic-bezier(0.25, 1, 0.5, 1),
-    opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-    margin-top 0.7s cubic-bezier(0.25, 1, 0.5, 1),
-    transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+    max-height 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.35s ease-out,
+    margin-top 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hiddenButtons {
   max-height: 0 !important;
   opacity: 0 !important;
   margin-top: 0 !important;
-  transform: translateY(-8px) scaleY(0.9) !important;
   pointer-events: none !important;
 }
 
@@ -207,6 +203,7 @@
   padding: 2px 6px;
   font-size: 10px;
   margin-left: 8px;
+  margin-top: 3px;
   line-height: 1;
   font-weight: 500;
   white-space: nowrap;
@@ -223,12 +220,13 @@
   padding: 3px 8px;
   font: var(--text-caption-medium);
   margin-left: 8px;
+  margin-top: 3px;
   line-height: 1;
   white-space: nowrap;
 }
 
 .cancelPendingCard {
-  background: rgba(254, 186, 163, 0.3) !important;
+  background: rgba(255, 237, 229, 0.50) !important;
 }
 
 .cancelPendingCard .iconContainer,

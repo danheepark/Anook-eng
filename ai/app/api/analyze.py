@@ -154,6 +154,12 @@ STATIC_REPLIES = {
         "ja": "かしこまりました！すぐに担当部門にお伝えいたします。少々お待ちくださいませ。🚀😊",
         "zh": "明白！我会立刻将此转交给相关部门。请稍等片刻。🚀😊"
     },
+    "INFO_NOT_FOUND_ASK": {
+        "ko": "그 부분은 제가 바로 확인이 어렵네요. 프론트 데스크에 확인해 드릴까요?",
+        "en": "I don't have that information on hand. Would you like me to check with the front desk?",
+        "ja": "その点はすぐにお調べできかねます。フロントデスクに確認いたしましょうか？",
+        "zh": "这个我暂时无法确认。需要我帮您向前台询问吗？"
+    },
     "INFO_NOT_FOUND": {
         "ko": "그 부분은 제가 바로 답변드리기 어려워 프론트 데스크로 즉시 전달해 두었습니다! 🥲 직원이 확인 후 바로 채팅으로 안내해 드릴 예정이니 잠시만 기다려 주세요. 🙏",
         "en": "Let me check on that with our front desk team. They'll get back to you shortly.",
@@ -236,6 +242,8 @@ def _get_static_reply(key: str, lang: str) -> str:
         return "[FORWARD_FRONT]"
     if key in ["INFO_NOT_FOUND", "ESCALATION_INFO"]:
         return "[INFO_NOT_FOUND]"
+    if key == "INFO_NOT_FOUND_ASK":
+        return "[INFO_NOT_FOUND_ASK]"
 
     lang = lang.lower()
     if lang not in ["ko", "en", "ja", "zh"]:
@@ -860,7 +868,12 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
                 enriched_history = list(request.chat_history)
                 if request.active_requests:
                     import json
-                    filtered = [{"id": r.get("id"), "summary": r.get("summary")} for r in request.active_requests]
+                    filtered = []
+                    for r in request.active_requests:
+                        item = {"id": r.get("id"), "summary": r.get("summary")}
+                        if r.get("entities") and isinstance(r.get("entities"), dict) and "menu_items" in r.get("entities"):
+                            item["menu_items"] = r["entities"]["menu_items"]
+                        filtered.append(item)
                     active_ctx = (
                         f"[고객의 현재 활성 요청(주문) 목록]\n"
                         f"{json.dumps(filtered, ensure_ascii=False)}\n\n"
@@ -1336,20 +1349,55 @@ async def _analyze_message_core(request: AnalyzeRequest) -> List[Dict[str, Any]]
             need_more_info_msg = _get_static_reply("NEED_MORE_INFO", request.language)
             
             if guest_reply == info_not_found_msg or "[INFO_NOT_FOUND]" in guest_reply or (info_not_found_msg and info_not_found_msg in guest_reply):
-                # ── [원칙 1: AI가 답을 못하고, 해결 주체가 명확함 → 바로 FRONT Handoff] ──
-                print(f"[Analyze] 🚨 지식 부재(INFO_NOT_FOUND) → 프론트 데스크 즉시 Handoff 티켓 발행")
                 summary_val = getattr(primary, 'summary', None) or "Information inquiry"
-                response = {
-                    "guest_reply": _get_static_reply("INFO_NOT_FOUND", request.language),
-                    "summary": summary_val,
-                    "domain_code": "FRONT",
-                    "priority": "NORMAL",
-                    "entities": {"intent": "ESCALATION", "reason": "LACK_OF_KNOWLEDGE"},
-                    "confidence": 1.0,
-                    "missing_fields": [],
-                    "clarification_options": [],
-                    "reasoning": getattr(primary, 'reasoning', f"• Guest inquired about: '{request.text}'.\n• Transferred to front desk for assistance.")
-                }
+
+                # ── [핸드오프 기준] ────────────────────────────────────────────────
+                # "AI가 답을 못했다"는 AI의 상태일 뿐, 고객의 필요가 아니다.
+                # 사람이 넘겨받아야 하는지는 아래 두 가지로만 판단한다.
+                #   (1) 실행/결정되어야 할 일이 있는가  → 라우터가 이미 INFO와
+                #       DEPARTMENT/FRONT_ESCALATION으로 갈라 놓았다. INFO로 들어온 이상
+                #       고객은 "알아보는 중"이므로 실행 대상이 없다.
+                #   (2) 그 일에 직원의 권한이나 현장 맥락이 필요한가
+                #       → 라우터가 URGENT로 표시한 경우(안전/운영 실패)만 해당.
+                # 둘 다 아니면 직원 큐에 넣지 않고 고객에게 먼저 물어본다.
+                # 잘못된 핸드오프의 비용은 직원이 치르므로, 그 비용을 감수할지는
+                # 고객이 결정하게 한다.
+                needs_human_now = getattr(primary, 'priority', "NORMAL") == "URGENT"
+
+                if needs_human_now:
+                    print(f"[Analyze] 🚨 지식 부재 + 긴급도 URGENT → 프론트 데스크 즉시 Handoff 티켓 발행")
+                    response = {
+                        "guest_reply": _get_static_reply("INFO_NOT_FOUND", request.language),
+                        "summary": summary_val,
+                        "domain_code": "FRONT",
+                        "priority": "URGENT",
+                        "entities": {"intent": "ESCALATION", "reason": "LACK_OF_KNOWLEDGE"},
+                        "confidence": 1.0,
+                        "missing_fields": [],
+                        "clarification_options": [],
+                        "reasoning": getattr(primary, 'reasoning', f"• Guest inquired about: '{request.text}'.\n• Transferred to front desk for assistance.")
+                    }
+                else:
+                    # 탐색성 질문(수영장 혼잡도 등)은 직원 개입 없이 고객에게 확인만 받는다.
+                    # 고객이 "네"를 누르면 라우터의 Escalation Confirmation 규칙이
+                    # 다음 턴에서 FRONT_ESCALATION으로 티켓을 만든다.
+                    print(f"[Analyze] 💬 지식 부재(탐색성 문의) → 티켓 없이 프론트 확인 여부 질문")
+                    response = {
+                        "guest_reply": _get_static_reply("INFO_NOT_FOUND_ASK", request.language),
+                        "summary": summary_val,
+                        "domain_code": None,
+                        "priority": "NORMAL",
+                        # 핸드오프는 아니지만 지식 공백은 남긴다 (unanswered_question 적재용)
+                        "entities": {"intent": "INFO_UNRESOLVED", "reason": "LACK_OF_KNOWLEDGE"},
+                        "confidence": primary.confidence,
+                        "missing_fields": [],
+                        "clarification_options": [
+                            _get_static_reply("OPTION_YES", request.language),
+                            _get_static_reply("OPTION_NO", request.language)
+                        ],
+                        "unanswered_question": request.text,
+                        "reasoning": getattr(primary, 'reasoning', f"• Guest inquired about: '{request.text}'.\n• No matching hotel knowledge; offered to check with the front desk.")
+                    }
             elif need_more_info_msg in guest_reply:
                 # ── [원칙 2: handoff 자체가 선택적인 상황 → Confirmation ([Yes] [No])] ──
                 response = {

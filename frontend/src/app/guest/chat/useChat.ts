@@ -50,6 +50,7 @@ export function useChat() {
   // [AN-358] FRONT 상담 완료 배치 처리 (프론트 연결 요청 N건 → 상담 완료 카드 1개)
   const frontCompletedBatch = useRef<{ requestId: number; summary: string; domainCode: string } | null>(null);
   const frontCompletedTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastConfirmTime = useRef<number>(0);
 
   // Update welcome message if language changes and it is the only message
   useEffect(() => {
@@ -101,6 +102,7 @@ export function useChat() {
     if (newContent.includes('[FORWARD_FACILITY]')) newContent = newContent.replace('[FORWARD_FACILITY]', currentT.aiReplies?.forwardFacility || '');
     if (newContent.includes('[FORWARD_CONCIERGE]')) newContent = newContent.replace('[FORWARD_CONCIERGE]', (currentT.aiReplies as any)?.forwardConcierge || '');
     if (newContent.includes('[FORWARD_FRONT]')) newContent = newContent.replace('[FORWARD_FRONT]', currentT.aiReplies?.forwardFront || '');
+    if (newContent.includes('[INFO_NOT_FOUND_ASK]')) newContent = newContent.replace('[INFO_NOT_FOUND_ASK]', (currentT.aiReplies as any)?.infoNotFoundAsk || '');
     if (newContent.includes('[INFO_NOT_FOUND]')) newContent = newContent.replace('[INFO_NOT_FOUND]', currentT.aiReplies?.infoNotFound || '');
     if (newContent.includes('[PII_GUARD]')) newContent = newContent.replace('[PII_GUARD]', currentT.aiReplies?.piiGuard || '');
     return newContent;
@@ -184,14 +186,15 @@ export function useChat() {
               requestId: r.id,
               domainCode: r.domainCode || 'UNKNOWN',
               summary: r.summary,
-              status: r.status,
+              // "사진처럼" 보존: REPLACED로 취소된 건은 과거 기록에서 '취소됨'으로 표시하지 않고 정상 접수(PENDING) 상태로 렌더링
+              status: (r.status === 'CANCELLED' && r.cancelReason === 'REPLACED') ? 'PENDING' : r.status,
               entities: r.entities,
-              progress: progressMap[r.status] || 0,
+              progress: (r.status === 'CANCELLED' && r.cancelReason === 'REPLACED') ? 10 : (progressMap[r.status] || 0),
               graceRemaining: 0,
               priority: r.priority || 'NORMAL',
               createdAt: r.createdAt,
               cancelReason: r.cancelReason,
-              cancelledAt: r.status === 'CANCELLED' ? (r.updatedAt || r.createdAt) : undefined,
+              cancelledAt: (r.status === 'CANCELLED' && r.cancelReason !== 'REPLACED') ? (r.updatedAt || r.createdAt) : undefined,
             },
             _ts: new Date(r.createdAt).getTime(),
           });
@@ -322,75 +325,83 @@ export function useChat() {
           return; // 직원이 채팅 중인 상태이므로 AI 응답 카드를 그리지 않음 (직원이 메시지를 보냄)
         }
 
-        // 진행 상태 메시지 제거
-        setMessages(prev => {
-          const filtered = prev.filter(m => m.type !== 'AI_PROGRESS');
+        let content = payload.content;
+        content = translateContent(content);
 
-          // 취소 관련 AI 응답은 backend (analyze.py)에서 전송한 content를 그대로 사용합니다.
-          let content = payload.content;
+        const isMenuInquiry =
+          payload.uiType === 'MENU_CARD' ||
+          payload.meta?.ui_type === 'MENU_CARD' ||
+          payload.meta?.intent === 'MENU_INQUIRY' ||
+          payload.meta?.entities?.intent === 'MENU_INQUIRY' ||
+          (content && content.includes('[MENU_CARD]')) ||
+          (content && (
+            content.includes('current room service menu') ||
+            content.includes('룸서비스 메뉴를 안내') ||
+            content.includes('룸서비스 메뉴입니다') ||
+            content.includes('Here is our current menu') ||
+            content.includes('ルームサービスのメニューをご案内') ||
+            content.includes('为您 provide 客房送餐菜单') ||
+            content.includes('为您제공客房送餐菜单') ||
+            content.includes('为您提供客房送餐菜单')
+          ));
 
-          // AI 특수 코드 매핑 (다국어 언어팩 연동, AI 할루시네이션 대비 includes 사용)
-          content = translateContent(content);
+        if (isMenuInquiry && content) {
+          content = content.replace(/\[MENU_CARD\]/g, '').trim();
+        }
 
-          const isMenuInquiry =
-            payload.uiType === 'MENU_CARD' ||
-            payload.meta?.ui_type === 'MENU_CARD' ||
-            payload.meta?.intent === 'MENU_INQUIRY' ||
-            payload.meta?.entities?.intent === 'MENU_INQUIRY' ||
-            (content && content.includes('[MENU_CARD]')) ||
-            (content && (
-              content.includes('current room service menu') ||
-              content.includes('룸서비스 메뉴를 안내') ||
-              content.includes('룸서비스 메뉴입니다') ||
-              content.includes('Here is our current menu') ||
-              content.includes('ルームサービスのメニューをご案内') ||
-              content.includes('为您提供客房送餐菜单')
-            ));
+        const msgType = isMenuInquiry
+          ? 'MENU_CARD'
+          : (payload.uiType ? payload.uiType : (payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : 'TEXT'));
+        const msgsToAppend: ChatMessage[] = [];
 
-          if (isMenuInquiry && content) {
-            content = content.replace(/\[MENU_CARD\]/g, '').trim();
+        if (msgType === 'REQUEST_CARD') {
+          if (payload.meta?.requestId) {
+            knownRequestIds.current.add(payload.meta.requestId);
           }
-
-          const msgType = isMenuInquiry
-            ? 'MENU_CARD'
-            : (payload.uiType ? payload.uiType : (payload.options && payload.options.length > 0 ? 'QUICK_REPLY' : 'TEXT'));
-          const msgsToAppend: ChatMessage[] = [];
-
-          if (msgType === 'REQUEST_CARD') {
-            if (payload.meta?.requestId) {
-              knownRequestIds.current.add(payload.meta.requestId);
-            }
-            if (content && content.trim() !== '') {
-              msgsToAppend.push({
-                id: payload.messageId ? `${payload.messageId}-text` : `text-${Date.now()}`,
-                variant: 'received',
-                content,
-                type: 'TEXT',
-                meta: { ...(payload.meta || {}), options: undefined },
-              });
-            }
+          if (content && content.trim() !== '') {
             msgsToAppend.push({
-              id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
-              variant: 'received',
-              content: '', // Extract content to TEXT message
-              type: 'REQUEST_CARD',
-              meta: { ...(payload.meta || {}), options: payload.options },
-            });
-          } else {
-            if (payload.meta?.requestId) {
-              knownRequestIds.current.add(payload.meta.requestId);
-            }
-            msgsToAppend.push({
-              id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
+              id: payload.messageId ? `${payload.messageId}-text` : `text-${Date.now()}`,
               variant: 'received',
               content,
-              type: msgType,
-              meta: { ...(payload.meta || {}), options: payload.options },
+              type: 'TEXT',
+              meta: { ...(payload.meta || {}), options: undefined },
             });
           }
-          
-          return [...filtered, ...msgsToAppend];
-        });
+          msgsToAppend.push({
+            id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
+            variant: 'received',
+            content: '', // Extract content to TEXT message
+            type: 'REQUEST_CARD',
+            meta: { ...(payload.meta || {}), options: payload.options },
+          });
+        } else {
+          if (payload.meta?.requestId) {
+            knownRequestIds.current.add(payload.meta.requestId);
+          }
+          msgsToAppend.push({
+            id: payload.messageId ? payload.messageId.toString() : Date.now().toString(),
+            variant: 'received',
+            content,
+            type: msgType,
+            meta: { ...(payload.meta || {}), options: payload.options },
+          });
+        }
+
+        const appendResponse = () => {
+          setMessages(prev => {
+            const filtered = prev.filter(m => m.type !== 'AI_PROGRESS');
+            return [...filtered, ...msgsToAppend];
+          });
+        };
+
+        const elapsedSinceConfirm = Date.now() - lastConfirmTime.current;
+        const requiredDelay = 600; // Wait for card buttons fold animation (0.55s) to finish first
+
+        if (elapsedSinceConfirm < requiredDelay) {
+          setTimeout(appendResponse, requiredDelay - elapsedSinceConfirm);
+        } else {
+          appendResponse();
+        }
       } else if (payload.type === 'STAFF_TYPING') {
         // 직원이 메시지 작성 중 → 타이핑 인디케이터 표시
         setIsStaffTyping(true);
@@ -541,7 +552,13 @@ export function useChat() {
                   graceRemaining: 0
                 }
               };
-              // 새 취소 카드: 하단에 추가
+
+              // modify(REPLACED) 일 때는 새 취소 카드를 하단에 추가하지 않음 (앞에 cancelled 카드 나오면 안됨)
+              if (payload.cancelReason === 'REPLACED') {
+                return updated;
+              }
+
+              // 새 취소 카드: 하단에 추가 (일반 취소일 경우)
               return [...updated, {
                 ...requestMsg,
                 id: `request-${payload.requestId}-cancelled-${Date.now()}`,
@@ -913,6 +930,25 @@ export function useChat() {
   // 5. Confirm Request Action
   const confirmRequest = async (requestId: number) => {
     if (!roomNo) return;
+
+    // 1. Mark confirm time & optimistically hide card buttons to start collapse NOW
+    lastConfirmTime.current = Date.now();
+    setMessages(prev => {
+      const idx = prev.findIndex(m => m.id === `request-${requestId}` || m.meta?.requestId === requestId);
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx] = {
+          ...updated[idx],
+          meta: {
+            ...updated[idx].meta,
+            graceRemaining: 0
+          }
+        };
+        return updated;
+      }
+      return prev;
+    });
+
     try {
       const response = await fetch(`/api/chat/${roomNo}/requests/${requestId}/confirm`, {
         method: 'POST'

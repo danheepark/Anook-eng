@@ -27,6 +27,31 @@ OUTPUT:
 {"intent": "DELIVERY", "item": "Blooming flowers", "quantity": 10}
 """
 
+import re
+
+def _is_meta_instruction_pill(opt_str: str) -> bool:
+    if not isinstance(opt_str, str):
+        return True
+    s = opt_str.lower().strip()
+    meta_verbs = ["confirm", "provide", "enter", "fill", "specify", "select", "choose", "check", "submit", "indicate"]
+    if any(s.startswith(v) for v in meta_verbs):
+        return True
+    meta_phrases = ["passenger count", "destination", "time", "details", "info", "information", "number of passengers"]
+    if any(p in s for p in meta_phrases) and any(v in s for v in ["confirm", "provide", "enter", "fill", "specify", "select", "choose"]):
+        return True
+    return False
+
+
+def _is_vague_time_str(val) -> bool:
+    if not val or not isinstance(val, str):
+        return False
+    v = val.lower().strip()
+    if re.search(r'\b\d{1,2}(:\d{2})?\s*(am|pm)?\b', v) or re.search(r'\b\d{1,2}\s*시', v):
+        return False
+    vague_words = ["morning", "afternoon", "evening", "night", "tonight", "tomorrow", "today", "아침", "오전", "오후", "저녁", "밤", "내일"]
+    return any(w in v for w in vague_words)
+
+
 async def run_concierge_agent(user_message: str, room_no: str, chat_history: list = None, images: list = None, active_requests: list = None, system_language: str = "en", **kwargs) -> dict:
     """
     Concierge Agent Engine (Step 0-2)
@@ -239,6 +264,31 @@ async def run_concierge_agent(user_message: str, room_no: str, chat_history: lis
                     result.target_request_id = None
                     cleaned_raw.pop("target_request_id", None)
                     cleaned_raw["action_type"] = "ADD_DUPLICATE"
+
+    # ── CODE-LEVEL GUARDRAIL: Filter meta-instruction pills and inject Contextual Time Pills ──
+    raw_time = entities.get("time")
+    is_time_vague = _is_vague_time_str(raw_time)
+
+    if is_time_vague:
+        entities.pop("time", None)
+        if "time" not in missing:
+            missing.append("time")
+        result.needs_clarification = True
+
+    vague_source = f"{user_message} {raw_time or ''}".lower()
+
+    if result.needs_clarification:
+        _cl_opts = getattr(result, 'clarification_options', None) or []
+        _valid_opts = [o for o in _cl_opts if not _is_meta_instruction_pill(o)]
+        result.clarification_options = _valid_opts
+
+        if ("time" in missing or is_time_vague or not entities.get("time")) and not _valid_opts:
+            if any(w in vague_source for w in ["morning", "아침", "오전"]):
+                result.clarification_options = ["08:00 AM", "09:00 AM", "10:00 AM"]
+            elif any(w in vague_source for w in ["afternoon", "낮", "오후"]):
+                result.clarification_options = ["01:00 PM", "02:00 PM", "03:00 PM"]
+            elif any(w in vague_source for w in ["evening", "night", "tonight", "저녁", "밤"]):
+                result.clarification_options = ["06:00 PM", "07:00 PM", "08:00 PM"]
 
     # Convert to /analyze response format (adhere to HotelRequestSchema)
     

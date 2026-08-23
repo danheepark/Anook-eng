@@ -73,9 +73,31 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
   // FRONT(실시간 상담)은 요청 상태바에서 제외
   const filteredRequests = activeRequests?.filter(r => r.domainCode !== 'FRONT');
 
-  // Auto-scroll to bottom when messages or typing state changes
+  // Auto-scroll to bottom ONLY when new messages arrive or typing status changes
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prevMsgLengthRef = useRef(messages.length);
+  const lastMsgIdRef = useRef(messages[messages.length - 1]?.id);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const currentMsgLength = messages.length;
+    const currentLastMsgId = messages[messages.length - 1]?.id;
+
+    // Trigger auto-scroll ONLY when a new message is appended or typing indicator state toggles
+    const isNewMessageAdded = currentMsgLength > prevMsgLengthRef.current || currentLastMsgId !== lastMsgIdRef.current;
+
+    prevMsgLengthRef.current = currentMsgLength;
+    lastMsgIdRef.current = currentLastMsgId;
+
+    if (isNewMessageAdded || isTyping || isStaffTyping) {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 60);
+    }
+
+    return () => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
   }, [messages, isTyping, isStaffTyping]);
 
   // 상태바 높이에 따른 채팅 메시지 패딩 오프셋 실시간 동기화
@@ -176,7 +198,9 @@ export default function ChatScreen({ messages, isTyping, isStaffTyping, activeRe
       <div
         className={`${styles.messageList} ${filteredRequests && filteredRequests.length > 0 ? styles.messageListWithStatusBar : ''}`}
       >
-        {!(messages.length === 1 && messages[0].type === 'WELCOME') && <div className={styles.spacer} />}
+        {!(messages.length === 1 && messages[0].type === 'WELCOME') && (
+          <div style={{ flex: '1 1 auto', minHeight: 0 }} />
+        )}
         {messages.map((msg, index) => {
           if (msg.type === 'AI_PROGRESS') {
             return null; // map 밖에서 독립 렌더링

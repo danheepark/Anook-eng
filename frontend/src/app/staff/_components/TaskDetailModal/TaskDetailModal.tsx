@@ -42,6 +42,7 @@ const ENTITY_LABELS_KO: Record<string, string> = {
   item: '대상 물품', time: '시간', special_requests: '추가 요청', count: '수량',
   type: '유형', target: '대상', special_notes: 'PMS 특이사항 노트',
   pms_allergen_warning: '⚠️ 알레르기 안전 경고 (고객 확인 완료)',
+  highlight_items: '수정된 항목',
 };
 
 const ENTITY_LABELS_EN: Record<string, string> = {
@@ -52,6 +53,7 @@ const ENTITY_LABELS_EN: Record<string, string> = {
   item: 'Item', time: 'Time', special_requests: 'Special Requests', count: 'Quantity',
   type: 'Type', target: 'Target', special_notes: 'PMS Special Notes',
   pms_allergen_warning: '⚠️ Allergen Warning (Guest Confirmed)',
+  highlight_items: 'Modified item',
 };
 
 /** 직원에게 보여줄 필요 없는 내부 키 */
@@ -386,9 +388,14 @@ function renderEntities(entities: Record<string, any>, language: string, skipIte
         </div>
       );
     } else {
-      const displayValue = typeof value === 'object' && value !== null
-        ? (value.name || value.id || JSON.stringify(value))
-        : String(value);
+      let displayValue: string;
+      if (Array.isArray(value)) {
+        displayValue = value.map(v => typeof v === 'object' && v !== null ? (v.name || v.id || JSON.stringify(v)) : String(v)).join(', ');
+      } else if (typeof value === 'object' && value !== null) {
+        displayValue = value.name || value.id || JSON.stringify(value);
+      } else {
+        displayValue = String(value);
+      }
 
       rendered.push(
         <div key={key} className={styles.reasoningItem}>

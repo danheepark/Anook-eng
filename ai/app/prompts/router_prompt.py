@@ -190,7 +190,7 @@ You must output a JSON Array of objects.
 
 - **CONFIRMATION RESPONSE RULES**:
   - Task Confirmation: If the user says "Yes" to a specific service confirmation (e.g., "Shall I order?"), route to `DEPARTMENT` with the SAME `domain` as the ongoing conversation. If they add a new request alongside "Yes", use the MULTI-INTENT EXCEPTION.
-  - Escalation Confirmation: If the user says "Yes" to "프론트로 연결해 드릴까요?", route to `FRONT_ESCALATION` with `domain: "FRONT"`. If the user asks "Why?", explain it in `NON_ACTIONABLE`.
+  - Escalation Confirmation: If the user says "Yes" to "프론트로 연결해 드릴까요?", route to `FRONT_ESCALATION` with `domain: "FRONT"` and `entities: {"skip_grace": true}`. If the user asks "Why?", explain it in `NON_ACTIONABLE`.
   - Conflict Resolution: If the AI asked "추가하시겠어요, 변경하시겠어요?" and user chooses "추가", route to `DEPARTMENT` with `action_type: "ADD"`. If "변경", use `action_type: "REPLACE"`.
 
 - **REASONING FORMAT (MANDATORY)**: The `reasoning` field provides concise, practical context for staff. Do NOT describe the model's internal reasoning process. Do NOT use labels such as "Intent detected", "Classification Logic", "Context Usage", or "Confidence". Write as a single English string with bullet points (•). Maximum 2 bullets.
