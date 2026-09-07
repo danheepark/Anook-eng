@@ -8,6 +8,7 @@ import * as XLSX from 'xlsx-js-style';
 import { HandoverRecord } from '@/components/ui/HandoverRecord';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import Button from '@/components/ui/Button/Button';
+import Dropdown from '@/components/ui/Dropdown/Dropdown';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useHandover } from './useHandover';
@@ -165,15 +166,20 @@ export default function HandoverPage() {
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
             />
-            <select
-              className={styles.shiftSelect}
+            {/* The same dropdown the status column uses, so the two menus on
+                this screen open the same way. A native select renders as the
+                operating system's own menu and was the one control here that
+                did not look like the product. */}
+            <Dropdown
+              className={styles.shiftDropdown}
+              options={[
+                { value: 'DAY', label: t.frontdeskPage?.handover?.shift?.DAY || '주간 (07:00 - 15:00)' },
+                { value: 'EVENING', label: t.frontdeskPage?.handover?.shift?.EVENING || '야간 (15:00 - 23:00)' },
+                { value: 'NIGHT', label: t.frontdeskPage?.handover?.shift?.NIGHT || '심야 (23:00 - 07:00)' },
+              ]}
               value={shiftType}
-              onChange={(e) => setShiftType(e.target.value)}
-            >
-              <option value="DAY">{t.frontdeskPage?.handover?.shift?.DAY || "주간 (07:00 - 15:00)"}</option>
-              <option value="EVENING">{t.frontdeskPage?.handover?.shift?.EVENING || "야간 (15:00 - 23:00)"}</option>
-              <option value="NIGHT">{t.frontdeskPage?.handover?.shift?.NIGHT || "심야 (23:00 - 07:00)"}</option>
-            </select>
+              onChange={setShiftType}
+            />
             <Button
               variant="primary"
               onClick={handleExcelDownload}
