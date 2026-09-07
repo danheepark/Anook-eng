@@ -2,6 +2,20 @@ import React from 'react';
 import styles from './HandoverTable.module.css';
 import { HandoverItem } from './HandoverRecord';
 import { useTranslation } from '@/app/useTranslation';
+import Dropdown from '../Dropdown/Dropdown';
+
+/* Status is a closed set, so it takes the product's own dropdown rather than a
+   native <select>, which renders as the operating system's menu and looks like
+   a different application inside the table.
+
+   It is always mounted rather than appearing on click. A dropdown that has to
+   be opened by a second click, and that can be dismissed while the cell still
+   thinks it is being edited, has two states too many for one control. */
+const STATUS_OPTIONS = [
+  { value: 'PENDING', label: 'PENDING' },
+  { value: 'IN PROGRESS', label: 'IN PROGRESS' },
+  { value: 'DONE', label: 'DONE' },
+];
 
 interface HandoverTableProps {
   items: HandoverItem[];
@@ -110,53 +124,59 @@ export default function HandoverTable({ items, onItemUpdate }: HandoverTableProp
                       {row.roomNumber}
                     </td>
                   )}
-                  <td 
-                    className={`${styles.td} ${styles.center} ${styles.editableCell}`}
-                    onClick={() => handleEditStart(row.id, 'status', row.status)}
-                  >
-                    {editingCell?.id === row.id && editingCell?.field === 'status' ? (
-                      <select
-                        className={styles.editInput}
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleEditCommit}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                      >
-                        <option value="PENDING">PENDING</option>
-                        <option value="IN_PROGRESS">IN_PROGRESS</option>
-                        <option value="DONE">DONE</option>
-                      </select>
-                    ) : (
-                      <div className={styles.statusWrapper}>
-                        <span
-                          className={`${styles.statusDot} ${
-                            isDone
-                              ? styles.statusDone
-                              : isPending
-                                ? styles.statusPending
-                                : styles.statusInProgress
-                          }`}
-                        />
-                        <span className={styles.statusText}>{row.status}</span>
-                      </div>
-                    )}
+                  <td className={`${styles.td} ${styles.center} ${styles.statusCell}`}>
+                    <div className={styles.statusWrapper}>
+                      {/* The dot is the thing a shift lead scans for; the
+                          dropdown is the thing they act on. */}
+                      <span
+                        className={`${styles.statusDot} ${
+                          isDone
+                            ? styles.statusDone
+                            : isPending
+                              ? styles.statusPending
+                              : styles.statusInProgress
+                        }`}
+                      />
+                      <Dropdown
+                        className={styles.statusDropdown}
+                        options={STATUS_OPTIONS}
+                        value={row.status}
+                        onChange={(val) => onItemUpdate?.(row.id, 'status', val)}
+                      />
+                    </div>
                   </td>
                   <td 
                     className={`${styles.td} ${styles.center} ${styles.editableCell}`}
                     onClick={() => handleEditStart(row.id, 'category', row.category)}
                   >
                     {editingCell?.id === row.id && editingCell?.field === 'category' ? (
-                      <input
+                      <textarea
                         className={styles.editInput}
                         value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
+                        onChange={(e) => {
+                          setEditValue(e.target.value);
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
                         onBlur={handleEditCommit}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleEditCommit();
+                          } else if (e.key === 'Escape') {
+                            setEditingCell(null);
+                          }
+                        }}
                         autoFocus
+                        style={{ resize: 'none', overflow: 'hidden', minHeight: '36px' }}
+                        rows={1}
                       />
                     ) : (
-                      row.category
+                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{row.category}</div>
                     )}
                   </td>
                   <td 
@@ -164,16 +184,33 @@ export default function HandoverTable({ items, onItemUpdate }: HandoverTableProp
                     onClick={() => handleEditStart(row.id, 'summary', row.summary)}
                   >
                     {editingCell?.id === row.id && editingCell?.field === 'summary' ? (
-                      <input
+                      <textarea
                         className={styles.editInput}
                         value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
+                        onChange={(e) => {
+                          setEditValue(e.target.value);
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
                         onBlur={handleEditCommit}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleEditCommit();
+                          } else if (e.key === 'Escape') {
+                            setEditingCell(null);
+                          }
+                        }}
                         autoFocus
+                        style={{ resize: 'none', overflow: 'hidden', minHeight: '36px' }}
+                        rows={1}
                       />
                     ) : (
-                      row.summary
+                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{row.summary}</div>
                     )}
                   </td>
                   <td className={`${styles.td} ${styles.center} ${styles.time}`}>{row.time}</td>

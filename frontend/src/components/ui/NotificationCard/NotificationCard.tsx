@@ -90,7 +90,7 @@ export default function NotificationCard({
   // 2. 둘째 줄: 그 판단의 대상 (객실 · 요청 항목) - RequestCard subtitle 스타일
   const roomDisplay = language === 'en' ? `ROOM ${roomNumber}` : `${roomNumber}호`;
   const toSentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
-  const cleanTitle = toSentenceCase(title);
+  const cleanTitle = toSentenceCase(title.replace(/^(?:Order|주문):\s*/i, ''));
   const targetDisplay = cleanTitle ? `${roomDisplay} · ${cleanTitle}` : roomDisplay;
 
   return (
@@ -135,8 +135,9 @@ export default function NotificationCard({
         <div className={styles.actionSection} onClick={(e) => e.stopPropagation()}>
           {secondaryLabel && onSecondaryClick && (
             <Button
-              variant="outlined"
-              size="small"
+              variant="secondary"
+              size="medium"
+              className={styles.rejectBtn}
               onClick={onSecondaryClick}
             >
               {secondaryLabel}
@@ -144,8 +145,8 @@ export default function NotificationCard({
           )}
           {primaryLabel && (
             <Button
-              variant="secondary"
-              size="small"
+              variant="primary"
+              size="medium"
               onClick={onPrimaryClick}
             >
               {primaryLabel}

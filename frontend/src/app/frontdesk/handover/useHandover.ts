@@ -73,9 +73,15 @@ export function useHandover() {
         });
 
         const mappedItems = data.tasks.map((task: any, index: number) => {
+          // The screen and the export both show this value, so the label is
+          // settled here rather than at each place it is rendered. COMPLETED
+          // was already being renamed; IN_PROGRESS now loses its underscore
+          // with it.
           let displayStatus = task.status || 'PENDING';
           if (displayStatus === 'COMPLETED') {
             displayStatus = 'DONE';
+          } else if (displayStatus === 'IN_PROGRESS') {
+            displayStatus = 'IN PROGRESS';
           }
           return {
             id: index + 1,

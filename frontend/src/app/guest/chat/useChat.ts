@@ -541,6 +541,32 @@ export function useChat() {
               }];
             }
 
+            // [불변 채팅 기록] 취소 반려(Cancel Rejected): 새 활성 카드를 하단에 추가하여 고객이 요청 재활성화를 인지할 수 있도록 함
+            if (payload.type === 'CANCEL_REJECTED' && existingIdx >= 0) {
+              const updated = [...prev];
+              updated[existingIdx] = {
+                ...updated[existingIdx],
+                meta: {
+                  ...updated[existingIdx].meta,
+                  status: payload.status,
+                  graceRemaining: 0
+                }
+              };
+              return [...updated, {
+                ...requestMsg,
+                id: `request-${payload.requestId}-active-${Date.now()}`,
+                meta: {
+                  ...requestMsg.meta,
+                  cancelPending: false, // 다시 활성화됨
+                  entities: payload.entities || existingMeta.entities,
+                  priority: payload.priority || existingMeta.priority,
+                  cancelReason: payload.cancelReason || existingMeta.cancelReason,
+                  createdAt: existingMeta.createdAt || payload.createdAt || new Date().toISOString(),
+                  graceRemaining: 0
+                }
+              }];
+            }
+
             // [불변 채팅 기록] 취소 완료(CANCELLED): 원래 카드 불변 유지, 새 취소 카드를 하단에 추가
             if (payload.status === 'CANCELLED' && existingIdx >= 0) {
               const updated = [...prev];
@@ -707,13 +733,31 @@ export function useChat() {
             setMessages(prev => {
               const msgId = `system-cancel-batch-${Date.now()}`;
 
+              const currentLang = useUiStore.getState().chatLanguage || useUiStore.getState().language || 'en';
+
               let content = '';
               if (hasStaffSuccess) {
                 // 직원/관리자가 강제 취소한 경우 (AI_RESPONSE 없음 → 여기서 안내)
-                content = '죄송합니다. 현재 해당 서비스 제공이 일시적으로 어려워 요청이 취소되었습니다. 도움이 필요하시면 프론트로 연락 부탁드립니다.';
+                if (currentLang === 'ko') {
+                  content = '죄송합니다. 현재 해당 서비스 제공이 일시적으로 어려워 요청이 취소되었습니다. 도움이 필요하시면 프론트로 연락 부탁드립니다.';
+                } else if (currentLang === 'ja') {
+                  content = '申し訳ございません。現在サービスの提供が困難なため、リクエストがキャンセルされました。ご不明な点がございましたらフロントまでご連絡ください。';
+                } else if (currentLang === 'zh') {
+                  content = '抱歉，由于暂时无法提供服务，您的请求已被取消。如需帮助，请联系前台。';
+                } else {
+                  content = 'We apologize, but your request has been cancelled as the service is temporarily unavailable. Please contact the front desk if you need further assistance.';
+                }
               } else if (hasGuestApproved) {
                 // 관리자가 고객 취소를 승인한 경우 (AI_RESPONSE 없음 → 여기서 안내)
-                content = '요청하신 취소가 정상 처리되었습니다.';
+                if (currentLang === 'ko') {
+                  content = '요청하신 취소가 정상 처리되었습니다.';
+                } else if (currentLang === 'ja') {
+                  content = 'キャンセルリクエストが正常に処理されました。';
+                } else if (currentLang === 'zh') {
+                  content = '您的取消请求已成功处理。';
+                } else {
+                  content = 'Your cancellation request has been successfully processed.';
+                }
               }
               // SUCCESS / PENDING 은 AI_RESPONSE 핸들러에서 이미 메시지를 표시하므로 생략
 
@@ -746,11 +790,22 @@ export function useChat() {
               // 버그 수정: 타임스탬프를 추가하여 식별자 중복으로 인한 증발 현상 방지
               const msgId = `system-cancel-reject-${payload.requestId}-${Date.now()}`;
               if (prev.some(m => m.id === msgId)) return prev;
+
+              const currentLang = useUiStore.getState().chatLanguage || useUiStore.getState().language || 'en';
+              let rejectContent = 'Notice: Your request is already in progress and cannot be cancelled. Please contact the front desk if you have further inquiries.';
+              if (currentLang === 'ko') {
+                rejectContent = '안내: 요청하신 사항은 이미 진행 중이어서 취소가 어렵습니다. 추가적인 문의사항은 프론트로 연락 부탁드립니다.';
+              } else if (currentLang === 'ja') {
+                rejectContent = '案内: リクエストは既に進行中のため、キャンセルできません。ご不明な点がございましたらフロントまでご連絡ください。';
+              } else if (currentLang === 'zh') {
+                rejectContent = '提示：您的请求已在处理中，无法取消。如有疑问，请联系前台。';
+              }
+
               return [...prev, {
                 id: msgId,
                 variant: 'received',
                 type: 'TEXT',
-                content: '안내: 요청하신 사항은 이미 진행 중이어서 취소가 어렵습니다. 추가적인 문의사항은 프론트로 연락 부탁드립니다.',
+                content: rejectContent,
               }];
             });
           }, 800);

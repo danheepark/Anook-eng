@@ -68,13 +68,13 @@
 @media (max-width: 768px) {
   .container {
     padding: var(--space-16) !important;
-    gap: var(--space-16) !important;
+    gap: 0 !important;
   }
 
   .mobileTabs {
     display: flex !important;
     width: 100% !important;
-    margin-bottom: var(--space-16) !important;
+    margin-bottom: 24px !important;
   }
 
   .mobileHidden {

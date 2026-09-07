@@ -76,14 +76,22 @@
   }
 
   .header {
+    height: 0;
     min-height: 0;
     margin: 0;
     padding: 0;
     justify-content: flex-end;
+    overflow: hidden;
+  }
+
+  .header:has(.headerRight) {
+    height: auto;
+    overflow: visible;
+    margin-bottom: var(--space-12);
   }
 
   .headerRight {
-    margin-bottom: var(--space-12);
+    margin-bottom: 0;
   }
 
   .column {

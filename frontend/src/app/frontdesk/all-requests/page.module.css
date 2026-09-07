@@ -82,7 +82,7 @@
   .mobileTabs {
     display: flex !important;
     width: 100% !important;
-    margin-bottom: var(--space-16) !important;
+    margin-bottom: 24px !important;
   }
 
   .mobileHidden {

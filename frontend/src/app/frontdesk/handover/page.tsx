@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import * as XLSX from 'xlsx';
+// xlsx-js-style, not xlsx: the community build of SheetJS reads cell styles
+// but drops them when writing, so wrapText never reached the file and every
+// summary was cut off at the column edge. Same API, styles included.
+import * as XLSX from 'xlsx-js-style';
 import { HandoverRecord } from '@/components/ui/HandoverRecord';
 import SmartSearchBar from '@/components/ui/SmartSearchBar/SmartSearchBar';
 import Button from '@/components/ui/Button/Button';
 import styles from './page.module.css';
 import { useTranslation } from '@/app/useTranslation';
 import { useHandover } from './useHandover';
-import FilterButton from '@/components/ui/FilterButton/FilterButton';
+import HeaderSearchSlot from '@/components/layout/HeaderSearchSlot';
 
 const sampleHandoverItems = [
   { id: 1, status: 'PENDING', category: '컴플레인', roomNumber: '812', summary: '에어컨 소음 발생 ➡️ 시설팀 조치 완료했으나 Evening조에서 18시경 객실로 사과 음료 서비스하며 재확인(Follow-up) 요망.', author: '김모닝 (Morning)', time: '10:15' },
@@ -19,7 +22,6 @@ const sampleHandoverItems = [
 export default function HandoverPage() {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
   const [downloading, setDownloading] = useState(false);
 
   const {
@@ -49,12 +51,6 @@ export default function HandoverPage() {
   const handleExcelDownload = async () => {
     setDownloading(true);
     try {
-      const shiftLabel = shiftType === 'DAY'
-        ? t.frontdeskPage?.handover?.shift?.label?.DAY || '주간'
-        : shiftType === 'EVENING'
-          ? t.frontdeskPage?.handover?.shift?.label?.EVENING || '야간'
-          : t.frontdeskPage?.handover?.shift?.label?.NIGHT || '심야';
-
       // Excel content formatting
       const headerRows = [
         [t.frontdeskPage?.handover?.title || "인수인계 문서"],
@@ -67,7 +63,7 @@ export default function HandoverPage() {
         ],
         [
           t.frontdeskPage?.handover?.briefing?.resolutionStatus || '처리 현황', 
-          `${(briefingData?.totalRequestCount || 0) - (briefingData?.pendingCount || 0)} / ${briefingData?.totalRequestCount || 0}`, 
+          `${(liveBriefing?.totalRequestCount || 0) - (liveBriefing?.pendingCount || 0)} / ${liveBriefing?.totalRequestCount || 0}`, 
           t.frontdeskPage?.handover?.briefing?.createdAt || '작성 일시', 
           briefingData?.createdAt || '-'
         ],
@@ -90,32 +86,64 @@ export default function HandoverPage() {
       ]);
 
       const worksheet = XLSX.utils.aoa_to_sheet([...headerRows, ...dataRows]);
-      
-      // Styling and column widths
+
+      const SUMMARY_WIDTH = 60;   // characters, matches the column width below
+      const SUMMARY_COL = 3;      // Summary / Details
+
       worksheet['!cols'] = [
-        { wch: 10 }, // Room
-        { wch: 12 }, // Status
-        { wch: 15 }, // Category
-        { wch: 60 }, // Summary
-        { wch: 12 }  // Time
+        { wch: 10 },             // Room
+        { wch: 12 },             // Status
+        { wch: 18 },             // Category
+        { wch: SUMMARY_WIDTH },  // Summary
+        { wch: 12 }              // Time
       ];
+
+      // A handover note is a paragraph, so the cell has to hold a paragraph:
+      // wrap it, top align it, and give the row enough height for the lines it
+      // takes. Excel auto-fits a wrapped row only when no height is set, but
+      // other viewers do not, so the height is written out.
+      const rows: { hpt: number }[] = [];
+      dataRows.forEach((row, i) => {
+        const rowIndex = headerRows.length + i;
+        const ref = XLSX.utils.encode_cell({ r: rowIndex, c: SUMMARY_COL });
+        const cell = worksheet[ref];
+        if (!cell) return;
+        cell.s = { alignment: { wrapText: true, vertical: 'top' } };
+        const lines = Math.max(1, Math.ceil(String(row[SUMMARY_COL] ?? '').length / (SUMMARY_WIDTH - 2)));
+        rows[rowIndex] = { hpt: lines * 15 + 4 };
+      });
+      worksheet['!rows'] = rows;
 
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Handover');
       
-      const fileName = `인수인계_${targetDate}_${shiftLabel}.xlsx`;
+      // Matches the file name the backend export endpoint produces, so the two
+      // routes to the same document do not hand back differently named files.
+      const fileName = `handover_${targetDate.replace(/-/g, '')}_${shiftType.toUpperCase()}.xlsx`;
       XLSX.writeFile(workbook, fileName);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '엑셀 다운로드 중 오류가 발생했습니다.');
+      alert(err instanceof Error ? err.message : 'Could not export the handover to Excel.');
     } finally {
       setDownloading(false);
     }
   };
 
+  /* The resolution count follows the table rather than the API response. It
+     used to come straight from the briefing payload, so marking an item DONE
+     changed the row and left the header saying the same thing it said before
+     the edit, which is the one number a shift lead reads first.
+
+     Resolved means DONE. The payload counted anything that was not PENDING,
+     which quietly treated an item still being worked on as finished. */
+  const liveBriefing = briefingData
+    ? {
+        ...briefingData,
+        totalRequestCount: editableItems.length,
+        pendingCount: editableItems.filter((item) => item.status !== 'DONE').length,
+      }
+    : undefined;
+
   const filteredItems = editableItems.filter(item => {
-    if (statusFilter !== 'ALL' && item.status !== statusFilter) {
-      return false;
-    }
     const search = searchValue.toLowerCase();
     if (!search) return true;
     return (
@@ -130,7 +158,6 @@ export default function HandoverPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerTop}>
-          <h1 className={styles.title}>{t.frontdeskPage?.handover?.title || "인수인계 문서"}</h1>
           <div className={styles.pickerActions}>
             <input
               type="date"
@@ -156,26 +183,17 @@ export default function HandoverPage() {
             </Button>
           </div>
         </div>
-        <div className={styles.searchBarRow}>
-          <div style={{ flex: 1 }}>
-            <SmartSearchBar
-              inputWrapperStyle={{ flex: 1 }}
-              value={searchValue}
-              onChange={(val) => setSearchValue(val)}
-            />
-          </div>
-          <FilterButton
-            filterOptions={[
-              { value: 'ALL', label: t.frontdeskPage?.handover?.filterOptions?.ALL || '전체 상태' },
-              { value: 'PENDING', label: t.frontdeskPage?.handover?.filterOptions?.PENDING || '대기중' },
-              { value: 'IN_PROGRESS', label: t.frontdeskPage?.handover?.filterOptions?.IN_PROGRESS || '진행중' },
-              { value: 'DONE', label: t.frontdeskPage?.handover?.filterOptions?.DONE || '처리 완료' }
-            ]}
-            selectedFilter={statusFilter}
-            onFilterSelect={setStatusFilter}
+      </div>
+
+      <HeaderSearchSlot>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <SmartSearchBar
+            inputWrapperStyle={{ width: 240 }}
+            value={searchValue}
+            onChange={(val) => setSearchValue(val)}
           />
         </div>
-      </div>
+      </HeaderSearchSlot>
 
       {loading ? (
         <div style={{ padding: '40px', textAlign: 'center' }}>{t.frontdeskPage?.handover?.loading || "데이터를 불러오는 중입니다..."}</div>
@@ -184,7 +202,7 @@ export default function HandoverPage() {
       ) : (
         <HandoverRecord
           managerName={managerName}
-          briefing={briefingData || undefined}
+          briefing={liveBriefing}
           items={filteredItems}
           onItemUpdate={handleItemUpdate}
         />

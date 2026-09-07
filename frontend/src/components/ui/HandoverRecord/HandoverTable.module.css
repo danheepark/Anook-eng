@@ -61,6 +61,37 @@
   font-weight: 500;
 }
 
+/* The status cell holds a control rather than text, so it gives up the padding
+   a text cell needs and lets the dropdown set the row height. */
+.statusCell {
+  padding: var(--space-8) var(--space-12);
+}
+
+/* The shared Dropdown is built for a form, where a 48px target and a full
+   width trigger are right. In a table row it has to sit at the height of the
+   text beside it, so the trigger is brought down here rather than the
+   component being changed for one caller. */
+.statusDropdown {
+  width: auto;
+  min-width: 132px;
+}
+
+.statusDropdown :global([class*="__trigger"]) {
+  height: 34px;
+  padding: 0 var(--space-8) 0 var(--space-12);
+  gap: var(--space-4);
+}
+
+.statusDropdown :global([class*="__textSelected"]) {
+  font: var(--text-caption-medium);
+  white-space: nowrap;
+}
+
+.statusDropdown :global([class*="__iconWrapper"]) {
+  width: 16px;
+  height: 16px;
+}
+
 .roomNo {
   font-weight: 600;
 }

@@ -253,7 +253,9 @@ export default function TaskTicket({
 
   const sourceTitle = rawDynamicTitle || title;
   const { translatedText: translatedSummary, isLoading: isTranslating } = useTranslationApi(sourceTitle, language);
-  const displaySummary = (translatedSummary || sourceTitle).replace(/^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}|\d{2}-\d{2}\s\d{2}:\d{2})\s*/, '');
+  const displaySummary = (translatedSummary || sourceTitle)
+    .replace(/^(?:\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}|\d{2}-\d{2}\s\d{2}:\d{2})\s*/, '')
+    .replace(/^(?:Order|주문):\s*/i, '');
 
   const { translatedText: translatedDetails } = useTranslationApi(
     language !== 'ko' && rawEntityDetails ? rawEntityDetails : undefined,

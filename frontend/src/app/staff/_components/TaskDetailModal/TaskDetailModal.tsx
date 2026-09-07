@@ -705,18 +705,18 @@ export default function TaskDetailModal({ isOpen, onClose, task, onAccept, onCom
               )}
             </div>
 
+            {task.cancelRequested && cleanSummary && (
+              <div className={styles.cancelSubTitle}>
+                {cleanSummary}
+              </div>
+            )}
+
             {/* 카드와 100% 동일하게 타이틀 바로 아래에 item list 렌더링 (회색 텍스트) */}
             {itemList.length > 0 && (
               <div className={styles.itemListSubtitle}>
                 {itemList.map((line, idx) => (
                   <p key={idx} className={styles.itemListLine}>{line}</p>
                 ))}
-              </div>
-            )}
-
-            {task.cancelRequested && cleanSummary && (
-              <div className={styles.cancelSubTitle}>
-                {cleanSummary}
               </div>
             )}
           </div>
